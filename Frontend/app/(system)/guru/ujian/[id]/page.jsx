@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
 import {
   ArrowLeft,
   Plus,
@@ -17,29 +16,33 @@ import {
   FileText,
   ListChecks,
   X,
+  Copy,
+  KeyRound,
+  Eye,
+  EyeOff,
+  HelpCircle,
+  GraduationCap,
+  CalendarDays,
+  Timer,
+  Award,
+  Sparkles,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
 import { getUjianById } from "@/services/ujian.service";
+import { deleteSoal } from "@/services/soalUjian.service";
 
-import {
-  getSoalByUjian,
-  deleteSoal,
-} from "@/services/soalUjian.service";
-
-
-function parseData(response) {
-  if (Array.isArray(response)) return response;
-  if (Array.isArray(response?.data)) return response.data;
-  if (Array.isArray(response?.data?.data)) return response.data.data;
-  return [];
-}
+const JENIS_SOAL = {
+  pilihan_ganda: { label: "Pilihan Ganda", color: "#2563EB", bg: "rgba(37,99,235,0.10)" },
+  esai: { label: "Esai", color: "#7C3AED", bg: "rgba(124,58,237,0.10)" },
+  benar_salah: { label: "Benar / Salah", color: "#0891B2", bg: "rgba(8,145,178,0.10)" },
+};
 
 function parseObject(response) {
   if (response?.data?.data) return response.data.data;
-  if (response?.data) return response.data;
+  if (response?.data && !Array.isArray(response.data)) return response.data;
   return response;
 }
 
@@ -49,21 +52,111 @@ function formatPoin(value) {
 }
 
 function getJenisLabel(jenis) {
-  if (jenis === "pilihan_ganda") return "Pilihan Ganda";
-  if (jenis === "esai") return "Esai";
-  if (jenis === "benar_salah") return "Benar / Salah";
-  return jenis || "-";
+  return JENIS_SOAL[jenis]?.label || jenis || "-";
+}
+
+function getJenisStyle(jenis) {
+  return JENIS_SOAL[jenis] || { color: "var(--color-text-secondary)", bg: "var(--color-input)" };
 }
 
 function getChoiceLetter(index) {
   return String.fromCharCode(65 + index);
 }
 
+function formatTanggal(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getPilihan(item) {
+  if (Array.isArray(item?.pilihan)) return item.pilihan;
+  if (typeof item?.pilihan === "string") {
+    try {
+      const parsed = JSON.parse(item.pilihan);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function StatCard({ label, value, icon: Icon, color }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm">
+      <span
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+        style={{ backgroundColor: `${color}15`, color }}
+      >
+        <Icon size={18} />
+      </span>
+      <div className="min-w-0">
+        <p className="truncate text-xs font-medium text-[var(--color-text-secondary)]">{label}</p>
+        <p className="text-xl font-bold text-[var(--color-text)]">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function InfoItem({ label, value, icon: Icon }) {
+  return (
+    <div className="flex items-start gap-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-3">
+      {Icon && (
+        <span
+          className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+          style={{
+            backgroundColor: "color-mix(in srgb, var(--school-primary) 10%, transparent)",
+            color: "var(--school-primary)",
+          }}
+        >
+          <Icon size={15} />
+        </span>
+      )}
+      <div className="min-w-0">
+        <p className="text-xs text-[var(--color-text-secondary)]">{label}</p>
+        <p className="mt-0.5 break-words text-sm font-semibold text-[var(--color-text)]">
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({ icon: Icon, title, description }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+        style={{
+          backgroundColor: "color-mix(in srgb, var(--school-primary) 10%, transparent)",
+          color: "var(--school-primary)",
+        }}
+      >
+        <Icon size={20} />
+      </span>
+      <div className="min-w-0">
+        <h2 className="text-base font-bold text-[var(--color-text)] sm:text-lg">{title}</h2>
+        {description && (
+          <p className="mt-0.5 text-xs leading-5 text-[var(--color-text-secondary)] sm:text-sm">
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function KelolaSoalUjianPage() {
   const router = useRouter();
   const params = useParams();
-
   const ujianId = params?.id;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -73,135 +166,95 @@ export default function KelolaSoalUjianPage() {
   const [deleting, setDeleting] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [showToken, setShowToken] = useState(true);
 
-
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     if (!ujianId) return;
-
-    loadData();
-  }, [ujianId]);
-
-  async function loadData() {
     try {
       setLoading(true);
       setError("");
-
-      const [ujianResponse, soalResponse] = await Promise.all([
-        getUjianById(ujianId),
-        getSoalByUjian(ujianId),
-      ]);
-
-      setUjian(parseObject(ujianResponse));
-
-      const soalData = parseData(soalResponse);
-
+      const response = await getUjianById(ujianId);
+      const ujianData = parseObject(response);
+      if (!ujianData || !ujianData.id) {
+        throw new Error("Data ujian tidak ditemukan.");
+      }
+      setUjian(ujianData);
+      const soalData = Array.isArray(ujianData.soalAsesmen) ? ujianData.soalAsesmen : [];
       const sortedSoal = [...soalData].sort(
-        (a, b) =>
-          Number(a.nomorUrut || 0) -
-          Number(b.nomorUrut || 0)
+        (a, b) => Number(a.nomorUrut || 0) - Number(b.nomorUrut || 0)
       );
-
       setSoal(sortedSoal);
     } catch (err) {
-      console.error("LOAD SOAL ERROR:", err);
-
-      setError(
-        err?.message ||
-          "Gagal mengambil data ujian dan soal."
-      );
+      console.error("LOAD DETAIL UJIAN ERROR:", err);
+      setError(err?.message || "Gagal mengambil data detail ujian.");
+      setUjian(null);
+      setSoal([]);
     } finally {
       setLoading(false);
     }
-  }
+  }, [ujianId]);
 
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const stats = useMemo(() => {
     const total = soal.length;
-
-    const pilihanGanda = soal.filter(
-      (item) =>
-        item.jenisSoal === "pilihan_ganda"
-    ).length;
-
-    const esai = soal.filter(
-      (item) =>
-        item.jenisSoal === "esai"
-    ).length;
-
-    const benarSalah = soal.filter(
-      (item) =>
-        item.jenisSoal === "benar_salah"
-    ).length;
-
-    const totalPoin = soal.reduce(
-      (sum, item) =>
-        sum + Number(item.poin || 0),
-      0
-    );
-
-    return {
-      total,
-      pilihanGanda,
-      esai,
-      benarSalah,
-      totalPoin,
-    };
+    const pilihanGanda = soal.filter((i) => i.jenisSoal === "pilihan_ganda").length;
+    const esai = soal.filter((i) => i.jenisSoal === "esai").length;
+    const benarSalah = soal.filter((i) => i.jenisSoal === "benar_salah").length;
+    const totalPoin = soal.reduce((s, i) => s + Number(i.poin || 0), 0);
+    return { total, pilihanGanda, esai, benarSalah, totalPoin };
   }, [soal]);
-
 
   function handleOpenCreate() {
     if (!ujianId) return;
-
-    router.push(
-      `/guru/ujian/${ujianId}/soal`
-    );
+    router.push(`/guru/ujian/${ujianId}/soal`);
   }
 
   function handleOpenEdit(item) {
     if (!ujianId || !item?.id) return;
-
-    router.push(
-      `/guru/ujian/${ujianId}/soal?soalId=${item.id}`
-    );
+    router.push(`/guru/ujian/${ujianId}/soal?soalId=${item.id}`);
   }
 
+  async function handleCopyToken() {
+    if (!ujian?.token) {
+      setError("Token ujian tidak tersedia.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(ujian.token);
+      setCopied(true);
+      setSuccess("Token ujian berhasil disalin ke clipboard.");
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("COPY TOKEN ERROR:", err);
+      setError("Gagal menyalin token. Silakan salin secara manual.");
+    }
+  }
 
   async function handleDelete(item) {
     const confirmed = window.confirm(
-      `Hapus soal nomor ${item.nomorUrut}?`
+      `Hapus soal nomor ${item.nomorUrut}?\n\nTindakan ini tidak dapat dibatalkan.`
     );
-
     if (!confirmed) return;
-
     try {
       setDeleting(item.id);
       setError("");
       setSuccess("");
-
       await deleteSoal(item.id);
-
-      setSuccess(
-        "Soal berhasil dihapus."
-      );
-
+      setSuccess(`Soal nomor ${item.nomorUrut} berhasil dihapus.`);
       await loadData();
     } catch (err) {
-      console.error(
-        "DELETE SOAL ERROR:",
-        err
-      );
-
-      setError(
-        err?.message ||
-          "Gagal menghapus soal."
-      );
+      console.error("DELETE SOAL ERROR:", err);
+      setError(err?.message || "Gagal menghapus soal.");
     } finally {
       setDeleting(null);
     }
   }
 
-
-  if (loading) {
+  function renderLayout(content) {
     return (
       <div className="flex h-screen w-full overflow-hidden bg-[var(--color-page)] text-[var(--color-text)]">
         <Sidebar
@@ -211,651 +264,545 @@ export default function KelolaSoalUjianPage() {
           setCollapsed={setIsCollapsed}
           role="guru"
         />
-
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <Header
-            toggleSidebar={() =>
-              setIsCollapsed(
-                (prev) => !prev
-              )
-            }
-            notifications={[]}
-            user={{
-              name: "Guru",
-              email: "guru@smartschool.com",
-              avatar: "GR",
-            }}
-          />
-
-          <main className="flex flex-1 items-center justify-center">
-            <div className="text-center">
-              <Loader2
-                size={32}
-                className="mx-auto animate-spin text-[var(--school-primary)]"
-              />
-
-              <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
-                Memuat data ujian...
-              </p>
-            </div>
+          <div className="shrink-0">
+            <Header
+              toggleSidebar={() => setIsCollapsed((p) => !p)}
+              notifications={[]}
+              user={{
+                name: "Guru",
+                email: "guru@smartschool.com",
+                avatar: "GR",
+              }}
+            />
+          </div>
+          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-page)]">
+            {content}
           </main>
         </div>
       </div>
     );
   }
 
+  if (loading) {
+    return renderLayout(
+      <div className="flex min-h-full items-center justify-center p-6">
+        <div className="text-center">
+          <Loader2 size={34} className="mx-auto animate-spin text-[var(--school-primary)]" />
+          <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
+            Memuat detail ujian...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  return (
-    <div className="flex h-screen w-full overflow-hidden bg-[var(--color-page)] text-[var(--color-text)]">
-      <Sidebar
-        active="ujian"
-        setActive={() => {}}
-        collapsed={isCollapsed}
-        setCollapsed={setIsCollapsed}
-        role="guru"
-      />
+  return renderLayout(
+    <div className="w-full space-y-4 p-4 sm:space-y-5 sm:p-5 lg:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.push("/guru/ujian")}
+            aria-label="Kembali ke daftar ujian"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text-secondary)] shadow-sm transition hover:bg-[var(--color-input)] focus:outline-none focus:ring-2 focus:ring-[var(--school-primary)]"
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-md"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--school-primary), var(--school-secondary))",
+            }}
+          >
+            <ClipboardList size={20} />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-lg font-bold text-[var(--color-text)] sm:text-xl">
+              Detail Ujian
+            </h1>
+            <p className="text-xs text-[var(--color-text-secondary)] sm:text-sm">
+              Informasi ujian dan pengelolaan soal.
+            </p>
+          </div>
+        </div>
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() =>
-            setIsCollapsed(
-              (prev) => !prev
-            )
-          }
-          notifications={[]}
-          user={{
-            name: "Guru",
-            email: "guru@smartschool.com",
-            avatar: "GR",
+        <button
+          type="button"
+          onClick={handleOpenCreate}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--school-primary)] focus:ring-offset-2 sm:w-auto"
+          style={{ backgroundColor: "var(--school-primary)" }}
+        >
+          <Plus size={17} />
+          Tambah Soal
+        </button>
+      </div>
+
+      {error && (
+        <div
+          className="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm"
+          style={{
+            backgroundColor: "color-mix(in srgb, #DC2626 8%, var(--color-card))",
+            borderColor: "color-mix(in srgb, #DC2626 25%, var(--color-border))",
+            color: "#DC2626",
           }}
-        />
+          role="alert"
+        >
+          <AlertCircle size={18} className="mt-0.5 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold">Terjadi masalah</p>
+            <p className="mt-1 break-words">{error}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setError("")}
+            aria-label="Tutup pesan error"
+            className="shrink-0 opacity-70 transition hover:opacity-100"
+          >
+            <X size={17} />
+          </button>
+        </div>
+      )}
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-page)]">
-          <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+      {success && (
+        <div
+          className="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm"
+          style={{
+            backgroundColor: "color-mix(in srgb, #16A34A 8%, var(--color-card))",
+            borderColor: "color-mix(in srgb, #16A34A 25%, var(--color-border))",
+            color: "#16A34A",
+          }}
+          role="status"
+        >
+          <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold">Berhasil</p>
+            <p className="mt-1">{success}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuccess("")}
+            aria-label="Tutup pesan sukses"
+            className="shrink-0 opacity-70 transition hover:opacity-100"
+          >
+            <X size={17} />
+          </button>
+        </div>
+      )}
 
+      {!ujian ? (
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-5 py-16 text-center">
+          <AlertCircle size={32} className="mx-auto text-red-500" />
+          <h2 className="mt-3 font-bold">Data ujian tidak ditemukan</h2>
+          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+            Periksa kembali data ujian yang ingin dibuka.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push("/guru/ujian")}
+            className="mt-5 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+            style={{ backgroundColor: "var(--school-primary)" }}
+          >
+            Kembali ke Daftar Ujian
+          </button>
+        </section>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm lg:col-span-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base font-bold text-[var(--color-text)] sm:text-lg">
+                  {ujian.judul || "Tanpa Judul"}
+                </h2>
+                {ujian.dipublikasikan ? (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
+                    style={{ backgroundColor: "rgba(22, 163, 74, 0.10)", color: "#16A34A" }}
+                  >
+                    <CheckCircle2 size={12} />
+                    Dipublikasi
+                  </span>
+                ) : (
+                  <span
+                    className="rounded-full px-2.5 py-1 text-xs font-semibold"
+                    style={{ backgroundColor: "rgba(245, 158, 11, 0.10)", color: "#D97706" }}
+                  >
+                    Draft
+                  </span>
+                )}
+              </div>
 
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--color-text-secondary)]">
+                <span className="inline-flex items-center gap-1.5">
+                  <BookOpen size={15} style={{ color: "var(--school-primary)" }} />
+                  {ujian.kelasMapel?.kelas?.nama || "Kelas"}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <FileText size={15} style={{ color: "var(--school-secondary)" }} />
+                  {ujian.kelasMapel?.mataPelajaran?.nama || "Mata Pelajaran"}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock3 size={15} />
+                  {ujian.durasi || 0} menit
+                </span>
+              </div>
 
-              <div className="flex min-w-0 items-start gap-3">
+              {ujian.deskripsi && (
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[var(--color-text-secondary)]">
+                  {ujian.deskripsi}
+                </p>
+              )}
+            </div>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push("/guru/ujian")
-                  }
-                  className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text-secondary)] shadow-sm transition hover:bg-[var(--color-input)] hover:text-[var(--color-text)]"
-                >
-                  <ArrowLeft size={18} />
-                </button>
-
-                <div
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-lg"
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm">
+              <div className="flex items-center gap-2">
+                <span
+                  className="flex h-8 w-8 items-center justify-center rounded-lg"
                   style={{
-                    background:
-                      "linear-gradient(135deg, var(--school-primary), var(--school-secondary))",
+                    backgroundColor: "color-mix(in srgb, var(--school-primary) 10%, transparent)",
+                    color: "var(--school-primary)",
                   }}
                 >
-                  <ClipboardList size={22} />
-                </div>
+                  <KeyRound size={16} />
+                </span>
+                <h2 className="text-sm font-bold text-[var(--color-text)]">Token Ujian</h2>
+              </div>
 
-                <div className="min-w-0">
-                  <h1 className="truncate text-xl font-bold text-[var(--color-text)] sm:text-2xl">
-                    Kelola Soal
-                  </h1>
-
-                  <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-                    Kelola pertanyaan dan jawaban untuk ujian ini.
-                  </p>
-                </div>
+              <div className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-input)] px-3 py-2.5">
+                <span className="break-all font-mono text-base font-bold tracking-[0.15em] text-[var(--color-text)]">
+                  {ujian.token ? (showToken ? ujian.token : "••••••") : "Tidak tersedia"}
+                </span>
+                {ujian.token && (
+                  <button
+                    type="button"
+                    onClick={() => setShowToken((p) => !p)}
+                    aria-label={showToken ? "Sembunyikan token" : "Tampilkan token"}
+                    className="shrink-0 rounded-md p-1 text-[var(--color-text-secondary)] transition hover:text-[var(--school-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--school-primary)]"
+                  >
+                    {showToken ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                )}
               </div>
 
               <button
                 type="button"
-                onClick={handleOpenCreate}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 sm:w-auto"
-                style={{
-                  backgroundColor:
-                    "var(--school-primary)",
-                }}
+                onClick={handleCopyToken}
+                disabled={!ujian.token}
+                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{ backgroundColor: "var(--school-primary)" }}
               >
-                <Plus size={17} />
-                Tambah Soal
+                {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
+                {copied ? "Tersalin" : "Salin Token"}
               </button>
+
+              <p className="mt-2 text-[11px] leading-4 text-[var(--color-text-secondary)]">
+                Bagikan token hanya kepada siswa yang mengikuti ujian.
+              </p>
             </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 2xl:grid-cols-4">
+            <StatCard
+              label="Total Soal"
+              value={stats.total}
+              icon={ListChecks}
+              color="var(--school-primary)"
+            />
+            <StatCard
+              label="Pilihan Ganda"
+              value={stats.pilihanGanda}
+              icon={CheckCircle2}
+              color="#16A34A"
+            />
+            <StatCard label="Esai" value={stats.esai} icon={FileText} color="#7C3AED" />
+            <StatCard
+              label="Total Poin"
+              value={formatPoin(stats.totalPoin)}
+              icon={ClipboardList}
+              color="var(--school-accent)"
+            />
+          </div>
 
-            {error && (
-              <div
-                className="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm"
+          <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm sm:p-5">
+            <SectionHeader
+              icon={CalendarDays}
+              title="Informasi Pelaksanaan"
+              description="Detail teknis pelaksanaan ujian."
+            />
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+              <InfoItem icon={GraduationCap} label="Jenis Ujian" value={ujian.tipe || "-"} />
+              <InfoItem icon={Timer} label="Durasi" value={`${ujian.durasi || 0} menit`} />
+              <InfoItem
+                icon={Award}
+                label="Nilai Kelulusan"
+                value={ujian.nilaiKelulusan ?? "-"}
+              />
+              <InfoItem
+                icon={CalendarDays}
+                label="Waktu Mulai"
+                value={formatTanggal(ujian.waktuMulai)}
+              />
+              <InfoItem
+                icon={CalendarDays}
+                label="Waktu Selesai"
+                value={formatTanggal(ujian.waktuSelesai)}
+              />
+              <InfoItem
+                icon={Sparkles}
+                label="Penilaian Otomatis"
+                value={ujian.penilaianOtomatis ? "Ya" : "Tidak"}
+              />
+            </div>
+          </section>
+
+          <section className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-sm">
+            <div className="flex flex-col gap-2 border-b border-[var(--color-border)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              <div>
+                <h2 className="text-base font-bold text-[var(--color-text)]">Daftar Soal</h2>
+                <p className="mt-0.5 text-xs text-[var(--color-text-secondary)] sm:text-sm">
+                  Urutan soal mengikuti nomor yang ditentukan.
+                </p>
+              </div>
+              <span
+                className="w-fit rounded-lg px-3 py-1.5 text-xs font-semibold"
                 style={{
                   backgroundColor:
-                    "color-mix(in srgb, #DC2626 8%, var(--color-card))",
-                  borderColor:
-                    "color-mix(in srgb, #DC2626 25%, var(--color-border))",
-                  color: "#DC2626",
+                    "color-mix(in srgb, var(--school-primary) 10%, transparent)",
+                  color: "var(--school-primary)",
                 }}
               >
-                <AlertCircle
-                  size={18}
-                  className="mt-0.5 shrink-0"
-                />
-
-                <div className="min-w-0">
-                  <p className="font-semibold">
-                    Terjadi masalah
-                  </p>
-
-                  <p className="mt-1 break-words">
-                    {error}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setError("")
-                  }
-                  className="ml-auto shrink-0 opacity-70 transition hover:opacity-100"
-                >
-                  <X size={17} />
-                </button>
-              </div>
-            )}
-
-
-            {success && (
-              <div
-                className="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm"
-                style={{
-                  backgroundColor:
-                    "color-mix(in srgb, #16A34A 8%, var(--color-card))",
-                  borderColor:
-                    "color-mix(in srgb, #16A34A 25%, var(--color-border))",
-                  color: "#16A34A",
-                }}
-              >
-                <CheckCircle2
-                  size={18}
-                  className="mt-0.5 shrink-0"
-                />
-
-                <div>
-                  <p className="font-semibold">
-                    Berhasil
-                  </p>
-
-                  <p className="mt-1">
-                    {success}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSuccess("")
-                  }
-                  className="ml-auto opacity-70 transition hover:opacity-100"
-                >
-                  <X size={17} />
-                </button>
-              </div>
-            )}
-
-
-            {ujian && (
-              <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm sm:p-6">
-
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-
-                  <div className="min-w-0">
-
-                    <div className="flex flex-wrap items-center gap-2">
-
-                      <h2 className="text-lg font-bold text-[var(--color-text)] sm:text-xl">
-                        {ujian.judul}
-                      </h2>
-
-                      {ujian.dipublikasikan ? (
-                        <span
-                          className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
-                          style={{
-                            backgroundColor:
-                              "rgba(22, 163, 74, 0.10)",
-                            color: "#16A34A",
-                          }}
-                        >
-                          <CheckCircle2 size={12} />
-                          Dipublikasi
-                        </span>
-                      ) : (
-                        <span
-                          className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
-                          style={{
-                            backgroundColor:
-                              "rgba(245, 158, 11, 0.10)",
-                            color: "#D97706",
-                          }}
-                        >
-                          Draft
-                        </span>
-                      )}
-
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[var(--color-text-secondary)]">
-
-                      <span className="inline-flex items-center gap-1.5">
-                        <BookOpen
-                          size={15}
-                          style={{
-                            color:
-                              "var(--school-primary)",
-                          }}
-                        />
-
-                        {ujian.kelasMapel?.kelas?.nama ||
-                          "Kelas"}
-                      </span>
-
-                      <span className="inline-flex items-center gap-1.5">
-                        <FileText
-                          size={15}
-                          style={{
-                            color:
-                              "var(--school-secondary)",
-                          }}
-                        />
-
-                        {ujian.kelasMapel?.mataPelajaran?.nama ||
-                          "Mata Pelajaran"}
-                      </span>
-
-                      <span className="inline-flex items-center gap-1.5">
-                        <Clock3
-                          size={15}
-                          style={{
-                            color:
-                              "var(--color-text-secondary)",
-                          }}
-                        />
-
-                        {ujian.durasi || 0} menit
-                      </span>
-
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-
-
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-medium text-[var(--color-text-secondary)]">
-                  <ListChecks
-                    size={15}
-                    style={{
-                      color:
-                        "var(--school-primary)",
-                    }}
-                  />
-                  Total Soal
-                </div>
-
-                <p className="mt-2 text-2xl font-bold text-[var(--color-text)]">
-                  {stats.total}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-medium text-[var(--color-text-secondary)]">
-                  <CheckCircle2
-                    size={15}
-                    style={{
-                      color:
-                        "#16A34A",
-                    }}
-                  />
-                  Pilihan Ganda
-                </div>
-
-                <p className="mt-2 text-2xl font-bold text-[var(--color-text)]">
-                  {stats.pilihanGanda}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-medium text-[var(--color-text-secondary)]">
-                  <FileText
-                    size={15}
-                    style={{
-                      color:
-                        "var(--school-secondary)",
-                    }}
-                  />
-                  Esai
-                </div>
-
-                <p className="mt-2 text-2xl font-bold text-[var(--color-text)]">
-                  {stats.esai}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-medium text-[var(--color-text-secondary)]">
-                  <ClipboardList
-                    size={15}
-                    style={{
-                      color:
-                        "var(--school-accent)",
-                    }}
-                  />
-                  Total Poin
-                </div>
-
-                <p className="mt-2 text-2xl font-bold text-[var(--color-text)]">
-                  {formatPoin(stats.totalPoin)}
-                </p>
-              </div>
-
+                {soal.length} Soal
+              </span>
             </div>
 
-
-            <section className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-sm">
-
-              <div className="border-b border-[var(--color-border)] px-5 py-4 sm:px-6">
-                <div>
-                  <h2 className="text-base font-bold text-[var(--color-text)]">
-                    Daftar Soal
-                  </h2>
-
-                  <p className="mt-1 text-xs text-[var(--color-text-secondary)] sm:text-sm">
-                    Urutan soal mengikuti nomor yang ditentukan.
-                  </p>
+            {soal.length === 0 ? (
+              <div className="px-5 py-14 text-center">
+                <div
+                  className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--school-primary) 10%, transparent)",
+                    color: "var(--school-primary)",
+                  }}
+                >
+                  <ClipboardList size={26} />
                 </div>
+                <h3 className="mt-4 text-sm font-bold text-[var(--color-text)]">
+                  Belum ada soal
+                </h3>
+                <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-[var(--color-text-secondary)] sm:text-sm">
+                  Tambahkan soal pertama untuk mulai menyusun ujian ini.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleOpenCreate}
+                  className="mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+                  style={{ backgroundColor: "var(--school-primary)" }}
+                >
+                  <Plus size={16} />
+                  Tambah Soal
+                </button>
               </div>
+            ) : (
+              <div className="divide-y divide-[var(--color-border)]">
+                {soal.map((item, index) => {
+                  const pilihan = getPilihan(item);
+                  const jenisStyle = getJenisStyle(item.jenisSoal);
 
-              {soal.length === 0 ? (
-                <div className="px-5 py-16 text-center sm:px-6">
-
-                  <div
-                    className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl"
-                    style={{
-                      backgroundColor:
-                        "color-mix(in srgb, var(--school-primary) 10%, transparent)",
-                      color:
-                        "var(--school-primary)",
-                    }}
-                  >
-                    <ClipboardList size={26} />
-                  </div>
-
-                  <h3 className="mt-4 text-sm font-bold text-[var(--color-text)]">
-                    Belum ada soal
-                  </h3>
-
-                  <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-[var(--color-text-secondary)] sm:text-sm">
-                    Tambahkan soal pertama untuk mulai menyusun ujian ini.
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={handleOpenCreate}
-                    className="mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
-                    style={{
-                      backgroundColor:
-                        "var(--school-primary)",
-                    }}
-                  >
-                    <Plus size={16} />
-                    Tambah Soal
-                  </button>
-
-                </div>
-              ) : (
-                <div className="divide-y divide-[var(--color-border)]">
-
-                  {soal.map((item, index) => (
-
+                  return (
                     <div
                       key={item.id}
-                      className="p-5 transition hover:bg-[var(--color-input)] sm:p-6"
+                      className="p-4 transition hover:bg-[var(--color-input)] sm:p-5"
                     >
-
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-
-
-                        <div className="flex shrink-0 items-center gap-3 lg:w-16 lg:flex-col lg:items-center">
-
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
+                        <div className="flex shrink-0 items-center gap-2 lg:w-12 lg:flex-col lg:items-center">
                           <div
-                            className="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold"
+                            className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold"
                             style={{
                               backgroundColor:
                                 "color-mix(in srgb, var(--school-primary) 10%, transparent)",
-                              color:
-                                "var(--school-primary)",
+                              color: "var(--school-primary)",
                             }}
                           >
-                            {item.nomorUrut ||
-                              index + 1}
+                            {item.nomorUrut || index + 1}
                           </div>
-
                           <span className="text-xs font-medium text-[var(--color-text-secondary)] lg:hidden">
                             Nomor soal
                           </span>
-
                         </div>
 
-
                         <div className="min-w-0 flex-1">
-
                           <div className="flex flex-wrap items-center gap-2">
-
                             <span
                               className="rounded-full px-2.5 py-1 text-xs font-semibold"
                               style={{
-                                backgroundColor:
-                                  "var(--color-input)",
-                                color:
-                                  "var(--color-text-secondary)",
+                                backgroundColor: jenisStyle.bg,
+                                color: jenisStyle.color,
                               }}
                             >
-                              {getJenisLabel(
-                                item.jenisSoal
-                              )}
+                              {getJenisLabel(item.jenisSoal)}
                             </span>
-
                             <span
                               className="rounded-full px-2.5 py-1 text-xs font-semibold"
                               style={{
                                 backgroundColor:
                                   "color-mix(in srgb, var(--school-secondary) 10%, transparent)",
-                                color:
-                                  "var(--school-secondary)",
+                                color: "var(--school-secondary)",
                               }}
                             >
                               {formatPoin(item.poin)} poin
                             </span>
-
                           </div>
 
-                          <p className="mt-3 whitespace-pre-wrap text-sm font-medium leading-6 text-[var(--color-text)]">
+                          <p className="mt-2.5 whitespace-pre-wrap text-sm font-medium leading-6 text-[var(--color-text)]">
                             {item.teksSoal}
                           </p>
 
+                          {item.jenisSoal === "pilihan_ganda" && pilihan.length > 0 && (
+                            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                              {pilihan.map((pilihanItem, pilihanIndex) => {
+                                const kunci = String(item.kunciJawaban ?? "").trim();
+                                const jawaban = String(pilihanItem ?? "").trim();
+                                const isCorrect =
+                                  kunci.toUpperCase() === jawaban.toUpperCase() ||
+                                  kunci.toUpperCase() === getChoiceLetter(pilihanIndex);
 
-                          {item.jenisSoal ===
-                            "pilihan_ganda" &&
-                            Array.isArray(
-                              item.pilihan
-                            ) && (
+                                return (
+                                  <div
+                                    key={`${item.id}-${pilihanIndex}`}
+                                    className="flex items-start gap-2 rounded-xl border px-3 py-2 text-sm"
+                                    style={{
+                                      backgroundColor: isCorrect
+                                        ? "rgba(22, 163, 74, 0.08)"
+                                        : "var(--color-card)",
+                                      borderColor: isCorrect
+                                        ? "rgba(22, 163, 74, 0.25)"
+                                        : "var(--color-border)",
+                                      color: isCorrect
+                                        ? "#16A34A"
+                                        : "var(--color-text-secondary)",
+                                    }}
+                                  >
+                                    <span
+                                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                                      style={{
+                                        backgroundColor: "var(--color-input)",
+                                        color: "var(--color-text)",
+                                      }}
+                                    >
+                                      {getChoiceLetter(pilihanIndex)}
+                                    </span>
+                                    <span className="flex-1 pt-0.5">{pilihanItem}</span>
+                                    {isCorrect && (
+                                      <CheckCircle2 size={15} className="mt-0.5 shrink-0" />
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
 
-                              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-
-                                {item.pilihan.map(
-                                  (
-                                    pilihan,
-                                    pilihanIndex
-                                  ) => {
-
-                                    const isCorrect =
-                                      String(
-                                        item.kunciJawaban ??
-                                          item.jawabanBenar ??
-                                          ""
-                                      ).trim() ===
-                                      String(
-                                        pilihan ??
-                                          ""
-                                      ).trim();
-
-                                    return (
-                                      <div
-                                        key={`${item.id}-${pilihanIndex}`}
-                                        className="flex items-start gap-2 rounded-xl border px-3 py-2.5 text-sm"
-                                        style={{
-                                          backgroundColor:
-                                            isCorrect
-                                              ? "rgba(22, 163, 74, 0.08)"
-                                              : "var(--color-card)",
-                                          borderColor:
-                                            isCorrect
-                                              ? "rgba(22, 163, 74, 0.25)"
-                                              : "var(--color-border)",
-                                          color:
-                                            isCorrect
-                                              ? "#16A34A"
-                                              : "var(--color-text-secondary)",
-                                        }}
-                                      >
-
-                                        <span
-                                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
-                                          style={{
-                                            backgroundColor:
-                                              "var(--color-input)",
-                                            color:
-                                              "var(--color-text)",
-                                          }}
-                                        >
-                                          {getChoiceLetter(
-                                            pilihanIndex
-                                          )}
-                                        </span>
-
-                                        <span className="pt-0.5">
-                                          {pilihan}
-                                        </span>
-
-                                        {isCorrect && (
-                                          <CheckCircle2
-                                            size={16}
-                                            className="ml-auto mt-0.5 shrink-0"
-                                          />
-                                        )}
-
-                                      </div>
-                                    );
-                                  }
-                                )}
-
-                              </div>
-                            )}
-
-
-                          {item.jenisSoal ===
-                            "esai" && (
-
+                          {item.jenisSoal === "esai" && (
                             <div
-                              className="mt-4 rounded-xl border px-4 py-3"
+                              className="mt-3 rounded-xl border px-3 py-2.5"
                               style={{
                                 backgroundColor:
-                                  "color-mix(in srgb, var(--school-secondary) 8%, transparent)",
+                                  "color-mix(in srgb, #7C3AED 8%, transparent)",
                                 borderColor:
-                                  "color-mix(in srgb, var(--school-secondary) 20%, var(--color-border))",
+                                  "color-mix(in srgb, #7C3AED 20%, var(--color-border))",
                               }}
                             >
-                              <p
-                                className="text-xs font-semibold"
-                                style={{
-                                  color:
-                                    "var(--school-secondary)",
-                                }}
-                              >
+                              <p className="text-xs font-semibold" style={{ color: "#7C3AED" }}>
                                 Soal Esai
                               </p>
-
-                              <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
+                              <p className="mt-0.5 text-xs text-[var(--color-text-secondary)]">
                                 Jawaban akan diperiksa oleh guru.
                               </p>
                             </div>
                           )}
 
+                          {item.jenisSoal === "benar_salah" && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {["Benar", "Salah"].map((value) => {
+                                const isCorrect =
+                                  String(item.kunciJawaban || "")
+                                    .trim()
+                                    .toLowerCase() === value.toLowerCase();
+                                return (
+                                  <span
+                                    key={value}
+                                    className="rounded-lg border px-3 py-1.5 text-xs font-medium"
+                                    style={{
+                                      backgroundColor: isCorrect
+                                        ? "rgba(22, 163, 74, 0.08)"
+                                        : "var(--color-card)",
+                                      borderColor: isCorrect
+                                        ? "rgba(22, 163, 74, 0.25)"
+                                        : "var(--color-border)",
+                                      color: isCorrect
+                                        ? "#16A34A"
+                                        : "var(--color-text-secondary)",
+                                    }}
+                                  >
+                                    {value}
+                                    {isCorrect && " ✓"}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
 
-
-                        <div className="flex shrink-0 items-center gap-2 lg:ml-4">
-
+                        <div className="flex shrink-0 items-center gap-2 lg:ml-2">
                           <button
                             type="button"
-                            onClick={() =>
-                              handleOpenEdit(item)
-                            }
+                            onClick={() => handleOpenEdit(item)}
                             title="Edit soal"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition hover:opacity-80"
+                            aria-label={`Edit soal nomor ${item.nomorUrut}`}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-[var(--school-primary)]"
                             style={{
                               backgroundColor:
                                 "color-mix(in srgb, var(--school-primary) 10%, transparent)",
-                              color:
-                                "var(--school-primary)",
+                              color: "var(--school-primary)",
                             }}
                           >
                             <Pencil size={15} />
                           </button>
-
                           <button
                             type="button"
-                            onClick={() =>
-                              handleDelete(item)
-                            }
-                            disabled={
-                              deleting ===
-                              item.id
-                            }
+                            onClick={() => handleDelete(item)}
+                            disabled={deleting === item.id}
                             title="Hapus soal"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={`Hapus soal nomor ${item.nomorUrut}`}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500"
                             style={{
-                              backgroundColor:
-                                "rgba(220, 38, 38, 0.08)",
-                              color:
-                                "#DC2626",
+                              backgroundColor: "rgba(220, 38, 38, 0.08)",
+                              color: "#DC2626",
                             }}
                           >
-                            {deleting ===
-                            item.id ? (
-                              <Loader2
-                                size={15}
-                                className="animate-spin"
-                              />
+                            {deleting === item.id ? (
+                              <Loader2 size={15} className="animate-spin" />
                             ) : (
                               <Trash2 size={15} />
                             )}
                           </button>
-
                         </div>
-
                       </div>
                     </div>
-                  ))}
+                  );
+                })}
+              </div>
+            )}
+          </section>
 
-                </div>
-              )}
-
-            </section>
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--color-border)] px-4 py-2.5 text-xs text-[var(--color-text-secondary)]">
+            <HelpCircle size={14} />
+            <span>Butuh bantuan? Hubungi admin sekolah jika ada kendala teknis.</span>
           </div>
-        </main>
-      </div>
+        </>
+      )}
     </div>
   );
 }

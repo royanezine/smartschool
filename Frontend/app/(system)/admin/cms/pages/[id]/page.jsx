@@ -593,57 +593,194 @@ export default function PageDetail() {
                 </div>
               </section>
 
-              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.34fr)] 2xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.3fr)]">
-                <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
-                  <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
-                    <div className="flex items-center gap-3">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
-                        <FileText className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <h2 className="theme-text text-sm font-bold">
-                          Konten Halaman
-                        </h2>
-                        <p className="theme-text-muted text-[11px]">
-                          Isi halaman yang tersimpan di CMS
-                        </p>
-                      </div>
-                    </div>
-                    <span className="theme-text-muted hidden text-[10px] font-semibold uppercase tracking-wider sm:block">
-                      CMS Content
-                    </span>
-                  </div>
-
-                  <div className="p-5 sm:p-7 lg:p-8">
-                    {page?.konten ? (
-                      <article
-                        className="cms-content theme-text-secondary max-w-none text-[15px] leading-8 [&_p]:mb-5 [&_h1]:mb-5 [&_h1]:mt-8 [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:text-[var(--color-text)] [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:text-[var(--color-text)] [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-[var(--color-text)] [&_h4]:mb-2 [&_h4]:mt-5 [&_h4]:text-lg [&_h4]:font-bold [&_h4]:text-[var(--color-text)] [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_li]:pl-1 [&_a]:font-semibold [&_a]:text-[var(--color-primary)] [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-[var(--color-primary-hover)] [&_strong]:font-bold [&_strong]:text-[var(--color-text)] [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--color-primary)] [&_blockquote]:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] [&_blockquote]:px-5 [&_blockquote]:py-4 [&_blockquote]:text-[var(--color-text-secondary)] [&_img]:my-6 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-[var(--color-border)] [&_table]:my-6 [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-[var(--color-border)] [&_th]:bg-[var(--color-table-header)] [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold [&_td]:border [&_td]:border-[var(--color-border)] [&_td]:px-4 [&_td]:py-3"
-                        dangerouslySetInnerHTML={{ __html: page.konten }}
-                      />
-                    ) : (
-                      <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
-                        <div className="theme-card-soft flex h-14 w-14 items-center justify-center rounded-2xl">
-                          <FileText className="theme-text-muted h-6 w-6" />
+              {/* PERUBAHAN LAYOUT: Grid 2 kolom dengan konten kiri yang besar */}
+              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.35fr)] 2xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.3fr)]">
+                
+                {/* KOLOM KIRI (Konten Utama & Menu Konfigurasi) */}
+                <div className="min-w-0 flex flex-col gap-6">
+                  {/* CARD KONTEN HALAMAN */}
+                  <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
+                    <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                          <FileText className="h-4 w-4" />
                         </div>
-                        <h3 className="theme-text-secondary mt-4 text-sm font-bold">
-                          Belum ada konten
-                        </h3>
-                        <p className="theme-text-muted mt-1 max-w-sm text-xs leading-5">
-                          Halaman ini belum memiliki isi. Silakan edit halaman
-                          untuk menambahkan konten.
-                        </p>
+                        <div>
+                          <h2 className="theme-text text-sm font-bold">
+                            Konten Halaman
+                          </h2>
+                          <p className="theme-text-muted text-[11px]">
+                            Isi halaman yang tersimpan di CMS
+                          </p>
+                        </div>
+                      </div>
+                      <span className="theme-text-muted hidden text-[10px] font-semibold uppercase tracking-wider sm:block">
+                        CMS Content
+                      </span>
+                    </div>
+
+                    <div className="p-5 sm:p-7 lg:p-8">
+                      {page?.konten ? (
+                        <article
+                          className="cms-content theme-text-secondary max-w-none text-[15px] leading-8 [&_p]:mb-5 [&_h1]:mb-5 [&_h1]:mt-8 [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:text-[var(--color-text)] [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:text-[var(--color-text)] [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-[var(--color-text)] [&_h4]:mb-2 [&_h4]:mt-5 [&_h4]:text-lg [&_h4]:font-bold [&_h4]:text-[var(--color-text)] [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_li]:pl-1 [&_a]:font-semibold [&_a]:text-[var(--color-primary)] [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-[var(--color-primary-hover)] [&_strong]:font-bold [&_strong]:text-[var(--color-text)] [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--color-primary)] [&_blockquote]:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] [&_blockquote]:px-5 [&_blockquote]:py-4 [&_blockquote]:text-[var(--color-text-secondary)] [&_img]:my-6 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-[var(--color-border)] [&_table]:my-6 [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-[var(--color-border)] [&_th]:bg-[var(--color-table-header)] [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold [&_td]:border [&_td]:border-[var(--color-border)] [&_td]:px-4 [&_td]:py-3"
+                          dangerouslySetInnerHTML={{ __html: page.konten }}
+                        />
+                      ) : (
+                        <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
+                          <div className="theme-card-soft flex h-14 w-14 items-center justify-center rounded-2xl">
+                            <FileText className="theme-text-muted h-6 w-6" />
+                          </div>
+                          <h3 className="theme-text-secondary mt-4 text-sm font-bold">
+                            Belum ada konten
+                          </h3>
+                          <p className="theme-text-muted mt-1 max-w-sm text-xs leading-5">
+                            Halaman ini belum memiliki isi. Silakan edit halaman
+                            untuk menambahkan konten.
+                          </p>
+                          <Link
+                            href={`/admin/cms/pages/${page.id}/edit`}
+                            className="theme-primary mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                            Tambahkan Konten
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+
+                  {/* CARD MENU KONFIGURASI (Dipindah ke bawah konten, ukuran besar) */}
+                  <section className="theme-card theme-border rounded-2xl border shadow-sm">
+                    <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                          <Menu className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <h3 className="theme-text text-sm font-bold">
+                            Menu Konfigurasi
+                          </h3>
+                          <p className="theme-text-muted text-[11px]">
+                            Menu navigasi yang menggunakan halaman ini
+                          </p>
+                        </div>
+                      </div>
+                      <span className="theme-card-soft theme-text-secondary rounded-lg px-3 py-1 text-xs font-bold">
+                        {menuKonfigurasi.length} Menu
+                      </span>
+                    </div>
+
+                    <div className="p-5 sm:p-6">
+                      {menuKonfigurasi.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {menuKonfigurasi.map((menu, index) => {
+                            const namaMenu =
+                              menu?.nama ||
+                              menu?.judul ||
+                              menu?.label ||
+                              menu?.namaMenu ||
+                              menu?.title ||
+                              "Menu tanpa nama";
+
+                            const urlMenu =
+                              menu?.url ||
+                              menu?.link ||
+                              menu?.path ||
+                              menu?.href ||
+                              "";
+
+                            const aktif =
+                              menu?.aktif === true ||
+                              menu?.isActive === true ||
+                              menu?.status === "aktif" ||
+                              menu?.status === "active";
+
+                            return (
+                              <div
+                                key={menu?.id || `${namaMenu}-${index}`}
+                                className="theme-card-soft theme-border rounded-xl border p-4 transition hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]"
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div className="theme-card theme-border flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
+                                    <Menu className="theme-text-secondary h-5 w-5" />
+                                  </div>
+
+                                  <div className="min-w-0 flex-1">
+                                    <p className="theme-text break-words text-sm font-semibold">
+                                      {namaMenu}
+                                    </p>
+
+                                    {urlMenu ? (
+                                      <p className="theme-text-muted mt-1 break-all text-xs">
+                                        {urlMenu}
+                                      </p>
+                                    ) : (
+                                      <p className="theme-text-muted mt-1 text-xs">
+                                        URL menu tidak tersedia
+                                      </p>
+                                    )}
+
+                                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                                      {menu?.urutan !== undefined && (
+                                        <span className="theme-text-muted bg-[var(--color-card)] border theme-border rounded-md px-2 py-1 text-[10px]">
+                                          Urutan: {menu.urutan}
+                                        </span>
+                                      )}
+
+                                      {menu?.posisi && (
+                                        <span className="theme-card theme-border theme-text-secondary rounded-md border px-2 py-1 text-[10px]">
+                                          {menu.posisi}
+                                        </span>
+                                      )}
+
+                                      {(menu?.aktif !== undefined ||
+                                        menu?.isActive !== undefined ||
+                                        menu?.status !== undefined) && (
+                                        <span
+                                          className={`rounded-md px-2 py-1 text-[10px] font-semibold ${
+                                            aktif
+                                              ? "theme-success border border-[color-mix(in_srgb,var(--color-success)_30%,transparent)]"
+                                              : "theme-card theme-text-muted border theme-border"
+                                          }`}
+                                        >
+                                          {aktif ? "Aktif" : "Nonaktif"}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <ChevronRight className="theme-text-muted mt-1 h-4 w-4 shrink-0" />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="theme-card-soft rounded-xl p-8 text-center">
+                          <Menu className="theme-text-muted mx-auto h-8 w-8" />
+                          <p className="theme-text-secondary mt-3 text-sm font-semibold">
+                            Belum ada menu konfigurasi
+                          </p>
+                          <p className="theme-text-muted mt-1 text-xs leading-5">
+                            Belum ada menu navigasi yang terhubung dengan halaman ini.
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="theme-border mt-5 border-t pt-4">
                         <Link
-                          href={`/admin/cms/pages/${page.id}/edit`}
-                          className="theme-primary mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition"
+                          href="/admin/cms/menu"
+                          className="theme-text-secondary inline-flex items-center gap-2 text-xs font-semibold transition hover:text-[var(--color-primary)]"
                         >
-                          <Pencil className="h-3.5 w-3.5" />
-                          Tambahkan Konten
+                          Kelola Menu Konfigurasi
+                          <ChevronRight className="h-3.5 w-3.5" />
                         </Link>
                       </div>
-                    )}
-                  </div>
-                </section>
+                    </div>
+                  </section>
+                </div>
 
+                {/* KOLOM KANAN (Sidebar Info) */}
                 <aside className="min-w-0 space-y-5">
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
@@ -677,136 +814,6 @@ export default function PageDetail() {
                           ? "Halaman ini dapat ditampilkan pada website sekolah."
                           : "Halaman masih dalam status draft dan belum dipublikasikan."}
                       </p>
-                    </div>
-                  </section>
-
-                  <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
-                        <Menu className="h-4 w-4" />
-                      </div>
-
-                      <div className="min-w-0">
-                        <h3 className="theme-text text-sm font-bold">
-                          Menu Konfigurasi
-                        </h3>
-                        <p className="theme-text-muted text-[11px]">
-                          Menu navigasi yang menggunakan halaman ini
-                        </p>
-                      </div>
-
-                      <span className="theme-card-soft theme-text-secondary ml-auto rounded-lg px-2.5 py-1 text-xs font-bold">
-                        {menuKonfigurasi.length}
-                      </span>
-                    </div>
-
-                    {menuKonfigurasi.length > 0 ? (
-                      <div className="mt-4 space-y-3">
-                        {menuKonfigurasi.map((menu, index) => {
-                          const namaMenu =
-                            menu?.nama ||
-                            menu?.judul ||
-                            menu?.label ||
-                            menu?.namaMenu ||
-                            menu?.title ||
-                            "Menu tanpa nama";
-
-                          const urlMenu =
-                            menu?.url ||
-                            menu?.link ||
-                            menu?.path ||
-                            menu?.href ||
-                            "";
-
-                          const aktif =
-                            menu?.aktif === true ||
-                            menu?.isActive === true ||
-                            menu?.status === "aktif" ||
-                            menu?.status === "active";
-
-                          return (
-                            <div
-                              key={menu?.id || `${namaMenu}-${index}`}
-                              className="theme-card-soft theme-border rounded-xl border p-3"
-                            >
-                              <div className="flex items-start gap-3">
-                                <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
-                                  <Menu className="theme-text-secondary h-4 w-4" />
-                                </div>
-
-                                <div className="min-w-0 flex-1">
-                                  <p className="theme-text break-words text-sm font-semibold">
-                                    {namaMenu}
-                                  </p>
-
-                                  {urlMenu ? (
-                                    <p className="theme-text-muted mt-1 break-all text-xs">
-                                      {urlMenu}
-                                    </p>
-                                  ) : (
-                                    <p className="theme-text-muted mt-1 text-xs">
-                                      URL menu tidak tersedia
-                                    </p>
-                                  )}
-
-                                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                                    {menu?.urutan !== undefined && (
-                                      <span className="theme-text-muted text-[10px]">
-                                        Urutan: {menu.urutan}
-                                      </span>
-                                    )}
-
-                                    {menu?.posisi && (
-                                      <span className="theme-card theme-border theme-text-secondary rounded-md border px-2 py-1 text-[10px]">
-                                        {menu.posisi}
-                                      </span>
-                                    )}
-
-                                    {(menu?.aktif !== undefined ||
-                                      menu?.isActive !== undefined ||
-                                      menu?.status !== undefined) && (
-                                      <span
-                                        className={`rounded-md px-2 py-1 text-[10px] font-semibold ${
-                                          aktif
-                                            ? "theme-success"
-                                            : "theme-card theme-text-muted"
-                                        }`}
-                                      >
-                                        {aktif ? "Aktif" : "Nonaktif"}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-
-                                <ChevronRight className="theme-text-muted mt-1 h-4 w-4 shrink-0" />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="theme-card-soft mt-4 rounded-xl p-4 text-center">
-                        <Menu className="theme-text-muted mx-auto h-6 w-6" />
-
-                        <p className="theme-text-secondary mt-2 text-xs font-semibold">
-                          Belum ada menu konfigurasi
-                        </p>
-
-                        <p className="theme-text-muted mt-1 text-[11px] leading-5">
-                          Belum ada menu navigasi yang terhubung dengan halaman
-                          ini.
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="theme-border mt-4 border-t pt-3">
-                      <Link
-                        href="/admin/cms/menu"
-                        className="theme-text-secondary inline-flex items-center gap-2 text-xs font-semibold transition hover:text-[var(--color-primary)]"
-                      >
-                        Kelola Menu Konfigurasi
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      </Link>
                     </div>
                   </section>
 
@@ -860,10 +867,8 @@ export default function PageDetail() {
                         type="button"
                         onClick={handleOpenWebsite}
                         disabled={!websiteUrl}
-                        className="theme-card theme-border theme-text-secondary inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-semibold transition theme-sidebar-hover disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                        Lihat di Website
+                       
                       </button>
 
                       <button

@@ -1,7 +1,7 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
@@ -26,44 +26,15 @@ import {
 const API_URL = "/api/cms/menu-konfigurasi";
 const HALAMAN_API_URL = "/api/cms/halaman";
 
-const SECTION_OPTIONS = [
-  { value: "hero", label: "Hero / Banner Utama" },
-  { value: "tentang", label: "Tentang Sekolah" },
-  { value: "keunggulan", label: "Keunggulan Sekolah" },
-  { value: "program", label: "Program Sekolah" },
-  { value: "informasi-terbaru", label: "Informasi Terbaru" },
-  { value: "cta", label: "Call to Action" },
-];
-
-const INITIAL_FORM = {
-  halamanCmsId: "",
-  section: "hero",
-  judul: "",
-  subJudul: "",
-  konten: "",
-  gambarUrl: "",
-  ctaText: "",
-  ctaLink: "",
-  urutan: 1,
-  status: "aktif",
-};
-
 function unwrapData(result) {
   let data = result?.data ?? result;
-
   for (let i = 0; i < 3; i += 1) {
-    if (
-      data &&
-      !Array.isArray(data) &&
-      typeof data === "object" &&
-      "data" in data
-    ) {
+    if (data && !Array.isArray(data) && typeof data === "object" && "data" in data) {
       data = data.data;
     } else {
       break;
     }
   }
-
   return data;
 }
 
@@ -73,20 +44,14 @@ function getErrorMessage(error, fallback) {
 
 function getStatusLabel(status) {
   const value = String(status || "").toLowerCase();
-
   if (value === "aktif") return "Aktif";
   if (value === "nonaktif") return "Nonaktif";
-  if (value === "draft") return "Draft";
-
   return status || "-";
 }
 
 function getStatusStyle(status) {
   const value = String(status || "").toLowerCase();
-
   if (value === "aktif") return "theme-success border";
-  if (value === "draft") return "theme-warning border";
-
   return "theme-card-soft theme-text-secondary border";
 }
 
@@ -100,15 +65,8 @@ function normalizeId(value) {
   return value === null || value === undefined ? "" : String(value);
 }
 
-function getPageTitle(page) {
-  return page?.judul || page?.title || "Halaman tanpa judul";
-}
-
-function getPageSlug(page) {
-  return page?.slug || "";
-}
-
 export default function CmsMenuPage() {
+  const router = useRouter();
   const [active, setActive] = useState("menu");
   const [collapsed, setCollapsed] = useState(false);
 
@@ -118,7 +76,6 @@ export default function CmsMenuPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingHalaman, setLoadingHalaman] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
   const [search, setSearch] = useState("");
@@ -126,22 +83,13 @@ export default function CmsMenuPage() {
   const [success, setSuccess] = useState("");
   const [halamanError, setHalamanError] = useState("");
 
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [formData, setFormData] = useState({ ...INITIAL_FORM });
-
-  const [previewItem, setPreviewItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const fetchItems = useCallback(async (showRefresh = false) => {
     try {
       setError("");
-
-      if (showRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (showRefresh) setRefreshing(true);
+      else setLoading(true);
 
       const result = await apiFetch(API_URL);
       const data = unwrapData(result);
@@ -149,16 +97,10 @@ export default function CmsMenuPage() {
       if (!Array.isArray(data)) {
         throw new Error("Format data konfigurasi menu dari server tidak valid.");
       }
-
       setItems(data);
     } catch (err) {
       console.error("Gagal mengambil konfigurasi menu:", err);
-      setError(
-        getErrorMessage(
-          err,
-          "Gagal mengambil konfigurasi menu dari server."
-        )
-      );
+      setError(getErrorMessage(err, "Gagal mengambil konfigurasi menu dari server."));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -169,20 +111,15 @@ export default function CmsMenuPage() {
     try {
       setLoadingHalaman(true);
       setHalamanError("");
-
       const result = await apiFetch(HALAMAN_API_URL);
       const data = unwrapData(result);
-
       if (!Array.isArray(data)) {
         throw new Error("Format daftar halaman CMS dari server tidak valid.");
       }
-
       setHalamanList(data);
     } catch (err) {
       console.error("Gagal mengambil daftar halaman CMS:", err);
-      setHalamanError(
-        getErrorMessage(err, "Gagal mengambil daftar halaman CMS.")
-      );
+      setHalamanError(getErrorMessage(err, "Gagal mengambil daftar halaman CMS."));
     } finally {
       setLoadingHalaman(false);
     }
@@ -195,9 +132,7 @@ export default function CmsMenuPage() {
 
   const filteredItems = items.filter((item) => {
     const keyword = search.trim().toLowerCase();
-
     if (!keyword) return true;
-
     const searchableValues = [
       item?.halamanCms?.judul,
       item?.halamanCms?.slug,
@@ -207,7 +142,6 @@ export default function CmsMenuPage() {
       item?.subJudul,
       item?.status,
     ];
-
     return searchableValues.some((value) =>
       String(value ?? "").toLowerCase().includes(keyword)
     );
@@ -217,185 +151,30 @@ export default function CmsMenuPage() {
     (item) => String(item?.status || "").toLowerCase() === "aktif"
   ).length;
 
-  const inactiveCount = items.filter(
-    (item) => String(item?.status || "").toLowerCase() === "nonaktif"
-  ).length;
-
-  const openCreateForm = () => {
-    setEditingItem(null);
-    setFormData({ ...INITIAL_FORM });
-    setError("");
-    setSuccess("");
-    setFormOpen(true);
-  };
-
-  const openEditForm = (item) => {
-    setEditingItem(item);
-
-    setFormData({
-      halamanCmsId: normalizeId(
-        item?.halamanCmsId ?? item?.halamanCms?.id
-      ),
-      section: item?.section || "hero",
-      judul: item?.judul || "",
-      subJudul: item?.subJudul || "",
-      konten: item?.konten || "",
-      gambarUrl: item?.gambarUrl || "",
-      ctaText: item?.ctaText || "",
-      ctaLink: item?.ctaLink || "",
-      urutan: Number(item?.urutan) || 1,
-      status: item?.status || "aktif",
-    });
-
-    setError("");
-    setSuccess("");
-    setFormOpen(true);
-  };
-
-  const closeForm = () => {
-    if (saving) return;
-
-    setFormOpen(false);
-    setEditingItem(null);
-    setFormData({ ...INITIAL_FORM });
-    setError("");
-  };
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    setFormData((current) => ({
-      ...current,
-      [name]: name === "urutan" ? value : value,
-    }));
-  };
-
-  const handleSave = async (event) => {
-    event.preventDefault();
-
-    if (saving) return;
-
-    const halamanCmsId = formData.halamanCmsId;
-    const section = formData.section.trim();
-    const judul = formData.judul.trim();
-
-    if (!halamanCmsId) {
-      setError("Halaman CMS wajib dipilih.");
-      return;
-    }
-
-    if (!section) {
-      setError("Section wajib dipilih.");
-      return;
-    }
-
-    if (!judul) {
-      setError("Judul wajib diisi.");
-      return;
-    }
-
-    const parsedUrutan = Number(formData.urutan);
-
-    if (!Number.isInteger(parsedUrutan) || parsedUrutan < 1) {
-      setError("Urutan harus berupa angka bulat minimal 1.");
-      return;
-    }
-
-    if (!["aktif", "nonaktif", "draft"].includes(formData.status)) {
-      setError("Status konfigurasi tidak valid.");
-      return;
-    }
-
-    const payload = {
-      halamanCmsId,
-      section,
-      judul,
-      subJudul: formData.subJudul.trim() || null,
-      konten: formData.konten.trim() || null,
-      gambarUrl: formData.gambarUrl.trim() || null,
-      ctaText: formData.ctaText.trim() || null,
-      ctaLink: formData.ctaLink.trim() || null,
-      urutan: parsedUrutan,
-      status: formData.status,
-    };
-
-    try {
-      setSaving(true);
-      setError("");
-      setSuccess("");
-
-      if (editingItem?.id) {
-        await apiFetch(
-          `${API_URL}/${encodeURIComponent(editingItem.id)}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          }
-        );
-      } else {
-        await apiFetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      }
-
-      const message = editingItem
-        ? "Konfigurasi menu berhasil diperbarui."
-        : "Konfigurasi menu berhasil disimpan.";
-
-      setFormOpen(false);
-      setEditingItem(null);
-      setFormData({ ...INITIAL_FORM });
-
-      await fetchItems(true);
-      setSuccess(message);
-    } catch (err) {
-      console.error("Gagal menyimpan konfigurasi menu:", err);
-      setError(
-        getErrorMessage(err, "Gagal menyimpan konfigurasi menu.")
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleDelete = async () => {
     if (!deleteTarget?.id || deletingId !== null) return;
-
     try {
       setDeletingId(deleteTarget.id);
       setError("");
       setSuccess("");
 
-      await apiFetch(
-        `${API_URL}/${encodeURIComponent(deleteTarget.id)}`,
-        { method: "DELETE" }
-      );
+      await apiFetch(`${API_URL}/${encodeURIComponent(deleteTarget.id)}`, {
+        method: "DELETE",
+      });
 
       const title = deleteTarget.judul || "Konfigurasi menu";
-
       setDeleteTarget(null);
-
-      if (previewItem?.id === deleteTarget.id) {
-        setPreviewItem(null);
-      }
-
       await fetchItems(true);
       setSuccess(`Konfigurasi "${title}" berhasil dinonaktifkan.`);
     } catch (err) {
       console.error("Gagal menonaktifkan konfigurasi menu:", err);
-      setError(
-        getErrorMessage(err, "Gagal menonaktifkan konfigurasi menu.")
-      );
+      setError(getErrorMessage(err, "Gagal menonaktifkan konfigurasi menu."));
     } finally {
       setDeletingId(null);
     }
   };
 
-  const halamanLabel = (item) =>
-    item?.halamanCms?.judul || "Halaman tidak ditemukan";
+  const halamanLabel = (item) => item?.halamanCms?.judul || "Halaman tidak ditemukan";
 
   const refreshAll = async () => {
     await Promise.all([fetchItems(true), fetchHalaman()]);
@@ -403,30 +182,19 @@ export default function CmsMenuPage() {
 
   if (loading) {
     return (
-      <div className="theme-page flex min-h-screen w-full">
-        <Sidebar
-          active={active}
-          setActive={setActive}
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
-        />
-
+      <div className="theme-page flex h-screen w-full overflow-hidden">
+        <Sidebar active={active} setActive={setActive} collapsed={collapsed} setCollapsed={setCollapsed} />
         <div className="flex min-w-0 flex-1 flex-col">
-          <Header
-            title="Pengaturan Menu Website"
-            user={{
-              name: "CMS Admin",
-              email: "cms@smartschool.com",
-              avatar: "CA",
-            }}
-          />
-
-          <main className="flex flex-1 items-center justify-center">
+          <div className="shrink-0">
+            <Header
+              title="Pengaturan Menu Website"
+              user={{ name: "CMS Admin", email: "cms@smartschool.com", avatar: "CA" }}
+            />
+          </div>
+          <main className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto">
             <div className="text-center">
               <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-[var(--color-primary)]" />
-              <p className="theme-text text-sm font-semibold">
-                Memuat konfigurasi menu...
-              </p>
+              <p className="theme-text text-sm font-semibold">Memuat konfigurasi menu...</p>
             </div>
           </main>
         </div>
@@ -435,60 +203,44 @@ export default function CmsMenuPage() {
   }
 
   return (
-    <div className="theme-page flex min-h-screen w-full">
-      <Sidebar
-        active={active}
-        setActive={setActive}
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-      />
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <Sidebar active={active} setActive={setActive} collapsed={collapsed} setCollapsed={setCollapsed} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          title="Pengaturan Menu Website"
-          user={{
-            name: "CMS Admin",
-            email: "cms@smartschool.com",
-            avatar: "CA",
-          }}
-        />
+        <div className="shrink-0">
+          <Header
+            title="Pengaturan Menu Website"
+            user={{ name: "CMS Admin", email: "cms@smartschool.com", avatar: "CA" }}
+          />
+        </div>
 
-        <main className="theme-page min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1700px] px-3 py-5 sm:px-6 lg:px-9">
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
+        <main className="theme-page flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <div className="w-full flex-1 px-3 py-5 sm:px-6 lg:px-9">
+            <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
+              <div className="flex items-center gap-3 lg:col-span-2">
                 <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border">
                   <Menu className="h-5 w-5" />
                 </div>
-
-                <div>
-                  <h1 className="theme-text text-2xl font-bold">
-                    Pengaturan Menu Website
-                  </h1>
+                <div className="min-w-0">
+                  <h1 className="theme-text text-2xl font-bold">Pengaturan Menu Website</h1>
                   <p className="theme-text-secondary mt-1 text-sm">
                     Kelola konten pada bagian-bagian template website sekolah.
                   </p>
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center justify-end gap-2 lg:col-span-2">
                 <button
                   type="button"
                   onClick={refreshAll}
                   disabled={refreshing || loadingHalaman}
                   className="theme-card theme-border theme-text-secondary inline-flex h-10 items-center gap-2 rounded-xl border px-4 text-sm font-semibold disabled:opacity-60"
                 >
-                  <RefreshCw
-                    className={`h-4 w-4 ${
-                      refreshing || loadingHalaman ? "animate-spin" : ""
-                    }`}
-                  />
+                  <RefreshCw className={`h-4 w-4 ${refreshing || loadingHalaman ? "animate-spin" : ""}`} />
                   Refresh
                 </button>
-
                 <button
                   type="button"
-                  onClick={openCreateForm}
+                  onClick={() => router.push("/admin/cms/menu/tambah")}
                   className="theme-primary inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold"
                 >
                   <Plus className="h-4 w-4" />
@@ -497,7 +249,7 @@ export default function CmsMenuPage() {
               </div>
             </div>
 
-            {error && !formOpen && (
+            {error && (
               <div className="theme-danger mb-4 flex items-start gap-3 rounded-xl border p-4">
                 <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
                 <div className="min-w-0 flex-1 text-sm">{error}</div>
@@ -529,51 +281,40 @@ export default function CmsMenuPage() {
               </div>
             )}
 
-            <section className="theme-card theme-border mb-6 rounded-2xl border p-5">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="theme-card-soft rounded-xl border p-4">
-                  <p className="theme-text-muted text-xs">
-                    Total konfigurasi
-                  </p>
-                  <p className="theme-text mt-2 text-2xl font-bold">
-                    {items.length}
-                  </p>
-                </div>
-
-                <div className="theme-card-soft rounded-xl border p-4">
-                  <p className="theme-text-muted text-xs">
-                    Konfigurasi aktif
-                  </p>
-                  <p className="theme-text mt-2 text-2xl font-bold">
-                    {activeCount}
-                  </p>
-                </div>
-
-                <div className="theme-card-soft rounded-xl border p-4">
-                  <p className="theme-text-muted text-xs">
-                    Konfigurasi nonaktif
-                  </p>
-                  <p className="theme-text mt-2 text-2xl font-bold">
-                    {inactiveCount}
-                  </p>
-                </div>
+            <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+              <div className="theme-card theme-border rounded-2xl border p-5">
+                <p className="theme-text-muted text-xs">Total konfigurasi</p>
+                <p className="theme-text mt-2 text-2xl font-bold">{items.length}</p>
               </div>
-              <p className="theme-text-muted mt-3 text-xs">
-                Statistik dihitung berdasarkan data yang dikembalikan endpoint
-                konfigurasi menu.
-              </p>
+              <div className="theme-card theme-border rounded-2xl border p-5">
+                <p className="theme-text-muted text-xs">Konfigurasi aktif</p>
+                <p className="theme-text mt-2 text-2xl font-bold">{activeCount}</p>
+              </div>
+              <div className="theme-card theme-border rounded-2xl border p-5">
+                <p className="theme-text-muted text-xs">Total halaman CMS</p>
+                <p className="theme-text mt-2 text-2xl font-bold">{halamanList.length}</p>
+              </div>
+              <div className="theme-card theme-border rounded-2xl border p-5">
+                <p className="theme-text-muted text-xs">Nonaktif</p>
+                <p className="theme-text mt-2 text-2xl font-bold">{items.length - activeCount}</p>
+              </div>
+              <div className="theme-card theme-border rounded-2xl border p-5">
+                <p className="theme-text-muted text-xs">Ditampilkan</p>
+                <p className="theme-text mt-2 text-2xl font-bold">{filteredItems.length}</p>
+              </div>
+              <div className="theme-card theme-border rounded-2xl border p-5">
+                <p className="theme-text-muted text-xs">Section unik</p>
+                <p className="theme-text mt-2 text-2xl font-bold">
+                  {new Set(items.map((i) => i.section)).size}
+                </p>
+              </div>
             </section>
 
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="theme-text text-base font-bold">
-                  Daftar Konfigurasi
-                </h2>
-                <p className="theme-text-secondary mt-1 text-xs">
-                  Konten disimpan melalui API backend CMS.
-                </p>
+                <h2 className="theme-text text-base font-bold">Daftar Konfigurasi</h2>
+                <p className="theme-text-secondary mt-1 text-xs">Konten disimpan melalui API backend CMS.</p>
               </div>
-
               <div className="relative w-full sm:max-w-sm">
                 <Search className="theme-text-muted absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
                 <input
@@ -582,7 +323,6 @@ export default function CmsMenuPage() {
                   placeholder="Cari halaman, section, atau judul..."
                   className="theme-input w-full rounded-xl border py-3 pl-9 pr-9 text-sm outline-none focus:border-[var(--color-primary)]"
                 />
-
                 {search && (
                   <button
                     type="button"
@@ -598,9 +338,7 @@ export default function CmsMenuPage() {
             <section className="theme-card theme-border overflow-hidden rounded-2xl border">
               <div className="theme-card-soft theme-border flex items-center justify-between border-b px-5 py-4">
                 <div>
-                  <h3 className="theme-text text-sm font-bold">
-                    Semua Konfigurasi Menu
-                  </h3>
+                  <h3 className="theme-text text-sm font-bold">Semua Konfigurasi Menu</h3>
                   <p className="theme-text-muted mt-1 text-xs">
                     {filteredItems.length} konfigurasi ditemukan
                   </p>
@@ -612,60 +350,34 @@ export default function CmsMenuPage() {
                   <table className="w-full min-w-[950px]">
                     <thead className="theme-table-header">
                       <tr className="border-b">
-                        <th className="px-5 py-4 text-left text-xs font-bold uppercase">
-                          Halaman / Section
-                        </th>
-                        <th className="px-5 py-4 text-left text-xs font-bold uppercase">
-                          Judul
-                        </th>
-                        <th className="px-5 py-4 text-left text-xs font-bold uppercase">
-                          Urutan
-                        </th>
-                        <th className="px-5 py-4 text-left text-xs font-bold uppercase">
-                          Status
-                        </th>
-                        <th className="px-5 py-4 text-right text-xs font-bold uppercase">
-                          Aksi
-                        </th>
+                        <th className="px-5 py-4 text-left text-xs font-bold uppercase">Halaman / Section</th>
+                        <th className="px-5 py-4 text-left text-xs font-bold uppercase">Judul</th>
+                        <th className="px-5 py-4 text-left text-xs font-bold uppercase">Urutan</th>
+                        <th className="px-5 py-4 text-left text-xs font-bold uppercase">Status</th>
+                        <th className="px-5 py-4 text-right text-xs font-bold uppercase">Aksi</th>
                       </tr>
                     </thead>
-
                     <tbody>
                       {filteredItems.map((item) => (
-                        <tr
-                          key={item.id}
-                          className="theme-table-hover theme-border-soft border-b"
-                        >
+                        <tr key={item.id} className="theme-table-hover theme-border-soft border-b">
                           <td className="px-5 py-4">
-                            <p className="theme-text text-sm font-semibold">
-                              {halamanLabel(item)}
-                            </p>
-                            <p className="theme-text-muted mt-1 text-xs">
-                              Section: {formatLabel(item.section)}
-                            </p>
+                            <p className="theme-text text-sm font-semibold">{halamanLabel(item)}</p>
+                            <p className="theme-text-muted mt-1 text-xs">Section: {formatLabel(item.section)}</p>
                             {item.halamanCms?.slug && (
-                              <p className="theme-text-muted mt-1 text-xs">
-                                Slug: {item.halamanCms.slug}
-                              </p>
+                              <p className="theme-text-muted mt-1 text-xs">Slug: {item.halamanCms.slug}</p>
                             )}
                           </td>
-
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
                               {item.gambarUrl ? (
                                 <div className="theme-card-soft flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border">
-                                  <img
-                                    src={item.gambarUrl}
-                                    alt=""
-                                    className="h-full w-full object-cover"
-                                  />
+                                  <img src={item.gambarUrl} alt="" className="h-full w-full object-cover" />
                                 </div>
                               ) : (
                                 <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border">
                                   <ImageIcon className="h-4 w-4" />
                                 </div>
                               )}
-
                               <div className="min-w-0">
                                 <p className="theme-text max-w-[320px] truncate text-sm font-semibold">
                                   {item.judul || "Tanpa Judul"}
@@ -678,42 +390,41 @@ export default function CmsMenuPage() {
                               </div>
                             </div>
                           </td>
-
                           <td className="px-5 py-4">
                             <span className="theme-card-soft theme-text-secondary inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs">
                               <ArrowUpDown className="h-3.5 w-3.5" />
                               {item.urutan ?? 1}
                             </span>
                           </td>
-
                           <td className="px-5 py-4">
-                            <span
-                              className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold ${getStatusStyle(item.status)}`}
-                            >
+                            <span className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold ${getStatusStyle(item.status)}`}>
                               {getStatusLabel(item.status)}
                             </span>
                           </td>
-
                           <td className="px-5 py-4">
                             <div className="flex justify-end gap-1">
                               <button
                                 type="button"
-                                title="Preview"
-                                onClick={() => setPreviewItem(item)}
+                                title="Lihat Detail"
+                                onClick={() =>
+                                  router.push(`/admin/cms/menu/${encodeURIComponent(normalizeId(item.id))}`)
+                                }
                                 className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                               >
                                 <Eye className="h-4 w-4" />
                               </button>
-
                               <button
                                 type="button"
                                 title="Edit"
-                                onClick={() => openEditForm(item)}
+                                onClick={() =>
+                                  router.push(
+                                    `/admin/cms/menu/${encodeURIComponent(normalizeId(item.id))}/edit`
+                                  )
+                                }
                                 className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                               >
                                 <Pencil className="h-4 w-4" />
                               </button>
-
                               <button
                                 type="button"
                                 title="Nonaktifkan"
@@ -733,20 +444,17 @@ export default function CmsMenuPage() {
                 <div className="px-5 py-14 text-center">
                   <Menu className="theme-text-muted mx-auto mb-3 h-8 w-8" />
                   <h3 className="theme-text text-sm font-bold">
-                    {search
-                      ? "Konfigurasi tidak ditemukan"
-                      : "Belum ada konfigurasi"}
+                    {search ? "Konfigurasi tidak ditemukan" : "Belum ada konfigurasi"}
                   </h3>
                   <p className="theme-text-secondary mx-auto mt-2 max-w-md text-xs leading-5">
                     {search
                       ? "Coba kata kunci pencarian lain."
                       : "Tambahkan konfigurasi agar konten website dapat dikelola melalui CMS."}
                   </p>
-
                   {!search && (
                     <button
                       type="button"
-                      onClick={openCreateForm}
+                      onClick={() => router.push("/admin/cms/menu/tambah")}
                       className="theme-primary mt-4 inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold"
                     >
                       <Plus className="h-4 w-4" />
@@ -758,402 +466,11 @@ export default function CmsMenuPage() {
             </section>
 
             <footer className="py-7 text-center">
-              <p className="theme-text-muted text-xs">
-                © 2026 SmartSchool • CMS Management
-              </p>
+              <p className="theme-text-muted text-xs">© 2026 SmartSchool • CMS Management</p>
             </footer>
           </div>
         </main>
       </div>
-
-      {formOpen && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-          <form
-            onSubmit={handleSave}
-            className="theme-card theme-border max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl border shadow-2xl"
-          >
-            <div className="theme-border sticky top-0 z-10 flex items-center justify-between border-b p-5">
-              <div>
-                <h2 className="theme-text text-lg font-bold">
-                  {editingItem ? "Edit Konfigurasi" : "Tambah Konfigurasi"}
-                </h2>
-                <p className="theme-text-secondary mt-1 text-xs">
-                  Atur konten untuk bagian template website sekolah.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                disabled={saving}
-                onClick={closeForm}
-                className="theme-text-muted rounded-lg p-2 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-5 p-5">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="theme-text mb-2 block text-sm font-semibold">
-                    Halaman <span className="text-red-500">*</span>
-                  </label>
-
-                  <select
-                    required
-                    name="halamanCmsId"
-                    value={formData.halamanCmsId}
-                    onChange={handleChange}
-                    disabled={loadingHalaman || halamanList.length === 0}
-                    className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
-                  >
-                    <option value="">
-                      {loadingHalaman
-                        ? "Memuat halaman..."
-                        : halamanList.length === 0
-                          ? "Belum ada halaman CMS"
-                          : "Pilih halaman CMS"}
-                    </option>
-
-                    {halamanList.map((halaman) => (
-                      <option
-                        key={halaman.id}
-                        value={normalizeId(halaman.id)}
-                      >
-                        {getPageTitle(halaman)}
-                        {getPageSlug(halaman)
-                          ? ` (${getPageSlug(halaman)})`
-                          : ""}
-                      </option>
-                    ))}
-                  </select>
-
-                  {halamanError && (
-                    <p className="mt-1 text-xs text-red-500">
-                      {halamanError}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="theme-text mb-2 block text-sm font-semibold">
-                    Section <span className="text-red-500">*</span>
-                  </label>
-
-                  <select
-                    required
-                    name="section"
-                    value={formData.section}
-                    onChange={handleChange}
-                    className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
-                  >
-                    {formData.section &&
-                      !SECTION_OPTIONS.some(
-                        (option) => option.value === formData.section
-                      ) && (
-                        <option value={formData.section}>
-                          {formatLabel(formData.section)} (konfigurasi lama)
-                        </option>
-                      )}
-
-                    {SECTION_OPTIONS.map((section) => (
-                      <option key={section.value} value={section.value}>
-                        {section.label}
-                      </option>
-                    ))}
-                  </select>
-
-                  <p className="theme-text-muted mt-1 text-xs">
-                    Pilih bagian yang sesuai dengan template halaman website.
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <label className="theme-text mb-2 block text-sm font-semibold">
-                  Judul <span className="text-red-500">*</span>
-                </label>
-                <input
-                  required
-                  name="judul"
-                  value={formData.judul}
-                  onChange={handleChange}
-                  placeholder="Contoh: Selamat Datang di Sekolah Kami"
-                  className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
-                />
-              </div>
-
-              <div>
-                <label className="theme-text mb-2 block text-sm font-semibold">
-                  Subjudul
-                </label>
-                <input
-                  name="subJudul"
-                  value={formData.subJudul}
-                  onChange={handleChange}
-                  placeholder="Masukkan subjudul atau deskripsi singkat"
-                  className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
-                />
-              </div>
-
-              <div>
-                <label className="theme-text mb-2 block text-sm font-semibold">
-                  Konten
-                </label>
-                <textarea
-                  rows={6}
-                  name="konten"
-                  value={formData.konten}
-                  onChange={handleChange}
-                  placeholder="Masukkan isi konten yang akan ditampilkan pada website..."
-                  className="theme-input w-full rounded-xl border px-3 py-3 text-sm leading-6 outline-none focus:border-[var(--color-primary)]"
-                />
-              </div>
-
-              <div>
-                <label className="theme-text mb-2 block text-sm font-semibold">
-                  URL Gambar
-                </label>
-                <input
-                  name="gambarUrl"
-                  type="url"
-                  value={formData.gambarUrl}
-                  onChange={handleChange}
-                  placeholder="https://contoh.com/gambar.jpg"
-                  className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
-                />
-
-                {formData.gambarUrl && (
-                  <div className="theme-card-soft mt-3 overflow-hidden rounded-xl border p-2">
-                    <img
-                      src={formData.gambarUrl}
-                      alt="Preview gambar"
-                      className="max-h-56 w-full rounded-lg object-contain"
-                      onError={(event) => {
-                        event.currentTarget.style.display = "none";
-                      }}
-                      onLoad={(event) => {
-                        event.currentTarget.style.display = "block";
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="theme-text mb-2 block text-sm font-semibold">
-                    Teks tombol CTA
-                  </label>
-                  <input
-                    name="ctaText"
-                    value={formData.ctaText}
-                    onChange={handleChange}
-                    placeholder="Contoh: Pelajari Selengkapnya"
-                    className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
-                  />
-                </div>
-
-                <div>
-                  <label className="theme-text mb-2 block text-sm font-semibold">
-                    Link tombol CTA
-                  </label>
-                  <input
-                    name="ctaLink"
-                    value={formData.ctaLink}
-                    onChange={handleChange}
-                    placeholder="/profil atau https://contoh.com"
-                    className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="theme-text mb-2 block text-sm font-semibold">
-                    Urutan <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    required
-                    type="number"
-                    min="1"
-                    step="1"
-                    name="urutan"
-                    value={formData.urutan}
-                    onChange={handleChange}
-                    className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
-                  />
-                </div>
-
-                <div>
-                  <label className="theme-text mb-2 block text-sm font-semibold">
-                    Status
-                  </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
-                  >
-                    <option value="aktif">Aktif</option>
-                    <option value="nonaktif">Nonaktif</option>
-                    <option value="draft">Draft</option>
-                  </select>
-                </div>
-              </div>
-
-              {error && (
-                <div className="theme-danger flex items-start gap-2 rounded-xl border p-3 text-sm">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="theme-card-soft theme-border sticky bottom-0 flex flex-col-reverse gap-2 border-t p-4 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                disabled={saving}
-                onClick={closeForm}
-                className="theme-card theme-border theme-text-secondary rounded-xl border px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
-              >
-                Batal
-              </button>
-
-              <button
-                type="submit"
-                disabled={
-                  saving ||
-                  loadingHalaman ||
-                  halamanList.length === 0
-                }
-                className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Menyimpan...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" />
-                    {editingItem
-                      ? "Simpan Perubahan"
-                      : "Simpan Konfigurasi"}
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {previewItem && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-          <div className="theme-card theme-border max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border shadow-2xl">
-            <div className="theme-border flex items-center justify-between border-b p-5">
-              <div>
-                <h2 className="theme-text text-lg font-bold">
-                  Preview Konfigurasi
-                </h2>
-                <p className="theme-text-muted mt-1 text-xs">
-                  {halamanLabel(previewItem)} /{" "}
-                  {formatLabel(previewItem.section)}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setPreviewItem(null)}
-                className="theme-text-muted rounded-lg p-2"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4 p-5">
-              {previewItem.gambarUrl && (
-                <img
-                  src={previewItem.gambarUrl}
-                  alt={previewItem.judul || "Gambar konten"}
-                  className="max-h-72 w-full rounded-xl object-cover"
-                />
-              )}
-
-              <div>
-                <p className="theme-text-muted text-xs">Judul</p>
-                <h3 className="theme-text mt-1 text-2xl font-bold">
-                  {previewItem.judul || "-"}
-                </h3>
-              </div>
-
-              {previewItem.subJudul && (
-                <div>
-                  <p className="theme-text-muted text-xs">Subjudul</p>
-                  <p className="theme-text-secondary mt-1 text-sm">
-                    {previewItem.subJudul}
-                  </p>
-                </div>
-              )}
-
-              <div>
-                <p className="theme-text-muted text-xs">Konten</p>
-                <div className="theme-card-soft theme-border mt-2 rounded-xl border p-4">
-                  <p className="theme-text-secondary whitespace-pre-wrap break-words text-sm leading-7">
-                    {previewItem.konten || "Belum ada konten."}
-                  </p>
-                </div>
-              </div>
-
-              {(previewItem.ctaText || previewItem.ctaLink) && (
-                <div className="theme-card-soft rounded-xl border p-4">
-                  <p className="theme-text-muted text-xs">Tombol CTA</p>
-                  <p className="theme-text mt-1 text-sm font-semibold">
-                    {previewItem.ctaText || "Tanpa teks tombol"}
-                  </p>
-                  <p className="theme-text-secondary mt-1 break-all text-xs">
-                    {previewItem.ctaLink || "Tanpa link"}
-                  </p>
-                </div>
-              )}
-
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="theme-card-soft rounded-lg border px-3 py-2">
-                  Urutan: {previewItem.urutan ?? 1}
-                </span>
-                <span
-                  className={`rounded-lg border px-3 py-2 ${getStatusStyle(previewItem.status)}`}
-                >
-                  {getStatusLabel(previewItem.status)}
-                </span>
-              </div>
-            </div>
-
-            <div className="theme-card-soft theme-border flex flex-col-reverse gap-2 border-t p-4 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => setPreviewItem(null)}
-                className="theme-card theme-border theme-text-secondary rounded-xl border px-4 py-2.5 text-sm font-semibold"
-              >
-                Tutup
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const item = previewItem;
-                  setPreviewItem(null);
-                  openEditForm(item);
-                }}
-                className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
-              >
-                <Pencil className="h-4 w-4" />
-                Edit Konfigurasi
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {deleteTarget && (
         <div className="fixed inset-0 z-[130] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
@@ -1162,20 +479,13 @@ export default function CmsMenuPage() {
               <div className="theme-danger flex h-11 w-11 items-center justify-center rounded-xl">
                 <Trash2 className="h-5 w-5" />
               </div>
-
-              <h3 className="theme-text mt-4 text-lg font-bold">
-                Nonaktifkan konfigurasi?
-              </h3>
-
+              <h3 className="theme-text mt-4 text-lg font-bold">Nonaktifkan konfigurasi?</h3>
               <p className="theme-text-secondary mt-2 text-sm leading-6">
                 Konfigurasi{" "}
-                <strong className="theme-text">
-                  "{deleteTarget.judul || "Tanpa Judul"}"
-                </strong>{" "}
+                <strong className="theme-text">"{deleteTarget.judul || "Tanpa Judul"}"</strong>{" "}
                 akan dinonaktifkan melalui endpoint backend.
               </p>
             </div>
-
             <div className="theme-card-soft theme-border flex flex-col-reverse gap-2 border-t p-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
@@ -1185,7 +495,6 @@ export default function CmsMenuPage() {
               >
                 Batal
               </button>
-
               <button
                 type="button"
                 disabled={deletingId === deleteTarget.id}

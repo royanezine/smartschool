@@ -21,6 +21,7 @@ import {
   ChevronDown,
   GraduationCap,
   FileQuestion,
+  Copy,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -187,6 +188,7 @@ export default function GuruUjianPage() {
   const [error, setError] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [publishLoading, setPublishLoading] = useState(null);
+  const [copiedTokenId, setCopiedTokenId] = useState(null);
 
 
   useEffect(() => {
@@ -350,6 +352,23 @@ export default function GuruUjianPage() {
     }
   }
 
+
+  async function handleCopyToken(token, ujianId) {
+    if (!token) return;
+
+    try {
+      await navigator.clipboard.writeText(String(token));
+      setCopiedTokenId(ujianId);
+      window.setTimeout(() => {
+        setCopiedTokenId((current) =>
+          current === ujianId ? null : current
+        );
+      }, 2000);
+    } catch (err) {
+      console.error("COPY TOKEN ERROR:", err);
+      setError("Token tidak dapat disalin. Silakan salin token secara manual.");
+    }
+  }
 
   async function handleRetry() {
     setError("");
@@ -735,7 +754,7 @@ export default function GuruUjianPage() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1180px] text-sm">
+                  <table className="w-full min-w-[1320px] text-sm">
                     <thead>
                       <tr
                         className={`border-b ${themeDivider} ${themeNeutralSurface}`}
@@ -748,6 +767,9 @@ export default function GuruUjianPage() {
                         </th>
                         <th className="theme-text-muted w-28 px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide">
                           Jenis
+                        </th>
+                        <th className="theme-text-muted min-w-[220px] px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide">
+                          Token Ujian
                         </th>
                         <th className="theme-text-muted w-32 px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-wide">
                           Durasi
@@ -844,6 +866,38 @@ export default function GuruUjianPage() {
                               >
                                 {getJenisLabel(item?.tipe || item?.jenis)}
                               </span>
+                            </td>
+
+                            <td className="px-4 py-4">
+                              {item?.token ? (
+                                <div className="flex max-w-[240px] items-center gap-2">
+                                  <code
+                                    className={`min-w-0 flex-1 truncate rounded-lg border ${themeInfoBorder} ${themeInfoSurface} px-2.5 py-2 font-mono text-xs font-bold tracking-wide text-[var(--color-info)]`}
+                                    title={String(item.token)}
+                                  >
+                                    {item.token}
+                                  </code>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCopyToken(item.token, item.id)}
+                                    title={copiedTokenId === item.id ? "Token tersalin" : "Salin token"}
+                                    aria-label="Salin token ujian"
+                                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition hover:brightness-95 ${
+                                      copiedTokenId === item.id
+                                        ? `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`
+                                        : `${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary`
+                                    }`}
+                                  >
+                                    {copiedTokenId === item.id ? (
+                                      <CheckCircle2 size={15} />
+                                    ) : (
+                                      <Copy size={15} />
+                                    )}
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="theme-text-muted text-xs">Tidak tersedia</span>
+                              )}
                             </td>
 
                             <td className="px-4 py-4 text-center">
@@ -1029,7 +1083,7 @@ export default function GuruUjianPage() {
 
                       {filteredUjian.length === 0 && (
                         <tr>
-                          <td colSpan={8} className="px-6 py-16 text-center">
+                          <td colSpan={9} className="px-6 py-16 text-center">
                             <div
                               className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface} theme-text-muted`}
                             >

@@ -41,7 +41,6 @@ function matchesRoute(pathname, routes) {
 function getTenantFromHost(host) {
   const hostname = host.split(":")[0].toLowerCase();
 
-  // Hanya aktif untuk subdomain lokal, misalnya smart.localhost
   if (!hostname.endsWith(".localhost")) {
     return null;
   }
@@ -52,7 +51,6 @@ function getTenantFromHost(host) {
     return null;
   }
 
-  // Mencegah nilai tenant yang tidak valid
   if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(tenant)) {
     return null;
   }
@@ -65,14 +63,12 @@ export function proxy(request) {
   const pathname = url.pathname;
   const host = request.headers.get("host") || url.host;
 
-  // Jangan mengubah endpoint API, aset Next.js, atau file statis.
   if (isExcludedPath(pathname)) {
     return NextResponse.next();
   }
 
   const tenant = getTenantFromHost(host);
 
-  // Domain utama atau localhost tanpa subdomain tenant.
   if (!tenant) {
     return NextResponse.next();
   }
@@ -80,7 +76,6 @@ export function proxy(request) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-school-subdomain", tenant);
 
-  // Halaman autentikasi menggunakan route global.
   if (matchesRoute(pathname, AUTH_ROUTES)) {
     return NextResponse.next({
       request: {

@@ -95,14 +95,7 @@ export const guruSidebarConfig = {
       permission: "akademik.view",
     },
 
-    {
-      type: "item",
-      key: "absensi-siswa",
-      label: "Absensi Siswa",
-      icon: ClipboardCheck,
-      path: "/guru/absensi",
-      permission: "akademik.view",
-    },
+    
 
     // AKADEMIK
     {

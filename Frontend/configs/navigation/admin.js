@@ -575,6 +575,12 @@ export const adminSidebarConfig = {
       label: "Halaman Website",
       path: "/admin/cms/pages",
     },
+     {
+      key: "cmsContent",
+      icon: FileText,
+      label: "Konten",
+      path: "/admin/cms/menu",
+    },
    
    
      
