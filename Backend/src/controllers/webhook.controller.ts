@@ -89,6 +89,16 @@ export const handleMidtransWebhook = async (
           .status(404)
           .json({ success: false, message: "Order ID not found" });
 
+      // Idempotensi: jika transaksi sudah sukses/settled atau transaction_id sudah tercatat, jangan perpanjang lagi
+      if (
+        riwayat.status === "success" ||
+        (transaction_id && riwayat.midtransPaymentId === transaction_id)
+      ) {
+        return res
+          .status(200)
+          .json({ received: true, message: "Transaction already processed / settled" });
+      }
+
       await prisma.$transaction(async (tx) => {
         if (
           transaction_status === "capture" ||

@@ -1,8 +1,17 @@
-import { Response } from "express";
+import { Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { isSuperAdmin, normalizeRole } from "../utils/rbac";
 import { AppError } from "../utils/appError";
+import {
+  ajukanSesiKonselingSchema,
+  createSesiKonselingSchema,
+  updateSesiKonselingSchema,
+  createKategoriPelanggaranSchema,
+  updateKategoriPelanggaranSchema,
+  createPelanggaranSiswaSchema,
+  updatePelanggaranSiswaSchema,
+} from "../validations/bk.validation";
 
 const WAKTU_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
 const TANGGAL_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -20,7 +29,11 @@ const waktuBertabrakan = (
   return mulaiA < selesaiB && mulaiB < selesaiA;
 };
 
-export const getSesiKonseling = async (req: AuthRequest, res: Response) => {
+export const getSesiKonseling = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
   try {
     const sekolahId = req.user?.sekolahId;
 
@@ -75,16 +88,15 @@ export const getSesiKonseling = async (req: AuthRequest, res: Response) => {
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil data sesi konseling",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const getSesiKonselingById = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -129,153 +141,137 @@ export const getSesiKonselingById = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil sesi konseling",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const ajukanSesiKonseling = async (req: AuthRequest, res: Response) => {
+export const ajukanSesiKonseling = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
   try {
     const sekolahId = req.user?.sekolahId;
     const siswaId = req.user?.userId;
 
     if (!sekolahId || !siswaId) {
-      return res.status(401).json({
-        success: false,
-        message: "Sekolah tidak ditemukan",
-      });
+      throw new AppError("Sekolah tidak ditemukan", 401);
     }
 
     if (normalizeRole(req.user?.role) !== "siswa") {
-      return res.status(403).json({
-        success: false,
-        message: "Hanya siswa yang dapat mengajukan sesi konseling",
-      });
+      throw new AppError("Hanya siswa yang dapat mengajukan sesi konseling", 403);
     }
 
-    const { tanggal, waktuMulai, waktuSelesai, topik, masalah, konselorId } =
-      req.body;
-
-    if (!tanggal || !waktuMulai || !waktuSelesai || !topik) {
-      return res.status(400).json({
-        success: false,
-        message: "tanggal, waktuMulai, waktuSelesai, dan topik wajib diisi",
-      });
-    }
-
-    const tanggalStr = String(tanggal).slice(0, 10);
-    const mulai = String(waktuMulai);
-    const selesai = String(waktuSelesai);
-    const topikStr = String(topik).trim();
-
-    if (
-      !TANGGAL_REGEX.test(tanggalStr) ||
-      Number.isNaN(new Date(tanggalStr).getTime())
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Format tanggal harus YYYY-MM-DD",
-      });
-    }
+    const validated = ajukanSesiKonselingSchema.parse(req.body);
+    const tanggalStr = validated.tanggal;
+    const mulai = validated.waktuMulai;
+    const selesai = validated.waktuSelesai;
+    const topikStr = validated.topik;
+    const masalah = validated.masalah;
+    const konselorId = validated.konselorId;
 
     if (tanggalStr < hariIniWib()) {
-      return res.status(400).json({
-        success: false,
-        message: "Tanggal pengajuan tidak boleh di masa lalu",
-      });
+      throw new AppError("Tanggal pengajuan tidak boleh di masa lalu", 400);
     }
 
-    if (!WAKTU_REGEX.test(mulai) || !WAKTU_REGEX.test(selesai)) {
-      return res.status(400).json({
-        success: false,
-        message: "Format waktu harus HH:MM",
-      });
-    }
+    const data = await prisma.$transaction(async (tx) => {
+      // Advisory lock pada level transaksi per siswa dan per konselor untuk mencegah race condition conflict
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`konseling_siswa:${sekolahId}:${siswaId}:${tanggalStr}`}))`;
 
-    if (mulai >= selesai) {
-      return res.status(400).json({
-        success: false,
-        message: "waktuSelesai harus setelah waktuMulai",
-      });
-    }
+      if (konselorId) {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`konseling_konselor:${sekolahId}:${konselorId}:${tanggalStr}`}))`;
 
-    if (!topikStr || topikStr.length > 150) {
-      return res.status(400).json({
-        success: false,
-        message: "Topik wajib diisi dan maksimal 150 karakter",
-      });
-    }
-
-    if (konselorId) {
-      const konselor = await prisma.pengguna.findFirst({
-        where: {
-          id: String(konselorId),
-          sekolahId,
-          dihapusPada: null,
-          status: "aktif",
-        },
-        select: {
-          id: true,
-          peran: { select: { nama: true } },
-        },
-      });
-
-      if (!konselor || normalizeRole(konselor.peran?.nama) === "siswa") {
-        return res.status(404).json({
-          success: false,
-          message: "Konselor tidak ditemukan",
-        });
-      }
-    }
-
-    const sesiSiswa = await prisma.sesiKonseling.findMany({
-      where: {
-        sekolahId,
-        siswaId,
-        tanggal: new Date(tanggalStr),
-        dihapusPada: null,
-        status: { in: ["diajukan", "dijadwalkan"] },
-      },
-      select: {
-        waktuMulai: true,
-        waktuSelesai: true,
-      },
-    });
-
-    if (
-      sesiSiswa.some((s) =>
-        waktuBertabrakan(mulai, selesai, s.waktuMulai, s.waktuSelesai)
-      )
-    ) {
-      return res.status(409).json({
-        success: false,
-        message: "Anda sudah memiliki pengajuan atau sesi pada jam tersebut",
-      });
-    }
-
-    const data = await prisma.sesiKonseling.create({
-      data: {
-        sekolahId,
-        siswaId,
-        konselorId: konselorId ? String(konselorId) : null,
-        tanggal: new Date(tanggalStr),
-        waktuMulai: mulai,
-        waktuSelesai: selesai,
-        topik: topikStr,
-        masalah: masalah ? String(masalah) : null,
-        status: "diajukan",
-        dibuatOleh: siswaId,
-      },
-      include: {
-        konselor: {
+        const konselor = await tx.pengguna.findFirst({
+          where: {
+            id: String(konselorId),
+            sekolahId,
+            dihapusPada: null,
+            status: "aktif",
+          },
           select: {
             id: true,
-            namaLengkap: true,
+            peran: { select: { nama: true } },
+          },
+        });
+
+        if (!konselor || normalizeRole(konselor.peran?.nama) === "siswa") {
+          throw new AppError("Konselor tidak ditemukan", 404);
+        }
+
+        const sesiKonselor = await tx.sesiKonseling.findMany({
+          where: {
+            sekolahId,
+            konselorId: String(konselorId),
+            tanggal: new Date(tanggalStr),
+            dihapusPada: null,
+            status: { in: ["diajukan", "dijadwalkan", "berlangsung"] },
+          },
+          select: {
+            waktuMulai: true,
+            waktuSelesai: true,
+          },
+        });
+
+        if (
+          sesiKonselor.some((s) =>
+            waktuBertabrakan(mulai, selesai, s.waktuMulai, s.waktuSelesai)
+          )
+        ) {
+          throw new AppError(
+            "Konselor sudah memiliki jadwal konseling pada jam tersebut",
+            409
+          );
+        }
+      }
+
+      const sesiSiswa = await tx.sesiKonseling.findMany({
+        where: {
+          sekolahId,
+          siswaId,
+          tanggal: new Date(tanggalStr),
+          dihapusPada: null,
+          status: { in: ["diajukan", "dijadwalkan", "berlangsung"] },
+        },
+        select: {
+          waktuMulai: true,
+          waktuSelesai: true,
+        },
+      });
+
+      if (
+        sesiSiswa.some((s) =>
+          waktuBertabrakan(mulai, selesai, s.waktuMulai, s.waktuSelesai)
+        )
+      ) {
+        throw new AppError(
+          "Anda sudah memiliki pengajuan atau sesi pada jam tersebut",
+          409
+        );
+      }
+
+      return await tx.sesiKonseling.create({
+        data: {
+          sekolahId,
+          siswaId,
+          konselorId: konselorId ? String(konselorId) : null,
+          tanggal: new Date(tanggalStr),
+          waktuMulai: mulai,
+          waktuSelesai: selesai,
+          topik: topikStr,
+          masalah: masalah ? String(masalah) : null,
+          status: "diajukan",
+          dibuatOleh: siswaId,
+        },
+        include: {
+          konselor: {
+            select: {
+              id: true,
+              namaLengkap: true,
+            },
           },
         },
-      },
+      });
     });
 
     return res.status(201).json({
@@ -284,16 +280,15 @@ export const ajukanSesiKonseling = async (req: AuthRequest, res: Response) => {
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengajukan sesi konseling",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const putuskanPengajuanKonseling = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -461,16 +456,15 @@ export const putuskanPengajuanKonseling = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal memproses pengajuan konseling",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const batalkanPengajuanKonseling = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -528,28 +522,25 @@ export const batalkanPengajuanKonseling = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal membatalkan pengajuan konseling",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const createSesiKonseling = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const isSuper = isSuperAdmin(req.user?.role);
     const sekolahId = req.user?.sekolahId;
 
     if (!isSuper && !sekolahId) {
-      return res.status(403).json({
-        success: false,
-        message: "Data tidak ditemukan atau Anda tidak memiliki akses",
-      });
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
     }
 
+    const validated = createSesiKonselingSchema.parse(req.body);
     const {
       siswaId,
       konselorId,
@@ -562,14 +553,7 @@ export const createSesiKonseling = async (
       tindakLanjut,
       status,
       catatan,
-    } = req.body;
-
-    if (!siswaId || !tanggal || !topik) {
-      return res.status(400).json({
-        success: false,
-        message: "siswaId, tanggal, dan topik wajib diisi",
-      });
-    }
+    } = validated;
 
     const siswa = await prisma.pengguna.findFirst({
       where: {
@@ -580,19 +564,13 @@ export const createSesiKonseling = async (
     });
 
     if (!siswa || !siswa.sekolahId) {
-      return res.status(403).json({
-        success: false,
-        message: "Data tidak ditemukan atau Anda tidak memiliki akses",
-      });
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
     }
 
     const targetSekolahId = siswa.sekolahId;
 
     if (!isSuper && sekolahId && targetSekolahId !== sekolahId) {
-      return res.status(403).json({
-        success: false,
-        message: "Data tidak ditemukan atau Anda tidak memiliki akses",
-      });
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
     }
 
     if (konselorId) {
@@ -605,29 +583,33 @@ export const createSesiKonseling = async (
       });
 
       if (!konselor) {
-        return res.status(403).json({
-          success: false,
-          message: "Data tidak ditemukan atau Anda tidak memiliki akses",
-        });
+        throw new AppError("Konselor tidak ditemukan", 404);
       }
     }
 
-    const data = await prisma.sesiKonseling.create({
-      data: {
-        sekolahId: targetSekolahId,
-        siswaId,
-        konselorId: konselorId || null,
-        tanggal: new Date(tanggal),
-        waktuMulai,
-        waktuSelesai,
-        topik,
-        masalah,
-        hasil,
-        tindakLanjut,
-        status: status || "dijadwalkan",
-        catatan,
-        dibuatOleh: req.user?.userId,
-      },
+    const data = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`konseling_siswa:${targetSekolahId}:${siswaId}:${tanggal}`}))`;
+      if (konselorId) {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`konseling_konselor:${targetSekolahId}:${konselorId}:${tanggal}`}))`;
+      }
+
+      return await tx.sesiKonseling.create({
+        data: {
+          sekolahId: targetSekolahId,
+          siswaId,
+          konselorId: konselorId || null,
+          tanggal: new Date(tanggal),
+          waktuMulai,
+          waktuSelesai,
+          topik,
+          masalah: masalah || null,
+          hasil: hasil || null,
+          tindakLanjut: tindakLanjut || null,
+          status: status || "dijadwalkan",
+          catatan: catatan || null,
+          dibuatOleh: req.user?.userId,
+        },
+      });
     });
 
     return res.status(201).json({
@@ -636,16 +618,15 @@ export const createSesiKonseling = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal membuat sesi konseling",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const updateSesiKonseling = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const isSuper = isSuperAdmin(req.user?.role);
@@ -653,10 +634,7 @@ export const updateSesiKonseling = async (
     const id = String(req.params.id);
 
     if (!isSuper && !sekolahId) {
-      return res.status(403).json({
-        success: false,
-        message: "Data tidak ditemukan atau Anda tidak memiliki akses",
-      });
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
     }
 
     const existing = await prisma.sesiKonseling.findFirst({
@@ -668,16 +646,12 @@ export const updateSesiKonseling = async (
     });
 
     if (!existing) {
-      return res.status(403).json({
-        success: false,
-        message: "Data tidak ditemukan atau Anda tidak memiliki akses",
-      });
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 404);
     }
 
     const targetSekolahId = existing.sekolahId;
-
+    const validated = updateSesiKonselingSchema.parse(req.body);
     const {
-      siswaId,
       konselorId,
       tanggal,
       waktuMulai,
@@ -688,23 +662,7 @@ export const updateSesiKonseling = async (
       tindakLanjut,
       status,
       catatan,
-    } = req.body;
-
-    if (siswaId && siswaId !== existing.siswaId) {
-      const siswa = await prisma.pengguna.findFirst({
-        where: {
-          id: siswaId,
-          sekolahId: targetSekolahId,
-          dihapusPada: null,
-        },
-      });
-      if (!siswa) {
-        return res.status(403).json({
-          success: false,
-          message: "Data tidak ditemukan atau Anda tidak memiliki akses",
-        });
-      }
-    }
+    } = validated;
 
     if (konselorId && konselorId !== existing.konselorId) {
       const konselor = await prisma.pengguna.findFirst({
@@ -715,17 +673,13 @@ export const updateSesiKonseling = async (
         },
       });
       if (!konselor) {
-        return res.status(403).json({
-          success: false,
-          message: "Data tidak ditemukan atau Anda tidak memiliki akses",
-        });
+        throw new AppError("Konselor tidak ditemukan", 404);
       }
     }
 
     const data = await prisma.sesiKonseling.update({
       where: { id },
       data: {
-        siswaId: siswaId || undefined,
         konselorId: konselorId !== undefined ? konselorId : undefined,
         tanggal: tanggal ? new Date(tanggal) : undefined,
         waktuMulai,
@@ -746,16 +700,15 @@ export const updateSesiKonseling = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal memperbarui sesi konseling",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const deleteSesiKonseling = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -796,16 +749,15 @@ export const deleteSesiKonseling = async (
       message: "Sesi konseling berhasil dihapus",
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal menghapus sesi konseling",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const getKategoriPelanggaran = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -832,16 +784,15 @@ export const getKategoriPelanggaran = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil kategori pelanggaran",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const createKategoriPelanggaran = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -853,22 +804,27 @@ export const createKategoriPelanggaran = async (
       });
     }
 
-    const { nama, deskripsi, poin, status } = req.body;
+    const validated = createKategoriPelanggaranSchema.parse(req.body);
 
-    if (!nama || poin === undefined) {
-      return res.status(400).json({
-        success: false,
-        message: "nama dan poin wajib diisi",
-      });
+    const duplikat = await prisma.kategoriPelanggaran.findFirst({
+      where: {
+        sekolahId,
+        nama: { equals: validated.nama, mode: "insensitive" },
+        dihapusPada: null,
+      },
+    });
+
+    if (duplikat) {
+      throw new AppError("Kategori pelanggaran dengan nama tersebut sudah ada", 400);
     }
 
     const data = await prisma.kategoriPelanggaran.create({
       data: {
         sekolahId,
-        nama,
-        deskripsi,
-        poin: Number(poin),
-        status: status || "aktif",
+        nama: validated.nama,
+        deskripsi: validated.deskripsi || null,
+        poin: validated.poin,
+        status: validated.status || "aktif",
         dibuatOleh: req.user?.userId,
       },
     });
@@ -879,16 +835,15 @@ export const createKategoriPelanggaran = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal membuat kategori pelanggaran",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const updateKategoriPelanggaran = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -916,15 +871,30 @@ export const updateKategoriPelanggaran = async (
       });
     }
 
-    const { nama, deskripsi, poin, status } = req.body;
+    const validated = updateKategoriPelanggaranSchema.parse(req.body);
+
+    if (validated.nama && validated.nama.toLowerCase() !== existing.nama.toLowerCase()) {
+      const duplikat = await prisma.kategoriPelanggaran.findFirst({
+        where: {
+          sekolahId,
+          nama: { equals: validated.nama, mode: "insensitive" },
+          dihapusPada: null,
+          id: { not: existing.id },
+        },
+      });
+
+      if (duplikat) {
+        throw new AppError("Kategori pelanggaran dengan nama tersebut sudah ada", 400);
+      }
+    }
 
     const data = await prisma.kategoriPelanggaran.update({
       where: { id },
       data: {
-        nama,
-        deskripsi,
-        poin: poin !== undefined ? Number(poin) : undefined,
-        status,
+        nama: validated.nama !== undefined ? validated.nama : undefined,
+        deskripsi: validated.deskripsi !== undefined ? validated.deskripsi : undefined,
+        poin: validated.poin !== undefined ? validated.poin : undefined,
+        status: validated.status !== undefined ? validated.status : undefined,
         diperbaruiOleh: req.user?.userId,
       },
     });
@@ -935,16 +905,15 @@ export const updateKategoriPelanggaran = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal memperbarui kategori pelanggaran",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const deleteKategoriPelanggaran = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -985,16 +954,15 @@ export const deleteKategoriPelanggaran = async (
       message: "Kategori pelanggaran berhasil dihapus",
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal menghapus kategori pelanggaran",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const getPelanggaranSiswa = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -1039,16 +1007,15 @@ export const getPelanggaranSiswa = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil data pelanggaran siswa",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const createPelanggaranSiswa = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -1060,6 +1027,7 @@ export const createPelanggaranSiswa = async (
       });
     }
 
+    const validated = createPelanggaranSiswaSchema.parse(req.body);
     const {
       siswaId,
       kategoriPelanggaranId,
@@ -1069,14 +1037,7 @@ export const createPelanggaranSiswa = async (
       status,
       tindakLanjut,
       catatan,
-    } = req.body;
-
-    if (!siswaId || !kategoriPelanggaranId || !tanggal) {
-      return res.status(400).json({
-        success: false,
-        message: "siswaId, kategoriPelanggaranId, dan tanggal wajib diisi",
-      });
-    }
+    } = validated;
 
     const siswa = await prisma.pengguna.findFirst({
       where: {
@@ -1114,11 +1075,11 @@ export const createPelanggaranSiswa = async (
         siswaId,
         kategoriPelanggaranId,
         tanggal: new Date(tanggal),
-        kronologi,
+        kronologi: kronologi || null,
         poin: poin !== undefined ? Number(poin) : kategori.poin,
         status: status || "tercatat",
-        tindakLanjut,
-        catatan,
+        tindakLanjut: tindakLanjut || null,
+        catatan: catatan || null,
         dibuatOleh: req.user?.userId,
       },
       include: {
@@ -1139,16 +1100,15 @@ export const createPelanggaranSiswa = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mencatat pelanggaran siswa",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const updatePelanggaranSiswa = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -1176,6 +1136,7 @@ export const updatePelanggaranSiswa = async (
       });
     }
 
+    const validated = updatePelanggaranSiswaSchema.parse(req.body);
     const {
       kategoriPelanggaranId,
       tanggal,
@@ -1184,18 +1145,18 @@ export const updatePelanggaranSiswa = async (
       status,
       tindakLanjut,
       catatan,
-    } = req.body;
+    } = validated;
 
     const data = await prisma.pelanggaranSiswa.update({
       where: { id },
       data: {
         kategoriPelanggaranId,
         tanggal: tanggal ? new Date(tanggal) : undefined,
-        kronologi,
+        kronologi: kronologi !== undefined ? (kronologi || null) : undefined,
         poin: poin !== undefined ? Number(poin) : undefined,
         status,
-        tindakLanjut,
-        catatan,
+        tindakLanjut: tindakLanjut !== undefined ? (tindakLanjut || null) : undefined,
+        catatan: catatan !== undefined ? (catatan || null) : undefined,
         diperbaruiOleh: req.user?.userId,
       },
     });
@@ -1206,16 +1167,15 @@ export const updatePelanggaranSiswa = async (
       data,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal memperbarui data pelanggaran",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const deletePelanggaranSiswa = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -1256,10 +1216,8 @@ export const deletePelanggaranSiswa = async (
       message: "Data pelanggaran berhasil dihapus",
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal menghapus data pelanggaran",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
@@ -1267,7 +1225,11 @@ export const deletePelanggaranSiswa = async (
 // ASESMEN MINAT BAKAT (BK)
 // -------------------------------------------------------------
 
-export const getAsesmenMinatBakat = async (req: AuthRequest, res: Response) => {
+export const getAsesmenMinatBakat = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
   try {
     const sekolahId = req.user?.sekolahId;
     if (!sekolahId) {
@@ -1326,14 +1288,16 @@ export const getAsesmenMinatBakat = async (req: AuthRequest, res: Response) => {
       data: formatted,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil data asesmen minat bakat",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const getAsesmenMinatBakatById = async (req: AuthRequest, res: Response) => {
+export const getAsesmenMinatBakatById = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
   try {
     const sekolahId = req.user?.sekolahId;
     const id = req.params.id as string;
@@ -1394,14 +1358,16 @@ export const getAsesmenMinatBakatById = async (req: AuthRequest, res: Response) 
       data: formatted,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil detail asesmen",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const createAsesmenMinatBakat = async (req: AuthRequest, res: Response) => {
+export const createAsesmenMinatBakat = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
   try {
     const sekolahId = req.user?.sekolahId;
     if (!sekolahId) {
@@ -1491,14 +1457,16 @@ export const createAsesmenMinatBakat = async (req: AuthRequest, res: Response) =
       data: formatted,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal membuat asesmen minat bakat",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const updateAsesmenMinatBakat = async (req: AuthRequest, res: Response) => {
+export const updateAsesmenMinatBakat = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
   try {
     const sekolahId = req.user?.sekolahId;
     const id = req.params.id as string;
@@ -1586,14 +1554,16 @@ export const updateAsesmenMinatBakat = async (req: AuthRequest, res: Response) =
       data: formatted,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal memperbarui data asesmen",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const deleteAsesmenMinatBakat = async (req: AuthRequest, res: Response) => {
+export const deleteAsesmenMinatBakat = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
   try {
     const sekolahId = req.user?.sekolahId;
     const id = req.params.id as string;
@@ -1633,9 +1603,7 @@ export const deleteAsesmenMinatBakat = async (req: AuthRequest, res: Response) =
       message: "Data asesmen berhasil dihapus",
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal menghapus data asesmen",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };

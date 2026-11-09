@@ -90,71 +90,83 @@ export const generateTagihan = handle(async (req: Request, res: Response) => {
   const siswaIds = [...siswaMap.keys()];
   if (siswaIds.length === 0) throw new HttpError(400, 'Tidak ada siswa pada cakupan yang dipilih');
 
-  const existing = await prisma.tagihan.findMany({
-    where: {
-      sekolahId,
-      kategoriTagihanId,
-      tahunAjaranId,
-      periodeBulan,
-      periodeTahun,
-      status: { not: 'batal' },
-      dihapusPada: null,
-      siswaId: { in: siswaIds },
-    },
-    select: { siswaId: true },
-  });
-  const sudahAda = new Set(existing.map((e) => e.siswaId));
+  const { dibuat, dilewatiSudahAda, dilewatiTanpaTarif } = await prisma.$transaction(async (tx) => {
+    // Kunci atomik per sekolah, kategori, dan periode agar eksekusi ganda/paralel tidak menduplikasi tagihan
+    const lockKey = `generate_tagihan:${sekolahId}:${kategoriTagihanId}:${tahunAjaranId}:${periodeBulan ?? 'all'}:${periodeTahun ?? 'all'}${kelasId ? `:${kelasId}` : ''}`;
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
 
-  let tanpaTarif = 0;
-  const rows: Prisma.TagihanCreateManyInput[] = [];
+    const existing = await tx.tagihan.findMany({
+      where: {
+        sekolahId,
+        kategoriTagihanId,
+        tahunAjaranId,
+        periodeBulan,
+        periodeTahun,
+        status: { not: 'batal' },
+        dihapusPada: null,
+        siswaId: { in: siswaIds },
+      },
+      select: { siswaId: true },
+    });
+    const sudahAda = new Set(existing.map((e) => e.siswaId));
 
-  for (const [siswaId, info] of siswaMap) {
-    if (sudahAda.has(siswaId)) continue;
+    let tanpaTarif = 0;
+    const rows: Prisma.TagihanCreateManyInput[] = [];
 
-    const tarif =
-      tarifList.find((t) => t.kelasId === info.kelasId) ??
-      tarifList.find((t) => !t.kelasId && t.tingkat === info.tingkat) ??
-      tarifList.find((t) => !t.kelasId && !t.tingkat);
+    for (const [siswaId, info] of siswaMap) {
+      if (sudahAda.has(siswaId)) continue;
 
-    if (!tarif) {
-      tanpaTarif += 1;
-      continue;
+      const tarif =
+        tarifList.find((t) => t.kelasId === info.kelasId) ??
+        tarifList.find((t) => !t.kelasId && t.tingkat === info.tingkat) ??
+        tarifList.find((t) => !t.kelasId && !t.tingkat);
+
+      if (!tarif) {
+        tanpaTarif += 1;
+        continue;
+      }
+
+      rows.push({
+        sekolahId,
+        siswaId,
+        kategoriTagihanId,
+        tarifTagihanId: tarif.id,
+        tahunAjaranId,
+        nomorTagihan: nomor('TGH'),
+        periodeBulan,
+        periodeTahun,
+        nominal: tarif.nominal,
+        diskon: new Prisma.Decimal(0),
+        totalTagihan: tarif.nominal,
+        totalDibayar: new Prisma.Decimal(0),
+        sisa: tarif.nominal,
+        jatuhTempo,
+        status: 'belum_bayar',
+        keterangan: str(req.body.keterangan),
+        dibuatOleh: userId,
+      });
     }
 
-    rows.push({
-      sekolahId,
-      siswaId,
-      kategoriTagihanId,
-      tarifTagihanId: tarif.id,
-      tahunAjaranId,
-      nomorTagihan: nomor('TGH'),
-      periodeBulan,
-      periodeTahun,
-      nominal: tarif.nominal,
-      diskon: new Prisma.Decimal(0),
-      totalTagihan: tarif.nominal,
-      totalDibayar: new Prisma.Decimal(0),
-      sisa: tarif.nominal,
-      jatuhTempo,
-      status: 'belum_bayar',
-      keterangan: str(req.body.keterangan),
-      dibuatOleh: userId,
-    });
-  }
+    if (rows.length > 0) {
+      await tx.tagihan.createMany({ data: rows });
+    }
 
-  if (rows.length > 0) {
-    await prisma.tagihan.createMany({ data: rows });
-  }
+    return {
+      dibuat: rows.length,
+      dilewatiSudahAda: sudahAda.size,
+      dilewatiTanpaTarif: tanpaTarif,
+    };
+  });
 
   return ok(
     res,
     {
       totalSiswa: siswaIds.length,
-      dibuat: rows.length,
-      dilewatiSudahAda: sudahAda.size,
-      dilewatiTanpaTarif: tanpaTarif,
+      dibuat,
+      dilewatiSudahAda,
+      dilewatiTanpaTarif,
     },
-    `${rows.length} tagihan berhasil dibuat`,
+    `${dibuat} tagihan berhasil dibuat`,
     201
   );
 });

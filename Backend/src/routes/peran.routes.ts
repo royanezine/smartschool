@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import {
   getIzin,
@@ -12,7 +13,7 @@ import {
 
 const router = Router();
 
-router.use(authenticate);
+router.use(authenticate, requireTenant, requireSubscription);
 
 router.get("/izin", requireIzin("manajemen_pengguna.view"), getIzin);
 

@@ -11,6 +11,7 @@ import {
   importNilaiExcel,
 } from "../controllers/nilai.controller";
 import { authenticate } from "../middlewares/auth.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 import { uploadNilaiExcel } from "../middlewares/upload.middleware";
 import { tarikSumberNilaiSchema, validateImportNilaiExcel } from "../validations/nilai.validation";
@@ -18,7 +19,7 @@ import { validate } from "../middlewares/validation.middleware";
 
 const router = Router();
 
-router.use(authenticate);
+router.use(authenticate, requireTenant, requireSubscription);
 
 router.post(
   "/tarik-sumber",

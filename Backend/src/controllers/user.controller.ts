@@ -1,5 +1,6 @@
 import { publicUser } from "../utils/publicUser";
-import { Response } from "express";
+import { Response, NextFunction } from "express";
+import crypto from "crypto";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { prisma } from "../config/db";
 import bcrypt from "bcryptjs";
@@ -12,7 +13,11 @@ import { ambilDataAkademikSiswa } from "../utils/profileSiswa.helper";
 
 const isGuru = (roleName?: string | null) => normalizeRole(roleName) === "guru";
 
-export const getUsers = async (req: AuthRequest, res: Response) => {
+export const getUsers = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction,
+) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -247,16 +252,16 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
       totalData,
     );
   } catch (error) {
-    console.error("Error getUsers:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan server",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const createUser = async (req: AuthRequest, res: Response) => {
+export const createUser = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction,
+) => {
   try {
     const {
       namaPengguna,
@@ -425,15 +430,16 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       data: user,
     });
   } catch (error) {
-    console.error("Error createUser:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan server",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const updateUser = async (req: AuthRequest, res: Response) => {
+export const updateUser = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
 
@@ -659,15 +665,16 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       data: user,
     });
   } catch (error) {
-    console.error("Error updateUser:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan server",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const deleteUser = async (req: AuthRequest, res: Response) => {
+export const deleteUser = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
 
@@ -764,15 +771,16 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       data: updatedUser,
     });
   } catch (error) {
-    console.error("Error deleteUser:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan server",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const profile = async (req: AuthRequest, res: Response) => {
+export const profile = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction,
+) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -890,15 +898,16 @@ export const profile = async (req: AuthRequest, res: Response) => {
       aksesMenu,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const updateProfile = async (req: AuthRequest, res: Response) => {
+export const updateProfile = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction,
+) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -960,15 +969,16 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
       data: user,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const getUserById = async (req: AuthRequest, res: Response) => {
+export const getUserById = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = req.user?.sekolahId;
@@ -1071,14 +1081,16 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
       data: publicUser(user),
     });
   } catch (error) {
-    console.error("Error getUserById:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Terjadi kesalahan server", errorCode: "INTERNAL_SERVER_ERROR" });
+    if (next) return next(error);
+    throw error;
   }
 };
 
-export const quickResetPassword = async (req: AuthRequest, res: Response) => {
+export const quickResetPassword = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction,
+) => {
   try {
     const targetUserId = Array.isArray(req.params.id)
       ? req.params.id[0]
@@ -1116,11 +1128,22 @@ export const quickResetPassword = async (req: AuthRequest, res: Response) => {
       }
     }
 
+    const generateRandomPassword = (length = 8): string => {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+      let result = "";
+      const randomValues = crypto.randomBytes(length);
+      for (let i = 0; i < length; i++) {
+        const val = randomValues[i] ?? 0;
+        result += chars.charAt(val % chars.length);
+      }
+      return result;
+    };
+
     const requestedPassword = req.body?.kataSandi || req.body?.password;
     if (requestedPassword && requestedPassword.length < 8) {
       throw new AppError("Kata sandi baru minimal 8 karakter", 400, "VALIDATION_ERROR");
     }
-    const newPassword = requestedPassword || "12345678";
+    const newPassword = requestedPassword || generateRandomPassword(8);
     const defaultPassword = await bcrypt.hash(newPassword, 10);
 
     await prisma.pengguna.update({
@@ -1130,11 +1153,15 @@ export const quickResetPassword = async (req: AuthRequest, res: Response) => {
 
     return successResponse(
       res,
-      requestedPassword
-        ? "Kata sandi berhasil direset"
-        : "Kata sandi berhasil direset menjadi: 12345678",
+      "Kata sandi berhasil direset",
+      {
+        id: targetUserId,
+        password: newPassword,
+        kataSandi: newPassword,
+      },
     );
   } catch (error: any) {
+    if (next) return next(error);
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({
         success: false,
@@ -1142,9 +1169,6 @@ export const quickResetPassword = async (req: AuthRequest, res: Response) => {
         errorCode: error.errorCode || (error.statusCode === 403 ? "FORBIDDEN" : "BUSINESS_ERROR"),
       });
     }
-    console.error("Error quickResetPassword:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Terjadi kesalahan server", errorCode: "INTERNAL_SERVER_ERROR" });
+    throw error;
   }
 };

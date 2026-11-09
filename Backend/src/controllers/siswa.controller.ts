@@ -84,14 +84,22 @@ export const deleteSiswa = async (
     const id = req.params.id as string;
     const sekolahId = req.user?.sekolahId;
 
-    await prisma.pengguna.update({
-      where: { id, sekolahId },
+    const result = await prisma.pengguna.updateMany({
+      where: {
+        id,
+        sekolahId,
+        dihapusPada: null,
+      },
       data: {
         dihapusPada: new Date(),
         dihapusOleh: req.user?.userId,
         status: "nonaktif",
       },
     });
+
+    if (result.count === 0) {
+      throw new AppError("Siswa tidak ditemukan", 404);
+    }
 
     return successResponse(res, "Siswa berhasil dihapus");
   } catch (error) {

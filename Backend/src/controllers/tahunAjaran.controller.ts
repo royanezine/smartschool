@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 
@@ -20,7 +20,8 @@ const getParamId = (req: AuthRequest): string | null => {
 
 export const getTahunAjaran = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -48,18 +49,15 @@ export const getTahunAjaran = async (
       data,
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const createTahunAjaran = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -142,18 +140,15 @@ export const createTahunAjaran = async (
       data,
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const updateTahunAjaran = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -253,18 +248,15 @@ export const updateTahunAjaran = async (
       data,
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const deleteTahunAjaran = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next?: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
@@ -314,11 +306,7 @@ export const deleteTahunAjaran = async (
       message: "Tahun ajaran berhasil dihapus",
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };

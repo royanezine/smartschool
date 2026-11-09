@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { requireAksesMenu } from "../middlewares/aksesMenu.middleware";
 import {
   getMenuBaku,
@@ -12,8 +13,8 @@ import {
 
 const router = Router();
 
-// Wajib terautentikasi untuk semua endpoint jabatan
-router.use(authenticate);
+// Wajib terautentikasi dan memiliki langganan aktif untuk semua endpoint jabatan
+router.use(authenticate, requireTenant, requireSubscription);
 
 // Endpoint referensi publik/internal (cukup otentikasi dasar untuk dropdown assign pegawai di frontend)
 router.get("/menu-baku", getMenuBaku);

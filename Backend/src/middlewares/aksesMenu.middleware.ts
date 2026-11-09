@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "./auth.middleware";
-import { isSuperAdmin } from "../utils/rbac";
+import { isSuperAdmin, normalizeRole } from "../utils/rbac";
 import { prisma } from "../config/db";
 import { AksiMenu } from "../constants/menu.constant";
 
@@ -45,6 +45,11 @@ export const requireAksesMenu = (
 
       // 1. Fallback Super Admin: Memiliki akses penuh ke seluruh menu platform
       if (isSuperAdmin(user.role)) {
+        return next();
+      }
+
+      // 2. Siswa memiliki akses bawaan baca ke menu publik/siswa
+      if (normalizeRole(user.role) === "siswa" && action === "view") {
         return next();
       }
 

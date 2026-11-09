@@ -27,7 +27,7 @@ export const handle =
         return res.status(404).json({ success: false, message: 'Data tidak ditemukan' });
       }
       console.error(e);
-      return res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server' });
+      return next(e);
     }
   };
 

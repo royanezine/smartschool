@@ -2,16 +2,60 @@ import {
   triggerDeadlineH1Notification,
   triggerLanggananH7Notification,
 } from "../controllers/notifikasi.controller";
+import { acquireDistributedLock, releaseDistributedLock, getRedisClient } from "../config/redis";
+import { prisma } from "../config/db";
 
 let notificationInterval: NodeJS.Timeout | null = null;
 let isDeadlineRunning = false;
 let isLanggananRunning = false;
 
+const runWithDistributedLock = async (
+  lockName: string,
+  ttlMs: number,
+  task: () => Promise<void>
+) => {
+  const redisKey = `scheduler:lock:${lockName}`;
+  const redis = getRedisClient();
+
+  if (redis) {
+    const locked = await acquireDistributedLock(redisKey, ttlMs);
+    if (!locked) {
+      return; // Pod / instance lain sedang atau sudah menjalankan task ini
+    }
+    try {
+      await task();
+    } finally {
+      await releaseDistributedLock(redisKey);
+    }
+    return;
+  }
+
+  // Fallback: Gunakan Postgres advisory lock non-blocking
+  try {
+    const lockRes: any = await prisma.$queryRaw`SELECT pg_try_advisory_lock(hashtext(${lockName})) as locked`;
+    const isLocked = lockRes?.[0]?.locked === true;
+    if (!isLocked) {
+      return; // Pod / instance lain sedang menjalankan task ini
+    }
+    try {
+      await task();
+    } finally {
+      await prisma.$queryRaw`SELECT pg_advisory_unlock(hashtext(${lockName}))`;
+    }
+    return;
+  } catch {
+    // Fallback jika database tidak mendukung pg advisory lock
+    await task();
+  }
+};
+
 export const runNotificationJobs = async () => {
   if (!isDeadlineRunning) {
     isDeadlineRunning = true;
     try {
-      await triggerDeadlineH1Notification();
+      await runWithDistributedLock("scheduler:deadline_h1", 20 * 60 * 1000, async () => {
+        await triggerDeadlineH1Notification();
+      });
     } catch (error) {
       console.error("[SCHEDULER] Gagal menjalankan deadline job:", error);
     } finally {
@@ -22,7 +66,9 @@ export const runNotificationJobs = async () => {
   if (!isLanggananRunning) {
     isLanggananRunning = true;
     try {
-      await triggerLanggananH7Notification();
+      await runWithDistributedLock("scheduler:langganan_h7", 20 * 60 * 1000, async () => {
+        await triggerLanggananH7Notification();
+      });
     } catch (error) {
       console.error("[SCHEDULER] Gagal menjalankan subscription job:", error);
     } finally {

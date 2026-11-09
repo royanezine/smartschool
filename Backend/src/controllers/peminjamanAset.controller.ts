@@ -40,50 +40,55 @@ export const ajukanPeminjaman = async (
       );
     }
 
-    for (const [asetId, totalDiminta] of itemQtyMap.entries()) {
-      const aset = await prisma.aset.findFirst({
-        where: { id: asetId, sekolahId, dihapusPada: null },
+    const peminjaman = await prisma.$transaction(async (tx) => {
+      // Validasi stok aset dengan penguncian atomik di dalam transaksi
+      for (const [asetId, totalDiminta] of itemQtyMap.entries()) {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`aset_stock:${sekolahId}:${asetId}`}))`;
+
+        const aset = await tx.aset.findFirst({
+          where: { id: asetId, sekolahId, dihapusPada: null },
+        });
+
+        if (!aset) {
+          throw new AppError("Aset tidak ditemukan", 404);
+        }
+        if (aset.status !== "aktif") {
+          throw new AppError(
+            `Aset "${aset.nama}" sedang tidak aktif/tersedia untuk dipinjam`,
+            400
+          );
+        }
+        if (aset.jumlahStok < totalDiminta) {
+          throw new AppError(
+            `Stok aset "${aset.nama}" tidak mencukupi (sisa: ${aset.jumlahStok}, diminta: ${totalDiminta})`,
+            400
+          );
+        }
+      }
+
+      return await tx.peminjamanAset.create({
+        data: {
+          sekolahId,
+          peminjamId: userId,
+          nomorPeminjaman: generateNomorPinjam(),
+          keperluan: validated.keperluan,
+          tanggalKembaliRencana: new Date(validated.tanggalKembaliRencana),
+          catatanPeminjaman: validated.catatanPeminjaman,
+          status: "menunggu_persetujuan",
+          detailPeminjaman: {
+            create: validated.items.map((item) => ({
+              asetId: item.asetId,
+              jumlah: item.jumlah,
+              kondisiSaatPinjam: "baik",
+            })),
+          },
+        },
+        include: {
+          detailPeminjaman: {
+            include: { aset: { select: { id: true, kode: true, nama: true } } },
+          },
+        },
       });
-
-      if (!aset) {
-        throw new AppError("Aset tidak ditemukan", 404);
-      }
-      if (aset.status !== "aktif") {
-        throw new AppError(
-          `Aset "${aset.nama}" sedang tidak aktif/tersedia untuk dipinjam`,
-          400
-        );
-      }
-      if (aset.jumlahStok < totalDiminta) {
-        throw new AppError(
-          `Stok aset "${aset.nama}" tidak mencukupi (sisa: ${aset.jumlahStok}, diminta: ${totalDiminta})`,
-          400
-        );
-      }
-    }
-
-    const peminjaman = await prisma.peminjamanAset.create({
-      data: {
-        sekolahId,
-        peminjamId: userId,
-        nomorPeminjaman: generateNomorPinjam(),
-        keperluan: validated.keperluan,
-        tanggalKembaliRencana: new Date(validated.tanggalKembaliRencana),
-        catatanPeminjaman: validated.catatanPeminjaman,
-        status: "menunggu_persetujuan",
-        detailPeminjaman: {
-          create: validated.items.map((item) => ({
-            asetId: item.asetId,
-            jumlah: item.jumlah,
-            kondisiSaatPinjam: "baik",
-          })),
-        },
-      },
-      include: {
-        detailPeminjaman: {
-          include: { aset: { select: { id: true, kode: true, nama: true } } },
-        },
-      },
     });
 
     return successResponse(

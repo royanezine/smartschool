@@ -25,17 +25,23 @@ import {
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
+import { requireAksesMenu } from "../middlewares/aksesMenu.middleware";
+import { requestLimit } from "../middlewares/requestLimit.middleware";
 
 const router = Router();
 
+// Proteksi Autentikasi, Tenant, Langganan, Rate Limit & RBAC Menu Bimbingan Konseling
 router.use(authenticate, requireTenant, requireSubscription);
+router.use(requestLimit(60, 60 * 1000));
+router.use(requireAksesMenu("bimbingan konseling"));
 
 router.get("/konseling", getSesiKonseling);
-router.post("/konseling/ajukan", authorizeRoles("siswa"), ajukanSesiKonseling);
+router.post("/konseling/ajukan", authorizeRoles("siswa"), requestLimit(10), ajukanSesiKonseling);
 router.get("/konseling/:id", getSesiKonselingById);
 router.put(
   "/konseling/:id/keputusan",
   authorizeRoles("admin_sekolah", "guru"),
+  requireAksesMenu("bimbingan konseling", "update"),
   putuskanPengajuanKonseling,
 );
 router.put(

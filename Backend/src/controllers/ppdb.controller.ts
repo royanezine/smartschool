@@ -642,79 +642,6 @@ export const verifikasiPpdb = async (req: Request, res: Response) => {
       });
     }
 
-    const ranking = await ambilRankingJalur(pendaftaran.jalurPpdbId, sekolahId);
-    const entri = ranking?.daftar.find((item) => item.id === pendaftaran.id);
-
-    if (!ranking || !entri) {
-      return res.status(400).json({
-        success: false,
-        message: "Pendaftar tidak termasuk dalam peringkat jalur",
-      });
-    }
-
-    if (!entri.memenuhiKriteria) {
-      return res.status(400).json({
-        success: false,
-        message: `Pendaftar belum memenuhi kriteria: ${entri.alasanTidakMemenuhi.join("; ")}`,
-        data: {
-          peringkat: entri.peringkat,
-          alasan: entri.alasanTidakMemenuhi,
-        },
-      });
-    }
-
-    if (abaikanKuota !== true && !entri.masukKuota) {
-      return res.status(400).json({
-        success: false,
-        message: `Peringkat ${entri.peringkat} berada di luar kuota ${ranking.kuota}`,
-        data: {
-          peringkat: entri.peringkat,
-          kuota: ranking.kuota,
-        },
-      });
-    }
-
-    const kelas = await prisma.kelas.findFirst({
-      where: {
-        id: kelasId,
-        sekolahId,
-        dihapusPada: null,
-      },
-    });
-
-    if (!kelas) {
-      return res.status(404).json({
-        success: false,
-        message: "Kelas tidak ditemukan",
-      });
-    }
-
-    if (
-      kelas.jurusanId &&
-      pendaftaran.jurusanId &&
-      kelas.jurusanId !== pendaftaran.jurusanId
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Jurusan kelas tidak sesuai dengan jurusan pilihan pendaftar",
-      });
-    }
-
-    if (kelas.kapasitas !== null && kelas.kapasitas !== undefined) {
-      const jumlahSiswa = await prisma.anggotaKelas.count({
-        where: {
-          kelasId: kelas.id,
-        },
-      });
-
-      if (jumlahSiswa >= kelas.kapasitas) {
-        return res.status(400).json({
-          success: false,
-          message: "Kapasitas kelas sudah penuh",
-        });
-      }
-    }
-
     const roleSiswa = await prisma.peran.findFirst({
       where: {
         nama: "siswa",
@@ -743,7 +670,6 @@ export const verifikasiPpdb = async (req: Request, res: Response) => {
     }
 
     const usernameBase = pendaftaran.nisn;
-
     const email = pendaftaran.email || `${pendaftaran.nisn}@smartschool.local`;
 
     const existingEmail = await prisma.pengguna.findUnique({
@@ -762,6 +688,64 @@ export const verifikasiPpdb = async (req: Request, res: Response) => {
     const password = await bcrypt.hash(pendaftaran.nisn, 10);
 
     const result = await prisma.$transaction(async (tx) => {
+      // Advisory lock agar tidak terjadi race condition verifikasi bersamaan di jalur yang sama
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`ppdb_verifikasi:${sekolahId}:${pendaftaran.jalurPpdbId}`}))`;
+
+      const pendaftaranTerkini = await tx.pendaftaranPpdb.findFirst({
+        where: { id: pendaftaran.id, sekolahId, dihapusPada: null },
+      });
+
+      if (!pendaftaranTerkini || (pendaftaranTerkini.status === "lulus" && pendaftaranTerkini.dikonversiKePenggunaId)) {
+        throw new AppError("Pendaftar sudah diproses atau dikonversi menjadi siswa", 400);
+      }
+
+      const ranking = await ambilRankingJalur(pendaftaran.jalurPpdbId, sekolahId);
+      const entri = ranking?.daftar.find((item) => item.id === pendaftaran.id);
+
+      if (!ranking || !entri) {
+        throw new AppError("Pendaftar tidak termasuk dalam peringkat jalur", 400);
+      }
+
+      if (!entri.memenuhiKriteria) {
+        throw new AppError(`Pendaftar belum memenuhi kriteria: ${entri.alasanTidakMemenuhi.join("; ")}`, 400);
+      }
+
+      if (abaikanKuota !== true && !entri.masukKuota) {
+        throw new AppError(`Peringkat ${entri.peringkat} berada di luar kuota ${ranking.kuota}`, 400);
+      }
+
+      const kelas = await tx.kelas.findFirst({
+        where: {
+          id: kelasId,
+          sekolahId,
+          dihapusPada: null,
+        },
+      });
+
+      if (!kelas) {
+        throw new AppError("Kelas tidak ditemukan", 404);
+      }
+
+      if (
+        kelas.jurusanId &&
+        pendaftaran.jurusanId &&
+        kelas.jurusanId !== pendaftaran.jurusanId
+      ) {
+        throw new AppError("Jurusan kelas tidak sesuai dengan jurusan pilihan pendaftar", 400);
+      }
+
+      if (kelas.kapasitas !== null && kelas.kapasitas !== undefined) {
+        const jumlahSiswa = await tx.anggotaKelas.count({
+          where: {
+            kelasId: kelas.id,
+          },
+        });
+
+        if (jumlahSiswa >= kelas.kapasitas) {
+          throw new AppError("Kapasitas kelas sudah penuh", 400);
+        }
+      }
+
       const pengguna = await tx.pengguna.create({
         data: {
           sekolahId,

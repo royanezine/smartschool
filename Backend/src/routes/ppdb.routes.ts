@@ -34,6 +34,7 @@ import {
 } from "../controllers/hasilSeleksi.controller";
 
 import { uploadPpdb } from "../middlewares/uploadPpdb.middleware";
+import { requestLimit } from "../middlewares/requestLimit.middleware";
 
 import {
   pendaftaranPpdbSchema,
@@ -57,9 +58,9 @@ const buatPpdb = [...tenantBase, requireIzin("ppdb.create")];
 
 router.get("/sekolah/:sekolahId/opsi", opsiPendaftaran);
 
-router.post("/daftar", validate(pendaftaranPpdbSchema), daftarPpdb);
+router.post("/daftar", requestLimit(10), validate(pendaftaranPpdbSchema), daftarPpdb);
 
-router.post("/login", validate(loginPendaftarSchema), loginPendaftar);
+router.post("/login", requestLimit(15), validate(loginPendaftarSchema), loginPendaftar);
 
 router.get("/saya", authenticatePendaftar, detailSaya);
 router.get("/saya/ranking", authenticatePendaftar, rankingSaya);

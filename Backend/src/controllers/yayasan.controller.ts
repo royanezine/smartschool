@@ -9,7 +9,7 @@ import { prisma } from "../config/db";
 import { successResponse } from "../utils/responseFormatter";
 
 // 1. Mengambil Daftar Sekolah Binaan (Sudah ada, dipertahankan)
-export const getSekolahBinaan = async (req: AuthRequest, res: Response) => {
+export const getSekolahBinaan = async (req: AuthRequest, res: Response, next?: NextFunction) => {
   try {
     if (!req.user || !req.user.yayasanId) {
       return res.status(403).json({ success: false, message: "Akses ditolak: Khusus Admin Yayasan" });
@@ -36,13 +36,13 @@ export const getSekolahBinaan = async (req: AuthRequest, res: Response) => {
 
     return successResponse(res, "Berhasil mengambil data sekolah binaan", sekolah);
   } catch (error) {
-    console.error("Error getSekolahBinaan:", error);
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 // 2. Metrik Dashboard (Total Sekolah, Status Aktif, dll)
-export const getDashboardSummary = async (req: AuthRequest, res: Response) => {
+export const getDashboardSummary = async (req: AuthRequest, res: Response, next?: NextFunction) => {
   try {
     if (!req.user || !req.user.yayasanId) {
       return res.status(403).json({ success: false, message: "Akses ditolak: Khusus Admin Yayasan" });
@@ -73,8 +73,8 @@ export const getDashboardSummary = async (req: AuthRequest, res: Response) => {
 
     return successResponse(res, "Berhasil mengambil metrik dashboard yayasan", data);
   } catch (error) {
-    console.error("Error getDashboardSummary:", error);
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
+    if (next) return next(error);
+    throw error;
   }
 };
 
@@ -167,7 +167,7 @@ export async function manageYayasanSchools(req: AuthRequest, res: Response, next
 }
 
 // 3. Melihat Detail Statistik Satu Sekolah (Read-Only)
-export const getDetailSekolahBinaan = async (req: AuthRequest, res: Response) => {
+export const getDetailSekolahBinaan = async (req: AuthRequest, res: Response, next?: NextFunction) => {
   try {
     if (!req.user || !req.user.yayasanId) {
       return res.status(403).json({ success: false, message: "Akses ditolak: Khusus Admin Yayasan" });
@@ -212,7 +212,7 @@ export const getDetailSekolahBinaan = async (req: AuthRequest, res: Response) =>
 
     return successResponse(res, "Berhasil mengambil detail sekolah", data);
   } catch (error) {
-    console.error("Error getDetailSekolahBinaan:", error);
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
+    if (next) return next(error);
+    throw error;
   }
 };

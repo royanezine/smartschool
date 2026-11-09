@@ -6,11 +6,12 @@ import {
   createBroadcastPengumuman, // <-- Import ini
 } from "../controllers/notifikasi.controller";
 import { authenticate } from "../middlewares/auth.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
 
-router.use(authenticate);
+router.use(authenticate, requireTenant, requireSubscription);
 
 router.get("/", getNotifikasiUser);
 router.patch("/read-all", markAllAsRead);

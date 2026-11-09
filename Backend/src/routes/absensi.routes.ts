@@ -3,6 +3,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { randomUUID } from "crypto";
+import { AppError } from "../utils/appError";
 import {
   createAbsensi,
   getAbsensiSaya,
@@ -34,14 +35,37 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+const ALLOWED_IMAGE_MIME = ["image/jpeg", "image/png", "image/jpg"];
+
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadDir),
   filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname) || ".jpg";
+    const ext = path.extname(file.originalname).toLowerCase() || ".jpg";
     cb(null, `absen-${randomUUID()}${ext}`);
   },
 });
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const mime = (file.mimetype || "").toLowerCase();
+    const ext = path.extname(file.originalname || "").toLowerCase();
+    if (
+      ALLOWED_IMAGE_MIME.includes(mime) &&
+      [".jpg", ".jpeg", ".png"].includes(ext)
+    ) {
+      cb(null, true);
+    } else {
+      cb(
+        new AppError(
+          "Hanya file gambar (JPEG, PNG, JPG) yang diperbolehkan",
+          400,
+          "INVALID_FILE_TYPE",
+        ),
+      );
+    }
+  },
+});
 
 router.use(authenticate, requireTenant, requireLangganan());
 

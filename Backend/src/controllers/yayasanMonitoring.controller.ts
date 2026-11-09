@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 
@@ -12,7 +12,11 @@ const ambilSekolahIds = async (yayasanId: string, sekolahId?: string) => {
   return ids;
 };
 
-export const listUsersLintasSekolah = async (req: Request, res: Response) => {
+export const listUsersLintasSekolah = async (
+  req: Request,
+  res: Response,
+  next?: NextFunction
+) => {
   try {
     const user = (req as AuthRequest).user;
     if (!user?.yayasanId) {
@@ -81,18 +85,15 @@ export const listUsersLintasSekolah = async (req: Request, res: Response) => {
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    console.error("[YAYASAN MONITORING] listUsersLintasSekolah:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil daftar pengguna",
-      errorCode: "INTERNAL_SERVER_ERROR",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };
 
 export const getPengaturanSekolahBinaan = async (
   req: Request,
   res: Response,
+  next?: NextFunction
 ) => {
   try {
     const user = (req as AuthRequest).user;
@@ -134,11 +135,7 @@ export const getPengaturanSekolahBinaan = async (
 
     return res.json({ success: true, data: sekolah });
   } catch (error) {
-    console.error("[YAYASAN MONITORING] getPengaturanSekolahBinaan:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil pengaturan sekolah",
-      errorCode: "INTERNAL_SERVER_ERROR",
-    });
+    if (next) return next(error);
+    throw error;
   }
 };

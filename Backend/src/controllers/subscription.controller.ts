@@ -74,6 +74,25 @@ export const createPayment = async (
       throw new AppError("Akses Ditolak", 403);
     }
 
+    // Cegah penumpukan tagihan ganda jika masih ada tagihan PENDING yang belum kadaluarsa (24 jam)
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const pendingPayment = await prisma.riwayatPembayaran.findFirst({
+      where: {
+        sekolahId: req.user.sekolahId,
+        status: "pending",
+        dihapusPada: null,
+        dibuatPada: { gte: oneDayAgo },
+      },
+    });
+
+    if (pendingPayment) {
+      throw new AppError(
+        "Anda masih memiliki transaksi yang berstatus PENDING. Harap selesaikan pembayaran sebelumnya atau tunggu hingga kadaluarsa.",
+        400,
+        "PENDING_PAYMENT_EXISTS",
+      );
+    }
+
     const data = createPaymentSchema.parse(req.body);
 
     const paket = await prisma.paket.findUnique({
