@@ -1,4 +1,6 @@
 import { Response, NextFunction } from "express";
+import ExcelJS from "exceljs";
+import PDFDocument from "pdfkit";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { isSuperAdmin, normalizeRole } from "../utils/rbac";
@@ -274,6 +276,22 @@ export const ajukanSesiKonseling = async (
       });
     });
 
+    try {
+      await prisma.notifikasi.create({
+        data: {
+          penggunaId: siswaId,
+          pengirimId: null,
+          judul: "Pengajuan Konseling Terkirim",
+          isi: `Pengajuan sesi konseling Anda pada tanggal ${validated.tanggal} pukul ${validated.waktuMulai} berhasil dikirim dan sedang menunggu konfirmasi guru BK.`,
+          tipe: "info",
+          kategori: "bk_konseling",
+          targetUrl: `/bk/konseling/${data.id}`,
+        },
+      });
+    } catch (notifErr) {
+      console.error("[NOTIFIKASI BK] Gagal membuat notifikasi pengajuan konseling:", notifErr);
+    }
+
     return res.status(201).json({
       success: true,
       message: "Pengajuan sesi konseling berhasil dikirim",
@@ -356,6 +374,22 @@ export const putuskanPengajuanKonseling = async (
           diperbaruiOleh: userId,
         },
       });
+
+      try {
+        await prisma.notifikasi.create({
+          data: {
+            penggunaId: existing.siswaId,
+            pengirimId: userId,
+            judul: "Pengajuan Konseling Ditolak",
+            isi: `Pengajuan sesi konseling Anda untuk tanggal ${new Date(existing.tanggal).toLocaleDateString("id-ID")} ditolak. Alasan: ${catatan}`,
+            tipe: "info",
+            kategori: "bk_konseling",
+            targetUrl: `/bk/konseling/${id}`,
+          },
+        });
+      } catch (notifErr) {
+        console.error("[NOTIFIKASI BK] Gagal mengirim notifikasi penolakan konseling:", notifErr);
+      }
 
       return res.json({
         success: true,
@@ -449,6 +483,22 @@ export const putuskanPengajuanKonseling = async (
         },
       },
     });
+
+    try {
+      await prisma.notifikasi.create({
+        data: {
+          penggunaId: existing.siswaId,
+          pengirimId: userId,
+          judul: "Pengajuan Konseling Disetujui",
+          isi: `Pengajuan sesi konseling Anda telah disetujui untuk tanggal ${new Date(existing.tanggal).toLocaleDateString("id-ID")} pukul ${existing.waktuMulai} - ${existing.waktuSelesai}.`,
+          tipe: "info",
+          kategori: "bk_konseling",
+          targetUrl: `/bk/konseling/${id}`,
+        },
+      });
+    } catch (notifErr) {
+      console.error("[NOTIFIKASI BK] Gagal mengirim notifikasi persetujuan konseling:", notifErr);
+    }
 
     return res.json({
       success: true,
@@ -693,6 +743,38 @@ export const updateSesiKonseling = async (
         diperbaruiOleh: req.user?.userId,
       },
     });
+
+    if (status && status !== existing.status) {
+      try {
+        const statusStr = String(status);
+        let notifJudul = "Update Status Sesi Konseling";
+        let notifIsi = `Status sesi konseling Anda telah diperbarui menjadi ${statusStr}.`;
+        if (statusStr === "dijadwalkan" || statusStr === "disetujui") {
+          notifJudul = "Sesi Konseling Disetujui / Dijadwalkan";
+          notifIsi = `Sesi konseling Anda telah dijadwalkan pada ${new Date(data.tanggal).toLocaleDateString("id-ID")} pukul ${data.waktuMulai} - ${data.waktuSelesai}.`;
+        } else if (statusStr === "ditolak" || statusStr === "dibatalkan") {
+          notifJudul = "Sesi Konseling Dibatalkan / Ditolak";
+          notifIsi = `Sesi konseling Anda pada ${new Date(data.tanggal).toLocaleDateString("id-ID")} telah dibatalkan.`;
+        } else if (statusStr === "selesai") {
+          notifJudul = "Sesi Konseling Selesai";
+          notifIsi = `Sesi konseling Anda pada ${new Date(data.tanggal).toLocaleDateString("id-ID")} telah selesai.`;
+        }
+
+        await prisma.notifikasi.create({
+          data: {
+            penggunaId: existing.siswaId,
+            pengirimId: req.user?.userId || null,
+            judul: notifJudul,
+            isi: notifIsi,
+            tipe: "info",
+            kategori: "bk_konseling",
+            targetUrl: `/bk/konseling/${id}`,
+          },
+        });
+      } catch (notifErr) {
+        console.error("[NOTIFIKASI BK] Gagal membuat notifikasi update konseling:", notifErr);
+      }
+    }
 
     return res.json({
       success: true,
@@ -959,15 +1041,97 @@ export const deleteKategoriPelanggaran = async (
   }
 };
 
+export const buildPelanggaranWhere = (req: AuthRequest) => {
+  const sekolahId = req.user?.sekolahId;
+  if (!sekolahId) {
+    return { sekolahId: undefined, where: null };
+  }
+
+  const actorRole = normalizeRole(req.user?.role);
+  const where: any = {
+    sekolahId,
+    dihapusPada: null,
+  };
+
+  if (actorRole === "siswa") {
+    where.siswaId = req.user?.userId;
+  } else if (req.query.siswaId) {
+    where.siswaId = String(req.query.siswaId);
+  }
+
+  const kategoriId = (req.query.kategoriId || req.query.kategoriPelanggaranId) as string | undefined;
+  if (kategoriId) {
+    where.kategoriPelanggaranId = String(kategoriId);
+  }
+
+  const status = req.query.status as string | undefined;
+  if (status) {
+    where.status = String(status);
+  }
+
+  const tanggalMulai = (req.query.tanggalMulai || req.query.startDate) as string | undefined;
+  const tanggalSelesai = (req.query.tanggalSelesai || req.query.endDate) as string | undefined;
+  if (tanggalMulai || tanggalSelesai) {
+    where.tanggal = {};
+    if (tanggalMulai) {
+      where.tanggal.gte = new Date(tanggalMulai);
+    }
+    if (tanggalSelesai) {
+      const end = new Date(tanggalSelesai);
+      if (tanggalSelesai.length <= 10) {
+        end.setHours(23, 59, 59, 999);
+      }
+      where.tanggal.lte = end;
+    }
+  }
+
+  const search = (req.query.search as string)?.trim();
+  if (search) {
+    where.OR = [
+      {
+        siswa: {
+          namaLengkap: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      },
+      {
+        siswa: {
+          nis: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      },
+      {
+        kategoriPelanggaran: {
+          nama: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      },
+      {
+        kronologi: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+    ];
+  }
+
+  return { sekolahId, where };
+};
+
 export const getPelanggaranSiswa = async (
   req: AuthRequest,
   res: Response,
   next?: NextFunction
 ) => {
   try {
-    const sekolahId = req.user?.sekolahId;
-
-    if (!sekolahId) {
+    const { sekolahId, where } = buildPelanggaranWhere(req);
+    if (!sekolahId || !where) {
       return res.status(401).json({
         success: false,
         message: "Sekolah tidak ditemukan",
@@ -977,80 +1141,6 @@ export const getPelanggaranSiswa = async (
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10));
     const skip = (page - 1) * limit;
-
-    const actorRole = normalizeRole(req.user?.role);
-    const where: any = {
-      sekolahId,
-      dihapusPada: null,
-    };
-
-    if (actorRole === "siswa") {
-      where.siswaId = req.user?.userId;
-    } else if (req.query.siswaId) {
-      where.siswaId = String(req.query.siswaId);
-    }
-
-    const kategoriId = (req.query.kategoriId || req.query.kategoriPelanggaranId) as string | undefined;
-    if (kategoriId) {
-      where.kategoriPelanggaranId = String(kategoriId);
-    }
-
-    const status = req.query.status as string | undefined;
-    if (status) {
-      where.status = String(status);
-    }
-
-    const tanggalMulai = (req.query.tanggalMulai || req.query.startDate) as string | undefined;
-    const tanggalSelesai = (req.query.tanggalSelesai || req.query.endDate) as string | undefined;
-    if (tanggalMulai || tanggalSelesai) {
-      where.tanggal = {};
-      if (tanggalMulai) {
-        where.tanggal.gte = new Date(tanggalMulai);
-      }
-      if (tanggalSelesai) {
-        const end = new Date(tanggalSelesai);
-        if (tanggalSelesai.length <= 10) {
-          end.setHours(23, 59, 59, 999);
-        }
-        where.tanggal.lte = end;
-      }
-    }
-
-    const search = (req.query.search as string)?.trim();
-    if (search) {
-      where.OR = [
-        {
-          siswa: {
-            namaLengkap: {
-              contains: search,
-              mode: "insensitive",
-            },
-          },
-        },
-        {
-          siswa: {
-            nis: {
-              contains: search,
-              mode: "insensitive",
-            },
-          },
-        },
-        {
-          kategoriPelanggaran: {
-            nama: {
-              contains: search,
-              mode: "insensitive",
-            },
-          },
-        },
-        {
-          kronologi: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-      ];
-    }
 
     const [totalData, data] = await Promise.all([
       prisma.pelanggaranSiswa.count({ where }),
@@ -1104,6 +1194,217 @@ export const getPelanggaranSiswa = async (
       totalPages,
       currentPage: page,
     });
+  } catch (error) {
+    if (next) return next(error);
+    throw error;
+  }
+};
+
+export const exportPelanggaranExcel = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
+  try {
+    const { sekolahId, where } = buildPelanggaranWhere(req);
+    if (!sekolahId || !where) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    const data = await prisma.pelanggaranSiswa.findMany({
+      where,
+      include: {
+        siswa: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            nis: true,
+            nisn: true,
+          },
+        },
+        kategoriPelanggaran: true,
+      },
+      orderBy: {
+        tanggal: "desc",
+      },
+    });
+
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "SmartSchool BK System";
+    workbook.created = new Date();
+    const worksheet = workbook.addWorksheet("Daftar Pelanggaran");
+
+    worksheet.columns = [
+      { header: "No", key: "no", width: 6 },
+      { header: "Tanggal", key: "tanggal", width: 14 },
+      { header: "NIS", key: "nis", width: 15 },
+      { header: "NISN", key: "nisn", width: 18 },
+      { header: "Nama Siswa", key: "namaSiswa", width: 28 },
+      { header: "Kategori Pelanggaran", key: "kategori", width: 25 },
+      { header: "Poin", key: "poin", width: 8 },
+      { header: "Status", key: "status", width: 14 },
+      { header: "Kronologi", key: "kronologi", width: 35 },
+      { header: "Tindak Lanjut", key: "tindakLanjut", width: 30 },
+      { header: "Catatan", key: "catatan", width: 25 },
+    ];
+
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    headerRow.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF1E3A8A" },
+    };
+    headerRow.alignment = { vertical: "middle", horizontal: "center" };
+    headerRow.height = 24;
+
+    data.forEach((item, index) => {
+      const row = worksheet.addRow({
+        no: index + 1,
+        tanggal: item.tanggal ? new Date(item.tanggal).toISOString().slice(0, 10) : "-",
+        nis: item.siswa?.nis || "-",
+        nisn: item.siswa?.nisn || "-",
+        namaSiswa: item.siswa?.namaLengkap || "-",
+        kategori: item.kategoriPelanggaran?.nama || "-",
+        poin: item.poin,
+        status: item.status || "tercatat",
+        kronologi: item.kronologi || "-",
+        tindakLanjut: item.tindakLanjut || "-",
+        catatan: item.catatan || "-",
+      });
+
+      row.alignment = { vertical: "middle" };
+      row.getCell("no").alignment = { horizontal: "center" };
+      row.getCell("tanggal").alignment = { horizontal: "center" };
+      row.getCell("nis").alignment = { horizontal: "center" };
+      row.getCell("poin").alignment = { horizontal: "center" };
+      row.getCell("status").alignment = { horizontal: "center" };
+    });
+
+    const filename = `daftar_pelanggaran_${Date.now()}.xlsx`;
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    await workbook.xlsx.write(res);
+    return res.end();
+  } catch (error) {
+    if (next) return next(error);
+    throw error;
+  }
+};
+
+export const exportPelanggaranPdf = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
+  try {
+    const { sekolahId, where } = buildPelanggaranWhere(req);
+    if (!sekolahId || !where) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    const data = await prisma.pelanggaranSiswa.findMany({
+      where,
+      include: {
+        siswa: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            nis: true,
+          },
+        },
+        kategoriPelanggaran: true,
+      },
+      orderBy: {
+        tanggal: "desc",
+      },
+    });
+
+    const filename = `daftar_pelanggaran_${Date.now()}.pdf`;
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    const doc = new PDFDocument({ margin: 30, size: "A4", layout: "landscape" });
+    doc.pipe(res);
+
+    doc.fontSize(16).font("Helvetica-Bold").text("LAPORAN DAFTAR PELANGGARAN SISWA", { align: "center" });
+    doc.moveDown(0.3);
+    doc.fontSize(10).font("Helvetica").text(`Tanggal Cetak: ${new Date().toLocaleDateString("id-ID")}`, { align: "center" });
+    doc.moveDown(1);
+
+    const tableTop = doc.y;
+    const colX = {
+      no: 30,
+      tanggal: 60,
+      nis: 140,
+      nama: 220,
+      kategori: 400,
+      poin: 580,
+      status: 630,
+      tindakLanjut: 700,
+    };
+
+    doc.rect(30, tableTop, 780, 20).fill("#1E3A8A");
+    doc.fillColor("#FFFFFF").fontSize(9).font("Helvetica-Bold");
+    doc.text("No", colX.no + 5, tableTop + 5);
+    doc.text("Tanggal", colX.tanggal, tableTop + 5);
+    doc.text("NIS", colX.nis, tableTop + 5);
+    doc.text("Nama Siswa", colX.nama, tableTop + 5);
+    doc.text("Pelanggaran", colX.kategori, tableTop + 5);
+    doc.text("Poin", colX.poin, tableTop + 5);
+    doc.text("Status", colX.status, tableTop + 5);
+    doc.text("Tindak Lanjut", colX.tindakLanjut, tableTop + 5);
+
+    let currentY = tableTop + 24;
+    doc.fillColor("#000000").font("Helvetica").fontSize(8);
+
+    data.forEach((item, index) => {
+      if (currentY > 530) {
+        doc.addPage({ margin: 30, size: "A4", layout: "landscape" });
+        currentY = 40;
+        doc.rect(30, currentY, 780, 20).fill("#1E3A8A");
+        doc.fillColor("#FFFFFF").fontSize(9).font("Helvetica-Bold");
+        doc.text("No", colX.no + 5, currentY + 5);
+        doc.text("Tanggal", colX.tanggal, currentY + 5);
+        doc.text("NIS", colX.nis, currentY + 5);
+        doc.text("Nama Siswa", colX.nama, currentY + 5);
+        doc.text("Pelanggaran", colX.kategori, currentY + 5);
+        doc.text("Poin", colX.poin, currentY + 5);
+        doc.text("Status", colX.status, currentY + 5);
+        doc.text("Tindak Lanjut", colX.tindakLanjut, currentY + 5);
+        currentY += 24;
+        doc.fillColor("#000000").font("Helvetica").fontSize(8);
+      }
+
+      if (index % 2 === 1) {
+        doc.rect(30, currentY - 2, 780, 16).fill("#F3F4F6");
+        doc.fillColor("#000000");
+      }
+
+      const tglStr = item.tanggal ? new Date(item.tanggal).toISOString().slice(0, 10) : "-";
+      doc.text(String(index + 1), colX.no + 5, currentY, { width: 25 });
+      doc.text(tglStr, colX.tanggal, currentY, { width: 75 });
+      doc.text(item.siswa?.nis || "-", colX.nis, currentY, { width: 75 });
+      doc.text((item.siswa?.namaLengkap || "-").slice(0, 32), colX.nama, currentY, { width: 175 });
+      doc.text((item.kategoriPelanggaran?.nama || "-").slice(0, 32), colX.kategori, currentY, { width: 175 });
+      doc.text(String(item.poin), colX.poin, currentY, { width: 45 });
+      doc.text(item.status || "tercatat", colX.status, currentY, { width: 65 });
+      doc.text((item.tindakLanjut || "-").slice(0, 20), colX.tindakLanjut, currentY, { width: 105 });
+
+      currentY += 16;
+    });
+
+    doc.end();
   } catch (error) {
     if (next) return next(error);
     throw error;
@@ -1191,6 +1492,22 @@ export const createPelanggaranSiswa = async (
         kategoriPelanggaran: true,
       },
     });
+
+    try {
+      await prisma.notifikasi.create({
+        data: {
+          penggunaId: data.siswaId,
+          pengirimId: req.user?.userId || null,
+          judul: "Catatan Pelanggaran Baru",
+          isi: `Pelanggaran "${kategori.nama}" telah dicatat pada tanggal ${new Date(tanggal).toLocaleDateString("id-ID")} dengan ${data.poin} poin.`,
+          tipe: "warning",
+          kategori: "bk_pelanggaran",
+          targetUrl: "/bk/pelanggaran",
+        },
+      });
+    } catch (notifErr) {
+      console.error("[NOTIFIKASI BK] Gagal membuat notifikasi pelanggaran:", notifErr);
+    }
 
     return res.status(201).json({
       success: true,

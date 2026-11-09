@@ -4,6 +4,7 @@ import cors from "cors";
 import path from "path";
 import { globalErrorHandler } from "./middlewares/error.middleware";
 import { ensureUploadDirectories } from "./utils/uploadDirectories";
+import { swaggerUi, swaggerSpec } from "./config/swagger";
 
 // Import Semua Routes
 import authRoutes from "./routes/auth.routes";
@@ -109,6 +110,13 @@ app.get("/ready", async (req: Request, res: Response) => {
       message: (error as Error).message,
     });
   }
+});
+
+// Dokumentasi Interaktif Swagger / OpenAPI dari Zod
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/api-docs.json", (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
 });
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));

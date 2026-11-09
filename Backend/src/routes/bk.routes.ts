@@ -13,6 +13,8 @@ import {
   updateKategoriPelanggaran,
   deleteKategoriPelanggaran,
   getPelanggaranSiswa,
+  exportPelanggaranExcel,
+  exportPelanggaranPdf,
   createPelanggaranSiswa,
   updatePelanggaranSiswa,
   deletePelanggaranSiswa,
@@ -59,6 +61,8 @@ router.put("/kategori-pelanggaran/:id", authorizeRoles("admin_sekolah", "guru"),
 router.delete("/kategori-pelanggaran/:id", authorizeRoles("admin_sekolah", "guru"), deleteKategoriPelanggaran);
 
 router.get("/pelanggaran", getPelanggaranSiswa);
+router.get("/pelanggaran/export/excel", exportPelanggaranExcel);
+router.get("/pelanggaran/export/pdf", exportPelanggaranPdf);
 router.post("/pelanggaran", authorizeRoles("admin_sekolah", "guru"), createPelanggaranSiswa);
 router.put("/pelanggaran/:id", authorizeRoles("admin_sekolah", "guru"), updatePelanggaranSiswa);
 router.delete("/pelanggaran/:id", authorizeRoles("admin_sekolah", "guru"), deletePelanggaranSiswa);
