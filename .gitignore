@@ -14,3 +14,10 @@ out/
 .DS_Store
 Thumbs.db
 *.tsbuildinfo
+/generated/prisma
+
+# AI agent & skills artifacts
+.agents/
+.claude/
+.windsurf/
+skills-lock.json

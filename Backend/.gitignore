@@ -14,3 +14,9 @@
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# AI agent & skills artifacts
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
