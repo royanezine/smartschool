@@ -1,481 +1,284 @@
+import { studentProfiles } from "./studentProfile.controller";
 import { publicUser } from "../utils/publicUser";
-import { Response, NextFunction } from "express";
-import crypto from "crypto";
-import { AuthRequest } from "../middlewares/auth.middleware";
+import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db";
-import bcrypt from "bcryptjs";
-import { paginatedResponse, successResponse } from "../utils/responseFormatter";
-import { normalizeRole, canManageRole } from "../utils/rbac";
-import { Prisma } from "@prisma/client";
 import { AppError } from "../utils/appError";
-import { normalizeShiftKerja } from "../utils/shiftKerja";
-import { ambilDataAkademikSiswa } from "../utils/profileSiswa.helper";
-import { catatAuditLog } from "../utils/auditLog";
+import { successResponse, paginatedResponse } from "../utils/responseFormatter";
+import { AuthRequest } from "../middlewares/auth.middleware";
+import bcrypt from "bcryptjs";
+import ExcelJS from "exceljs";
 
-const isGuru = (roleName?: string | null) => normalizeRole(roleName) === "guru";
-
-export const getUsers = async (
+export const getSiswaList = async (
   req: AuthRequest,
   res: Response,
-  next?: NextFunction,
+  next: NextFunction,
 ) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-    }
-
-    const actorRole = normalizeRole(req.user.role);
-    const sekolahId = req.user.sekolahId;
+    const sekolahId = req.user?.sekolahId;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
 
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
-    const requestedRole = req.query.role as string;
-    const status = req.query.status as string;
-    const shiftKerjaQuery = req.query.shiftKerja as string | undefined;
-    const sortBy = (req.query.sortBy as string) || "dibuatPada";
-    const sortOrder = (req.query.sortOrder as "asc" | "desc") || "desc";
 
     const skip = (page - 1) * limit;
-    const AND: Prisma.PenggunaWhereInput[] = [{ dihapusPada: null }];
 
-    if (actorRole !== "super_admin") {
-      if (!sekolahId) return res.status(403).json({ success: false, message: "Anda tidak terhubung dengan sekolah" });
-      AND.push({ sekolahId });
-      AND.push({ peran: { is: { nama: { notIn: ["super_admin", "superadmin", "Super Admin", "SUPER_ADMIN", "super-admin"] } } } });
-    }
-
-    if (status) AND.push({ status });
-    if (shiftKerjaQuery) {
-      const shift = normalizeShiftKerja(shiftKerjaQuery);
-      if (!shift) return res.status(400).json({ success: false, message: "Filter shiftKerja tidak valid (pagi / siang)" });
-      AND.push({ shiftKerja: shift });
-    }
-
-    if (requestedRole) {
-      const normRequested = normalizeRole(requestedRole);
-      if (actorRole !== "super_admin" && (normRequested === "super_admin" || normRequested === "admin_yayasan")) {
-        return res.status(403).json({ success: false, message: "Anda tidak memiliki izin untuk memfilter peran tersebut", errorCode: "FORBIDDEN_ROLE_FILTER" });
-      }
-      AND.push({ peran: { is: { nama: normRequested } } });
-    }
-
-    if (actorRole === "admin_sekolah") {
-      AND.push({ peran: { is: { nama: { notIn: ["super_admin", "superadmin", "Super Admin", "SUPER_ADMIN", "super-admin", "admin_yayasan", "adminyayasan", "Admin Yayasan", "ADMIN_YAYASAN", "admin_sekolah", "adminsekolah", "Admin Sekolah", "ADMIN_SEKOLAH"] } } } });
-    }
-
-    if (search) {
-      AND.push({
-        OR: [
-          { namaLengkap: { contains: search, mode: "insensitive" } },
-          { email: { contains: search, mode: "insensitive" } },
-          { nip: { contains: search, mode: "insensitive" } },
-          { nisn: { contains: search, mode: "insensitive" } },
-          { namaPengguna: { contains: search, mode: "insensitive" } },
-        ],
-      });
-    }
-
-    const whereClause: Prisma.PenggunaWhereInput = { AND };
-
-    const [users, totalData] = await Promise.all([
-      prisma.pengguna.findMany({
-        where: whereClause,
-        skip,
-        take: limit,
-        orderBy: { [sortBy]: sortOrder },
-        select: {
-          id: true, email: true, namaPengguna: true, namaLengkap: true, avatar: true, nipd: true, nip: true, nisn: true, jenisKelamin: true, status: true, dibuatPada: true, jabatan: true, golongan: true, shiftKerja: true, shiftKerjaId: true, shiftKerjaMaster: true, kategoriJabatanId: true,
-          kategoriJabatan: { select: { id: true, nama: true, kode: true } },
-          terakhirLogin: true, pinHash: true, sekolahId: true,
-          sekolah: { select: { id: true, nama: true, kode: true } },
-          peran: { select: { id: true, nama: true, namaTampilan: true } },
-          biometrikWajah: { select: { id: true, status: true, urlFotoReferensi: true, dibuatPada: true, diperbaruiPada: true, dihapusPada: true } },
-        },
-      }),
-      prisma.pengguna.count({ where: whereClause }),
-    ]);
-
-    const formattedUsers = users.map((user) => {
-      const baseUser = publicUser(user);
-      return { ...baseUser, jabatan: user.jabatan, golongan: user.golongan, kategoriJabatanId: user.kategoriJabatanId, kategoriJabatan: user.kategoriJabatan };
-    });
-
-    return paginatedResponse(res, "Berhasil mengambil data pengguna", formattedUsers, page, limit, totalData);
-  } catch (error) {
-    if (next) return next(error);
-    console.error("Error getUsers:", error);
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
-  }
-};
-
-export const createUser = async (
-  req: AuthRequest,
-  res: Response,
-  next?: NextFunction,
-) => {
-  try {
-    const { namaPengguna, email, kataSandi, namaLengkap, peranId, sekolahId, nipd, nip, nuptk, nisn, jenisKelamin, tempatLahir, tanggalLahir, alamat, noTelepon, avatar, jabatan, golongan, nik, namaAyah, pekerjaanAyah, namaIbu, pekerjaanIbu, alamatKtp, alamatDomisili, kecamatan, kelurahan, kota, shiftKerja } = req.body;
-
-    if (!namaPengguna || !email || !kataSandi || !namaLengkap || !peranId) {
-      return res.status(400).json({ success: false, message: "Data tidak lengkap" });
-    }
-
-    const existingUser = await prisma.pengguna.findFirst({ where: { OR: [{ email }, { namaPengguna }] } });
-    if (existingUser) return res.status(400).json({ success: false, message: "Email atau username sudah terdaftar" });
-
-    const role = await prisma.peran.findUnique({ where: { id: peranId } });
-    if (!role) return res.status(400).json({ success: false, message: "Role tidak ditemukan" });
-
-    const actorRole = normalizeRole(req.user?.role);
-    const targetRoleName = normalizeRole(role.nama);
-
-    if (actorRole !== "super_admin") {
-      if (role.sekolahId !== null && role.sekolahId !== req.user?.sekolahId) return res.status(403).json({ success: false, message: "Anda tidak dapat menggunakan peran dari sekolah lain", errorCode: "FORBIDDEN_ROLE_TENANT" });
-      if (!canManageRole(actorRole, targetRoleName)) return res.status(403).json({ success: false, message: "Anda tidak dapat membuat pengguna dengan level peran tersebut", errorCode: "FORBIDDEN" });
-      if (!req.user?.sekolahId) return res.status(403).json({ success: false, message: "Anda tidak terhubung dengan sekolah", errorCode: "NO_TENANT_LINKED" });
-    }
-
-    const assignedSekolahId = actorRole === "super_admin" ? sekolahId || null : req.user?.sekolahId || null;
-    let shiftValue: string | null = null;
-
-    if (isGuru(role.nama)) {
-      shiftValue = normalizeShiftKerja(shiftKerja);
-      if (!shiftValue) return res.status(400).json({ success: false, message: "Shift kerja guru wajib diisi (pagi / siang)" });
-    }
-
-    const passwordHash = await bcrypt.hash(kataSandi, 10);
-
-    const user = await prisma.pengguna.create({
-      data: {
-        namaPengguna, email, kataSandi: passwordHash, namaLengkap, peranId, sekolahId: assignedSekolahId, nipd: nipd || null, nip: nip || null, nuptk: nuptk || null, nisn: nisn || null, jenisKelamin: jenisKelamin || null, tempatLahir: tempatLahir || null, tanggalLahir: tanggalLahir ? new Date(tanggalLahir) : null, alamat: alamat || null, noTelepon: noTelepon || null, avatar: avatar || null, jabatan: jabatan || null, golongan: golongan || null, shiftKerja: shiftValue, nik: nik || null, namaAyah: namaAyah || null, pekerjaanAyah: pekerjaanAyah || null, namaIbu: namaIbu || null, pekerjaanIbu: pekerjaanIbu || null, alamatKtp: alamatKtp || null, alamatDomisili: alamatDomisili || null, kecamatan: kecamatan || null, kelurahan: kelurahan || null, kotaKabupaten: kota || null, status: "aktif",
-      },
-      select: { id: true, namaPengguna: true, email: true, namaLengkap: true, status: true, shiftKerja: true, sekolah: { select: { id: true, nama: true } }, peran: { select: { id: true, nama: true, namaTampilan: true } } },
-    });
-
-    await catatAuditLog(req, "CREATE_USER", "manajemen_pengguna", user.id, null, { email: user.email, namaLengkap: user.namaLengkap, peran: role.nama });
-
-    return res.status(201).json({ success: true, message: `${role.namaTampilan || role.nama} berhasil dibuat`, data: user });
-  } catch (error) {
-    if (next) return next(error);
-    console.error("Error createUser:", error);
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
-  }
-};
-
-export const updateUser = async (
-  req: AuthRequest,
-  res: Response,
-  next?: NextFunction,
-) => {
-  try {
-    const id = req.params.id as string;
-    const { namaPengguna, email, kataSandi, namaLengkap, peranId, sekolahId, nipd, nip, nuptk, nisn, jenisKelamin, tempatLahir, tanggalLahir, alamat, noTelepon, avatar, status, jabatan, golongan, nik, namaAyah, pekerjaanAyah, namaIbu, pekerjaanIbu, alamatKtp, alamatDomisili, kecamatan, kelurahan, kota, shiftKerja } = req.body;
-
-    const target = await prisma.pengguna.findUnique({ where: { id }, select: { id: true, sekolahId: true, shiftKerja: true, peran: { select: { nama: true } } } });
-    if (!target) return res.status(404).json({ success: false, message: "Pengguna tidak ditemukan" });
-
-    const actorRole = normalizeRole(req.user?.role);
-    const targetRole = normalizeRole(target.peran?.nama);
-
-    if (actorRole !== "super_admin") {
-      if (target.sekolahId !== req.user?.sekolahId) return res.status(403).json({ success: false, message: "Anda tidak dapat mengakses pengguna dari sekolah lain" });
-      if (!canManageRole(actorRole, targetRole)) return res.status(403).json({ success: false, message: "Anda tidak dapat mengelola role dengan level tersebut" });
-    }
-
-    const wasGuru = isGuru(target.peran?.nama);
-    let finalRoleName: string | null | undefined = target.peran?.nama;
-
-    if (peranId !== undefined && peranId !== null) {
-      const newRole = await prisma.peran.findUnique({ where: { id: peranId } });
-      if (!newRole) return res.status(400).json({ success: false, message: "Role tidak ditemukan" });
-      if (actorRole !== "super_admin") {
-        if (newRole.sekolahId !== null && newRole.sekolahId !== req.user?.sekolahId) return res.status(403).json({ success: false, message: "Anda tidak dapat menggunakan peran dari sekolah lain", errorCode: "FORBIDDEN_ROLE_TENANT" });
-        if (!canManageRole(actorRole, newRole.nama)) return res.status(403).json({ success: false, message: "Anda tidak dapat memberikan peran dengan level tersebut", errorCode: "FORBIDDEN" });
-      }
-      finalRoleName = newRole.nama;
-    }
-
-    if (target.id === req.user?.userId && (status === "nonaktif" || (peranId && normalizeRole(finalRoleName) !== "super_admin" && targetRole === "super_admin"))) {
-      return res.status(400).json({ success: false, message: "Anda tidak dapat menonaktifkan atau menurunkan peran akun Anda sendiri", errorCode: "SELF_DEMOTION_FORBIDDEN" });
-    }
-
-    if (targetRole === "super_admin" && (status === "nonaktif" || (peranId && normalizeRole(finalRoleName) !== "super_admin"))) {
-      const activeSuperAdminCount = await prisma.pengguna.count({ where: { peran: { nama: "super_admin" }, status: "aktif", dihapusPada: null, id: { not: target.id } } });
-      if (activeSuperAdminCount === 0) return res.status(400).json({ success: false, message: "Tidak dapat menonaktifkan atau menurunkan peran super admin terakhir dalam sistem", errorCode: "LAST_SUPERADMIN_PROTECTION" });
-    }
-
-    const willBeGuru = isGuru(finalRoleName);
-
-    const data: any = {
-      ...(namaPengguna !== undefined && { namaPengguna }),
-      ...(email !== undefined && { email }),
-      ...(namaLengkap !== undefined && { namaLengkap }),
-      ...(peranId !== undefined && { peranId }),
-      ...(sekolahId !== undefined && actorRole === "super_admin" && { sekolahId }),
-      ...(nipd !== undefined && { nipd }),
-      ...(nip !== undefined && { nip }),
-      ...(nuptk !== undefined && { nuptk }),
-      ...(nisn !== undefined && { nisn }),
-      ...(jenisKelamin !== undefined && { jenisKelamin }),
-      ...(tempatLahir !== undefined && { tempatLahir }),
-      ...(tanggalLahir !== undefined && { tanggalLahir: tanggalLahir ? new Date(tanggalLahir) : null }),
-      ...(alamat !== undefined && { alamat }),
-      ...(noTelepon !== undefined && { noTelepon }),
-      ...(avatar !== undefined && { avatar }),
-      ...(status !== undefined && { status }),
-      ...(jabatan !== undefined && { jabatan }),
-      ...(golongan !== undefined && { golongan }),
-      ...(nik !== undefined && { nik }),
-      ...(namaAyah !== undefined && { namaAyah }),
-      ...(pekerjaanAyah !== undefined && { pekerjaanAyah }),
-      ...(namaIbu !== undefined && { namaIbu }),
-      ...(pekerjaanIbu !== undefined && { pekerjaanIbu }),
-      ...(alamatKtp !== undefined && { alamatKtp }),
-      ...(alamatDomisili !== undefined && { alamatDomisili }),
-      ...(kecamatan !== undefined && { kecamatan }),
-      ...(kelurahan !== undefined && { kelurahan }),
-      ...(kota !== undefined && { kotaKabupaten: kota }),
+    const where: any = {
+      sekolahId,
+      dihapusPada: null,
+      peran: { nama: "siswa" },
     };
 
-    if (willBeGuru) {
-      const roleBaruJadiGuru = !wasGuru;
-      if (shiftKerja !== undefined || roleBaruJadiGuru) {
-        const shiftValue = normalizeShiftKerja(shiftKerja);
-        if (!shiftValue) return res.status(400).json({ success: false, message: "Shift kerja guru wajib diisi (pagi / siang)" });
-        data.shiftKerja = shiftValue;
-      }
-    } else if (target.shiftKerja) {
-      data.shiftKerja = null;
+    if (search) {
+      where.OR = [
+        { namaLengkap: { contains: search, mode: "insensitive" } },
+        { nisn: { contains: search, mode: "insensitive" } },
+      ];
     }
 
-    if (kataSandi) data.kataSandi = await bcrypt.hash(kataSandi, 10);
-    data.diperbaruiOleh = req.user?.userId;
+    const [data, totalData] = await Promise.all([
+      prisma.pengguna.findMany({
+        where,
+        skip,
+        take: limit,
+        select: {
+          pinHash: true,
+          id: true,
+          namaLengkap: true,
+          email: true,
+          nisn: true,
+          nis: true,
+          status: true,
+        },
+        orderBy: { dibuatPada: "desc" },
+      }),
+      prisma.pengguna.count({ where }),
+    ]);
 
-    const user = await prisma.pengguna.update({
-      where: { id },
-      data,
-      select: { id: true, namaPengguna: true, email: true, namaLengkap: true, status: true, shiftKerja: true, sekolah: { select: { id: true, nama: true } }, peran: { select: { id: true, nama: true, namaTampilan: true } } },
-    });
-
-    await catatAuditLog(req, "UPDATE_USER", "manajemen_pengguna", id, target, data);
-
-    return res.status(200).json({ success: true, message: "Pengguna berhasil diperbarui", data: user });
+    return paginatedResponse(
+      res,
+      "Data siswa berhasil diambil",
+      data.map(publicUser),
+      page,
+      limit,
+      totalData,
+    );
   } catch (error) {
-    if (next) return next(error);
-    console.error("Error updateUser:", error);
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
+    next(error);
   }
 };
 
-export const deleteUser = async (
+// === UPDATE SISWA ===
+// Reuse the complete validated profile/enrollment transaction; do not drop
+// parent fields by maintaining a separate, incomplete payload projection here.
+export const updateSiswa = (req: AuthRequest, res: Response, next: NextFunction) =>
+  studentProfiles(req, res, next);
+
+export const deleteSiswa = async (
   req: AuthRequest,
   res: Response,
-  next?: NextFunction,
-) => {
-  try {
-    const id = req.params.id as string;
-    const user = await prisma.pengguna.findUnique({ where: { id }, select: { id: true, sekolahId: true, peran: { select: { nama: true } } } });
-    if (!user) return res.status(404).json({ success: false, message: "Pengguna tidak ditemukan" });
-
-    const actorRole = normalizeRole(req.user?.role);
-    const targetRole = normalizeRole(user.peran?.nama);
-
-    if (actorRole !== "super_admin") {
-      if (targetRole === "super_admin" || targetRole === "admin_yayasan") return res.status(403).json({ success: false, message: "Anda tidak dapat mengelola role dengan level tersebut", errorCode: "FORBIDDEN" });
-      if (user.sekolahId !== req.user?.sekolahId) return res.status(403).json({ success: false, message: "Anda tidak dapat mengakses pengguna dari sekolah lain", errorCode: "FORBIDDEN" });
-      if (!canManageRole(actorRole, targetRole)) return res.status(403).json({ success: false, message: "Anda tidak dapat mengelola role dengan level tersebut", errorCode: "FORBIDDEN" });
-    }
-
-    if (user.id === req.user?.userId) return res.status(400).json({ success: false, message: "Anda tidak dapat menghapus atau menonaktifkan akun Anda sendiri", errorCode: "SELF_DELETION_FORBIDDEN" });
-
-    if (targetRole === "super_admin") {
-      const activeSuperAdminCount = await prisma.pengguna.count({ where: { peran: { nama: "super_admin" }, status: "aktif", dihapusPada: null, id: { not: user.id } } });
-      if (activeSuperAdminCount === 0) return res.status(400).json({ success: false, message: "Tidak dapat menghapus super admin terakhir dalam sistem", errorCode: "LAST_SUPERADMIN_PROTECTION" });
-    }
-
-    const updatedUser = await prisma.pengguna.update({
-      where: { id },
-      data: { status: "nonaktif", dihapusPada: new Date() },
-      select: { id: true, namaPengguna: true, email: true, namaLengkap: true, status: true, dihapusPada: true },
-    });
-
-    await catatAuditLog(req, "DELETE_USER", "manajemen_pengguna", id, user, { status: "nonaktif" });
-
-    return res.status(200).json({ success: true, message: "Pengguna berhasil dinonaktifkan", data: updatedUser });
-  } catch (error) {
-    if (next) return next(error);
-    console.error("Error deleteUser:", error);
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan server" });
-  }
-};
-
-export const profile = async (
-  req: AuthRequest,
-  res: Response,
-  next?: NextFunction,
-) => {
-  try {
-    if (!req.user) return res.status(401).json({ success: false, message: "Unauthorized" });
-
-    const user = await prisma.pengguna.findUnique({
-      where: { id: req.user.userId },
-      select: {
-        pinHash: true, id: true, email: true, namaPengguna: true, namaLengkap: true, avatar: true, nipd: true, nip: true, nuptk: true, nisn: true, nis: true, nik: true, jabatan: true, golongan: true, shiftKerja: true, jenisKelamin: true, tempatLahir: true, tanggalLahir: true, alamat: true, alamatDomisili: true, noTelepon: true, status: true, terakhirLogin: true, dibuatPada: true, diperbaruiPada: true, diperbaruiOleh: true,
-        sekolah: { select: { id: true, nama: true, subdomain: true, kode: true, alamat: true, telepon: true, email: true, logoBesarUrl: true, logoKecilUrl: true, status: true } },
-        peran: { select: { id: true, nama: true, namaTampilan: true, deskripsi: true, status: true } },
-        biometrikWajah: true,
-      },
-    });
-
-    if (!user) return res.status(404).json({ success: false, message: "Pengguna tidak ditemukan" });
-
-    if (normalizeRole(user.peran?.nama) === "siswa" && user.sekolah?.id) {
-      const akademik = await ambilDataAkademikSiswa(user.id, user.sekolah.id);
-      return res.status(200).json({ success: true, message: "Profile berhasil diambil", data: { ...publicUser(user), ...akademik } });
-    }
-
-    return res.status(200).json({ success: true, message: "Profile berhasil diambil", data: publicUser(user) });
-  } catch (error) {
-    if (next) return next(error);
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-export const updateProfile = async (
-  req: AuthRequest,
-  res: Response,
-  next?: NextFunction,
-) => {
-  try {
-    if (!req.user) return res.status(401).json({ success: false, message: "Unauthorized" });
-
-    const { namaLengkap, noTelepon, alamat, avatar, alamatDomisili, tempatLahir, tanggalLahir } = req.body;
-
-    const user = await prisma.pengguna.update({
-      where: { id: req.user.userId },
-      data: {
-        ...(namaLengkap !== undefined && { namaLengkap }),
-        ...(noTelepon !== undefined && { noTelepon }),
-        ...(alamat !== undefined && { alamat }),
-        ...(avatar !== undefined && { avatar }),
-        ...(alamatDomisili !== undefined && { alamatDomisili }),
-        ...(tempatLahir !== undefined && { tempatLahir }),
-        ...(tanggalLahir !== undefined && { tanggalLahir: tanggalLahir ? new Date(tanggalLahir) : null }),
-      },
-      select: { id: true, namaLengkap: true, email: true, namaPengguna: true, avatar: true, noTelepon: true, alamat: true, alamatDomisili: true, shiftKerja: true, status: true, sekolah: { select: { id: true, nama: true, subdomain: true } }, peran: { select: { id: true, nama: true, namaTampilan: true } } },
-    });
-
-    return res.status(200).json({ success: true, message: "Profile berhasil diupdate", data: user });
-  } catch (error) {
-    if (next) return next(error);
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-export const getUserById = async (
-  req: AuthRequest,
-  res: Response,
-  next?: NextFunction,
+  next: NextFunction,
 ) => {
   try {
     const id = req.params.id as string;
     const sekolahId = req.user?.sekolahId;
 
-    const user = await prisma.pengguna.findUnique({
+    await prisma.pengguna.update({
       where: { id },
-      select: {
-        pinHash: true, id: true, email: true, namaPengguna: true, namaLengkap: true, avatar: true, nipd: true, nip: true, nuptk: true, nisn: true, nik: true, golongan: true, jenisKelamin: true, tempatLahir: true, tanggalLahir: true, alamat: true, alamatDomisili: true, noTelepon: true, status: true, dibuatPada: true,
-        sekolah: { select: { id: true, nama: true, kode: true } },
-        peran: { select: { id: true, nama: true, namaTampilan: true } },
-        biometrikWajah: true, jabatan: true, shiftKerja: true, shiftKerjaId: true,
-        shiftKerjaMaster: { select: { id: true, nama: true, kode: true, jamMasuk: true, jamKeluar: true } },
-        kategoriJabatanId: true, kategoriJabatan: { select: { id: true, nama: true } },
+      data: {
+        dihapusPada: new Date(),
+        dihapusOleh: req.user?.userId,
+        status: "nonaktif",
       },
     });
 
-    if (!user) return res.status(404).json({ success: false, message: "Pengguna tidak ditemukan" });
-
-    const actorRole = normalizeRole(req.user?.role);
-    const targetRole = normalizeRole(user.peran?.nama);
-
-    if (actorRole !== "super_admin") {
-      if (targetRole === "super_admin" || targetRole === "admin_yayasan") return res.status(403).json({ success: false, message: "Akses ditolak: Anda tidak memiliki izin untuk melihat pengguna ini", errorCode: "FORBIDDEN" });
-      if (!user.sekolah?.id || user.sekolah.id !== sekolahId) return res.status(403).json({ success: false, message: "Akses ditolak: Pengguna berada di luar sekolah Anda", errorCode: "FORBIDDEN" });
-      if (!canManageRole(actorRole, targetRole)) return res.status(403).json({ success: false, message: "Akses ditolak: Anda tidak memiliki izin untuk melihat pengguna ini", errorCode: "FORBIDDEN" });
-    }
-
-    return res.status(200).json({ success: true, message: "Detail pengguna berhasil diambil", data: publicUser(user) });
+    return successResponse(res, "Siswa berhasil dihapus");
   } catch (error) {
-    if (next) return next(error);
-    console.error("Error getUserById:", error);
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan server", errorCode: "INTERNAL_SERVER_ERROR" });
+    next(error);
   }
 };
 
-export const quickResetPassword = async (
+export const getMySiswa = async (
   req: AuthRequest,
   res: Response,
-  next?: NextFunction,
+  next: NextFunction,
 ) => {
   try {
-    const targetUserId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-    if (!targetUserId) throw new AppError("ID pengguna tidak valid", 400);
+    const siswa = await prisma.pengguna.findFirst({
+      where: {
+        id: req.user?.userId,
+        peran: { nama: "siswa" },
+        dihapusPada: null,
+      },
+      select: {
+          pinHash: true,
+        id: true,
+        namaLengkap: true,
+        email: true,
+        nisn: true,
+        nis: true,
+        status: true,
+        jenisKelamin: true,
+      },
+    });
 
-    const adminSekolahId = req.user?.sekolahId;
-    const actorRole = normalizeRole(req.user?.role);
+    if (!siswa) throw new AppError("Data siswa tidak ditemukan", 404);
+    return successResponse(res, "Data siswa berhasil diambil", publicUser(siswa));
+  } catch (error) {
+    next(error);
+  }
+};
 
-    const targetUser = await prisma.pengguna.findUnique({ where: { id: targetUserId }, include: { peran: { select: { nama: true } } } });
-    if (!targetUser) throw new AppError("Pengguna tidak ditemukan", 404);
+// Reuse the complete validated profile/enrollment transaction; do not drop
+// parent fields by maintaining a separate, incomplete payload projection here.
+export const createSiswa = (req: AuthRequest, res: Response, next: NextFunction) =>
+  studentProfiles(req, res, next);
 
-    const targetRole = normalizeRole(targetUser.peran?.nama);
+export const getSemuaSiswaAdmin = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
 
-    if (actorRole !== "super_admin") {
-      if (targetRole === "super_admin" || targetRole === "admin_yayasan") throw new AppError("Akses ditolak untuk mereset pengguna ini", 403, "FORBIDDEN");
-      if (!targetUser.sekolahId || targetUser.sekolahId !== adminSekolahId) throw new AppError("Akses ditolak untuk mereset pengguna ini", 403, "FORBIDDEN");
-      if (!canManageRole(actorRole, targetRole)) throw new AppError("Anda tidak dapat mereset kata sandi pengguna dengan level peran tersebut", 403, "FORBIDDEN");
-    }
-
-    const generateRandomPassword = (length = 8): string => {
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
-      let result = "";
-      const randomValues = crypto.randomBytes(length);
-      for (let i = 0; i < length; i++) {
-        const val = randomValues[i] ?? 0;
-        result += chars.charAt(val % chars.length);
-      }
-      return result;
+    const skip = (page - 1) * limit;
+    const where: any = {
+      sekolahId,
+      dihapusPada: null,
+      peran: { nama: "siswa" },
     };
 
-    const requestedPassword = req.body?.kataSandi || req.body?.password;
-    if (requestedPassword && requestedPassword.length < 8) {
-      throw new AppError("Kata sandi baru minimal 8 karakter", 400, "VALIDATION_ERROR");
+    if (search) {
+      where.OR = [
+        { namaLengkap: { contains: search, mode: "insensitive" } },
+        { nisn: { contains: search, mode: "insensitive" } },
+        { nis: { contains: search, mode: "insensitive" } },
+      ];
     }
-    
-    const newPassword = requestedPassword || generateRandomPassword(8);
-    const defaultPassword = await bcrypt.hash(newPassword, 10);
 
-    await prisma.pengguna.update({ where: { id: targetUserId }, data: { kataSandi: defaultPassword, diperbaruiOleh: req.user?.userId } });
+    const [data, totalData] = await Promise.all([
+      prisma.pengguna.findMany({
+        where,
+        skip,
+        take: limit,
+        select: {
+          pinHash: true,
+          id: true,
+          namaLengkap: true,
+          email: true,
+          nisn: true,
+          nis: true,
+          status: true,
+          jenisKelamin: true,
+        },
+        orderBy: { dibuatPada: "desc" },
+      }),
+      prisma.pengguna.count({ where }),
+    ]);
 
-    await catatAuditLog(req, "RESET_PASSWORD", "manajemen_pengguna", targetUserId, null, { message: "Password direset" });
+    return paginatedResponse(
+      res,
+      "Data siswa berhasil diambil",
+      data.map(publicUser),
+      page,
+      limit,
+      totalData,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Reuse the complete validated profile/enrollment transaction; do not drop
+// parent fields by maintaining a separate, incomplete payload projection here.
+export const updateSiswaAdmin = (req: AuthRequest, res: Response, next: NextFunction) =>
+  studentProfiles(req, res, next);
+
+export const bulkImportSiswa = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const file = req.file;
+
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+    if (!file) throw new AppError("File excel wajib diunggah", 400);
+
+    const peranSiswa = await prisma.peran.findFirst({
+      where: {
+        nama: "siswa",
+        status: "aktif",
+        dihapusPada: null,
+        OR: [{ sekolahId }, { sekolahId: null }],
+      },
+      orderBy: {
+        sekolahId: "desc",
+      },
+    });
+    if (!peranSiswa) throw new AppError("Role siswa tidak ditemukan", 500);
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(file.path);
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet) throw new AppError("Sheet Excel tidak ditemukan", 400);
+
+    const siswaMentah: Array<{
+      namaLengkap: string;
+      nisn: string;
+      nis: string | null;
+      email: string;
+      jenisKelamin: string | null;
+    }> = [];
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) {
+        const nisnRaw = row.getCell(2).value?.toString() || "";
+        if (nisnRaw) {
+          siswaMentah.push({
+            namaLengkap: row.getCell(1).value?.toString() || "Tanpa Nama",
+            nisn: nisnRaw,
+            nis: row.getCell(3).value?.toString() || null,
+            email:
+              row.getCell(4).value?.toString() || `${nisnRaw}@student.local`,
+            jenisKelamin: row.getCell(5).value?.toString() || null,
+          });
+        }
+      }
+    });
+
+    const dataSiswaBaru = await Promise.all(
+      siswaMentah.map(async (siswa) => ({
+        sekolahId,
+        peranId: peranSiswa.id,
+        dibuatOleh: req.user?.userId,
+        namaPengguna: siswa.nisn,
+        kataSandi: await bcrypt.hash(siswa.nisn, 10),
+        status: "aktif",
+        ...siswa,
+      })),
+    );
+
+    await prisma.pengguna.createMany({
+      data: dataSiswaBaru,
+      skipDuplicates: true,
+    });
+
+    const fs = await import("fs/promises");
+    await fs.unlink(file.path);
 
     return successResponse(
       res,
-      "Kata sandi berhasil direset",
-      {
-        id: targetUserId,
-        password: newPassword,
-        kataSandi: newPassword,
-      },
+      `Berhasil memproses import ${dataSiswaBaru.length} siswa`,
+      null,
+      201,
     );
-  } catch (error: any) {
-    if (next) return next(error);
-    if (error instanceof AppError) {
-      return res.status(error.statusCode).json({ success: false, message: error.message, errorCode: error.errorCode || (error.statusCode === 403 ? "FORBIDDEN" : "BUSINESS_ERROR") });
-    }
-    console.error("Error quickResetPassword:", error);
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan server", errorCode: "INTERNAL_SERVER_ERROR" });
+  } catch (error) {
+    next(error);
   }
 };
