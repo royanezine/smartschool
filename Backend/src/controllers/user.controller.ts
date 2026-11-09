@@ -182,15 +182,6 @@ export const getUsers = async (
           status: true,
           dibuatPada: true,
           jabatan: true,
-        jabatanId: true,
-        jabatanRef: {
-          select: {
-            id: true,
-            namaJabatan: true,
-            deskripsi: true,
-            aksesMenu: true,
-          },
-        },
           golongan: true,
           shiftKerja: true,
           shiftKerjaId: true,
@@ -807,15 +798,6 @@ export const profile = async (
         nis: true,
         nik: true,
         jabatan: true,
-        jabatanId: true,
-        jabatanRef: {
-          select: {
-            id: true,
-            namaJabatan: true,
-            deskripsi: true,
-            aksesMenu: true,
-          },
-        },
         golongan: true,
         shiftKerja: true,
         jenisKelamin: true,
@@ -866,36 +848,20 @@ export const profile = async (
       });
     }
 
-    const rawAksesMenu = user.jabatanRef?.aksesMenu;
-    const aksesMenu = Array.isArray(rawAksesMenu) ? rawAksesMenu : [];
-    const jabatanNama = user.jabatanRef?.namaJabatan ?? (user.jabatan || null);
-    const baseUserData = publicUser(user);
-    const profileData = {
-      ...baseUserData,
-      jabatan: jabatanNama,
-      aksesMenu,
-    };
-
     if (normalizeRole(user.peran?.nama) === "siswa" && user.sekolah?.id) {
       const akademik = await ambilDataAkademikSiswa(user.id, user.sekolah.id);
 
       return res.status(200).json({
         success: true,
         message: "Profile berhasil diambil",
-        data: { ...profileData, ...akademik },
-        user: { ...baseUserData, nama: user.namaLengkap, role: user.peran?.nama ?? null },
-        jabatan: jabatanNama,
-        aksesMenu,
+        data: { ...publicUser(user), ...akademik },
       });
     }
 
     return res.status(200).json({
       success: true,
       message: "Profile berhasil diambil",
-      data: profileData,
-      user: { ...baseUserData, nama: user.namaLengkap, role: user.peran?.nama ?? null },
-      jabatan: jabatanNama,
-      aksesMenu,
+      data: publicUser(user),
     });
   } catch (error) {
     if (next) return next(error);
@@ -1010,15 +976,6 @@ export const getUserById = async (
         peran: { select: { id: true, nama: true, namaTampilan: true } },
         biometrikWajah: true,
         jabatan: true,
-        jabatanId: true,
-        jabatanRef: {
-          select: {
-            id: true,
-            namaJabatan: true,
-            deskripsi: true,
-            aksesMenu: true,
-          },
-        },
         shiftKerja: true,
         shiftKerjaId: true,
         shiftKerjaMaster: {

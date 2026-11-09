@@ -130,8 +130,16 @@ export const createKategoriAset = async (
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = kategoriAsetSchema.parse(req.body);
+    
+    // Paksa isi null kalau frontend gak ngirim keterangan
+    const dataToCreate = {
+      ...validatedData,
+      keterangan: validatedData.keterangan ?? null,
+      sekolahId
+    };
+
     const kategori = await prisma.kategoriAset.create({
-      data: { ...validatedData, sekolahId },
+      data: dataToCreate,
     });
     return successResponse(res, "Kategori aset berhasil dibuat", kategori, 201);
   } catch (error) {
@@ -329,11 +337,17 @@ export const createAset = async (
     });
     if (existingAset) throw new AppError("Kode aset sudah digunakan", 400);
 
+    // Beri default value kalau frontend gak ngirim
+    const dataToCreate = {
+      ...validatedData,
+      keterangan: validatedData.keterangan ?? null,
+      jumlahStok: validatedData.jumlahStok ?? validatedData.jumlah ?? 0,
+      stokMinimum: validatedData.stokMinimum ?? 0,
+      sekolahId,
+    };
+
     const aset = await prisma.aset.create({
-      data: {
-        ...validatedData,
-        sekolahId,
-      } as any,
+      data: dataToCreate as any,
     });
     return successResponse(res, "Aset berhasil dibuat", aset, 201);
   } catch (error) {
