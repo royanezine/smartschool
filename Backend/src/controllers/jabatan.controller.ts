@@ -4,15 +4,21 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
-import { DAFTAR_MENU_BAKU, DAFTAR_AKSI_MENU } from "../constants/menu.constant";
+import { isSuperAdmin } from "../utils/rbac";
+import {
+  DAFTAR_AKSI_MENU,
+  KONFIGURASI_MENU,
+  getMenusByJenjang,
+} from "../constants/menu.constant";
 import {
   createJabatanSchema,
   updateJabatanSchema,
 } from "../validations/jabatan.validation";
 
 /**
- * Mengembalikan daftar konstan menu baku dan aksi yang didukung sistem
- * Digunakan frontend untuk me-render checkbox dinamis hak akses menu
+ * Mengembalikan daftar konstan menu baku dan aksi yang didukung sistem.
+ * Fitur Toggling Jenjang: Menyesuaikan daftar menu sesuai jenjang sekolah (SD, SMP, SMA, SMK).
+ * Menu seperti "jurusan" dan "prakerin" tidak akan muncul untuk admin SD/SMP.
  */
 export const getMenuBaku = async (
   req: AuthRequest,
@@ -20,9 +26,28 @@ export const getMenuBaku = async (
   next: NextFunction,
 ) => {
   try {
+    const user = req.user;
+    let jenjang: string | null = null;
+    const targetSekolahId = (req.query.sekolahId as string) || user?.sekolahId;
+
+    if (targetSekolahId) {
+      const sekolah = await prisma.sekolah.findUnique({
+        where: { id: targetSekolahId },
+        select: { id: true, nama: true, jenjang: true },
+      });
+      jenjang = sekolah?.jenjang || null;
+    } else if (req.query.jenjang && typeof req.query.jenjang === "string") {
+      jenjang = req.query.jenjang;
+    }
+
+    // Filter menu berdasarkan jenjang sekolah (SD/SMP tidak mendapatkan menu jurusan/prakerin)
+    const menus = getMenusByJenjang(jenjang);
+
     return successResponse(res, "Daftar menu baku dan aksi berhasil diambil", {
-      menus: DAFTAR_MENU_BAKU,
+      menus,
       actions: DAFTAR_AKSI_MENU,
+      jenjang: jenjang || null,
+      menuDetails: KONFIGURASI_MENU.filter((item) => menus.includes(item.menu)),
     });
   } catch (error) {
     next(error);
@@ -91,7 +116,7 @@ export const getJabatanById = async (
 
 /**
  * Menyimpan jabatan baru menggunakan data dari validasi Zod
- * Menolak jika namaJabatan sudah ada
+ * Menolak jika namaJabatan sudah ada atau menu melanggar batasan jenjang sekolah
  */
 export const createJabatan = async (
   req: AuthRequest,
@@ -117,6 +142,26 @@ export const createJabatan = async (
         400,
         "DUPLICATE_JABATAN",
       );
+    }
+
+    // Validasi jenjang sekolah: tolak jika admin sekolah mencoba memberikan menu yang tidak diizinkan untuk jenjangnya
+    if (!isSuperAdmin(req.user?.role) && req.user?.sekolahId && validatedData.aksesMenu) {
+      const sekolah = await prisma.sekolah.findUnique({
+        where: { id: req.user.sekolahId },
+        select: { jenjang: true },
+      });
+      if (sekolah?.jenjang) {
+        const allowedMenus = getMenusByJenjang(sekolah.jenjang);
+        for (const item of validatedData.aksesMenu) {
+          if (!allowedMenus.includes(item.menu as any)) {
+            throw new AppError(
+              `Menu "${item.menu}" tidak diizinkan untuk jenjang sekolah ${sekolah.jenjang}`,
+              400,
+              "MENU_NOT_ALLOWED_FOR_JENJANG",
+            );
+          }
+        }
+      }
     }
 
     const jabatan = await prisma.jabatan.create({
@@ -184,6 +229,26 @@ export const updateJabatan = async (
           400,
           "DUPLICATE_JABATAN",
         );
+      }
+    }
+
+    // Validasi jenjang sekolah jika aksesMenu diupdate
+    if (!isSuperAdmin(req.user?.role) && req.user?.sekolahId && validatedData.aksesMenu) {
+      const sekolah = await prisma.sekolah.findUnique({
+        where: { id: req.user.sekolahId },
+        select: { jenjang: true },
+      });
+      if (sekolah?.jenjang) {
+        const allowedMenus = getMenusByJenjang(sekolah.jenjang);
+        for (const item of validatedData.aksesMenu) {
+          if (!allowedMenus.includes(item.menu as any)) {
+            throw new AppError(
+              `Menu "${item.menu}" tidak diizinkan untuk jenjang sekolah ${sekolah.jenjang}`,
+              400,
+              "MENU_NOT_ALLOWED_FOR_JENJANG",
+            );
+          }
+        }
       }
     }
 

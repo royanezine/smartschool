@@ -20,6 +20,8 @@ const select = {
   kelurahan: true, kodePos: true, noTelepon: true, namaAyah: true, nikAyah: true,
   pekerjaanAyah: true, noHpAyah: true, namaIbu: true, nikIbu: true, pekerjaanIbu: true,
   noHpIbu: true, namaWaliPesertaDidik: true,
+  jurusanId: true,
+  jurusan: { select: { id: true, kode: true, nama: true } },
   kelasSiswa: { where: { dihapusPada: null, status: "aktif", kelas: { dihapusPada: null } }, select: { id: true, kelasId: true, tahunAjaranId: true, kelas: { select: { id: true, nama: true, tahunAjaranId: true } } } },
 } satisfies Prisma.PenggunaSelect;
 

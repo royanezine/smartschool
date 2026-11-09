@@ -14,6 +14,7 @@ const fields = {
   namaIbu: optionalText(100), nikIbu: optionalText(20), pekerjaanIbu: optionalText(50), noHpIbu: optionalText(20),
   namaWaliPesertaDidik: optionalText(20),
   kelasId: z.string().uuid().nullable().optional(), tahunAjaranId: z.string().uuid().optional(),
+  jurusanId: z.string().uuid().nullable().optional(),
   status: z.enum(["aktif", "nonaktif"]).optional(),
 };
 export const createSiswaSchema = z.object({ ...fields, kataSandi: z.string().min(8).max(72).refine(v => Buffer.byteLength(v) <= 72) }).strict();

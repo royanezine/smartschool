@@ -40,6 +40,7 @@ model Pengguna {
   golongan                 String?             @db.VarChar(50)
   jabatan                  String?             @db.VarChar(100)
   jabatanId                String?             @map("jabatan_id")
+  jurusanId                String?             @map("jurusan_id")
   kategoriJabatanId        String?             @map("kategori_jabatan_id")
   kecamatan                String?             @db.VarChar(50)
   kelurahan                String?             @db.VarChar(50)
@@ -85,6 +86,7 @@ model Pengguna {
   penggajian               Penggajian[]
   kategoriJabatan          KategoriJabatan?    @relation(fields: [kategoriJabatanId], references: [id])
   jabatanRef               Jabatan?            @relation(fields: [jabatanId], references: [id])
+  jurusan                  Jurusan?            @relation(fields: [jurusanId], references: [id])
   peran                    Peran?              @relation(fields: [peranId], references: [id])
   sekolah                  Sekolah?            @relation(fields: [sekolahId], references: [id])
   shiftKerjaMaster         ShiftKerja?         @relation(fields: [shiftKerjaId], references: [id])
@@ -106,6 +108,7 @@ model Pengguna {
   transaksiTabunganPetugas TransaksiTabungan[] @relation("PetugasTabungan")
 
   @@index([jabatanId])
+  @@index([jurusanId])
   @@map("pengguna")
 }
 
@@ -1883,6 +1886,7 @@ model Jurusan {
   sekolah         Sekolah           @relation(fields: [sekolahId], references: [id])
   kelas           Kelas[]
   pendaftaranPpdb PendaftaranPpdb[]
+  pengguna        Pengguna[]
 
   @@unique([sekolahId, kode])
   @@map("jurusan")
