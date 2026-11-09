@@ -15,6 +15,7 @@ out/
 Thumbs.db
 *.tsbuildinfo
 /generated/prisma
+prisma7.config.ts
 
 # AI agent & skills artifacts
 .agents/
