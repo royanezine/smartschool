@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { AlertCircle, RefreshCw } from "lucide-react";
 
 import {
@@ -10,11 +10,15 @@ import {
   subscribeAuth,
   verifySessionProfile,
   getAuthRole,
+  hasMenuAccess,
+  getMenuKeyForAdminPath,
+  getDefaultAdminPath,
 } from "@/lib/auth";
 
 
 export default function AuthGuard({ allowedRoles = [], children }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const skipGuard = process.env.NEXT_PUBLIC_SKIP_AUTH_GUARD === "true";
 
@@ -47,6 +51,7 @@ export default function AuthGuard({ allowedRoles = [], children }) {
       if (result.valid) {
         const role = result.role || getAuthRole();
 
+        // Tier 1: Validasi Role dasar
         if (allowed.length > 0 && role && !allowed.includes(role)) {
           const home = getRoleHome(role);
 
@@ -61,6 +66,43 @@ export default function AuthGuard({ allowedRoles = [], children }) {
             router.replace(home);
           }
           return;
+        }
+
+        // Tier 2: Validasi Delegated RBAC (Jabatan / aksesMenu) khusus admin_sekolah
+        if (role === "admin_sekolah") {
+          const currentPath =
+            pathname ||
+            (typeof window !== "undefined" ? window.location.pathname : "");
+          const requiredMenu = getMenuKeyForAdminPath(currentPath);
+
+          if (requiredMenu) {
+            let requiredAction = "view";
+            if (
+              currentPath.endsWith("/tambah") ||
+              currentPath.includes("/tambah/")
+            ) {
+              requiredAction = "create";
+            } else if (
+              currentPath.includes("/edit") ||
+              currentPath.endsWith("/edit")
+            ) {
+              requiredAction = "update";
+            }
+
+            if (!hasMenuAccess(requiredMenu, requiredAction)) {
+              const fallbackHome = getDefaultAdminPath();
+              const targetRedirect =
+                fallbackHome && fallbackHome !== currentPath
+                  ? fallbackHome
+                  : "/login";
+
+              if (!isRedirectingRef.current) {
+                isRedirectingRef.current = true;
+                router.replace(targetRedirect);
+              }
+              return;
+            }
+          }
         }
 
         setTempError(null);
@@ -88,7 +130,7 @@ export default function AuthGuard({ allowedRoles = [], children }) {
         router.replace(isExpired ? "/login?sessionExpired=1" : "/login");
       }
     },
-    [allowedKey, router, skipGuard]
+    [allowedKey, router, pathname, skipGuard]
   );
 
   useEffect(() => {
@@ -98,6 +140,7 @@ export default function AuthGuard({ allowedRoles = [], children }) {
 
     let active = true;
 
+    isRedirectingRef.current = false;
     const timer = setTimeout(() => {
       if (active) {
         verify(false);
@@ -115,7 +158,7 @@ export default function AuthGuard({ allowedRoles = [], children }) {
       clearTimeout(timer);
       unsubscribe();
     };
-  }, [skipGuard, verify]);
+  }, [skipGuard, verify, pathname]);
 
   const handleRetry = async () => {
     setIsRetrying(true);

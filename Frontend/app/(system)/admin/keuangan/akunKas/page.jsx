@@ -26,6 +26,7 @@ import {
 import { getAkunKas, deleteAkunKas } from "@/services/jurnalKas.service";
 
 import Header from "@/app/components/Header";
+import CanAccess from "@/app/components/auth/CanAccess";
 import Sidebar from "@/app/components/Sidebar";
 
 function formatRupiah(value) {
@@ -265,13 +266,15 @@ export default function AkunKasPage() {
                     Muat Ulang
                   </button>
 
-                  <Link
-                    href="/admin/keuangan/akunKas/tambah"
-                    className="theme-primary inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold"
-                  >
-                    <Plus size={17} />
-                    Tambah Akun
-                  </Link>
+                  <CanAccess menu="keuangan dan kas" action="create">
+                    <Link
+                      href="/admin/keuangan/akunKas/tambah"
+                      className="theme-primary inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold"
+                    >
+                      <Plus size={17} />
+                      Tambah Akun
+                    </Link>
+                  </CanAccess>
                 </div>
               </section>
 
@@ -581,31 +584,35 @@ export default function AkunKasPage() {
                                 >
                                   <BookOpen size={14} />
                                 </Link>
-                                <Link
-                                  href={`/admin/keuangan/akunKas/${item.id}/edit`}
-                                  title="Edit akun"
-                                  aria-label={`Edit akun ${item.nama}`}
-                                  className="theme-input inline-flex h-8 w-8 items-center justify-center rounded-lg"
-                                >
-                                  <Pencil size={14} />
-                                </Link>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDelete(item)}
-                                  disabled={deletingId === item.id}
-                                  title="Hapus akun"
-                                  aria-label={`Hapus akun ${item.nama}`}
-                                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-danger)] text-[var(--color-danger)] transition hover:bg-[var(--color-danger-background)] disabled:opacity-50"
-                                >
-                                  {deletingId === item.id ? (
-                                    <Loader2
-                                      size={14}
-                                      className="animate-spin"
-                                    />
-                                  ) : (
-                                    <Trash2 size={14} />
-                                  )}
-                                </button>
+                                <CanAccess menu="keuangan dan kas" action="update">
+                                  <Link
+                                    href={`/admin/keuangan/akunKas/${item.id}/edit`}
+                                    title="Edit akun"
+                                    aria-label={`Edit akun ${item.nama}`}
+                                    className="theme-input inline-flex h-8 w-8 items-center justify-center rounded-lg"
+                                  >
+                                    <Pencil size={14} />
+                                  </Link>
+                                </CanAccess>
+                                <CanAccess menu="keuangan dan kas" action="delete">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDelete(item)}
+                                    disabled={deletingId === item.id}
+                                    title="Hapus akun"
+                                    aria-label={`Hapus akun ${item.nama}`}
+                                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-danger)] text-[var(--color-danger)] transition hover:bg-[var(--color-danger-background)] disabled:opacity-50"
+                                  >
+                                    {deletingId === item.id ? (
+                                      <Loader2
+                                        size={14}
+                                        className="animate-spin"
+                                      />
+                                    ) : (
+                                      <Trash2 size={14} />
+                                    )}
+                                  </button>
+                                </CanAccess>
                               </div>
                             </td>
                           </tr>

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
+import CanAccess from "@/app/components/auth/CanAccess";
 import Sidebar from "@/app/components/Sidebar";
 
 import {
@@ -535,25 +536,27 @@ export default function SettingTarifPage() {
                     Muat Ulang
                   </button>
 
-                  {tab === "kategori" ? (
-                    <button
-                      type="button"
-                      onClick={openTambahKategori}
-                      className="theme-primary inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_25%,transparent)] transition hover:opacity-90"
-                    >
-                      <Plus size={16} />
-                      Tambah Kategori
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={openTambahTarif}
-                      className="theme-primary inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_25%,transparent)] transition hover:opacity-90"
-                    >
-                      <Plus size={16} />
-                      Tambah Tarif
-                    </button>
-                  )}
+                  <CanAccess menu="keuangan dan kas" action="create">
+                    {tab === "kategori" ? (
+                      <button
+                        type="button"
+                        onClick={openTambahKategori}
+                        className="theme-primary inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_25%,transparent)] transition hover:opacity-90"
+                      >
+                        <Plus size={16} />
+                        Tambah Kategori
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={openTambahTarif}
+                        className="theme-primary inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_25%,transparent)] transition hover:opacity-90"
+                      >
+                        <Plus size={16} />
+                        Tambah Tarif
+                      </button>
+                    )}
+                  </CanAccess>
                 </div>
               </div>
             </div>
@@ -872,17 +875,21 @@ function KategoriTab({
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center justify-center gap-1">
-                        <ActionButton
-                          title="Edit"
-                          icon={<Edit size={16} />}
-                          onClick={() => onEdit(item)}
-                        />
-                        <ActionButton
-                          title="Hapus"
-                          icon={<Trash2 size={16} />}
-                          onClick={() => onDelete(item)}
-                          type="danger"
-                        />
+                        <CanAccess menu="keuangan dan kas" action="update">
+                          <ActionButton
+                            title="Edit"
+                            icon={<Edit size={16} />}
+                            onClick={() => onEdit(item)}
+                          />
+                        </CanAccess>
+                        <CanAccess menu="keuangan dan kas" action="delete">
+                          <ActionButton
+                            title="Hapus"
+                            icon={<Trash2 size={16} />}
+                            onClick={() => onDelete(item)}
+                            type="danger"
+                          />
+                        </CanAccess>
                       </div>
                     </td>
                   </tr>
@@ -1051,17 +1058,21 @@ function TarifTab({
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center justify-center gap-1">
-                        <ActionButton
-                          title="Edit"
-                          icon={<Edit size={16} />}
-                          onClick={() => onEdit(item)}
-                        />
-                        <ActionButton
-                          title="Hapus"
-                          icon={<Trash2 size={16} />}
-                          onClick={() => onDelete(item)}
-                          type="danger"
-                        />
+                        <CanAccess menu="keuangan dan kas" action="update">
+                          <ActionButton
+                            title="Edit"
+                            icon={<Edit size={16} />}
+                            onClick={() => onEdit(item)}
+                          />
+                        </CanAccess>
+                        <CanAccess menu="keuangan dan kas" action="delete">
+                          <ActionButton
+                            title="Hapus"
+                            icon={<Trash2 size={16} />}
+                            onClick={() => onDelete(item)}
+                            type="danger"
+                          />
+                        </CanAccess>
                       </div>
                     </td>
                   </tr>

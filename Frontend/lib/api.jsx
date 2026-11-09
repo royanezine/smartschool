@@ -1,4 +1,12 @@
-import { getToken, clearSession } from "./auth";
+import {
+  getToken,
+  getRefreshToken,
+  getStoredUser,
+  setSession,
+  clearSession,
+  registerAuthApiHandlers,
+  requestNewAccessToken as authRequestNewAccessToken,
+} from "./auth";
 
 function normalizeEndpoint(endpoint) {
   if (!endpoint) return "/";
@@ -29,6 +37,30 @@ function resolveFullUrl(endpoint) {
   return `${cleanBase}${cleanPath}`;
 }
 
+const AUTH_NO_REFRESH_PATHS = [
+  "/api/auth/login",
+  "/api/auth/refresh",
+  "/api/auth/register",
+  "/api/auth/verify-register",
+  "/api/auth/lupa-kata-sandi",
+  "/api/auth/atur-ulang-kata-sandi",
+  "/api/auth/pin/setup",
+  "/api/auth/pin/verify",
+  "/api/auth/pin/forgot",
+  "/api/auth/pin/reset",
+];
+
+function isNoRefreshEndpoint(endpoint) {
+  const normalized = normalizeEndpoint(endpoint).toLowerCase();
+  return AUTH_NO_REFRESH_PATHS.some(
+    (path) => normalized === path || normalized.startsWith(`${path}/`)
+  );
+}
+
+export async function requestNewAccessToken() {
+  return authRequestNewAccessToken();
+}
+
 export async function apiFetch(endpoint, options = {}) {
   const token = getToken();
 
@@ -40,11 +72,11 @@ export async function apiFetch(endpoint, options = {}) {
     ...(options.headers || {}),
   };
 
-  if (!isFormData) {
+  if (!isFormData && !headers["Content-Type"]) {
     headers["Content-Type"] = "application/json";
   }
 
-  if (token) {
+  if (token && !headers.Authorization) {
     headers.Authorization = `Bearer ${token}`;
   }
 
@@ -65,6 +97,41 @@ export async function apiFetch(endpoint, options = {}) {
     throw err;
   }
 
+  // Tangani HTTP 401 Unauthorized dengan refresh token silent terpusat
+  if (response.status === 401) {
+    const canAttemptRefresh =
+      !options._retry &&
+      !isNoRefreshEndpoint(endpoint) &&
+      Boolean(getRefreshToken());
+
+    if (canAttemptRefresh) {
+      let newAccessToken = null;
+      try {
+        newAccessToken = await requestNewAccessToken();
+      } catch (refreshErr) {
+        clearSession();
+      }
+
+      if (newAccessToken) {
+        const retryHeaders = {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${newAccessToken}`,
+        };
+        if (!isFormData && !retryHeaders["Content-Type"]) {
+          retryHeaders["Content-Type"] = "application/json";
+        }
+
+        return await apiFetch(endpoint, {
+          ...options,
+          _retry: true,
+          headers: retryHeaders,
+        });
+      }
+    } else {
+      clearSession();
+    }
+  }
+
   const contentType =
     response.headers.get("content-type") || "";
 
@@ -72,14 +139,31 @@ export async function apiFetch(endpoint, options = {}) {
 
   if (contentType.includes("application/json")) {
     try {
-      data = await response.json();
+      if (typeof response.json === "function") {
+        data = await response.json();
+      } else if (typeof response.text === "function") {
+        const raw = await response.text();
+        data = raw && raw.trim() ? JSON.parse(raw) : null;
+      }
     } catch {
       data = null;
     }
   } else {
     try {
-      const text = await response.text();
-      data = text || null;
+      if (typeof response.text === "function") {
+        const text = await response.text();
+        if (text && text.trim()) {
+          try {
+            data = JSON.parse(text);
+          } catch {
+            data = text;
+          }
+        } else {
+          data = null;
+        }
+      } else if (typeof response.json === "function") {
+        data = await response.json();
+      }
     } catch {
       data = null;
     }
@@ -92,7 +176,9 @@ export async function apiFetch(endpoint, options = {}) {
 
     let message = `Request gagal. Status: ${response.status}`;
 
-    if (data && typeof data === "object") {
+    if (response.status === 429) {
+      message = "Terlalu banyak percobaan, mohon tunggu sebentar.";
+    } else if (data && typeof data === "object") {
       message =
         data.message ||
         data.error ||
@@ -118,8 +204,20 @@ export async function apiFetch(endpoint, options = {}) {
       .replace(/(?:password|token|tokenPendaftaran|otp)\s*[:=]\s*[^\s,]+/gi, "token: [REDACTED]")
       .replace(/ey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+/g, "[REDACTED]");
 
+    const retryAfterHeader =
+      typeof response.headers?.get === "function"
+        ? response.headers.get("retry-after") || response.headers.get("Retry-After")
+        : null;
+    const parsedRetryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : null;
+    const retryAfter =
+      Number.isFinite(parsedRetryAfter) && parsedRetryAfter > 0
+        ? parsedRetryAfter
+        : null;
+
     const error = new Error(message);
     error.status = response.status;
+    error.statusCode = response.status;
+    error.retryAfter = retryAfter;
     error.data = data?.data ?? data;
     error.raw = data;
     error.errorCode = data?.errorCode || null;
@@ -129,4 +227,8 @@ export async function apiFetch(endpoint, options = {}) {
   }
 
   return data;
+}
+
+if (typeof registerAuthApiHandlers === "function") {
+  registerAuthApiHandlers({ apiFetch });
 }

@@ -289,7 +289,8 @@ export interface UpdateAsesmenMinatBakatPayload {
 }
 
 
-import { getToken } from "../lib/auth";
+import { getToken, getRefreshToken, clearSession } from "../lib/auth";
+import { apiFetch, requestNewAccessToken } from "../lib/api";
 
 function getHeaders(): HeadersInit {
   const token = getToken();
@@ -305,46 +306,42 @@ function getHeaders(): HeadersInit {
   };
 }
 
-async function handleResponse<T>(
-  response: Response
+async function request<T>(
+  endpoint: string,
+  options: RequestInit = {}
 ): Promise<T> {
-  let result: any = null;
-
   try {
-    result = await response.json();
-  } catch {
-    result = null;
+    const result = await apiFetch(endpoint, {
+      ...options,
+      headers: {
+        ...getHeaders(),
+        ...(options.headers || {}),
+      },
+    });
+
+    if (
+      result &&
+      typeof result === "object" &&
+      "data" in result
+    ) {
+      return result.data as T;
+    }
+
+    if (
+      result &&
+      typeof result === "object" &&
+      "result" in result
+    ) {
+      return result.result as T;
+    }
+
+    return result as T;
+  } catch (err: any) {
+    if (err?.status && /^Request gagal\.\s*Status:/i.test(err.message || "")) {
+      err.message = `Request gagal dengan status ${err.status}`;
+    }
+    throw err;
   }
-
-  if (!response.ok) {
-    const message =
-      result?.message ||
-      result?.error ||
-      `Request gagal dengan status ${response.status}`;
-
-    const error = new Error(message) as Error & { status?: number };
-    error.status = response.status;
-
-    throw error;
-  }
-
-  if (
-    result &&
-    typeof result === "object" &&
-    "data" in result
-  ) {
-    return result.data as T;
-  }
-
-  if (
-    result &&
-    typeof result === "object" &&
-    "result" in result
-  ) {
-    return result.result as T;
-  }
-
-  return result as T;
 }
 
 
@@ -354,16 +351,10 @@ const KONSELING_PATH =
 export async function getSesiKonseling(): Promise<
   SesiKonseling[]
 > {
-  const response = await fetch(
-    `${API_URL}${KONSELING_PATH}`,
-    {
-      method: "GET",
-      headers: getHeaders(),
-      cache: "no-store",
-    }
-  );
-
-  return handleResponse<SesiKonseling[]>(response);
+  return request<SesiKonseling[]>(KONSELING_PATH, {
+    method: "GET",
+    cache: "no-store",
+  });
 }
 
 export async function getSesiKonselingById(
@@ -373,16 +364,10 @@ export async function getSesiKonselingById(
     throw new Error("ID sesi konseling wajib diisi");
   }
 
-  const response = await fetch(
-    `${API_URL}${KONSELING_PATH}/${id}`,
-    {
-      method: "GET",
-      headers: getHeaders(),
-      cache: "no-store",
-    }
-  );
-
-  return handleResponse<SesiKonseling>(response);
+  return request<SesiKonseling>(`${KONSELING_PATH}/${id}`, {
+    method: "GET",
+    cache: "no-store",
+  });
 }
 
 export async function createSesiKonseling(
@@ -400,16 +385,10 @@ export async function createSesiKonseling(
     throw new Error("Topik wajib diisi");
   }
 
-  const response = await fetch(
-    `${API_URL}${KONSELING_PATH}`,
-    {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
-
-  return handleResponse<SesiKonseling>(response);
+  return request<SesiKonseling>(KONSELING_PATH, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function updateSesiKonseling(
@@ -420,16 +399,10 @@ export async function updateSesiKonseling(
     throw new Error("ID sesi konseling wajib diisi");
   }
 
-  const response = await fetch(
-    `${API_URL}${KONSELING_PATH}/${id}`,
-    {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
-
-  return handleResponse<SesiKonseling>(response);
+  return request<SesiKonseling>(`${KONSELING_PATH}/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function deleteSesiKonseling(
@@ -439,15 +412,9 @@ export async function deleteSesiKonseling(
     throw new Error("ID sesi konseling wajib diisi");
   }
 
-  const response = await fetch(
-    `${API_URL}${KONSELING_PATH}/${id}`,
-    {
-      method: "DELETE",
-      headers: getHeaders(),
-    }
-  );
-
-  await handleResponse<any>(response);
+  await request<any>(`${KONSELING_PATH}/${id}`, {
+    method: "DELETE",
+  });
 }
 
 
@@ -457,16 +424,10 @@ const KATEGORI_PATH =
 export async function getKategoriPelanggaran(): Promise<
   KategoriPelanggaran[]
 > {
-  const response = await fetch(
-    `${API_URL}${KATEGORI_PATH}`,
-    {
-      method: "GET",
-      headers: getHeaders(),
-      cache: "no-store",
-    }
-  );
-
-  return handleResponse<KategoriPelanggaran[]>(response);
+  return request<KategoriPelanggaran[]>(KATEGORI_PATH, {
+    method: "GET",
+    cache: "no-store",
+  });
 }
 
 export async function createKategoriPelanggaran(
@@ -483,18 +444,10 @@ export async function createKategoriPelanggaran(
     throw new Error("Poin wajib diisi");
   }
 
-  const response = await fetch(
-    `${API_URL}${KATEGORI_PATH}`,
-    {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
-
-  return handleResponse<KategoriPelanggaran>(
-    response
-  );
+  return request<KategoriPelanggaran>(KATEGORI_PATH, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function updateKategoriPelanggaran(
@@ -507,18 +460,10 @@ export async function updateKategoriPelanggaran(
     );
   }
 
-  const response = await fetch(
-    `${API_URL}${KATEGORI_PATH}/${id}`,
-    {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
-
-  return handleResponse<KategoriPelanggaran>(
-    response
-  );
+  return request<KategoriPelanggaran>(`${KATEGORI_PATH}/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function deleteKategoriPelanggaran(
@@ -530,34 +475,408 @@ export async function deleteKategoriPelanggaran(
     );
   }
 
-  const response = await fetch(
-    `${API_URL}${KATEGORI_PATH}/${id}`,
-    {
-      method: "DELETE",
-      headers: getHeaders(),
-    }
-  );
-
-  await handleResponse<any>(response);
+  await request<any>(`${KATEGORI_PATH}/${id}`, {
+    method: "DELETE",
+  });
 }
 
+
+export interface PelanggaranQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  siswaId?: string;
+  kategoriId?: string;
+  status?: string;
+  tanggalMulai?: string;
+  tanggalSelesai?: string;
+}
+
+export interface PelanggaranPaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalData: number;
+  totalPages: number;
+  currentPage: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export type PelanggaranSiswaListResult = PelanggaranSiswa[] & {
+  data: PelanggaranSiswa[];
+  meta: PelanggaranPaginationMeta;
+  pagination: {
+    totalData: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+  totalData: number;
+  totalPages: number;
+  currentPage: number;
+};
 
 const PELANGGARAN_PATH =
   `${BK_BASE_PATH}/pelanggaran`;
 
-export async function getPelanggaranSiswa(): Promise<
-  PelanggaranSiswa[]
-> {
-  const response = await fetch(
-    `${API_URL}${PELANGGARAN_PATH}`,
-    {
+export async function getPelanggaranSiswa(
+  params?: PelanggaranQueryParams
+): Promise<PelanggaranSiswaListResult> {
+  const query = new URLSearchParams();
+  if (params?.page !== undefined && params?.page !== null) {
+    query.set("page", String(params.page));
+  }
+  if (params?.limit !== undefined && params?.limit !== null) {
+    query.set("limit", String(params.limit));
+  }
+  if (params?.search) {
+    query.set("search", params.search);
+  }
+  if (params?.siswaId) {
+    query.set("siswaId", params.siswaId);
+  }
+  if (params?.kategoriId) {
+    query.set("kategoriId", params.kategoriId);
+  }
+  if (params?.status) {
+    query.set("status", params.status);
+  }
+  if (params?.tanggalMulai) {
+    query.set("tanggalMulai", params.tanggalMulai);
+  }
+  if (params?.tanggalSelesai) {
+    query.set("tanggalSelesai", params.tanggalSelesai);
+  }
+
+  const qs = query.toString();
+  const endpoint = qs
+    ? `${PELANGGARAN_PATH}?${qs}`
+    : PELANGGARAN_PATH;
+
+  let result: any = null;
+  try {
+    result = await apiFetch(endpoint, {
       method: "GET",
       headers: getHeaders(),
       cache: "no-store",
+    });
+  } catch (err: any) {
+    if (err?.status && /^Request gagal\.\s*Status:/i.test(err.message || "")) {
+      err.message = `Request gagal dengan status ${err.status}`;
     }
+    throw err;
+  }
+
+  const rawData: PelanggaranSiswa[] = Array.isArray(result?.data)
+    ? result.data
+    : Array.isArray(result)
+    ? result
+    : [];
+
+  const rawMeta = result?.meta || {};
+  const rawPagination = result?.pagination || {};
+
+  const totalData = Number(
+    rawMeta.totalData ??
+    rawMeta.total ??
+    rawPagination.totalData ??
+    result?.totalData ??
+    rawData.length
   );
 
-  return handleResponse<PelanggaranSiswa[]>(response);
+  const limit = Number(
+    rawMeta.limit ??
+    rawPagination.limit ??
+    params?.limit ??
+    10
+  );
+
+  const totalPages = Number(
+    rawMeta.totalPages ??
+    rawPagination.totalPages ??
+    result?.totalPages ??
+    (totalData > 0 ? Math.ceil(totalData / limit) : 1)
+  );
+
+  const currentPage = Number(
+    rawMeta.currentPage ??
+    rawMeta.page ??
+    rawPagination.currentPage ??
+    result?.currentPage ??
+    params?.page ??
+    1
+  );
+
+  const meta: PelanggaranPaginationMeta = {
+    page: currentPage,
+    limit,
+    total: totalData,
+    totalData,
+    totalPages,
+    currentPage,
+    hasNext: Boolean(
+      rawMeta.hasNext ??
+      rawPagination.hasNext ??
+      (currentPage < totalPages)
+    ),
+    hasPrev: Boolean(
+      rawMeta.hasPrev ??
+      rawPagination.hasPrev ??
+      (currentPage > 1)
+    ),
+  };
+
+  const pagination = {
+    totalData,
+    totalPages,
+    currentPage,
+    limit,
+    hasNext: meta.hasNext,
+    hasPrev: meta.hasPrev,
+  };
+
+  const list = [...rawData] as PelanggaranSiswaListResult;
+  list.data = rawData;
+  list.meta = meta;
+  list.pagination = pagination;
+  list.totalData = totalData;
+  list.totalPages = totalPages;
+  list.currentPage = currentPage;
+
+  return list;
+}
+
+export interface PelanggaranExportParams {
+  search?: string;
+  siswaId?: string;
+  kategoriId?: string;
+  status?: string;
+  tanggalMulai?: string;
+  tanggalSelesai?: string;
+}
+
+export interface PelanggaranExportResult {
+  blob: Blob;
+  filename: string;
+}
+
+export function extractFilenameFromDisposition(
+  disposition: string | null | undefined,
+  fallbackFilename: string
+): string {
+  if (!disposition || typeof disposition !== "string") {
+    return fallbackFilename;
+  }
+
+  // 1. Try RFC 5987/6266 utf-8 filename*
+  const utf8Match = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    try {
+      const decoded = decodeURIComponent(utf8Match[1].trim());
+      const clean = decoded.replace(/^["']|["']$/g, "").trim();
+      if (clean && clean !== "undefined" && clean !== "null" && clean !== "[object Object]") {
+        return clean;
+      }
+    } catch {
+      // ignore decode error
+    }
+  }
+
+  // 2. Try standard filename="..." or filename=...
+  const match = disposition.match(/filename\s*=\s*(?:"([^"]+)"|'([^']+)'|([^;\s]+))/i);
+  const found = match?.[1] || match?.[2] || match?.[3];
+  if (found) {
+    const clean = found.trim().replace(/^["']|["']$/g, "").trim();
+    if (clean && clean !== "undefined" && clean !== "null" && clean !== "[object Object]") {
+      return clean;
+    }
+  }
+
+  return fallbackFilename;
+}
+
+export function downloadBlob(blob: Blob, filename: string): void {
+  if (typeof window === "undefined" || !blob) {
+    return;
+  }
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename || "download";
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => {
+    try {
+      window.URL.revokeObjectURL(url);
+    } catch {
+      // ignore revoke error
+    }
+  }, 100);
+}
+
+function getExportHeaders(type: "excel" | "pdf"): HeadersInit {
+  const token = getToken();
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    Accept:
+      type === "excel"
+        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/octet-stream"
+        : "application/pdf, application/octet-stream",
+  };
+}
+
+async function exportPelanggaranBlob(
+  type: "excel" | "pdf",
+  params?: PelanggaranExportParams
+): Promise<PelanggaranExportResult> {
+  const query = new URLSearchParams();
+  if (params?.search) {
+    query.set("search", params.search);
+  }
+  if (params?.siswaId) {
+    query.set("siswaId", params.siswaId);
+  }
+  if (params?.kategoriId) {
+    query.set("kategoriId", params.kategoriId);
+  }
+  if (params?.status) {
+    query.set("status", params.status);
+  }
+  if (params?.tanggalMulai) {
+    query.set("tanggalMulai", params.tanggalMulai);
+  }
+  if (params?.tanggalSelesai) {
+    query.set("tanggalSelesai", params.tanggalSelesai);
+  }
+
+  const qs = query.toString();
+  const subPath = type === "excel" ? "export/excel" : "export/pdf";
+  const primaryPath = `${PELANGGARAN_PATH}/${subPath}`;
+  const url = qs
+    ? `${API_URL}${primaryPath}?${qs}`
+    : `${API_URL}${primaryPath}`;
+
+  let headers = getExportHeaders(type);
+
+  let response = await fetch(url, {
+    method: "GET",
+    headers,
+    cache: "no-store",
+  });
+
+  if (response.status === 401) {
+    if (getRefreshToken()) {
+      let newAccessToken: string | null = null;
+      try {
+        newAccessToken = await requestNewAccessToken();
+      } catch {
+        clearSession();
+      }
+
+      if (newAccessToken) {
+        headers = {
+          ...headers,
+          Authorization: `Bearer ${newAccessToken}`,
+        };
+        response = await fetch(url, {
+          method: "GET",
+          headers,
+          cache: "no-store",
+        });
+        if (response.status === 401) {
+          clearSession();
+        }
+      }
+    } else {
+      clearSession();
+    }
+  }
+
+  // Fallback jika backend me-mount tanpa prefix /bk
+  if (response.status === 404 && url.includes("/api/bk/pelanggaran/")) {
+    const fallbackUrl = url.replace("/api/bk/pelanggaran/", "/api/pelanggaran/");
+    try {
+      const fallbackResponse = await fetch(fallbackUrl, {
+        method: "GET",
+        headers,
+        cache: "no-store",
+      });
+      if (fallbackResponse.ok) {
+        response = fallbackResponse;
+      }
+    } catch {
+      // tetap gunakan response awal
+    }
+  }
+
+  if (!response.ok) {
+    let errorMessage = `Gagal mengekspor data ${type.toUpperCase()} (Status: ${response.status})`;
+
+    try {
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const errorJson = await response.json();
+        errorMessage = errorJson?.message || errorJson?.error || errorMessage;
+      } else {
+        const text = await response.text();
+        if (text && text.trim() && !/<[a-z][\s\S]*>/i.test(text)) {
+          errorMessage = text.trim();
+        }
+      }
+    } catch {
+      // gunakan message default
+    }
+
+    if (response.status === 401) {
+      errorMessage = "Sesi login tidak valid atau telah berakhir. Silakan login kembali.";
+    } else if (response.status === 403) {
+      errorMessage = "Anda tidak memiliki hak akses untuk mengekspor data pelanggaran.";
+    } else if (response.status === 404) {
+      errorMessage = `Layanan export ${type.toUpperCase()} tidak ditemukan di server.`;
+    }
+
+    const error = new Error(errorMessage) as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    const errorJson = await response.json();
+    if (!errorJson?.success && !errorJson?.sukses) {
+      const msg = errorJson?.message || errorJson?.pesan || `Gagal mengekspor data ${type.toUpperCase()}`;
+      throw new Error(msg);
+    }
+  }
+
+  const blob = await response.blob();
+  if (!blob || blob.size === 0) {
+    throw new Error(`File ${type.toUpperCase()} yang diterima dari server kosong.`);
+  }
+
+  const fallbackExt = type === "excel" ? "xlsx" : "pdf";
+  const fallbackFilename = `daftar_pelanggaran.${fallbackExt}`;
+  const disposition = response.headers.get("content-disposition");
+  const filename = extractFilenameFromDisposition(disposition, fallbackFilename);
+
+  return { blob, filename };
+}
+
+export async function exportPelanggaranExcel(
+  params?: PelanggaranExportParams
+): Promise<PelanggaranExportResult> {
+  return exportPelanggaranBlob("excel", params);
+}
+
+export async function exportPelanggaranPdf(
+  params?: PelanggaranExportParams
+): Promise<PelanggaranExportResult> {
+  return exportPelanggaranBlob("pdf", params);
 }
 
 export async function createPelanggaranSiswa(
@@ -577,18 +896,10 @@ export async function createPelanggaranSiswa(
     throw new Error("Tanggal wajib diisi");
   }
 
-  const response = await fetch(
-    `${API_URL}${PELANGGARAN_PATH}`,
-    {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
-
-  return handleResponse<PelanggaranSiswa>(
-    response
-  );
+  return request<PelanggaranSiswa>(PELANGGARAN_PATH, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function updatePelanggaranSiswa(
@@ -601,18 +912,10 @@ export async function updatePelanggaranSiswa(
     );
   }
 
-  const response = await fetch(
-    `${API_URL}${PELANGGARAN_PATH}/${id}`,
-    {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
-
-  return handleResponse<PelanggaranSiswa>(
-    response
-  );
+  return request<PelanggaranSiswa>(`${PELANGGARAN_PATH}/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function deletePelanggaranSiswa(
@@ -624,15 +927,9 @@ export async function deletePelanggaranSiswa(
     );
   }
 
-  const response = await fetch(
-    `${API_URL}${PELANGGARAN_PATH}/${id}`,
-    {
-      method: "DELETE",
-      headers: getHeaders(),
-    }
-  );
-
-  await handleResponse<any>(response);
+  await request<any>(`${PELANGGARAN_PATH}/${id}`, {
+    method: "DELETE",
+  });
 }
 
 
@@ -642,18 +939,10 @@ const ASESMEN_PATH =
 export async function getAsesmenMinatBakat(): Promise<
   AsesmenMinatBakat[]
 > {
-  const response = await fetch(
-    `${API_URL}${ASESMEN_PATH}`,
-    {
-      method: "GET",
-      headers: getHeaders(),
-      cache: "no-store",
-    }
-  );
-
-  return handleResponse<AsesmenMinatBakat[]>(
-    response
-  );
+  return request<AsesmenMinatBakat[]>(ASESMEN_PATH, {
+    method: "GET",
+    cache: "no-store",
+  });
 }
 
 export async function createAsesmenMinatBakat(
@@ -671,18 +960,10 @@ export async function createAsesmenMinatBakat(
     throw new Error("Jenis asesmen wajib diisi");
   }
 
-  const response = await fetch(
-    `${API_URL}${ASESMEN_PATH}`,
-    {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
-
-  return handleResponse<AsesmenMinatBakat>(
-    response
-  );
+  return request<AsesmenMinatBakat>(ASESMEN_PATH, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function updateAsesmenMinatBakat(
@@ -695,18 +976,10 @@ export async function updateAsesmenMinatBakat(
     );
   }
 
-  const response = await fetch(
-    `${API_URL}${ASESMEN_PATH}/${id}`,
-    {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
-
-  return handleResponse<AsesmenMinatBakat>(
-    response
-  );
+  return request<AsesmenMinatBakat>(`${ASESMEN_PATH}/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function deleteAsesmenMinatBakat(
@@ -718,15 +991,9 @@ export async function deleteAsesmenMinatBakat(
     );
   }
 
-  const response = await fetch(
-    `${API_URL}${ASESMEN_PATH}/${id}`,
-    {
-      method: "DELETE",
-      headers: getHeaders(),
-    }
-  );
-
-  await handleResponse<any>(response);
+  await request<any>(`${ASESMEN_PATH}/${id}`, {
+    method: "DELETE",
+  });
 }
 
 
@@ -750,16 +1017,10 @@ export async function ajukanSesiKonseling(
     throw new Error("Topik konseling wajib dipilih.");
   }
 
-  const response = await fetch(
-    `${API_URL}/api/bk/konseling/ajukan`,
-    {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    },
-  );
-
-  return handleResponse(response);
+  return request("/api/bk/konseling/ajukan", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function putuskanPengajuanKonseling(
@@ -770,16 +1031,10 @@ export async function putuskanPengajuanKonseling(
     catatan?: string;
   }
 ) {
-  const response = await fetch(
-    `${API_URL}/api/bk/konseling/${id}/keputusan`,
-    {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
-
-  return handleResponse(response);
+  return request(`/api/bk/konseling/${id}/keputusan`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function batalkanPengajuanKonseling(id: string): Promise<any> {
@@ -787,15 +1042,9 @@ export async function batalkanPengajuanKonseling(id: string): Promise<any> {
     throw new Error("ID pengajuan konseling wajib diisi");
   }
 
-  const response = await fetch(
-    `${API_URL}/api/bk/konseling/${encodeURIComponent(id)}/batal`,
-    {
-      method: "PUT",
-      headers: getHeaders(),
-    }
-  );
-
-  return handleResponse(response);
+  return request(`/api/bk/konseling/${encodeURIComponent(id)}/batal`, {
+    method: "PUT",
+  });
 }
 
 export const batalKonseling = batalkanPengajuanKonseling;

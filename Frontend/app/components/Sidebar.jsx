@@ -24,6 +24,8 @@ import {
   getActiveModules,
   clearSession,
   subscribeAuth,
+  hasMenuAccess,
+  getUserAksesMenu,
 } from "../../lib/auth";
 
 const configByRole = {
@@ -62,7 +64,7 @@ function getSidebarRole(role) {
   const normalized = normalizeRole(role);
 
   if (normalized === "super_admin") return "super-admin";
-  if (normalized === "admin" || normalized === "admin_sekolah") return "admin";
+  if (normalized === "admin" || normalized === "admin_sekolah" || normalized === "cms") return "admin";
   if (normalized === "admin_yayasan" || normalized === "yayasan") return "yayasan";
   if (normalized === "guru") return "guru";
   if (normalized === "siswa") return "siswa";
@@ -95,9 +97,23 @@ function isRoleAllowed(menuRole, currentRole) {
   return getSidebarRole(menuRole) === current;
 }
 
-function canViewMenu(item, permissions, modules) {
+function canViewMenu(item, permissions, modules, currentRole) {
   if (!item) return false;
 
+  const authRole = getAuthRole();
+  const isSuperAdmin = authRole === "super_admin";
+  if (isSuperAdmin) return true;
+
+  // Jika item berada dalam konfigurasi menu admin (role admin/admin_sekolah)
+  if (currentRole === "admin") {
+    // Menu item untuk admin WAJIB memiliki menuKey dan diizinkan aksinya ("view")
+    if (!item.menuKey) {
+      return false;
+    }
+    return hasMenuAccess(item.menuKey, "view");
+  }
+
+  // Untuk role non-admin (guru, siswa, yayasan), gunakan logika legacy berbasis permission/modul
   const permissionAllowed = !item.permission || permissions.includes(item.permission);
   const moduleAllowed = !item.module || modules.includes(item.module);
 
@@ -125,24 +141,20 @@ function filterMenuItems(items, permissions, modules, currentRole) {
           currentRole
         );
 
-        const parentAllowed = canViewMenu(item, permissions, modules);
-
-        if (parentAllowed && filteredChildren.length > 0) {
-          return { ...item, children: filteredChildren };
-        }
+        const parentAllowed = canViewMenu(item, permissions, modules, currentRole);
 
         if (filteredChildren.length > 0) {
           return { ...item, children: filteredChildren };
         }
 
-        if (parentAllowed) {
+        if (parentAllowed && item.path) {
           return { ...item, children: [] };
         }
 
         return null;
       }
 
-      if (!canViewMenu(item, permissions, modules)) return null;
+      if (!canViewMenu(item, permissions, modules, currentRole)) return null;
 
       return item;
     })
@@ -345,7 +357,8 @@ export default function Sidebar({
     const filtered = filterMenuItems(config.menuSections, permissions, modules, role);
 
     return removeEmptyHeaders(filtered);
-  }, [config, permissions, modules, role]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, permissions, modules, role, authTick]);
 
   const menuPaths = useMemo(() => {
     const paths = [];

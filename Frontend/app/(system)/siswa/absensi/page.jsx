@@ -219,6 +219,9 @@ function getResponseObject(response) {
 }
 
 function getErrorMessage(error, fallback) {
+  if (error?.status === 429 || error?.statusCode === 429 || error?.response?.status === 429) {
+    return "Terlalu banyak percobaan, mohon tunggu sebentar.";
+  }
   if (error instanceof Error && error.message) return error.message;
   if (typeof error?.message === "string" && error.message) {
     return error.message;
@@ -2265,10 +2268,53 @@ export default function SiswaAbsensiPage() {
 
                       <input
                         type="file"
-                        accept="image/*,.pdf"
-                        onChange={(event) =>
-                          setBukti(event.target.files?.[0] || null)
-                        }
+                        accept="image/png, image/jpeg, image/jpg, application/pdf"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0] || null;
+                          if (!file) {
+                            setBukti(null);
+                            return;
+                          }
+
+                          const validMimes = [
+                            "image/png",
+                            "image/jpeg",
+                            "image/jpg",
+                            "application/pdf",
+                          ];
+                          const validExtensions = [
+                            ".png",
+                            ".jpg",
+                            ".jpeg",
+                            ".pdf",
+                          ];
+                          const fileName = (file.name || "").toLowerCase();
+                          const hasValidExt = validExtensions.some((ext) =>
+                            fileName.endsWith(ext)
+                          );
+                          const hasValidMime =
+                            !file.type ||
+                            validMimes.includes(file.type.toLowerCase());
+
+                          if (!hasValidExt || !hasValidMime) {
+                            setError(
+                              "Format file tidak didukung. Hanya JPG, PNG, atau PDF."
+                            );
+                            setBukti(null);
+                            event.target.value = "";
+                            return;
+                          }
+
+                          if (file.size > 5 * 1024 * 1024) {
+                            setError("Ukuran file bukti maksimal 5 MB.");
+                            setBukti(null);
+                            event.target.value = "";
+                            return;
+                          }
+
+                          setError("");
+                          setBukti(file);
+                        }}
                         className="w-full text-xs theme-text-muted"
                       />
                     </div>

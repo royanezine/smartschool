@@ -222,6 +222,7 @@ export default function LoginForm() {
       }
 
       const token = response.token;
+      const refreshToken = response.refreshToken ?? null;
 
       if (!token) {
         throw new Error(
@@ -257,6 +258,12 @@ export default function LoginForm() {
 
       const userId = userData.id ?? payload.userId ?? payload.id ?? null;
 
+      const rawAksesMenu =
+        userData.aksesMenu ?? response.aksesMenu ?? payload.aksesMenu;
+      const aksesMenu = Array.isArray(rawAksesMenu) ? rawAksesMenu : [];
+      const jabatan =
+        userData.jabatan ?? response.jabatan ?? payload.jabatan ?? null;
+
       const userInfo = {
         id: userId,
         userId,
@@ -273,11 +280,18 @@ export default function LoginForm() {
           userData.peranId ??
           null,
         role,
+        jabatan,
+        aksesMenu,
+        jenjang:
+          userData.jenjang ??
+          payload.jenjang ??
+          userData.sekolah?.jenjang ??
+          null,
       };
 
       clearSession();
 
-      setSession(token, userInfo);
+      setSession(token, userInfo, refreshToken);
 
       if (currentRequestId !== requestIdRef.current) {
         return;
