@@ -1,7 +1,6 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { fileTypeFromFile } from "file-type";
 
 const allowedImageMime = ["image/jpeg", "image/png"];
 const allowedPdfMime = ["application/pdf"];
@@ -9,13 +8,57 @@ const allowedExcelMime = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ];
 
+const detectMimeTypeFromBuffer = (buffer: Buffer): string | null => {
+  if (buffer.length < 4) return null;
+  // JPEG: FF D8 FF
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return "image/jpeg";
+  }
+  // PNG: 89 50 4E 47
+  if (
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47
+  ) {
+    return "image/png";
+  }
+  // PDF: 25 50 44 46 (%PDF)
+  if (
+    buffer[0] === 0x25 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x44 &&
+    buffer[3] === 0x46
+  ) {
+    return "application/pdf";
+  }
+  // ZIP / XLSX: 50 4B 03 04 or 50 4B 05 06 or 50 4B 07 08
+  if (
+    buffer[0] === 0x50 &&
+    buffer[1] === 0x4b &&
+    (buffer[2] === 0x03 || buffer[2] === 0x05 || buffer[2] === 0x07) &&
+    (buffer[3] === 0x04 || buffer[3] === 0x06 || buffer[3] === 0x08)
+  ) {
+    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  }
+  return null;
+};
+
 const validateMagicByte = async (
   filePath: string,
   allowedMimes: string[],
   errorMessage: string,
 ) => {
-  const type = await fileTypeFromFile(filePath);
-  if (!type || !allowedMimes.includes(type.mime)) {
+  if (!fs.existsSync(filePath)) return;
+  const buffer = Buffer.alloc(8);
+  const fd = fs.openSync(filePath, "r");
+  try {
+    fs.readSync(fd, buffer, 0, 8, 0);
+  } finally {
+    fs.closeSync(fd);
+  }
+  const detected = detectMimeTypeFromBuffer(buffer);
+  if (!detected || !allowedMimes.includes(detected)) {
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     throw new Error(errorMessage);
   }

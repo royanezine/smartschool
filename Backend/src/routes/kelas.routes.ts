@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
+import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireSubscription } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 import {

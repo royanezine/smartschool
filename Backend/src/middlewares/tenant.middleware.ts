@@ -66,3 +66,5 @@ export const requireTenant = async (
     next(error);
   }
 };
+
+export { requireSubscription } from "./langganan.middleware";

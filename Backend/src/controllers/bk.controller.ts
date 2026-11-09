@@ -213,15 +213,13 @@ export const putuskanPengajuanKonseling = async (
         console.error("[NOTIFIKASI BK] Gagal mengirim notifikasi penolakan konseling:", notifErr);
       }
 
+      await catatAuditLog(req, "REJECT_KONSELING", "bk", id, { status: existing.status }, { status: "ditolak" });
+
       return res.json({
         success: true,
         message: "Pengajuan konseling ditolak",
         data,
       });
-      if (!catatan || !String(catatan).trim()) throw new AppError("Alasan penolakan wajib diisi pada catatan", 400);
-      const data = await prisma.sesiKonseling.update({ where: { id }, data: { status: "ditolak", catatan: String(catatan).trim(), diperbaruiOleh: userId } });
-      await catatAuditLog(req, "REJECT_KONSELING", "bk", id, { status: existing.status }, { status: "ditolak" });
-      return res.json({ success: true, message: "Pengajuan konseling ditolak", data });
     }
 
     if (!existing.waktuMulai || !existing.waktuSelesai) throw new AppError("Pengajuan tidak memiliki jam sesi yang valid", 400);
@@ -255,14 +253,13 @@ export const putuskanPengajuanKonseling = async (
       console.error("[NOTIFIKASI BK] Gagal mengirim notifikasi persetujuan konseling:", notifErr);
     }
 
+    await catatAuditLog(req, "APPROVE_KONSELING", "bk", id, { status: existing.status }, { status: "dijadwalkan" });
+
     return res.json({
       success: true,
       message: "Pengajuan konseling disetujui",
       data,
     });
-    await catatAuditLog(req, "APPROVE_KONSELING", "bk", id, { status: existing.status }, { status: "dijadwalkan" });
-
-    return res.json({ success: true, message: "Pengajuan konseling disetujui", data });
   } catch (error) {
     next(error);
   }
@@ -618,50 +615,10 @@ export const getPelanggaranSiswa = async (
         message: "Sekolah tidak ditemukan",
       });
     }
-    const sekolahId = req.user?.sekolahId;
-    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 401);
 
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10));
     const skip = (page - 1) * limit;
-
-    const actorRole = normalizeRole(req.user?.role);
-    const where: any = { sekolahId, dihapusPada: null };
-    if (actorRole === "siswa") where.siswaId = req.user?.userId;
-
-    if (actorRole === "siswa") {
-      where.siswaId = req.user?.userId;
-    } else if (req.query.siswaId) {
-      where.siswaId = String(req.query.siswaId);
-    }
-
-    const kategoriId = (req.query.kategoriId || req.query.kategoriPelanggaranId) as string | undefined;
-    if (kategoriId) where.kategoriPelanggaranId = String(kategoriId);
-
-    const status = req.query.status as string | undefined;
-    if (status) where.status = String(status);
-
-    const tanggalMulai = (req.query.tanggalMulai || req.query.startDate) as string | undefined;
-    const tanggalSelesai = (req.query.tanggalSelesai || req.query.endDate) as string | undefined;
-    if (tanggalMulai || tanggalSelesai) {
-      where.tanggal = {};
-      if (tanggalMulai) where.tanggal.gte = new Date(tanggalMulai);
-      if (tanggalSelesai) {
-        const end = new Date(tanggalSelesai);
-        if (tanggalSelesai.length <= 10) end.setHours(23, 59, 59, 999);
-        where.tanggal.lte = end;
-      }
-    }
-
-    const search = (req.query.search as string)?.trim();
-    if (search) {
-      where.OR = [
-        { siswa: { namaLengkap: { contains: search, mode: "insensitive" } } },
-        { siswa: { nis: { contains: search, mode: "insensitive" } } },
-        { kategoriPelanggaran: { nama: { contains: search, mode: "insensitive" } } },
-        { kronologi: { contains: search, mode: "insensitive" } },
-      ];
-    }
 
     const [totalData, data] = await Promise.all([
       prisma.pelanggaranSiswa.count({ where }),
@@ -997,5 +954,393 @@ export const deletePelanggaranSiswa = async (
     return res.json({ success: true, message: "Data pelanggaran berhasil dihapus" });
   } catch (error) {
     next(error);
+  }
+};
+
+// -------------------------------------------------------------
+// ASESMEN MINAT BAKAT (BK)
+// -------------------------------------------------------------
+
+export const getAsesmenMinatBakat = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    if (!sekolahId) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    const actorRole = normalizeRole(req.user?.role);
+    const where: any = {
+      sekolahId,
+      dihapusPada: null,
+    };
+
+    if (actorRole === "siswa") {
+      where.siswaId = req.user?.userId;
+    } else if (req.query.siswaId && typeof req.query.siswaId === "string") {
+      where.siswaId = req.query.siswaId;
+    }
+
+    if (req.query.jenis && typeof req.query.jenis === "string") {
+      where.jenis = req.query.jenis;
+    }
+
+    const asesmenDb = (prisma as any).asesmenMinatBakat;
+    const data = await asesmenDb.findMany({
+      where,
+      include: {
+        siswa: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            nipd: true,
+            nisn: true,
+          },
+        },
+      },
+      orderBy: { tanggal: "desc" },
+    });
+
+    const formatted = data.map((item: any) => ({
+      ...item,
+      siswa: item.siswa
+        ? {
+            id: item.siswa.id,
+            namaLengkap: item.siswa.namaLengkap,
+            nis: item.siswa.nipd,
+            nisn: item.siswa.nisn,
+          }
+        : null,
+    }));
+
+    return res.json({
+      success: true,
+      message: "Berhasil mengambil data asesmen minat bakat",
+      data: formatted,
+    });
+  } catch (error) {
+    if (next) return next(error);
+    throw error;
+  }
+};
+
+export const getAsesmenMinatBakatById = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const id = req.params.id as string;
+
+    if (!sekolahId) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    const where: any = {
+      id,
+      sekolahId,
+      dihapusPada: null,
+    };
+
+    if (normalizeRole(req.user?.role) === "siswa") {
+      where.siswaId = req.user?.userId;
+    }
+
+    const item = await (prisma as any).asesmenMinatBakat.findFirst({
+      where,
+      include: {
+        siswa: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            nipd: true,
+            nisn: true,
+          },
+        },
+      },
+    });
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: "Data asesmen minat bakat tidak ditemukan",
+      });
+    }
+
+    const formatted = {
+      ...item,
+      siswa: (item as any).siswa
+        ? {
+            id: (item as any).siswa.id,
+            namaLengkap: (item as any).siswa.namaLengkap,
+            nis: (item as any).siswa.nipd,
+            nisn: (item as any).siswa.nisn,
+          }
+        : null,
+    };
+
+    return res.json({
+      success: true,
+      message: "Berhasil mengambil detail asesmen",
+      data: formatted,
+    });
+  } catch (error) {
+    if (next) return next(error);
+    throw error;
+  }
+};
+
+export const createAsesmenMinatBakat = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    if (!sekolahId) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    const {
+      siswaId,
+      tanggal,
+      jenis,
+      minat,
+      bakat,
+      hasil,
+      rekomendasi,
+      skor,
+      status,
+      catatan,
+    } = req.body;
+
+    if (!siswaId || !tanggal || !jenis) {
+      return res.status(400).json({
+        success: false,
+        message: "siswaId, tanggal, dan jenis wajib diisi",
+      });
+    }
+
+    const siswa = await prisma.pengguna.findFirst({
+      where: {
+        id: siswaId,
+        sekolahId,
+        dihapusPada: null,
+      },
+    });
+
+    if (!siswa) {
+      return res.status(404).json({
+        success: false,
+        message: "Siswa tidak ditemukan",
+      });
+    }
+
+    const created = await (prisma as any).asesmenMinatBakat.create({
+      data: {
+        sekolahId,
+        siswaId,
+        tanggal: new Date(tanggal),
+        jenis,
+        minat: minat || null,
+        bakat: bakat || null,
+        hasil: hasil || null,
+        rekomendasi: rekomendasi || null,
+        skor: skor !== undefined && skor !== null && skor !== "" ? Number(skor) : null,
+        status: status || "selesai",
+        catatan: catatan || null,
+        dibuatOleh: req.user?.userId,
+      },
+      include: {
+        siswa: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            nipd: true,
+            nisn: true,
+          },
+        },
+      },
+    });
+
+    const formatted = {
+      ...created,
+      siswa: (created as any).siswa
+        ? {
+            id: (created as any).siswa.id,
+            namaLengkap: (created as any).siswa.namaLengkap,
+            nis: (created as any).siswa.nipd,
+            nisn: (created as any).siswa.nisn,
+          }
+        : null,
+    };
+
+    return res.status(201).json({
+      success: true,
+      message: "Asesmen minat bakat berhasil dibuat",
+      data: formatted,
+    });
+  } catch (error) {
+    if (next) return next(error);
+    throw error;
+  }
+};
+
+export const updateAsesmenMinatBakat = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const id = req.params.id as string;
+
+    if (!sekolahId) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    const existing = await (prisma as any).asesmenMinatBakat.findFirst({
+      where: {
+        id,
+        sekolahId,
+        dihapusPada: null,
+      },
+    });
+
+    if (!existing) {
+      return res.status(404).json({
+        success: false,
+        message: "Data asesmen tidak ditemukan",
+      });
+    }
+
+    const {
+      siswaId,
+      tanggal,
+      jenis,
+      minat,
+      bakat,
+      hasil,
+      rekomendasi,
+      skor,
+      status,
+      catatan,
+    } = req.body;
+
+    const updateData: any = {
+      diperbaruiOleh: req.user?.userId,
+    };
+
+    if (siswaId) updateData.siswaId = siswaId;
+    if (tanggal) updateData.tanggal = new Date(tanggal);
+    if (jenis) updateData.jenis = String(jenis);
+    if (minat !== undefined) updateData.minat = minat || null;
+    if (bakat !== undefined) updateData.bakat = bakat || null;
+    if (hasil !== undefined) updateData.hasil = hasil || null;
+    if (rekomendasi !== undefined) updateData.rekomendasi = rekomendasi || null;
+    if (skor !== undefined) updateData.skor = skor !== null && skor !== "" ? Number(skor) : null;
+    if (status) updateData.status = status;
+    if (catatan !== undefined) updateData.catatan = catatan || null;
+
+    const updated = await (prisma as any).asesmenMinatBakat.update({
+      where: { id },
+      data: updateData,
+      include: {
+        siswa: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            nipd: true,
+            nisn: true,
+          },
+        },
+      },
+    });
+
+    const formatted = {
+      ...updated,
+      siswa: (updated as any).siswa
+        ? {
+            id: (updated as any).siswa.id,
+            namaLengkap: (updated as any).siswa.namaLengkap,
+            nis: (updated as any).siswa.nipd,
+            nisn: (updated as any).siswa.nisn,
+          }
+        : null,
+    };
+
+    return res.json({
+      success: true,
+      message: "Asesmen minat bakat berhasil diperbarui",
+      data: formatted,
+    });
+  } catch (error) {
+    if (next) return next(error);
+    throw error;
+  }
+};
+
+export const deleteAsesmenMinatBakat = async (
+  req: AuthRequest,
+  res: Response,
+  next?: NextFunction
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const id = req.params.id as string;
+
+    if (!sekolahId) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    const existing = await (prisma as any).asesmenMinatBakat.findFirst({
+      where: {
+        id,
+        sekolahId,
+        dihapusPada: null,
+      },
+    });
+
+    if (!existing) {
+      return res.status(404).json({
+        success: false,
+        message: "Data asesmen tidak ditemukan",
+      });
+    }
+
+    await (prisma as any).asesmenMinatBakat.update({
+      where: { id },
+      data: {
+        dihapusPada: new Date(),
+        dihapusOleh: req.user?.userId,
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: "Data asesmen berhasil dihapus",
+    });
+  } catch (error) {
+    if (next) return next(error);
+    throw error;
   }
 };

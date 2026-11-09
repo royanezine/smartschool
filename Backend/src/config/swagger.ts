@@ -1,7 +1,7 @@
+import "./initOpenApi";
 import {
   OpenAPIRegistry,
   OpenApiGeneratorV3,
-  extendZodWithOpenApi,
 } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
 import swaggerUi from "swagger-ui-express";
@@ -19,9 +19,6 @@ import {
   createSesiKonselingSchema,
   createKategoriPelanggaranSchema,
 } from "../validations/bk.validation";
-
-// Aktifkan ekstensi openapi pada Zod
-extendZodWithOpenApi(z);
 
 export const registry = new OpenAPIRegistry();
 
