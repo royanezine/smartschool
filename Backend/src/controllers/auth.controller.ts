@@ -125,11 +125,13 @@ export const formatAuthUser = async (user: AuthUserPayload) => {
 
     if (!cekWali) {
       aksesMenu = aksesMenu.filter((item: any) => {
-        const menuStr = String(item?.menu || item?.namaMenu || item || "").toLowerCase();
+        const menuStr = String(item?.menu || item?.namaMenu || item?.key || item || "").toLowerCase();
         return !(
           menuStr.includes("rapor kelas") ||
+          menuStr.includes("rapor-kelas") ||
           menuStr.includes("rapor_kelas") ||
           menuStr.includes("wali kelas") ||
+          menuStr.includes("wali-kelas") ||
           menuStr.includes("wali_kelas") ||
           menuStr.includes("rapor (wali)") ||
           menuStr.includes("rapor kelas (wali)")
