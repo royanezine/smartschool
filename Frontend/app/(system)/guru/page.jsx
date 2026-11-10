@@ -32,7 +32,6 @@ import {
   ClipboardCheck,
   BookOpen,
   ClipboardList,
-  HelpCircle,
   ChevronRight,
   Users,
   Clock3,
@@ -49,10 +48,6 @@ import {
   Sparkles,
 } from "lucide-react";
 
-/* ------------------------------------------------------------------ */
-/* Warna & gaya                                                        */
-/* ------------------------------------------------------------------ */
-
 const TONES = {
   primary: "var(--color-primary)",
   success: "var(--color-success, #16a34a)",
@@ -67,12 +62,38 @@ const tint = (color, pct = 12) =>
   `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
 const quickMenu = [
-  { id: "jadwal", title: "Jadwal Mengajar", desc: "Lihat jadwal dan agenda mengajar", icon: CalendarDays, path: "/guru/jadwal", tone: "primary" },
-  { id: "absensi", title: "Absensi", desc: "Pantau kehadiran siswa", icon: ClipboardCheck, path: "/guru/absensi", tone: "success" },
-  { id: "tugas", title: "Tugas Siswa", desc: "Buat tugas dan pantau pengumpulan", icon: ClipboardList, path: "/guru/tugas", tone: "warning" },
-  { id: "nilai", title: "Kelola Nilai", desc: "Periksa dan beri nilai siswa", icon: NotebookPen, path: "/guru/nilai", tone: "violet" },
-  { id: "materi", title: "Materi Pembelajaran", desc: "Kelola bahan ajar", icon: BookOpen, path: "/guru/materi", tone: "info" },
-  { id: "quiz", title: "Quiz & CBT", desc: "Kelola evaluasi pembelajaran", icon: HelpCircle, path: "/guru/ujian", tone: "danger" },
+  {
+    id: "presensi",
+    title: "Presensi Saya",
+    desc: "Check-in & check-out kehadiran",
+    icon: ClipboardCheck,
+    path: "/guru/absensi",
+    tone: "success",
+  },
+  {
+    id: "jadwal",
+    title: "Jadwal",
+    desc: "Jadwal dan agenda mengajar",
+    icon: CalendarDays,
+    path: "/guru/jadwal",
+    tone: "primary",
+  },
+  {
+    id: "materi",
+    title: "Materi",
+    desc: "Kelola bahan ajar kelas",
+    icon: BookOpen,
+    path: "/guru/materi",
+    tone: "info",
+  },
+  {
+    id: "tugas",
+    title: "Tugas",
+    desc: "Buat tugas & pantau pengumpulan",
+    icon: ClipboardList,
+    path: "/guru/tugas",
+    tone: "warning",
+  },
 ];
 
 const themeCard =
@@ -116,10 +137,6 @@ const SCHEDULE_TONE = {
   Selesai: "muted",
   Jadwal: "muted",
 };
-
-/* ------------------------------------------------------------------ */
-/* Helpers                                                             */
-/* ------------------------------------------------------------------ */
 
 function getPayload(response) {
   if (response?.data?.data !== undefined) return response.data.data;
@@ -477,10 +494,6 @@ function pickLatestTodayRecord(records) {
   return todayRecords[0] || null;
 }
 
-/* ------------------------------------------------------------------ */
-/* Page                                                                */
-/* ------------------------------------------------------------------ */
-
 export default function GuruDashboardPage() {
   const router = useRouter();
 
@@ -520,7 +533,6 @@ export default function GuruDashboardPage() {
         setUser(getUserFromStorage());
         const storedUserId = getStoredUserId();
 
-        // 1. Ambil data secara paralel dari endpoint canonical Backend
         const [
           kelasDiampuResult,
           jadwalResult,
@@ -535,7 +547,6 @@ export default function GuruDashboardPage() {
           getRiwayatShiftSaya(1, 30),
         ]);
 
-        // --- KELAS DIAMPU ---
         let teacherClassMapel = [];
         if (kelasDiampuResult.status === "fulfilled") {
           const payload = getPayload(kelasDiampuResult.value);
@@ -547,7 +558,6 @@ export default function GuruDashboardPage() {
                 ? payload.items
                 : [];
         } else {
-          // Fallback ke getKelasMapel jika endpoint /diampu gagal
           try {
             const fallbackRes = await getKelasMapel();
             const fallbackPayload = getPayload(fallbackRes);
@@ -571,7 +581,6 @@ export default function GuruDashboardPage() {
 
         setKelasMapel(teacherClassMapel);
 
-        // --- NOTIFIKASI ---
         const notificationPayload =
           notificationResult.status === "fulfilled"
             ? getPayload(notificationResult.value)
@@ -591,7 +600,6 @@ export default function GuruDashboardPage() {
           )
         );
 
-        // --- KEHADIRAN SAYA HARI INI ---
         const myAttendanceRecords = [];
         let attendanceFetchFailed = false;
 
@@ -624,7 +632,6 @@ export default function GuruDashboardPage() {
           setAttendanceTodayError("");
         }
 
-        // --- JADWAL MENGAJAR & BEBAN MINGGUAN ---
         const teacherKmIds = new Set(
           teacherClassMapel.map((item) => item?.id).filter(Boolean)
         );
@@ -691,7 +698,6 @@ export default function GuruDashboardPage() {
         );
         setJadwal(todaySchedules);
 
-        // --- KELAS UNIK & SISWA DIAMPU ---
         const uniqueClasses = [
           ...new Map(
             teacherClassMapel
@@ -771,7 +777,6 @@ export default function GuruDashboardPage() {
           setStudentCountAvailable(studentsCountAvailable);
         }
 
-        // --- ABSENSI SISWA HARI INI ---
         const attendanceEntries = await Promise.all(
           uniqueClasses.map(async (kelas) => {
             try {
@@ -820,7 +825,6 @@ export default function GuruDashboardPage() {
 
         setAttendanceByClass(Object.fromEntries(attendanceEntries));
 
-        // --- TUGAS DAN PENILAIAN ---
         let pendingCount = 0;
         let gradedCount = 0;
         let taskDataFailed = false;
@@ -928,8 +932,6 @@ export default function GuruDashboardPage() {
     }, 60);
     return () => clearTimeout(timer);
   }, [loading]);
-
-  /* ---------------- Data turunan ---------------- */
 
   const uniqueClassCount = useMemo(
     () =>
@@ -1099,8 +1101,6 @@ export default function GuruDashboardPage() {
   const checkInValue = getAttendanceTime(attendanceToday, "masuk");
   const checkOutValue = getAttendanceTime(attendanceToday, "keluar");
 
-  /* ---------------- Daftar "Perlu Perhatian" ---------------- */
-
   const attentionItems = [];
 
   if (!loading) {
@@ -1123,7 +1123,7 @@ export default function GuruDashboardPage() {
         Icon: LogIn,
         title: "Anda belum check-in hari ini",
         desc: "Catat kehadiran agar shift kerja Anda tercatat.",
-        cta: "Buka absensi",
+        cta: "Buka presensi",
         onClick: () => router.push("/guru/absensi"),
       });
     }
@@ -1192,7 +1192,6 @@ export default function GuruDashboardPage() {
         <main className="theme-page min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
             <div className="w-full space-y-6 lg:space-y-7">
-              {/* ================= ERROR ================= */}
               {error && (
                 <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
                   <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
@@ -1212,20 +1211,19 @@ export default function GuruDashboardPage() {
                 </div>
               )}
 
-              {/* ================= HERO ================= */}
               <section
-                className="relative overflow-hidden rounded-2xl p-5 text-white sm:p-7 shadow-lg"
+                className="relative overflow-hidden rounded-3xl p-5 text-white sm:p-7 lg:p-8 shadow-xl"
                 style={{
                   background:
-                    "linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 65%, #071530) 100%)",
+                    "linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 60%, #05101f) 100%)",
                 }}
               >
-                <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
-                <div className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
+                <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-24 left-1/4 h-56 w-56 rounded-full bg-white/8 blur-3xl" />
 
                 <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
                   <div className="min-w-0 lg:col-span-7 xl:col-span-8">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-medium ring-1 ring-white/25">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-medium ring-1 ring-white/25 backdrop-blur-sm">
                       <CalendarDays size={13} />
                       {formatDate(today)}
                     </span>
@@ -1241,7 +1239,7 @@ export default function GuruDashboardPage() {
                       <button
                         type="button"
                         onClick={() => router.push("/guru/jadwal")}
-                        className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-white/90 shadow-sm"
+                        className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-white/90 shadow-md"
                       >
                         <CalendarDays size={15} />
                         Lihat jadwal
@@ -1249,17 +1247,17 @@ export default function GuruDashboardPage() {
                       <button
                         type="button"
                         onClick={() => router.push("/guru/absensi")}
-                        className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold ring-1 ring-white/25 transition hover:bg-white/25"
+                        className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold ring-1 ring-white/25 backdrop-blur-sm transition hover:bg-white/25"
                       >
                         <ClipboardCheck size={15} />
-                        Buka absensi
+                        Presensi saya
                       </button>
                       <button
                         type="button"
                         title="Muat ulang data"
                         onClick={() => loadDashboard(true)}
                         disabled={refreshing}
-                        className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3.5 py-2.5 text-sm font-medium text-white/90 ring-1 ring-white/20 transition hover:bg-white/20 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3.5 py-2.5 text-sm font-medium text-white/90 ring-1 ring-white/20 backdrop-blur-sm transition hover:bg-white/20 disabled:opacity-50"
                       >
                         <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
                         Refresh
@@ -1267,75 +1265,81 @@ export default function GuruDashboardPage() {
                     </div>
                   </div>
 
-                  {/* Kartu fokus */}
-                  <div className="min-w-0 lg:col-span-5 xl:col-span-4 rounded-2xl bg-white/15 p-5 ring-1 ring-white/25 backdrop-blur">
-                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-white/80">
-                      <Sparkles size={13} />
-                      {focusSchedule
-                        ? focusSchedule.status === "Berlangsung"
-                          ? "Sedang berlangsung"
-                          : "Kelas berikutnya"
-                        : "Jadwal hari ini"}
-                    </div>
+                  <div className="min-w-0 lg:col-span-5 xl:col-span-4">
+                    <div className="relative overflow-hidden rounded-2xl bg-white/15 p-5 ring-1 ring-white/25 backdrop-blur-md">
+                      <div className="pointer-events-none absolute -right-8 -top-10 opacity-90 scale-125 sm:scale-100 sm:-right-6 sm:-top-8">
+                        <StackedBooks />
+                      </div>
 
-                    {loading ? (
-                      <p className="mt-3 text-sm text-white/80">Memuat jadwal…</p>
-                    ) : focusSchedule ? (
-                      <>
-                        <p className="mt-3 truncate text-xl font-bold">
-                          {focusSchedule.item.kelasMapel?.mataPelajaran?.nama ||
-                            focusSchedule.item.kelasMapel?.mataPelajaran?.namaMapel ||
-                            "Mata pelajaran"}
-                        </p>
-                        <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/85">
+                      <div className="relative pr-28 sm:pr-32">
+                        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-white/80">
+                          <Sparkles size={13} />
+                          {focusSchedule
+                            ? focusSchedule.status === "Berlangsung"
+                              ? "Sedang berlangsung"
+                              : "Kelas berikutnya"
+                            : "Jadwal hari ini"}
+                        </div>
+
+                        {loading ? (
+                          <p className="mt-3 text-sm text-white/80">Memuat jadwal…</p>
+                        ) : focusSchedule ? (
+                          <>
+                            <p className="mt-3 truncate text-xl font-bold">
+                              {focusSchedule.item.kelasMapel?.mataPelajaran?.nama ||
+                                focusSchedule.item.kelasMapel?.mataPelajaran?.namaMapel ||
+                                "Mata pelajaran"}
+                            </p>
+                            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/85">
+                              <span className="inline-flex items-center gap-1.5">
+                                <GraduationCap size={14} />
+                                {focusSchedule.item.kelasMapel?.kelas?.nama ||
+                                  focusSchedule.item.kelasMapel?.kelas?.namaKelas ||
+                                  "Kelas"}
+                              </span>
+                              {focusSchedule.item.ruangan && (
+                                <span className="inline-flex items-center gap-1.5">
+                                  <MapPin size={14} />
+                                  {focusSchedule.item.ruangan}
+                                </span>
+                              )}
+                            </p>
+                            <p className="mt-3 inline-flex items-center gap-2 rounded-lg bg-white/15 px-3 py-1.5 text-sm font-semibold tabular-nums">
+                              <Clock3 size={14} />
+                              {formatTime(focusSchedule.item.jamMulai)} –{" "}
+                              {formatTime(focusSchedule.item.jamSelesai)}
+                            </p>
+                          </>
+                        ) : (
+                          <p className="mt-3 text-sm leading-relaxed text-white/85">
+                            {jadwal.length === 0
+                              ? "Tidak ada sesi mengajar hari ini."
+                              : "Semua sesi mengajar hari ini sudah selesai."}
+                          </p>
+                        )}
+
+                        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/20 pt-3 text-xs text-white/85">
                           <span className="inline-flex items-center gap-1.5">
-                            <GraduationCap size={14} />
-                            {focusSchedule.item.kelasMapel?.kelas?.nama ||
-                              focusSchedule.item.kelasMapel?.kelas?.namaKelas ||
-                              "Kelas"}
+                            <LogIn size={13} />
+                            Masuk{" "}
+                            <b className="tabular-nums">
+                              {checkInValue ? formatTime(checkInValue) : "-"}
+                            </b>
                           </span>
-                          {focusSchedule.item.ruangan && (
-                            <span className="inline-flex items-center gap-1.5">
-                              <MapPin size={14} />
-                              {focusSchedule.item.ruangan}
-                            </span>
-                          )}
-                        </p>
-                        <p className="mt-3 inline-flex items-center gap-2 rounded-lg bg-white/15 px-3 py-1.5 text-sm font-semibold tabular-nums">
-                          <Clock3 size={14} />
-                          {formatTime(focusSchedule.item.jamMulai)} –{" "}
-                          {formatTime(focusSchedule.item.jamSelesai)}
-                        </p>
-                      </>
-                    ) : (
-                      <p className="mt-3 text-sm leading-relaxed text-white/85">
-                        {jadwal.length === 0
-                          ? "Tidak ada sesi mengajar hari ini. Nikmati harinya!"
-                          : "Semua sesi mengajar hari ini sudah selesai. Kerja bagus!"}
-                      </p>
-                    )}
-
-                    <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/20 pt-3 text-xs text-white/85">
-                      <span className="inline-flex items-center gap-1.5">
-                        <LogIn size={13} />
-                        Masuk{" "}
-                        <b className="tabular-nums">
-                          {checkInValue ? formatTime(checkInValue) : "-"}
-                        </b>
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <LogOut size={13} />
-                        Pulang{" "}
-                        <b className="tabular-nums">
-                          {checkOutValue ? formatTime(checkOutValue) : "-"}
-                        </b>
-                      </span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <LogOut size={13} />
+                            Pulang{" "}
+                            <b className="tabular-nums">
+                              {checkOutValue ? formatTime(checkOutValue) : "-"}
+                            </b>
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </section>
 
-              {/* ================= KPI ================= */}
               <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 sm:gap-5">
                 <KpiCard
                   label="Kelas Diampu"
@@ -1390,9 +1394,43 @@ export default function GuruDashboardPage() {
                 />
               </section>
 
-              {/* ================= JADWAL & PERLU PERHATIAN ================= */}
+              <section className="space-y-4">
+                <SectionHeader
+                  title="Akses Cepat"
+                  subtitle="Langsung ke menu yang paling sering dipakai."
+                />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  {quickMenu.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => router.push(item.path)}
+                      className={`${themeCard} group relative overflow-hidden flex min-w-0 items-center gap-3.5 p-4 text-left transition duration-200 hover:-translate-y-0.5`}
+                    >
+                      <span
+                        className="absolute inset-x-0 top-0 h-1 opacity-80"
+                        style={{ background: TONES[item.tone] || TONES.primary }}
+                      />
+                      <IconChip Icon={item.icon} tone={item.tone} size={44} />
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-sm font-semibold theme-text">
+                          {item.title}
+                        </h3>
+                        <p className="mt-0.5 line-clamp-1 text-xs theme-text-secondary">
+                          {item.desc}
+                        </p>
+                      </div>
+                      <ChevronRight
+                        size={15}
+                        className={`shrink-0 transition group-hover:translate-x-0.5 ${themeMuted}`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </section>
+
               <section className="grid min-w-0 grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3 2xl:grid-cols-3">
-                {/* Jadwal hari ini */}
                 <div className={`${themeCard} min-w-0 overflow-hidden lg:col-span-2`}>
                   <CardHeader
                     Icon={Clock3}
@@ -1505,7 +1543,6 @@ export default function GuruDashboardPage() {
                   )}
                 </div>
 
-                {/* Perlu perhatian */}
                 <div className={`${themeCard} min-w-0 overflow-hidden lg:col-span-1`}>
                   <CardHeader
                     Icon={AlertCircle}
@@ -1573,38 +1610,6 @@ export default function GuruDashboardPage() {
                 </div>
               </section>
 
-              {/* ================= AKSES CEPAT ================= */}
-              <section className="space-y-4">
-                <SectionHeader
-                  title="Akses Cepat"
-                  subtitle="Langsung ke menu yang paling sering dipakai."
-                />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-6 gap-3 sm:gap-4">
-                  {quickMenu.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => router.push(item.path)}
-                      className={`${themeCard} group flex min-w-0 items-center gap-3.5 p-4 text-left transition duration-200 hover:-translate-y-0.5`}
-                    >
-                      <IconChip Icon={item.icon} tone={item.tone} size={42} />
-                      <div className="min-w-0 flex-1">
-                        <h3 className="truncate text-sm font-semibold theme-text">
-                          {item.title}
-                        </h3>
-                        <p className="mt-0.5 line-clamp-1 text-xs theme-text-secondary">{item.desc}</p>
-                      </div>
-                      <ChevronRight
-                        size={15}
-                        className={`shrink-0 transition group-hover:translate-x-0.5 ${themeMuted}`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              {/* ================= ANALITIK KEHADIRAN ================= */}
               <section className="space-y-4">
                 <SectionHeader
                   title="Kehadiran Siswa Hari Ini"
@@ -1708,7 +1713,6 @@ export default function GuruDashboardPage() {
                 </div>
               </section>
 
-              {/* ================= KELAS & PENILAIAN ================= */}
               <section className="space-y-4">
                 <SectionHeader
                   title="Kelas dan Penilaian"
@@ -1771,50 +1775,49 @@ export default function GuruDashboardPage() {
 
                   <div className="min-w-0 lg:col-span-1">
                     <ChartCard title="Kehadiran Saya Hari Ini" subtitle="Dicatat oleh sistem absensi">
-                    <div className="grid grid-cols-2 gap-3">
-                      <TimeBox
-                        label="Jam masuk"
-                        value={checkInValue}
-                        doneText="Check-in tercatat"
-                        emptyText="Belum check-in"
-                        Icon={LogIn}
-                        tone="success"
-                      />
-                      <TimeBox
-                        label="Jam pulang"
-                        value={checkOutValue}
-                        doneText="Check-out tercatat"
-                        emptyText="Belum check-out"
-                        Icon={LogOut}
-                        tone="info"
-                      />
-                    </div>
-
-                    {attendanceTodayError ? (
-                      <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/5 p-3">
-                        <p className="text-xs text-red-500">{attendanceTodayError}</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <TimeBox
+                          label="Jam masuk"
+                          value={checkInValue}
+                          doneText="Check-in tercatat"
+                          emptyText="Belum check-in"
+                          Icon={LogIn}
+                          tone="success"
+                        />
+                        <TimeBox
+                          label="Jam pulang"
+                          value={checkOutValue}
+                          doneText="Check-out tercatat"
+                          emptyText="Belum check-out"
+                          Icon={LogOut}
+                          tone="info"
+                        />
                       </div>
-                    ) : !attendanceToday ? (
-                      <p className={`mt-4 text-xs leading-relaxed ${themeMuted}`}>
-                        Belum ada catatan absensi shift untuk hari ini. Pastikan Anda sudah check-in dan memiliki shift kerja.
-                      </p>
-                    ) : (
-                      <p className={`mt-4 text-xs ${themeMuted}`}>
-                        Status:{" "}
-                        <span className="font-semibold theme-text">
-                          {attendanceToday.statusShift || attendanceToday.status || "Tercatat"}
-                        </span>
-                        {attendanceToday.shiftKerja?.nama
-                          ? ` · Shift ${attendanceToday.shiftKerja.nama}`
-                          : ""}
-                      </p>
-                    )}
-                  </ChartCard>
-                </div>
-              </div>
-            </section>
 
-              {/* ================= NOTIFIKASI ================= */}
+                      {attendanceTodayError ? (
+                        <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+                          <p className="text-xs text-red-500">{attendanceTodayError}</p>
+                        </div>
+                      ) : !attendanceToday ? (
+                        <p className={`mt-4 text-xs leading-relaxed ${themeMuted}`}>
+                          Belum ada catatan absensi shift untuk hari ini. Pastikan Anda sudah check-in dan memiliki shift kerja.
+                        </p>
+                      ) : (
+                        <p className={`mt-4 text-xs ${themeMuted}`}>
+                          Status:{" "}
+                          <span className="font-semibold theme-text">
+                            {attendanceToday.statusShift || attendanceToday.status || "Tercatat"}
+                          </span>
+                          {attendanceToday.shiftKerja?.nama
+                            ? ` · Shift ${attendanceToday.shiftKerja.nama}`
+                            : ""}
+                        </p>
+                      )}
+                    </ChartCard>
+                  </div>
+                </div>
+              </section>
+
               <section className={`${themeCard} min-w-0 overflow-hidden`}>
                 <CardHeader
                   Icon={Bell}
@@ -1893,9 +1896,115 @@ export default function GuruDashboardPage() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Komponen umum                                                       */
-/* ------------------------------------------------------------------ */
+function StackedBooks() {
+  return (
+    <div className="relative w-[150px] sm:w-[180px] animate-[float_5s_ease-in-out_infinite]">
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        @keyframes sway {
+          0%, 100% { transform: rotate(0deg); }
+          50% { transform: rotate(5deg); }
+        }
+        @keyframes sway-reverse {
+          0%, 100% { transform: rotate(0deg); }
+          50% { transform: rotate(-5deg); }
+        }
+        .plant-leaf { animation: sway 4s ease-in-out infinite; transform-origin: bottom center; }
+        .plant-leaf-2 { animation: sway-reverse 5s ease-in-out infinite; transform-origin: bottom center; }
+      `}</style>
+      
+      <svg
+        viewBox="0 0 120 120"
+        className="h-auto w-full overflow-visible drop-shadow-2xl"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="bookTheme1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="var(--color-primary)" />
+          </linearGradient>
+          <linearGradient id="bookTheme2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0.8" />
+          </linearGradient>
+          <linearGradient id="bookTheme3" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0.5" />
+          </linearGradient>
+          
+          <linearGradient id="potGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="100%" stopColor="#E2E8F0" />
+          </linearGradient>
+          
+          <linearGradient id="leafGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#4ADE80" />
+            <stop offset="100%" stopColor="#16A34A" />
+          </linearGradient>
+
+          <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="8" stdDeviation="6" floodColor="#000000" floodOpacity="0.25" />
+          </filter>
+        </defs>
+
+        <g filter="url(#dropShadow)">
+          <g transform="translate(15, 85)">
+            <rect x="0" y="8" width="80" height="14" rx="3" fill="url(#bookTheme3)" />
+            <rect x="0" y="8" width="80" height="3" rx="1.5" fill="#FFFFFF" opacity="0.5" />
+            <path d="M78 8 L85 11 L85 22 L78 19 Z" fill="#F8FAFC" />
+            <path d="M78 8 L85 11 L85 22 L78 19 Z" fill="url(#bookTheme3)" opacity="0.2" />
+          </g>
+
+          <g transform="translate(10, 68)">
+            <rect x="0" y="8" width="90" height="16" rx="3" fill="url(#bookTheme2)" />
+            <rect x="0" y="8" width="90" height="4" rx="2" fill="#FFFFFF" opacity="0.6" />
+            <path d="M88 8 L96 12 L96 25 L88 21 Z" fill="#F8FAFC" />
+            <path d="M88 8 L96 12 L96 25 L88 21 Z" fill="url(#bookTheme2)" opacity="0.2" />
+            <path d="M92 13 L92 23" stroke="#CBD5E1" strokeWidth="1.5" />
+          </g>
+
+          <g transform="translate(18, 48)">
+            <rect x="0" y="8" width="75" height="18" rx="3" fill="url(#bookTheme1)" />
+            <rect x="0" y="8" width="75" height="5" rx="2" fill="#FFFFFF" opacity="0.7" />
+            <rect x="8" y="15" width="35" height="2" rx="1" fill="#FFFFFF" opacity="0.3" />
+            <path d="M73 8 L80 12 L80 27 L73 23 Z" fill="#F8FAFC" />
+            <path d="M73 8 L80 12 L80 27 L73 23 Z" fill="url(#bookTheme1)" opacity="0.2" />
+            <path d="M77 13 L77 25" stroke="#CBD5E1" strokeWidth="1.5" />
+            <path d="M60 8 L65 8 L62.5 18 Z" fill="#FCD34D" />
+          </g>
+        </g>
+
+        <g transform="translate(30, 25)">
+          <g className="plant-leaf">
+            <path d="M18 20 C5 10 2 0 10 -5 C18 -10 22 5 18 20 Z" fill="url(#leafGradient)" />
+            <path d="M18 20 C8 12 5 2 10 -5" stroke="#166534" strokeWidth="1" opacity="0.3" />
+          </g>
+          <g className="plant-leaf-2">
+            <path d="M20 20 C30 8 38 2 42 8 C46 14 34 22 20 20 Z" fill="#22C55E" />
+            <path d="M20 20 C30 12 38 8 42 8" stroke="#166534" strokeWidth="1" opacity="0.3" />
+          </g>
+          <g className="plant-leaf" style={{ animationDelay: '0.5s' }}>
+            <path d="M19 20 C15 5 20 -8 27 -8 C34 -8 30 8 19 20 Z" fill="#16A34A" />
+            <path d="M19 20 C17 8 22 -5 27 -8" stroke="#166534" strokeWidth="1" opacity="0.3" />
+          </g>
+          
+          <path d="M10 20 L30 20 L27 38 C26 43 14 43 13 38 Z" fill="url(#potGradient)" />
+          <ellipse cx="20" cy="20" rx="10" ry="3" fill="#F1F5F9" />
+          <ellipse cx="20" cy="20" rx="9" ry="2" fill="#94A3B8" opacity="0.3" />
+        </g>
+
+        <circle cx="105" cy="30" r="2" fill="#FFFFFF" opacity="0.4" />
+        <circle cx="95" cy="20" r="1" fill="#FFFFFF" opacity="0.5" />
+        <circle cx="15" cy="40" r="1.5" fill="#FFFFFF" opacity="0.4" />
+      </svg>
+    </div>
+  );
+}
 
 function IconChip({ Icon, tone = "primary", size = 40 }) {
   const color = TONES[tone] || TONES.primary;
@@ -2104,10 +2213,6 @@ function LegendList({ data = [], total = 0 }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Diagram: Donut                                                      */
-/* ------------------------------------------------------------------ */
-
 function DonutChart({
   data = [],
   total = 0,
@@ -2186,10 +2291,6 @@ function DonutChart({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Diagram: Stacked bar tipis                                          */
-/* ------------------------------------------------------------------ */
-
 function StackedBar({ breakdown, total, animate = true }) {
   const hasData = breakdown && total > 0;
 
@@ -2219,10 +2320,6 @@ function StackedBar({ breakdown, total, animate = true }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Diagram: Bar vertikal dengan sumbu Y                                */
-/* ------------------------------------------------------------------ */
-
 function ColumnChart({ items = [], animate = true, height = 200 }) {
   const rawMax = Math.max(...items.map((item) => item.value), 0);
   const axisMax = rawMax <= 4 ? Math.max(1, Math.ceil(rawMax)) : niceMax(rawMax);
@@ -2235,7 +2332,6 @@ function ColumnChart({ items = [], animate = true, height = 200 }) {
     <div className="overflow-x-auto">
       <div style={{ minWidth: AXIS_WIDTH + items.length * MIN_COLUMN_WIDTH }}>
         <div className="flex">
-          {/* Sumbu Y */}
           <div
             className="relative shrink-0"
             style={{ width: AXIS_WIDTH, height }}
@@ -2254,7 +2350,6 @@ function ColumnChart({ items = [], animate = true, height = 200 }) {
             ))}
           </div>
 
-          {/* Area grafik */}
           <div className="relative min-w-0 flex-1" style={{ height }}>
             {ticks.map((tick) => (
               <div
@@ -2304,7 +2399,6 @@ function ColumnChart({ items = [], animate = true, height = 200 }) {
           </div>
         </div>
 
-        {/* Label sumbu X */}
         <div className="mt-3 flex">
           <div className="shrink-0" style={{ width: AXIS_WIDTH }} />
           <div

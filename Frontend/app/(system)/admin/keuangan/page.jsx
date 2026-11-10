@@ -37,22 +37,24 @@ import {
   Clock,
   Building2,
   Loader2,
+  ArrowUpRight,
+  MoreHorizontal
 } from "lucide-react";
 
 const themeCardShadow =
-  "shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+  "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
 const themeNeutralSurface =
-  "bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]";
+  "bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]";
 
 const themeNeutralHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
 const themeNeutralBorder =
-  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
 const themeDivider =
-  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 
 const themePrimaryText = "text-[var(--color-primary)]";
 
@@ -179,8 +181,7 @@ export default function KeuanganPage() {
       if (!active) return;
 
       const messages = [];
-      const [akunRes, jurnalRes, tagihanRes, tunggakanRes, bulanRes] =
-        results;
+      const [akunRes, jurnalRes, tagihanRes, tunggakanRes, bulanRes] = results;
 
       if (akunRes.status === "fulfilled") {
         setAkunKas(akunRes.value.data || []);
@@ -263,17 +264,12 @@ export default function KeuanganPage() {
 
   const kategoriOptions = useMemo(() => {
     const map = new Map();
-
     transactions.forEach((item) => {
       if (item.kategoriKey) {
         map.set(item.kategoriKey, item.kategori);
       }
     });
-
-    return [...map.entries()].map(([value, label]) => ({
-      value,
-      label,
-    }));
+    return [...map.entries()].map(([value, label]) => ({ value, label }));
   }, [transactions]);
 
   const filteredData = useMemo(() => {
@@ -284,14 +280,10 @@ export default function KeuanganPage() {
         !keyword ||
         item.keterangan.toLowerCase().includes(keyword) ||
         item.nomor.toLowerCase().includes(keyword);
-
       const matchJenis =
         jenisFilter === "semua" || item.jenis === jenisFilter;
-
       const matchKategori =
-        kategoriFilter === "semua" ||
-        item.kategoriKey === kategoriFilter;
-
+        kategoriFilter === "semua" || item.kategoriKey === kategoriFilter;
       const matchBulan = !bulanIniOnly || isSameMonth(item.tanggal);
 
       return matchSearch && matchJenis && matchKategori && matchBulan;
@@ -307,13 +299,9 @@ export default function KeuanganPage() {
 
   const saldoAkhir = akunTotalSaldo;
   const totalMasuk =
-    jurnalRingkasan === null
-      ? null
-      : Number(jurnalRingkasan.totalMasuk || 0);
+    jurnalRingkasan === null ? null : Number(jurnalRingkasan.totalMasuk || 0);
   const totalKeluar =
-    jurnalRingkasan === null
-      ? null
-      : Number(jurnalRingkasan.totalKeluar || 0);
+    jurnalRingkasan === null ? null : Number(jurnalRingkasan.totalKeluar || 0);
   const pemasukanBulanIni =
     bulanIni === null ? null : Number(bulanIni.totalMasuk || 0);
   const pengeluaranBulanIni =
@@ -378,8 +366,13 @@ export default function KeuanganPage() {
 
   const toggleSidebar = () => setIsCollapsed((v) => !v);
 
+  // Hitung persentase pembayaran tagihan
+  const totalTagihan = tagihanRingkasan?.totalTagihan || 0;
+  const totalDibayar = tagihanRingkasan?.totalDibayar || 0;
+  const progressPersen = totalTagihan > 0 ? (totalDibayar / totalTagihan) * 100 : 0;
+
   return (
-    <div className="theme-page flex h-screen w-full overflow-hidden">
+    <div className="theme-page flex h-screen w-full overflow-hidden bg-[#f8fafc]">
       <Sidebar
         active="keuangan"
         setActive={() => {}}
@@ -403,25 +396,13 @@ export default function KeuanganPage() {
 
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
+            
+            {/* HEADER & ACTIONS */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_70%,var(--color-info)))] text-[var(--color-card)] shadow-[0_4px_14px_color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
-                  <Wallet size={20} />
-                </div>
-
-                <div>
-                  <p className="text-[11px] font-medium uppercase tracking-wider theme-text-muted">
-                    Keuangan / Bendahara
-                  </p>
-
-                  <h1 className="mt-0.5 text-xl font-bold theme-text sm:text-2xl">
-                    Manajemen Keuangan
-                  </h1>
-
-                  <p className="mt-1 text-xs leading-relaxed theme-text-secondary sm:text-sm">
-                    Kelola pemasukan, pengeluaran, dan laporan keuangan sekolah.
-                  </p>
-                </div>
+              <div>
+                <p className="text-sm font-medium theme-text-muted">
+                  Tetap pantau arus kas dan laporan keuangan sekolah Anda hari ini.
+                </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -429,27 +410,27 @@ export default function KeuanganPage() {
                   type="button"
                   onClick={handleExport}
                   disabled={filteredData.length === 0}
-                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-4 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
+                  className={`inline-flex h-9 items-center justify-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-3 text-xs font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                 >
-                  <Download size={15} />
+                  <Download size={14} />
                   Export
                 </button>
 
                 <button
                   type="button"
                   onClick={() => openForm("pengeluaran")}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[color-mix(in_srgb,var(--color-danger)_12%,transparent)] px-4 text-sm font-semibold text-[var(--color-danger)] transition hover:bg-[color-mix(in_srgb,var(--color-danger)_18%,transparent)]"
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[color-mix(in_srgb,var(--color-danger)_12%,transparent)] px-3 text-xs font-semibold text-[var(--color-danger)] transition hover:bg-[color-mix(in_srgb,var(--color-danger)_18%,transparent)]"
                 >
-                  <ArrowUpCircle size={15} />
+                  <ArrowUpRight size={14} className="rotate-45" />
                   Pengeluaran
                 </button>
 
                 <button
                   type="button"
                   onClick={() => openForm("pemasukan")}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_75%,var(--color-success)))] px-4 text-sm font-semibold text-[var(--color-card)] shadow-[0_4px_14px_color-mix(in_srgb,var(--color-primary)_25%,transparent)] transition hover:opacity-90"
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-3 text-xs font-semibold text-white shadow-sm transition hover:opacity-90"
                 >
-                  <Plus size={15} />
+                  <Plus size={14} />
                   Pemasukan
                 </button>
               </div>
@@ -457,509 +438,373 @@ export default function KeuanganPage() {
 
             {error && (
               <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)] p-4 text-sm">
-                <AlertCircle
-                  size={18}
-                  className="mt-0.5 shrink-0 text-[var(--color-danger)]"
-                />
+                <AlertCircle size={18} className="mt-0.5 shrink-0 text-[var(--color-danger)]" />
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold theme-text">
-                    Sebagian data gagal dimuat
-                  </p>
-                  <p className="mt-1 break-words theme-text-secondary">
-                    {error}
-                  </p>
+                  <p className="font-semibold theme-text">Sebagian data gagal dimuat</p>
+                  <p className="mt-1 break-words theme-text-secondary">{error}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setRefreshKey((value) => value + 1)}
                   className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold theme-text-secondary"
                 >
-                  <RefreshCw size={13} />
-                  Coba lagi
+                  <RefreshCw size={13} /> Coba lagi
                 </button>
               </div>
             )}
 
-            {loading && (
-              <div className="flex items-center gap-2 rounded-xl border theme-border theme-card p-4 text-sm theme-text-muted">
-                <Loader2 size={16} className="animate-spin" />
-                Memuat data keuangan dari server...
+            {/* TOP GRID: SALDO UTAMA & STAT CARDS */}
+            <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+              {/* Kartu Saldo Utama (Biru) */}
+              <div className="lg:col-span-4 relative overflow-hidden rounded-2xl bg-[#2563eb] p-6 text-white shadow-lg">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-white/90">Total Saldo Kas</p>
+                  <Wallet size={20} className="text-white/70" />
+                </div>
+                <h2 className="mt-4 text-3xl font-bold tracking-tight">
+                  {loading ? "..." : formatRupiahOrUnavailable(saldoAkhir)}
+                </h2>
+                <p className="mt-1 flex items-center gap-1 text-xs text-white/80">
+                  <TrendingUp size={12} /> Saldo gabungan semua akun
+                </p>
+
+                <div className="mt-6 flex gap-3">
+                  <button 
+                    onClick={() => openForm("pemasukan")}
+                    className="flex-1 rounded-xl bg-[#1e40af] py-2 text-xs font-semibold transition hover:bg-[#1e3a8a]"
+                  >
+                    Transfer Masuk
+                  </button>
+                  <button 
+                    onClick={() => openForm("pengeluaran")}
+                    className="flex-1 rounded-xl bg-white py-2 text-xs font-semibold text-[#2563eb] transition hover:bg-slate-50"
+                  >
+                    Transfer Keluar
+                  </button>
+                </div>
               </div>
-            )}
 
-            <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-              <StatCard
-                icon={Wallet}
-                label="Saldo Akhir"
-                value={formatRupiahOrUnavailable(saldoAkhir)}
-                description="Saldo semua akun kas"
-                accent="primary"
-              />
+              {/* 4 Kartu Ringkasan */}
+              <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Pemasukan */}
+                <div className={`rounded-2xl border ${themeNeutralBorder} bg-white p-4 ${themeCardShadow}`}>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-500">
+                      <TrendingUp size={16} />
+                    </div>
+                    <p className="text-xs font-semibold text-slate-500">TOTAL PEMASUKAN</p>
+                  </div>
+                  <div className="mt-3 flex items-end justify-between">
+                    <div>
+                      <p className="text-xl font-bold text-slate-800">
+                        {loading ? "..." : formatRupiahOrUnavailable(totalMasuk)}
+                      </p>
+                      <p className="text-[11px] text-slate-400 mt-1">Bulan ini</p>
+                    </div>
+                    <p className="text-xs font-semibold text-emerald-500">
+                      {loading ? "..." : formatRupiahOrUnavailable(pemasukanBulanIni)}
+                    </p>
+                  </div>
+                </div>
 
-              <StatCard
-                icon={TrendingUp}
-                label="Total Pemasukan"
-                value={formatRupiahOrUnavailable(totalMasuk)}
-                description="Ringkasan jurnal kas"
-                accent="success"
-              />
+                {/* Pengeluaran */}
+                <div className={`rounded-2xl border ${themeNeutralBorder} bg-white p-4 ${themeCardShadow}`}>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500">
+                      <TrendingDown size={16} />
+                    </div>
+                    <p className="text-xs font-semibold text-slate-500">TOTAL PENGELUARAN</p>
+                  </div>
+                  <div className="mt-3 flex items-end justify-between">
+                    <div>
+                      <p className="text-xl font-bold text-slate-800">
+                        {loading ? "..." : formatRupiahOrUnavailable(totalKeluar)}
+                      </p>
+                      <p className="text-[11px] text-slate-400 mt-1">Bulan ini</p>
+                    </div>
+                    <p className="text-xs font-semibold text-red-500">
+                      {loading ? "..." : formatRupiahOrUnavailable(pengeluaranBulanIni)}
+                    </p>
+                  </div>
+                </div>
 
-              <StatCard
-                icon={TrendingDown}
-                label="Total Pengeluaran"
-                value={formatRupiahOrUnavailable(totalKeluar)}
-                description="Ringkasan jurnal kas"
-                accent="danger"
-              />
+                {/* Total Transaksi */}
+                <div className={`rounded-2xl border ${themeNeutralBorder} bg-white p-4 ${themeCardShadow}`}>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-500">
+                      <Receipt size={16} />
+                    </div>
+                    <p className="text-xs font-semibold text-slate-500">TOTAL TRANSAKSI</p>
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-xl font-bold text-slate-800">
+                      {loading ? "..." : formatNumberOrUnavailable(jurnalTotal)}
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-1">Jumlah tercatat</p>
+                  </div>
+                </div>
 
-              <StatCard
-                icon={Receipt}
-                label="Jumlah Transaksi"
-                value={formatNumberOrUnavailable(jurnalTotal)}
-                description="Total jurnal tercatat"
-                accent="info"
-              />
-
-              <StatCard
-                icon={ArrowDownCircle}
-                label="Pemasukan Bulan Ini"
-                value={formatRupiahOrUnavailable(pemasukanBulanIni)}
-                description="Dari laporan kas periode ini"
-                accent="success"
-              />
-
-              <StatCard
-                icon={ArrowUpCircle}
-                label="Pengeluaran Bulan Ini"
-                value={formatRupiahOrUnavailable(pengeluaranBulanIni)}
-                description="Dari laporan kas periode ini"
-                accent="warning"
-              />
+                {/* Tunggakan */}
+                <div className={`rounded-2xl border ${themeNeutralBorder} bg-white p-4 ${themeCardShadow}`}>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-orange-500">
+                      <AlertCircle size={16} />
+                    </div>
+                    <p className="text-xs font-semibold text-slate-500">TUNGGAKAN</p>
+                  </div>
+                  <div className="mt-3 flex items-end justify-between">
+                    <div>
+                      <p className="text-xl font-bold text-red-500">
+                        {loading ? "..." : formatRupiahOrUnavailable(tunggakanRingkasan?.totalTunggakan)}
+                      </p>
+                      <p className="text-[11px] text-slate-400 mt-1">Siswa menunggak</p>
+                    </div>
+                    <p className="text-[11px] font-semibold text-slate-600">
+                      {tunggakanRingkasan?.jumlahTagihan || 0} Tagihan
+                    </p>
+                  </div>
+                </div>
+              </div>
             </section>
 
-            <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {akunKas.map((akun) => {
-                const isBank = akun.tipe === "bank";
+            {/* MIDDLE GRID: AKUN KAS & LAPORAN PROGRES */}
+            <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+              
+              {/* Kiri: Akun Kas & Bank */}
+              <div className="lg:col-span-4 flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-bold text-slate-800">Akun Kas & Bank</h2>
+                  <Link href="/admin/keuangan/akunKas/tambah" className="text-blue-500 hover:text-blue-600">
+                    <Plus size={18} className="rounded-full bg-blue-50 p-0.5" />
+                  </Link>
+                </div>
 
-                return (
-                  <div
-                    key={akun.id}
-                    className={`group relative overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card p-4 ${themeCardShadow} transition hover:-translate-y-0.5 hover:shadow-md`}
-                  >
-                    <div
-                      className={`absolute inset-x-0 top-0 h-0.5 ${
-                        isBank
-                          ? "bg-[var(--color-info)]"
-                          : "bg-[var(--color-primary)]"
-                      }`}
-                    />
-
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                            isBank
-                              ? "bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)] text-[var(--color-info)]"
-                              : `${themePrimarySurface} ${themePrimaryText}`
-                          }`}
-                        >
-                          {isBank ? (
-                            <CreditCard size={18} />
-                          ) : (
-                            <Wallet size={18} />
-                          )}
+                <div className="flex flex-col gap-3">
+                  {akunKas.map((akun, index) => {
+                    const isBank = akun.tipe === "bank";
+                    // Alternating colors for design (Blue and Dark)
+                    const isDark = index % 2 !== 0;
+                    
+                    return (
+                      <div
+                        key={akun.id}
+                        className={`relative overflow-hidden rounded-xl p-4 shadow-sm ${
+                          isDark ? "bg-[#1e293b] text-white" : "bg-[#2563eb] text-white"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {isBank ? <Building2 size={16} className="text-white/80" /> : <Wallet size={16} className="text-white/80" />}
+                            <p className="text-sm font-medium">{akun.nama}</p>
+                          </div>
+                          <span className="rounded bg-white/20 px-2 py-0.5 text-[9px] font-semibold backdrop-blur-sm">
+                            {isBank ? "Bank" : "Tunai"}
+                          </span>
                         </div>
-
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold theme-text">
-                            {akun.nama}
-                          </p>
-
-                          <p className="mt-0.5 text-xs theme-text-muted">
-                            {akun.kode} •{" "}
-                            {isBank ? "Bank" : "Kas tunai"}
+                        
+                        <div className="mt-4">
+                          <p className="text-lg font-bold">{formatRupiah(akun.saldo)}</p>
+                          <p className={`mt-0.5 text-[10px] ${isDark ? "text-slate-400" : "text-blue-200"}`}>
+                            {akun.kode || (isBank ? "REKENING" : "KAS")}
                           </p>
                         </div>
                       </div>
+                    );
+                  })}
+
+                  {!loading && akunKas.length === 0 && (
+                    <div className={`flex items-center justify-center rounded-xl border border-dashed ${themeNeutralBorder} p-6`}>
+                      <p className="text-center text-xs theme-text-muted">Belum ada akun kas.</p>
                     </div>
-
-                    <div className={`mt-3 border-t ${themeDivider} pt-3`}>
-                      <p className="text-[11px] font-medium uppercase tracking-wider theme-text-muted">
-                        Saldo
-                      </p>
-
-                      <p className="mt-1 text-lg font-bold theme-text">
-                        {formatRupiah(akun.saldo)}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {!loading && akunKas.length === 0 && (
-                <div
-                  className={`flex items-center justify-center rounded-2xl border border-dashed ${themeNeutralBorder} p-4`}
-                >
-                  <p className="text-center text-xs theme-text-muted">
-                    Belum ada akun kas yang dapat ditampilkan.
-                  </p>
-                </div>
-              )}
-
-              <Link
-                href="/admin/keuangan/akunKas/tambah"
-                className={`flex items-center justify-center rounded-2xl border border-dashed ${themeNeutralBorder} p-4 transition ${themeNeutralHover} hover:border-[var(--color-primary)]`}
-              >
-                <div className="text-center">
-                  <div
-                    className={`mx-auto flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySurface} ${themePrimaryText}`}
-                  >
-                    <Plus size={18} />
-                  </div>
-
-                  <p className="mt-2 text-xs font-semibold theme-text-secondary">
-                    Tambah Akun
-                  </p>
-                </div>
-              </Link>
-            </section>
-
-            <section className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-              <div
-                className={`rounded-2xl border ${themeNeutralBorder} theme-card p-5 ${themeCardShadow}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySurface} ${themePrimaryText}`}
-                  >
-                    <FileText size={18} />
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-bold theme-text">
-                      Ringkasan Tagihan Siswa
-                    </h3>
-                    <p className="mt-0.5 text-xs theme-text-muted">
-                      Agregat seluruh tagihan yang tercatat.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-2.5">
-                  {tagihanRingkasan ? (
-                    <>
-                      <ReportRow
-                        label="Jumlah Tagihan"
-                        value={Number(
-                          tagihanRingkasan.jumlahTagihan || 0,
-                        ).toLocaleString("id-ID")}
-                        variant="neutral"
-                      />
-                      <ReportRow
-                        label="Total Tagihan"
-                        value={formatRupiah(
-                          tagihanRingkasan.totalTagihan,
-                        )}
-                        variant="neutral"
-                      />
-                      <ReportRow
-                        label="Total Dibayar"
-                        value={formatRupiah(
-                          tagihanRingkasan.totalDibayar,
-                        )}
-                        variant="success"
-                      />
-                      <ReportRow
-                        label="Sisa Tagihan"
-                        value={formatRupiah(
-                          tagihanRingkasan.totalSisa,
-                        )}
-                        variant="danger"
-                      />
-                    </>
-                  ) : (
-                    <p className="text-sm theme-text-muted">
-                      Tidak tersedia.
-                    </p>
                   )}
                 </div>
               </div>
 
-              <div
-                className={`rounded-2xl border ${themeNeutralBorder} theme-card p-5 ${themeCardShadow}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] text-[var(--color-warning)]">
-                    <AlertCircle size={18} />
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-bold theme-text">
-                      Ringkasan Tunggakan
-                    </h3>
-                    <p className="mt-0.5 text-xs theme-text-muted">
-                      Tagihan yang sudah melewati jatuh tempo.
-                    </p>
-                  </div>
+              {/* Kanan: Laporan & Progres */}
+              <div className="lg:col-span-8 flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-bold text-slate-800">Laporan & Progres</h2>
+                  <button onClick={() => setRefreshKey(k => k+1)} className="text-slate-400 hover:text-slate-600">
+                    <RefreshCw size={16} />
+                  </button>
                 </div>
 
-                <div className="mt-4 space-y-2.5">
-                  {tunggakanRingkasan ? (
-                    <>
-                      <ReportRow
-                        label="Jumlah Tagihan Menunggak"
-                        value={Number(
-                          tunggakanRingkasan.jumlahTagihan || 0,
-                        ).toLocaleString("id-ID")}
-                        variant="neutral"
-                      />
-                      <ReportRow
-                        label="Total Tunggakan"
-                        value={formatRupiah(
-                          tunggakanRingkasan.totalTunggakan,
-                        )}
-                        variant="danger"
-                        bold
-                      />
-                    </>
-                  ) : (
-                    <p className="text-sm theme-text-muted">
-                      Tidak tersedia.
+                <div className={`flex-1 rounded-2xl border ${themeNeutralBorder} bg-white p-5 ${themeCardShadow} flex flex-col sm:flex-row gap-6`}>
+                  
+                  {/* Progres Pembayaran */}
+                  <div className="flex-1 flex flex-col justify-center">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                      Progres Pembayaran Tagihan
                     </p>
-                  )}
+                    <div className="flex items-end justify-between mb-1">
+                      <p className="text-2xl font-bold text-slate-800">
+                        {formatRupiah(totalDibayar)}
+                      </p>
+                      <p className="text-xs text-slate-500 mb-1">
+                        dari {formatRupiah(totalTagihan)}
+                      </p>
+                    </div>
+                    {/* Progress Bar */}
+                    <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden mt-2">
+                      <div 
+                        className="h-full bg-blue-500 rounded-full transition-all duration-500" 
+                        style={{ width: `${progressPersen}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-slate-500">
+                      Sisa: {formatRupiah(totalTagihan - totalDibayar)}
+                    </p>
+                  </div>
+
+                  <div className="hidden sm:block w-px bg-slate-100 my-2" />
+
+                  {/* Laporan Bulan Ini */}
+                  <div className="flex-1 flex flex-col justify-center space-y-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                      Laporan Bulan Ini
+                    </p>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-500">Masuk</span>
+                      <span className="text-sm font-bold text-emerald-500">
+                        {formatRupiah(pemasukanBulanIni || 0)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-500">Keluar</span>
+                      <span className="text-sm font-bold text-red-500">
+                        {formatRupiah(pengeluaranBulanIni || 0)}
+                      </span>
+                    </div>
+                    
+                    <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
+                      <span className="text-sm font-semibold text-slate-700">Selisih</span>
+                      <span className="text-sm font-bold text-blue-600">
+                        {formatRupiah((pemasukanBulanIni || 0) - (pengeluaranBulanIni || 0))}
+                      </span>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </section>
 
-            <section
-              className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
-            >
-              <div
-                className={`flex flex-col gap-4 border-b ${themeDivider} p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5`}
-              >
+            {/* BOTTOM: AKTIVITAS TERBARU (TABEL) */}
+            <section className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-white ${themeCardShadow}`}>
+              
+              <div className="flex flex-col gap-4 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-sm font-bold theme-text sm:text-base">
-                    Riwayat Transaksi
-                  </h2>
-
-                  <p className="mt-1 text-xs theme-text-muted">
-                    Daftar pemasukan dan pengeluaran terbaru.
-                  </p>
+                  <h2 className="text-sm font-bold text-slate-800">Aktivitas Terbaru</h2>
+                  <p className="mt-1 text-xs text-slate-500">Riwayat pemasukan dan pengeluaran terbaru.</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setBulanIniOnly((value) => !value);
-                      setPage(1);
-                    }}
-                    aria-pressed={bulanIniOnly}
-                    className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${
-                      bulanIniOnly
-                        ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] text-[var(--color-primary)]"
-                        : `${themeNeutralBorder} theme-card theme-text-secondary ${themeNeutralHover}`
-                    }`}
-                  >
-                    <Calendar size={14} />
-                    Bulan Ini
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setRefreshKey((value) => value + 1)}
-                    disabled={loading}
-                    className={`inline-flex h-9 items-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-3 text-xs font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
-                  >
-                    <RefreshCw
-                      size={14}
-                      className={loading ? "animate-spin" : ""}
-                    />
-                    Refresh
-                  </button>
-                </div>
-              </div>
-
-              <div
-                className={`flex flex-col gap-3 border-b ${themeDivider} p-4 sm:flex-row sm:items-center`}
-              >
-                <div className="relative flex-1">
-                  <Search
-                    size={15}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
-                  />
-
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      setPage(1);
-                    }}
-                    placeholder="Cari nomor transaksi atau keterangan..."
-                    className={`h-10 w-full rounded-xl border ${themeNeutralBorder} theme-card pl-9 pr-3 text-sm theme-text outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2 sm:flex-row">
                   <div className="relative">
-                    <Filter
-                      size={14}
-                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
-                    />
-
-                    <select
-                      value={jenisFilter}
+                    <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={search}
                       onChange={(e) => {
-                        setJenisFilter(e.target.value);
+                        setSearch(e.target.value);
                         setPage(1);
                       }}
-                      className={`h-10 cursor-pointer appearance-none rounded-xl border ${themeNeutralBorder} theme-card pl-9 pr-8 text-sm theme-text-secondary outline-none transition ${themeFocus}`}
-                    >
-                      <option value="semua">Semua Jenis</option>
-                      <option value="pemasukan">Pemasukan</option>
-                      <option value="pengeluaran">Pengeluaran</option>
-                    </select>
+                      placeholder="Cari transaksi..."
+                      className="h-8 w-full sm:w-48 rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white"
+                    />
                   </div>
 
                   <select
-                    value={kategoriFilter}
+                    value={jenisFilter}
                     onChange={(e) => {
-                      setKategoriFilter(e.target.value);
+                      setJenisFilter(e.target.value);
                       setPage(1);
                     }}
-                    className={`h-10 cursor-pointer rounded-xl border ${themeNeutralBorder} theme-card px-3 text-sm theme-text-secondary outline-none transition ${themeFocus}`}
+                    className="h-8 cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs text-slate-600 outline-none focus:border-blue-500"
                   >
-                    <option value="semua">Semua Kategori</option>
-                    {kategoriOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
+                    <option value="semua">Semua</option>
+                    <option value="pemasukan">Masuk</option>
+                    <option value="pengeluaran">Keluar</option>
                   </select>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBulanIniOnly((v) => !v);
+                      setPage(1);
+                    }}
+                    className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${
+                      bulanIniOnly
+                        ? "border-blue-500 bg-blue-50 text-blue-600"
+                        : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <Calendar size={12} />
+                    Bulan Ini
+                  </button>
                 </div>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[850px] text-left text-sm">
                   <thead>
-                    <tr
-                      className={`border-b ${themeDivider} ${themeNeutralSurface}`}
-                    >
-                      <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider theme-text-muted">
-                        Tanggal
-                      </th>
-                      <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider theme-text-muted">
-                        Nomor
-                      </th>
-                      <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider theme-text-muted">
-                        Kategori
-                      </th>
-                      <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider theme-text-muted">
-                        Keterangan
-                      </th>
-                      <th className="px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider theme-text-muted">
-                        Jumlah
-                      </th>
-                      <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider theme-text-muted">
-                        Status
-                      </th>
-                      <th className="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider theme-text-muted">
-                        Aksi
-                      </th>
+                    <tr className="border-b border-slate-100 bg-slate-50/50">
+                      <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Tanggal</th>
+                      <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">No. Jurnal</th>
+                      <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Keterangan / Kategori</th>
+                      <th className="px-5 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-slate-400">Jumlah</th>
+                      <th className="px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">Status</th>
+                      <th className="px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">Aksi</th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {loading ? (
                       <tr>
-                        <td colSpan={7} className="px-4 py-14 text-center">
-                          <Loader2
-                            size={24}
-                            className="mx-auto animate-spin text-[var(--color-primary)]"
-                          />
-                          <p className="mt-3 text-sm font-semibold theme-text">
-                            Memuat transaksi
-                          </p>
-                          <p className="mt-1 text-xs theme-text-muted">
-                            Mengambil data jurnal kas dari server.
-                          </p>
+                        <td colSpan={6} className="px-5 py-10 text-center">
+                          <Loader2 size={24} className="mx-auto animate-spin text-blue-500" />
+                          <p className="mt-2 text-sm text-slate-500">Memuat transaksi...</p>
                         </td>
                       </tr>
                     ) : paginatedData.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-4 py-14 text-center">
-                          <div
-                            className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${themeNeutralSurface}`}
-                          >
-                            <Receipt
-                              size={20}
-                              className="theme-text-muted"
-                            />
-                          </div>
-
-                          <p className="mt-3 text-sm font-semibold theme-text">
-                            Tidak ada transaksi
-                          </p>
-
-                          <p className="mt-1 text-xs theme-text-muted">
-                            Coba ubah filter atau kata kunci pencarian.
-                          </p>
+                        <td colSpan={6} className="px-5 py-10 text-center">
+                          <p className="text-sm text-slate-500">Tidak ada transaksi ditemukan.</p>
                         </td>
                       </tr>
                     ) : (
                       paginatedData.map((item) => {
-                        const isPemasukan =
-                          item.jenis === "pemasukan";
-
+                        const isPemasukan = item.jenis === "pemasukan";
                         return (
-                          <tr
-                            key={item.id}
-                            className={`border-b ${themeDivider} transition ${themeNeutralHover}`}
-                          >
-                            <td className="px-4 py-3 text-xs theme-text-secondary">
+                          <tr key={item.id} className="border-b border-slate-50 transition hover:bg-slate-50/50">
+                            <td className="px-5 py-4 text-xs text-slate-500 whitespace-nowrap">
                               {formatTanggal(item.tanggal)}
                             </td>
-
-                            <td className="px-4 py-3 text-xs font-medium theme-text">
+                            <td className="px-5 py-4 text-xs font-medium text-slate-600 whitespace-nowrap">
                               {item.nomor}
                             </td>
-
-                            <td className="px-4 py-3">
-                              <span
-                                className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-medium ${getKategoriStyle(
-                                  item.kategori,
-                                )}`}
-                              >
-                                {item.kategori}
+                            <td className="px-5 py-4">
+                              <p className="text-xs font-semibold text-slate-800">{item.keterangan}</p>
+                              <p className="text-[10px] text-slate-400 mt-0.5">{item.kategori}</p>
+                            </td>
+                            <td className={`px-5 py-4 text-right text-xs font-bold whitespace-nowrap ${
+                              isPemasukan ? "text-emerald-500" : "text-red-500"
+                            }`}>
+                              {isPemasukan ? "+" : "-"}{formatRupiah(item.jumlah)}
+                            </td>
+                            <td className="px-5 py-4 text-center">
+                              <span className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-semibold ${
+                                item.status === 'aktif' 
+                                  ? 'bg-emerald-50 text-emerald-600' 
+                                  : 'bg-slate-100 text-slate-600'
+                              }`}>
+                                {item.status.toUpperCase()}
                               </span>
                             </td>
-
-                            <td className="px-4 py-3 text-xs theme-text-secondary">
-                              {item.keterangan}
-                            </td>
-
-                            <td
-                              className={`px-4 py-3 text-right text-xs font-bold ${
-                                isPemasukan
-                                  ? "text-[var(--color-success)]"
-                                  : "text-[var(--color-danger)]"
-                              }`}
-                            >
-                              {isPemasukan ? "+" : "-"}
-                              {formatRupiah(item.jumlah)}
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <StatusBadge status={item.status} />
-                            </td>
-
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-5 py-4 text-center">
                               <button
                                 type="button"
                                 onClick={() => openDetail(item)}
-                                title="Lihat detail"
-                                className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-card theme-text-muted transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]`}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 transition hover:border-blue-500 hover:text-blue-500"
                               >
                                 <Eye size={14} />
                               </button>
@@ -972,333 +817,41 @@ export default function KeuanganPage() {
                 </table>
               </div>
 
-              <div
-                className={`flex flex-col gap-3 border-t ${themeDivider} px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5`}
-              >
-                <p className="text-xs theme-text-muted">
-                  Menampilkan{" "}
-                  <span className="font-semibold theme-text-secondary">
-                    {paginatedData.length}
-                  </span>{" "}
-                  dari{" "}
-                  <span className="font-semibold theme-text-secondary">
-                    {filteredData.length}
-                  </span>{" "}
-                  transaksi
-                </p>
+              {/* Pagination Bawah */}
+              {!loading && paginatedData.length > 0 && (
+                <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs text-slate-500">
+                    Menampilkan <span className="font-semibold text-slate-700">{paginatedData.length}</span> dari <span className="font-semibold text-slate-700">{filteredData.length}</span> transaksi
+                  </p>
 
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    disabled={currentPage <= 1}
-                    onClick={() =>
-                      setPage((p) => Math.max(1, p - 1))
-                    }
-                    className={`inline-flex h-8 items-center gap-1 rounded-lg border ${themeNeutralBorder} theme-card px-2.5 text-xs font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
-                  >
-                    <ChevronLeft size={14} />
-                    Sebelumnya
-                  </button>
-
-                  <span className="px-2 text-xs font-semibold theme-text-secondary">
-                    {currentPage} / {totalPages}
-                  </span>
-
-                  <button
-                    type="button"
-                    disabled={currentPage >= totalPages}
-                    onClick={() =>
-                      setPage((p) =>
-                        Math.min(totalPages, p + 1),
-                      )
-                    }
-                    className={`inline-flex h-8 items-center gap-1 rounded-lg border ${themeNeutralBorder} theme-card px-2.5 text-xs font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
-                  >
-                    Berikutnya
-                    <ChevronRight size={14} />
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={currentPage <= 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className="inline-flex h-7 items-center justify-center rounded border border-slate-200 bg-white px-2 text-xs text-slate-500 transition hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <span className="px-2 text-xs font-medium text-slate-600">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={currentPage >= totalPages}
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      className="inline-flex h-7 items-center justify-center rounded border border-slate-200 bg-white px-2 text-xs text-slate-500 transition hover:bg-slate-50 disabled:opacity-40"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </section>
 
-            <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div
-                className={`relative overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card p-5 ${themeCardShadow}`}
-              >
-                <div className="absolute inset-x-0 top-0 h-0.5 bg-[var(--color-primary)]" />
-
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySurface} ${themePrimaryText}`}
-                  >
-                    <FileText size={18} />
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-bold theme-text">
-                      Laporan Bulanan
-                    </h3>
-
-                    <p className="mt-0.5 text-xs theme-text-muted">
-                      Rangkuman keuangan bulan ini.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-2.5">
-                  <ReportRow
-                    label="Pemasukan"
-                    value={formatRupiahOrUnavailable(pemasukanBulanIni)}
-                    variant="success"
-                  />
-
-                  <ReportRow
-                    label="Pengeluaran"
-                    value={formatRupiahOrUnavailable(pengeluaranBulanIni)}
-                    variant="danger"
-                  />
-
-                  <div
-                    className={`border-t ${themeDivider} pt-2.5`}
-                  >
-                    <ReportRow
-                      label="Selisih"
-                      value={
-                        pemasukanBulanIni === null ||
-                        pengeluaranBulanIni === null
-                          ? "Tidak tersedia"
-                          : formatRupiah(
-                              pemasukanBulanIni - pengeluaranBulanIni,
-                            )
-                      }
-                      variant="primary"
-                      bold
-                    />
-                  </div>
-
-                  {bulanIni === null && (
-                    <p className="text-[11px] theme-text-muted">
-                      Agregat laporan kas bulan ini tidak tersedia.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div
-                className={`relative overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card p-5 ${themeCardShadow}`}
-              >
-                <div className="absolute inset-x-0 top-0 h-0.5 bg-[var(--color-info)]" />
-
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)] text-[var(--color-info)]">
-                    <Building2 size={18} />
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-bold theme-text">
-                      Ringkasan Akun
-                    </h3>
-
-                    <p className="mt-0.5 text-xs theme-text-muted">
-                      Total saldo dari semua akun.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-2.5">
-                  {akunKas.length === 0 ? (
-                    <p className="text-sm theme-text-muted">
-                      {loading
-                        ? "Memuat akun kas..."
-                        : "Belum ada akun kas."}
-                    </p>
-                  ) : (
-                    akunKas.map((akun) => (
-                      <ReportRow
-                        key={akun.id}
-                        label={akun.nama}
-                        value={formatRupiah(akun.saldo)}
-                        variant="neutral"
-                      />
-                    ))
-                  )}
-
-                  <div
-                    className={`border-t ${themeDivider} pt-2.5`}
-                  >
-                    <ReportRow
-                      label="Total"
-                      value={formatRupiahOrUnavailable(saldoAkhir)}
-                      variant="primary"
-                      bold
-                    />
-                  </div>
-                </div>
-              </div>
-            </section>
           </div>
         </main>
       </div>
-    </div>
-  );
-}
-
-function StatCard({ icon: Icon, label, value, description, accent = "primary" }) {
-  const accentConfig = {
-    primary: {
-      iconBg: themePrimarySurface,
-      iconText: themePrimaryText,
-      bar: "bg-[var(--color-primary)]",
-    },
-    success: {
-      iconBg: "bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)]",
-      iconText: "text-[var(--color-success)]",
-      bar: "bg-[var(--color-success)]",
-    },
-    danger: {
-      iconBg: "bg-[color-mix(in_srgb,var(--color-danger)_12%,transparent)]",
-      iconText: "text-[var(--color-danger)]",
-      bar: "bg-[var(--color-danger)]",
-    },
-    warning: {
-      iconBg: "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
-      iconText: "text-[var(--color-warning)]",
-      bar: "bg-[var(--color-warning)]",
-    },
-    info: {
-      iconBg: "bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)]",
-      iconText: "text-[var(--color-info)]",
-      bar: "bg-[var(--color-info)]",
-    },
-  };
-
-  const cfg = accentConfig[accent] || accentConfig.primary;
-
-  return (
-    <div
-      className={`group relative overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card p-4 ${themeCardShadow} transition hover:-translate-y-0.5 hover:shadow-md`}
-    >
-      <div className={`absolute inset-x-0 top-0 h-0.5 ${cfg.bar}`} />
-
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-medium uppercase tracking-wider theme-text-muted">
-            {label}
-          </p>
-
-          <p className="mt-2 truncate text-lg font-bold theme-text">
-            {value}
-          </p>
-
-          {description && (
-            <p className="mt-1 text-[11px] theme-text-muted">
-              {description}
-            </p>
-          )}
-        </div>
-
-        <div
-          className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${cfg.iconBg} ${cfg.iconText}`}
-        >
-          <Icon size={16} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function getKategoriStyle(kategori) {
-  const map = {
-    SPP: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]",
-    Gaji: "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] text-[var(--color-warning)]",
-    Operasional:
-      "bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)] text-[var(--color-info)]",
-    Pemeliharaan:
-      "bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-[var(--color-danger)]",
-    Lainnya:
-      "bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] theme-text-secondary",
-  };
-
-  return map[kategori] || map.Lainnya;
-}
-
-function StatusBadge({ status }) {
-  const config = {
-    aktif: {
-      className:
-        "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]",
-      icon: CheckCircle2,
-      label: "Aktif",
-    },
-    lunas: {
-      className:
-        "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]",
-      icon: CheckCircle2,
-      label: "Lunas",
-    },
-    menunggu: {
-      className:
-        "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]",
-      icon: Clock,
-      label: "Menunggu",
-    },
-    dibatalkan: {
-      className:
-        "border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-[var(--color-danger)]",
-      icon: AlertCircle,
-      label: "Dibatalkan",
-    },
-    gagal: {
-      className:
-        "border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-[var(--color-danger)]",
-      icon: AlertCircle,
-      label: "Gagal",
-    },
-  };
-
-  const item = config[status] || {
-    className: `${themeNeutralSurface} theme-text-muted border theme-border`,
-    icon: AlertCircle,
-    label: formatKategori(status),
-  };
-
-  const Icon = item.icon;
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${item.className}`}
-    >
-      <Icon size={11} />
-      {item.label}
-    </span>
-  );
-}
-
-function ReportRow({ label, value, variant = "neutral", bold = false }) {
-  const valueColor = {
-    success: "text-[var(--color-success)]",
-    danger: "text-[var(--color-danger)]",
-    primary: themePrimaryText,
-    neutral: "theme-text-secondary",
-  }[variant];
-
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <span
-        className={`text-xs ${
-          bold ? "font-semibold theme-text" : "theme-text-muted"
-        }`}
-      >
-        {label}
-      </span>
-
-      <span
-        className={`text-sm ${valueColor} ${
-          bold ? "font-bold" : "font-semibold"
-        }`}
-      >
-        {value}
-      </span>
     </div>
   );
 }

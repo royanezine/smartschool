@@ -544,40 +544,41 @@ export default function GuruTugasPage() {
 
         <main className="theme-page min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+            
+            {/* === BANNER HERO (DISAMAKAN DENGAN HALAMAN PRESENSI) === */}
             <section
-              className={`relative overflow-hidden rounded-2xl border p-6 sm:p-8 ${themePrimaryGradient} ${themePrimaryShadow} ${themePrimarySoftBorder}`}
+              className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 ${themePrimaryGradient} shadow-lg`}
             >
-              <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)] blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] blur-3xl" />
-              <div className="pointer-events-none absolute right-1/4 top-1/2 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-card)_8%,transparent)] blur-2xl" />
+              <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
               <div className="relative z-10">
                 <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
                     <div className="mb-4 flex flex-wrap items-center gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] text-[var(--color-card)] backdrop-blur">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
                         <ClipboardList size={25} />
                       </div>
-                      <span className="rounded-full border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] px-3 py-1 text-xs font-semibold tracking-wide text-[var(--color-card)]">
-                        GURU
+                      <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
+                        Guru
                       </span>
                     </div>
 
-                    <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl">
+                    <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
                       Tugas & Pengumpulan
                     </h1>
 
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] sm:text-base">
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90 sm:text-base">
                       Buat tugas, pantau deadline, dan lihat progres pengumpulan
                       siswa dalam satu halaman.
                     </p>
 
                     <div className="mt-5 flex flex-wrap gap-2">
-                      <div className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--color-card)_82%,transparent)] backdrop-blur">
+                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
                         <ListChecks size={14} />
                         {summary.total} tugas
                       </div>
-                      <div className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--color-card)_82%,transparent)] backdrop-blur">
+                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
                         <BarChart3 size={14} />
                         {summary.progress}% progres
                       </div>
@@ -589,7 +590,7 @@ export default function GuruTugasPage() {
                       type="button"
                       onClick={() => loadTugas(true)}
                       disabled={refreshing}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-card)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-4 text-sm font-medium text-[var(--color-card)] backdrop-blur transition-all hover:bg-[color-mix(in_srgb,var(--color-card)_16%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <RefreshCw
                         size={16}
@@ -601,7 +602,7 @@ export default function GuruTugasPage() {
                     <button
                       type="button"
                       onClick={() => router.push("/guru/tugas/tambah")}
-                      className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--color-card)] transition-all active:scale-[0.98] ${themePrimaryGradient} ${themePrimaryShadow}`}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 active:scale-[0.98]"
                     >
                       <Plus size={17} />
                       Buat Tugas
@@ -609,45 +610,46 @@ export default function GuruTugasPage() {
                   </div>
                 </div>
 
+                {/* 4 Kartu Statistik (Tanpa Border Kaku) */}
                 <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
+                    <div className="flex items-center gap-2 text-white/70">
                       <ClipboardList size={15} />
                       <span className="text-xs font-medium">Total Tugas</span>
                     </div>
-                    <p className="mt-2 text-2xl font-bold text-[var(--color-card)]">
+                    <p className="mt-2 text-2xl font-bold text-white">
                       {summary.total}
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
+                    <div className="flex items-center gap-2 text-white/70">
                       <Clock size={15} />
                       <span className="text-xs font-medium">
                         Sedang Berjalan
                       </span>
                     </div>
-                    <p className="mt-2 text-2xl font-bold text-[var(--color-card)]">
+                    <p className="mt-2 text-2xl font-bold text-white">
                       {summary.berjalan}
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
+                    <div className="flex items-center gap-2 text-white/70">
                       <CalendarDays size={15} />
                       <span className="text-xs font-medium">Berakhir</span>
                     </div>
-                    <p className="mt-2 text-2xl font-bold text-[var(--color-card)]">
+                    <p className="mt-2 text-2xl font-bold text-white">
                       {summary.berakhir}
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
+                    <div className="flex items-center gap-2 text-white/70">
                       <CheckCircle2 size={15} />
                       <span className="text-xs font-medium">Pengumpulan</span>
                     </div>
-                    <p className="mt-2 text-2xl font-bold text-[var(--color-card)]">
+                    <p className="mt-2 text-2xl font-bold text-white">
                       {summary.totalPengumpulan}
                     </p>
                   </div>

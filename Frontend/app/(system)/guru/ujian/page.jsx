@@ -142,7 +142,6 @@ function getJenisLabel(jenis) {
 }
 
 
-
 function StatCard({
   icon: Icon,
   label,
@@ -153,22 +152,24 @@ function StatCard({
 }) {
   return (
     <div
-      className={`theme-card group rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 sm:p-5`}
+      className={`theme-card group rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 sm:p-4`}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-2.5">
         <div className="min-w-0">
-          <p className="theme-text-muted text-xs font-semibold">{label}</p>
-          <p className="theme-text mt-2 text-2xl font-bold tracking-tight">
+          <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide">
+            {label}
+          </p>
+          <p className="theme-text mt-1 text-xl font-bold tracking-tight">
             {value}
           </p>
-          <p className="theme-text-muted mt-1 text-[11px] leading-5">
+          <p className="theme-text-muted mt-0.5 text-[10px] leading-4 truncate">
             {description}
           </p>
         </div>
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${bgClass}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${bgClass}`}
         >
-          <Icon size={18} className={iconClass} />
+          <Icon size={15} className={iconClass} />
         </div>
       </div>
     </div>
@@ -376,7 +377,6 @@ export default function GuruUjianPage() {
   }
 
 
-
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
@@ -398,70 +398,59 @@ export default function GuruUjianPage() {
 
         <main className="theme-page min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+            
+            {/* === BANNER HERO (KONSISTEN DENGAN HALAMAN LAIN) === */}
             <section
-              className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 ${themePrimaryGradient} shadow-lg`}
             >
-              <div className="pointer-events-none absolute inset-0">
-                <div
-                  className={`absolute -right-24 -top-24 h-60 w-60 rounded-full ${themePrimarySoft} blur-3xl`}
-                />
-                <div className="absolute -bottom-28 left-1/3 h-52 w-52 rounded-full bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] blur-3xl" />
-              </div>
+              <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
-              <div className="relative flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex min-w-0 items-start gap-4">
-                  <div
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
-                  >
-                    <ClipboardList size={22} />
-                  </div>
-
+              <div className="relative z-10">
+                <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
-                        Ujian
-                      </h1>
-                      <span
-                        className={`rounded-full ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder} border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide`}
-                      >
+                    <div className="mb-4 flex flex-wrap items-center gap-3">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
+                        <ClipboardList size={25} />
+                      </div>
+                      <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
                         Guru
                       </span>
                     </div>
 
-                    <p className="theme-text-secondary mt-1.5 max-w-2xl text-sm leading-6">
-                      Kelola ujian, soal, jadwal, dan publikasi berdasarkan
-                      kelas serta mata pelajaran yang kamu ajar.
+                    <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                      Ujian
+                    </h1>
+
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90 sm:text-base">
+                      Kelola ujian, soal, jadwal, dan publikasi berdasarkan kelas serta mata pelajaran yang kamu ajar.
                     </p>
 
                     {selectedData && (
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} px-2.5 py-1.5 text-xs font-semibold`}
-                        >
-                          <GraduationCap size={13} />
+                      <div className="mt-5 flex flex-wrap gap-2">
+                        <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
+                          <GraduationCap size={14} />
                           {selectedData?.kelas?.nama || "Kelas"}
-                        </span>
-
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-lg border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)] px-2.5 py-1.5 text-xs font-semibold`}
-                        >
-                          <BookOpen size={13} />
-                          {selectedData?.mataPelajaran?.nama ||
-                            "Mata Pelajaran"}
-                        </span>
+                        </div>
+                        <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
+                          <BookOpen size={14} />
+                          {selectedData?.mataPelajaran?.nama || "Mata Pelajaran"}
+                        </div>
                       </div>
                     )}
                   </div>
-                </div>
 
-                <button
-                  type="button"
-                  onClick={() => router.push("/guru/ujian/tambah")}
-                  className={`inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90 sm:w-auto`}
-                >
-                  <Plus size={17} />
-                  Tambah Ujian
-                </button>
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/guru/ujian/tambah")}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 active:scale-[0.98]"
+                    >
+                      <Plus size={17} />
+                      Tambah Ujian
+                    </button>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -616,7 +605,8 @@ export default function GuruUjianPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-5">
+              {/* Kartu Statistik yang Lebih Ramping */}
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
                 <StatCard
                   icon={ClipboardList}
                   label="Total Ujian"

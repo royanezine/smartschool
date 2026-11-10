@@ -36,6 +36,7 @@ import {
   getMetodeAbsensiAktif,
 } from "@/services/absensi.service";
 
+// === THEME CONSTANTS ===
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 
@@ -55,6 +56,10 @@ const themeCardShadow =
 
 const themeNeutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+// === BANNER STYLES (Dinamis mengikuti Theme Admin) ===
+const heroDynamicGradient = themePrimaryGradient; 
+const heroCardBg = "bg-white/10 rounded-xl p-4 transition-colors hover:bg-white/15";
 
 const PAGE_SIZE = 10;
 const TIME_ZONE = "Asia/Jakarta";
@@ -1270,68 +1275,68 @@ export default function AbsensiGuruPage() {
 
         <main className="theme-page min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
-            {/* ================= A. HEADER HALAMAN ================= */}
+            
+            {/* ================= A. HEADER HALAMAN (BANNER DINAMIS) ================= */}
             <section
-              className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 ${heroDynamicGradient} shadow-lg`}
             >
-              <div className="pointer-events-none absolute inset-0">
-                <div
-                  className={`absolute -right-24 -top-24 h-60 w-60 rounded-full ${themePrimarySoft} blur-3xl`}
-                />
-                <div className="absolute -bottom-28 left-1/3 h-52 w-52 rounded-full bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] blur-3xl" />
-              </div>
+              {/* Ornamen Latar Belakang */}
+              <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
-              <div className="relative flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex min-w-0 items-start gap-4">
-                  <div
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
-                  >
-                    <ClipboardCheck size={22} />
-                  </div>
-
+              <div className="relative z-10">
+                <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
-                        Presensi Saya
-                      </h1>
-                      <span
-                        className={`rounded-full ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder} border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide`}
-                      >
+                    <div className="mb-4 flex flex-wrap items-center gap-3">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
+                        <ClipboardCheck size={25} />
+                      </div>
+                      <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
                         Guru
                       </span>
                     </div>
 
-                    <p className="theme-text-secondary mt-1.5 max-w-2xl text-sm leading-6">
+                    <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                      Presensi Saya
+                    </h1>
+
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90 sm:text-base">
                       Kelola kehadiran harian, check-in, dan check-out shift kerja secara real-time.
                     </p>
-                  </div>
-                </div>
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] text-xs theme-text font-medium">
-                    <CalendarDays size={15} className="text-[var(--color-primary)]" />
-                    <span>{formatDate(today)}</span>
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
+                        <CalendarDays size={14} />
+                        {formatDate(today)}
+                      </div>
+                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
+                        <History size={14} />
+                        {summary.total} Riwayat
+                      </div>
+                    </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      fetchHistory(true);
-                      fetchMetodeAbsensi();
-                    }}
-                    disabled={loading || shiftLoading || submitting}
-                    className={`inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90 sm:w-auto disabled:opacity-50`}
-                  >
-                    <RefreshCw
-                      size={15}
-                      className={
-                        loading || shiftLoading || metodeLoading
-                          ? "animate-spin"
-                          : ""
-                      }
-                    />
-                    Perbarui Data
-                  </button>
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        fetchHistory(true);
+                        fetchMetodeAbsensi();
+                      }}
+                      disabled={loading || shiftLoading || submitting}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <RefreshCw
+                        size={16}
+                        className={
+                          loading || shiftLoading || metodeLoading
+                            ? "animate-spin"
+                            : ""
+                        }
+                      />
+                      <span className="hidden sm:inline">Perbarui Data</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </section>

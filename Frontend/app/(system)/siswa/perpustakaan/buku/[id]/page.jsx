@@ -1679,9 +1679,7 @@ export default function BukuDetailSiswaPage() {
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}
               >
-                <Sparkles
-                  size={19}
-                />
+             
               </div>
 
               <div>

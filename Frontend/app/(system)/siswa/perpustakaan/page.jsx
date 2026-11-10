@@ -396,7 +396,7 @@ export default function PerpustakaanSiswaPage() {
           <div className="relative grid gap-8 px-5 py-7 sm:px-7 sm:py-8 lg:grid-cols-[1fr_380px] lg:px-10 lg:py-10">
             <div>
               <div className={`mb-4 inline-flex items-center gap-2 rounded-full border ${themePrimaryBorder} ${themePrimarySoft} px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)]`}>
-                <Sparkles size={13} /> Perpustakaan Siswa
+               Perpustakaan Siswa
               </div>
               <h1 className="theme-text max-w-2xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-[38px] lg:leading-tight">
                 Temukan buku untuk belajar dan membaca.
