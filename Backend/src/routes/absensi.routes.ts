@@ -23,6 +23,7 @@ import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
 import { requireLangganan } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
+import { requireAksesMenu } from "../middlewares/aksesMenu.middleware";
 import { uploadBiometrik } from "../middlewares/upload.middleware";
 
 import { authorizeRoles } from "../middlewares/role.middleware";
@@ -73,11 +74,11 @@ router.get("/", authorizeRoles("admin_sekolah"), requireIzin("absensi.view", "lm
 
 router.post(
   "/",
-  requireIzin("lms.create"),
+  requireAksesMenu("absen saya", "create"),
   upload.single("snapshot"),
   createAbsensi,
 );
-router.get("/saya", requireIzin("lms.view"), getAbsensiSaya);
+router.get("/saya", requireAksesMenu("absen saya", "view"), getAbsensiSaya);
 router.get("/rekap-mapel", requireIzin("lms.view", "laporan.view"), getRekapAbsensiMapel);
 router.get("/monitoring-guru", getMonitoringGuru);
 router.get("/kelas/:kelasId", requireIzin("lms.view"), getAbsensiKelas);

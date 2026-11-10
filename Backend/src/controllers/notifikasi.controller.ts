@@ -10,7 +10,8 @@ export const getNotifikasiUser = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = (req as AuthRequest).user?.userId as string;
+    const authUser = (req as AuthRequest).user;
+    const userId = (authUser?.userId || (authUser as any)?.id) as string;
 
     const [notifikasi, unreadCount] = await Promise.all([
       prisma.notifikasi.findMany({
@@ -39,7 +40,8 @@ export const markAsRead = async (
 ) => {
   try {
     const id = req.params.id as string;
-    const userId = (req as AuthRequest).user?.userId as string;
+    const authUser = (req as AuthRequest).user;
+    const userId = (authUser?.userId || (authUser as any)?.id) as string;
 
     await prisma.notifikasi.updateMany({
       where: { id, penggunaId: userId },
@@ -61,7 +63,8 @@ export const markAllAsRead = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = (req as AuthRequest).user?.userId as string;
+    const authUser = (req as AuthRequest).user;
+    const userId = (authUser?.userId || (authUser as any)?.id) as string;
 
     await prisma.notifikasi.updateMany({
       where: { penggunaId: userId, dibaca: false },

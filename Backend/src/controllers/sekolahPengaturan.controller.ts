@@ -12,12 +12,17 @@ const presensiSchema = z
     bujur: z.coerce.number().min(-180).max(180).optional(),
     radiusAbsensi: z.coerce.number().int().min(1).max(100000).optional(),
     metodeAbsensiAktif: z
-      .array(z.enum(["barcode", "lokasi", "face"]))
-      .min(1)
-      .transform((v) => Array.from(new Set(v)))
+      .array(z.enum(["barcode", "lokasi", "face", "manual", "gps"]))
+      .transform((v) =>
+        Array.from(new Set(v.map((m) => (m === "gps" ? "lokasi" : m)))),
+      )
       .optional(),
-  })
-  .strict();
+    barcode: z.boolean().optional(),
+    face: z.boolean().optional(),
+    gps: z.boolean().optional(),
+    lokasi: z.boolean().optional(),
+    manual: z.boolean().optional(),
+  });
 
 const tentukanSekolah = (req: AuthRequest) => {
   const role = normalizeRole(req.user?.role);
@@ -35,12 +40,46 @@ const format = (s: {
   bujur: unknown;
   radiusAbsensi: number | null;
   metodeAbsensiAktif: string[];
-}) => ({
-  lintang: s.lintang === null ? null : Number(s.lintang),
-  bujur: s.bujur === null ? null : Number(s.bujur),
-  radiusAbsensi: s.radiusAbsensi,
-  metodeAbsensiAktif: s.metodeAbsensiAktif,
-});
+}) => {
+  let list: string[] = [];
+  if (Array.isArray(s.metodeAbsensiAktif)) {
+    list = s.metodeAbsensiAktif;
+  } else if (typeof s.metodeAbsensiAktif === "string") {
+    try {
+      const parsed = JSON.parse(s.metodeAbsensiAktif);
+      if (Array.isArray(parsed)) list = parsed;
+      else list = [s.metodeAbsensiAktif];
+    } catch {
+      list = [s.metodeAbsensiAktif];
+    }
+  }
+
+  const normalized = list.map((m) => String(m).trim().toLowerCase());
+  const isBarcode = normalized.includes("barcode");
+  const isFace = normalized.includes("face");
+  const isGps = normalized.includes("gps") || normalized.includes("lokasi");
+  const isLokasi = isGps;
+  const isManual = normalized.includes("manual");
+
+  return {
+    lintang: s.lintang === null ? null : Number(s.lintang),
+    bujur: s.bujur === null ? null : Number(s.bujur),
+    radiusAbsensi: s.radiusAbsensi,
+    metodeAbsensiAktif: list,
+    barcode: isBarcode,
+    face: isFace,
+    gps: isGps,
+    lokasi: isLokasi,
+    manual: isManual,
+    metode: {
+      barcode: isBarcode,
+      face: isFace,
+      gps: isGps,
+      lokasi: isLokasi,
+      manual: isManual,
+    },
+  };
+};
 
 export const getPengaturanPresensi = async (
   req: AuthRequest,
@@ -82,9 +121,30 @@ export const updatePengaturanPresensi = async (
     });
     if (!ada) throw new AppError("Sekolah tidak ditemukan", 404);
 
+    const { barcode, face, gps, lokasi, manual, ...restData } = data;
+    let finalMetode = restData.metodeAbsensiAktif;
+    if (
+      finalMetode === undefined &&
+      (barcode !== undefined ||
+        face !== undefined ||
+        gps !== undefined ||
+        lokasi !== undefined ||
+        manual !== undefined)
+    ) {
+      finalMetode = [];
+      if (barcode) finalMetode.push("barcode");
+      if (face) finalMetode.push("face");
+      if (gps || lokasi) finalMetode.push("lokasi");
+      if (manual) finalMetode.push("manual");
+    }
+
     const sekolah = await prisma.sekolah.update({
       where: { id: sekolahId },
-      data: { ...data, diperbaruiOleh: req.user!.userId },
+      data: {
+        ...restData,
+        ...(finalMetode !== undefined && { metodeAbsensiAktif: finalMetode }),
+        diperbaruiOleh: req.user!.userId,
+      },
       select: {
         lintang: true,
         bujur: true,

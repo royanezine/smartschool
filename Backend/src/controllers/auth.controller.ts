@@ -108,10 +108,35 @@ interface AuthUserPayload {
   jabatanRef?: { namaJabatan?: string | null; aksesMenu?: any } | null;
 }
 
-export const formatAuthUser = (user: AuthUserPayload) => {
+export const formatAuthUser = async (user: AuthUserPayload) => {
   const rawAkses = user.jabatanRef?.aksesMenu;
-  const aksesMenu = Array.isArray(rawAkses) ? rawAkses : [];
+  let aksesMenu = Array.isArray(rawAkses) ? [...rawAkses] : [];
   const namaJabatan = user.jabatanRef?.namaJabatan ?? (user.jabatan || null);
+  const roleName = normalizeRole(user.peran?.nama);
+
+  // Dynamic RBAC: Cek apakah guru adalah wali kelas
+  if (roleName === "guru") {
+    const cekWali = await prisma.kelas.findFirst({
+      where: {
+        waliKelasId: user.id,
+        dihapusPada: null,
+      },
+    });
+
+    if (!cekWali) {
+      aksesMenu = aksesMenu.filter((item: any) => {
+        const menuStr = String(item?.menu || item?.namaMenu || item || "").toLowerCase();
+        return !(
+          menuStr.includes("rapor kelas") ||
+          menuStr.includes("rapor_kelas") ||
+          menuStr.includes("wali kelas") ||
+          menuStr.includes("wali_kelas") ||
+          menuStr.includes("rapor (wali)") ||
+          menuStr.includes("rapor kelas (wali)")
+        );
+      });
+    }
+  }
 
   return {
     id: user.id,
@@ -209,7 +234,7 @@ export const verifyRegister = async (req: Request, res: Response) => {
     type: "refresh",
   });
 
-  const formattedAuth = formatAuthUser(userWithRole);
+  const formattedAuth = await formatAuthUser(userWithRole);
 
   return res.status(200).json({
     success: true,
@@ -328,7 +353,7 @@ export const login = async (req: Request, res: Response) => {
     type: "refresh",
   });
 
-  const formattedAuth = formatAuthUser(user);
+  const formattedAuth = await formatAuthUser(user);
 
   return res.status(200).json({
     success: true,
@@ -516,7 +541,7 @@ export const setupPin = async (req: Request, res: Response) => {
     type: "refresh",
   });
 
-  const formattedAuth = formatAuthUser(user);
+  const formattedAuth = await formatAuthUser(user);
 
   return res.status(200).json({
     success: true,
@@ -662,7 +687,7 @@ export const verifyPin = async (req: Request, res: Response) => {
     type: "refresh",
   });
 
-  const formattedAuth = formatAuthUser(user);
+  const formattedAuth = await formatAuthUser(user);
 
   return res.status(200).json({
     success: true,
@@ -898,7 +923,7 @@ export const refreshToken = async (
       type: "refresh",
     });
 
-    const formattedAuth = formatAuthUser(user);
+    const formattedAuth = await formatAuthUser(user);
 
     return res.status(200).json({
       success: true,

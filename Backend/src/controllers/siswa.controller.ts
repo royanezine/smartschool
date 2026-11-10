@@ -50,6 +50,8 @@ export const getSiswaList = async (
           nisn: true,
           nis: true,
           status: true,
+          jurusanId: true,
+          jurusan: true,
         },
         orderBy: { dibuatPada: "desc" },
       }),
@@ -120,7 +122,7 @@ export const getMySiswa = async (
         dihapusPada: null,
       },
       select: {
-          pinHash: true,
+        pinHash: true,
         id: true,
         namaLengkap: true,
         email: true,
@@ -128,6 +130,8 @@ export const getMySiswa = async (
         nis: true,
         status: true,
         jenisKelamin: true,
+        jurusanId: true,
+        jurusan: true,
       },
     });
 
@@ -183,6 +187,8 @@ export const getSemuaSiswaAdmin = async (
           nis: true,
           status: true,
           jenisKelamin: true,
+          jurusanId: true,
+          jurusan: true,
         },
         orderBy: { dibuatPada: "desc" },
       }),
@@ -197,6 +203,37 @@ export const getSemuaSiswaAdmin = async (
       limit,
       totalData,
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSiswa = getSemuaSiswaAdmin;
+
+export const getSiswaById = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const sekolahId = req.user?.sekolahId;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+
+    const siswa = await prisma.pengguna.findFirst({
+      where: {
+        id,
+        sekolahId,
+        peran: { nama: "siswa" },
+        dihapusPada: null,
+      },
+      include: {
+        jurusan: true,
+      },
+    });
+
+    if (!siswa) throw new AppError("Siswa tidak ditemukan", 404);
+    return successResponse(res, "Data siswa berhasil diambil", publicUser(siswa));
   } catch (error) {
     next(error);
   }

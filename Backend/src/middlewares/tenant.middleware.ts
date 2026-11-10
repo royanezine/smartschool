@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "./auth.middleware";
 import { prisma } from "../config/db";
-import { isSuperAdmin } from "../utils/rbac";
+import { isSuperAdmin, normalizeRole } from "../utils/rbac";
 import { availableSchoolWhere } from "../utils/schoolAvailability";
 
 export const requireTenant = async (
@@ -18,7 +18,13 @@ export const requireTenant = async (
       });
     }
 
-    if (isSuperAdmin(req.user.role)) {
+    const role = normalizeRole(req.user.role);
+    if (
+      isSuperAdmin(role) ||
+      role === "super_admin" ||
+      role === "yayasan" ||
+      role === "admin_yayasan"
+    ) {
       return next();
     }
 

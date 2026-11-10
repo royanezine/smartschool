@@ -75,9 +75,17 @@ export const requireAksesMenu = (
         return next();
       }
 
-      // 2. Siswa memiliki akses bawaan baca ke menu publik/siswa
-      if (normalizeRole(user.role) === "siswa" && action === "view") {
-        return next();
+      // 2. Siswa memiliki akses bawaan baca ke menu publik/siswa, serta create & view pada "absen saya"
+      if (normalizeRole(user.role) === "siswa") {
+        const normalizedTarget = normalizeMenuName(menuName);
+        if (
+          action === "view" ||
+          normalizedTarget === "absen saya" ||
+          normalizedTarget === "absen_saya" ||
+          normalizedTarget === "absensi"
+        ) {
+          return next();
+        }
       }
 
       // 3. Ambil daftar aksesMenu dari session req.user atau fallback fetch dari database (dengan Redis cache)

@@ -871,7 +871,10 @@ export const getMetodeAbsensiAktif = async (
   req: AuthRequest,
   res: Response,
 ) => {
-  const sekolahId = req.user?.sekolahId;
+  const sekolahId = resolveSchoolId(
+    req.user,
+    typeof req.query.sekolahId === "string" ? req.query.sekolahId : undefined,
+  );
 
   if (!sekolahId) {
     throw new AppError(
@@ -880,17 +883,57 @@ export const getMetodeAbsensiAktif = async (
     );
   }
 
-  const sekolah = await prisma.sekolah.findUnique({
-    where: { id: sekolahId },
-    select: { metodeAbsensiAktif: true },
+  const sekolah = await prisma.sekolah.findFirst({
+    where: { id: sekolahId, dihapusPada: null },
+    select: {
+      metodeAbsensiAktif: true,
+      lintang: true,
+      bujur: true,
+      radiusAbsensi: true,
+    },
   });
 
   if (!sekolah) {
     throw new AppError("Sekolah tidak ditemukan", 404);
   }
 
+  let list: string[] = [];
+  if (Array.isArray(sekolah.metodeAbsensiAktif)) {
+    list = sekolah.metodeAbsensiAktif;
+  } else if (typeof sekolah.metodeAbsensiAktif === "string") {
+    try {
+      const parsed = JSON.parse(sekolah.metodeAbsensiAktif);
+      if (Array.isArray(parsed)) list = parsed;
+      else list = [sekolah.metodeAbsensiAktif];
+    } catch {
+      list = [sekolah.metodeAbsensiAktif];
+    }
+  }
+
+  const normalized = list.map((m) => String(m).trim().toLowerCase());
+  const isBarcode = normalized.includes("barcode");
+  const isFace = normalized.includes("face");
+  const isGps = normalized.includes("gps") || normalized.includes("lokasi");
+  const isLokasi = isGps;
+  const isManual = normalized.includes("manual");
+
   return successResponse(res, "Berhasil mengambil metode absensi aktif", {
-    metodeAktif: sekolah.metodeAbsensiAktif,
+    metodeAktif: list,
+    barcode: isBarcode,
+    face: isFace,
+    gps: isGps,
+    lokasi: isLokasi,
+    manual: isManual,
+    lintang: sekolah.lintang !== null && sekolah.lintang !== undefined ? Number(sekolah.lintang) : null,
+    bujur: sekolah.bujur !== null && sekolah.bujur !== undefined ? Number(sekolah.bujur) : null,
+    radiusAbsensi: sekolah.radiusAbsensi ?? null,
+    metode: {
+      barcode: isBarcode,
+      face: isFace,
+      gps: isGps,
+      lokasi: isLokasi,
+      manual: isManual,
+    },
   });
 };
 

@@ -324,18 +324,53 @@ export const profile = async (
         pinHash: true, id: true, email: true, namaPengguna: true, namaLengkap: true, avatar: true, nipd: true, nip: true, nuptk: true, nisn: true, nis: true, nik: true, jabatan: true, golongan: true, shiftKerja: true, jenisKelamin: true, tempatLahir: true, tanggalLahir: true, alamat: true, alamatDomisili: true, noTelepon: true, status: true, terakhirLogin: true, dibuatPada: true, diperbaruiPada: true, diperbaruiOleh: true,
         sekolah: { select: { id: true, nama: true, subdomain: true, kode: true, alamat: true, telepon: true, email: true, logoBesarUrl: true, logoKecilUrl: true, status: true } },
         peran: { select: { id: true, nama: true, namaTampilan: true, deskripsi: true, status: true } },
+        jabatanRef: { select: { id: true, namaJabatan: true, aksesMenu: true } },
         biometrikWajah: true,
       },
     });
 
     if (!user) return res.status(404).json({ success: false, message: "Pengguna tidak ditemukan" });
 
-    if (normalizeRole(user.peran?.nama) === "siswa" && user.sekolah?.id) {
-      const akademik = await ambilDataAkademikSiswa(user.id, user.sekolah.id);
-      return res.status(200).json({ success: true, message: "Profile berhasil diambil", data: { ...publicUser(user), ...akademik } });
+    const rawAkses = user.jabatanRef?.aksesMenu;
+    let aksesMenu = Array.isArray(rawAkses) ? [...rawAkses] : [];
+    const roleName = normalizeRole(user.peran?.nama);
+
+    // Dynamic RBAC: Cek apakah guru adalah wali kelas
+    if (roleName === "guru") {
+      const cekWali = await prisma.kelas.findFirst({
+        where: {
+          waliKelasId: user.id,
+          dihapusPada: null,
+        },
+      });
+
+      if (!cekWali) {
+        aksesMenu = aksesMenu.filter((item: any) => {
+          const menuStr = String(item?.menu || item?.namaMenu || item || "").toLowerCase();
+          return !(
+            menuStr.includes("rapor kelas") ||
+            menuStr.includes("rapor_kelas") ||
+            menuStr.includes("wali kelas") ||
+            menuStr.includes("wali_kelas") ||
+            menuStr.includes("rapor (wali)") ||
+            menuStr.includes("rapor kelas (wali)")
+          );
+        });
+      }
     }
 
-    return res.status(200).json({ success: true, message: "Profile berhasil diambil", data: publicUser(user) });
+    const baseData = {
+      ...publicUser(user),
+      jabatan: user.jabatanRef?.namaJabatan ?? (user.jabatan || null),
+      aksesMenu,
+    };
+
+    if (roleName === "siswa" && user.sekolah?.id) {
+      const akademik = await ambilDataAkademikSiswa(user.id, user.sekolah.id);
+      return res.status(200).json({ success: true, message: "Profile berhasil diambil", data: { ...baseData, ...akademik } });
+    }
+
+    return res.status(200).json({ success: true, message: "Profile berhasil diambil", data: baseData });
   } catch (error) {
     if (next) return next(error);
     console.error(error);
