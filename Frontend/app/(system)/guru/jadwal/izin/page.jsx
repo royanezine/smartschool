@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
@@ -17,6 +17,7 @@ import {
   ArrowRight,
   Loader2,
   RefreshCw,
+  UserCheck,
 } from "lucide-react";
 
 import { getDaftarIzin } from "@/services/izin.service";
@@ -234,53 +235,62 @@ export default function GuruIzinPage() {
   const notifications = [];
 
 
-  async function loadRiwayatIzin(
-    showLoading = true
-  ) {
-    try {
-      if (showLoading) {
-        setLoading(true);
-      } else {
-        setRefreshing(true);
-      }
+  const currentUserId =
+    sessionUser?.id || sessionUser?.userId || "";
 
-      setPageError("");
+  const loadRiwayatIzin = useCallback(
+    async (showLoading = true) => {
+      try {
+        if (showLoading) {
+          setLoading(true);
+        } else {
+          setRefreshing(true);
+        }
 
-      const response =
-  await getDaftarIzin({ mine: true });
+        setPageError("");
 
-      let daftar = normalizeResponseData(response);
+        const response = await getDaftarIzin({
+          mine: true,
+          limit: 100,
+        });
 
-      // Filter izin berdasarkan pengguna yang sedang login (penggunaId session === row.penggunaId)
-      if (sessionUser?.id) {
-        daftar = daftar.filter(
-          (item) => String(item.penggunaId) === String(sessionUser.id)
+        let daftar = normalizeResponseData(response);
+
+        // Filter izin berdasarkan pengguna yang sedang login (penggunaId session === row.penggunaId)
+        if (currentUserId) {
+          daftar = daftar.filter(
+            (item) =>
+              String(
+                item.penggunaId || item.pengguna?.id || ""
+              ) === String(currentUserId)
+          );
+        }
+
+        setRiwayatIzin(daftar);
+      } catch (error) {
+        console.error(
+          "Gagal mengambil riwayat izin:",
+          error
         );
+
+        setPageError(
+          error?.message ||
+            "Gagal mengambil riwayat pengajuan izin."
+        );
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-
-      setRiwayatIzin(daftar);
-    } catch (error) {
-      console.error(
-        "Gagal mengambil riwayat izin:",
-        error
-      );
-
-      setPageError(
-        error?.message ||
-          "Gagal mengambil riwayat pengajuan izin."
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }
+    },
+    [currentUserId]
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
       loadRiwayatIzin(true);
     }, 0);
     return () => clearTimeout(timer);
-  }, []);
+  }, [loadRiwayatIzin]);
 
 
   const summary = {
@@ -654,6 +664,26 @@ export default function GuruIzinPage() {
                                 "-"}
                             </p>
 
+                            {item.guruPengganti?.namaLengkap && (
+                              <div
+                                className={`mt-2.5 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs ${themeInfoSurface} ${themeInfoBorder} theme-text-secondary`}
+                              >
+                                <UserCheck
+                                  size={13}
+                                  className={themePrimaryText}
+                                />
+                                <span>
+                                  Guru Pengganti:{" "}
+                                  <strong className="theme-text">
+                                    {item.guruPengganti.namaLengkap}
+                                  </strong>
+                                  {item.guruPengganti.nip
+                                    ? ` (NIP: ${item.guruPengganti.nip})`
+                                    : ""}
+                                </span>
+                              </div>
+                            )}
+
 
                             {item.catatan && (
                               <div
@@ -755,12 +785,12 @@ function buildUploadUrl(path) {
     return path;
   }
 
-  const apiUrl =
+  const apiUrl = (
     process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:5000";
+    "http://localhost:5000"
+  )
+    .replace(/\/+$/, "")
+    .replace(/\/api$/i, "");
 
-  return `${apiUrl.replace(
-    /\/$/,
-    ""
-  )}${path.startsWith("/") ? "" : "/"}${path}`;
+  return `${apiUrl}${path.startsWith("/") ? "" : "/"}${path}`;
 }

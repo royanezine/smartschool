@@ -23,11 +23,12 @@ import {
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import {
+  extractIzinFieldErrors,
+  formatIzinErrorMessage,
+  getDaftarGuruPengganti,
   getDaftarIzin,
   verifikasiIzin,
-  verifikasiPengajuan,
 } from "@/services/izin.service";
-import { getUsers } from "@/services/user.service";
 
 /* =========================================================
    HELPER RESPONSE API
@@ -389,6 +390,10 @@ function mapIzinToAdminData(item) {
 
   return {
     id: item?.id ?? item?.izinId ?? item?.pengajuanId ?? null,
+    sekolahId:
+      item?.sekolahId ||
+      pengguna?.sekolahId ||
+      null,
     nama: getNamaPengguna(item),
     identitas: getIdentitasPengguna(item),
     jabatan: getJabatanPengguna(item),
@@ -485,12 +490,14 @@ export default function PermohonanIzinGuruPage() {
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [approveGuruPenggantiId, setApproveGuruPenggantiId] =
     useState("");
+  const [approveCatatan, setApproveCatatan] = useState("");
+  const [approveFieldErrors, setApproveFieldErrors] = useState({});
 
   /* Modal tolak */
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectCatatan, setRejectCatatan] = useState("");
 
-  /* Daftar guru untuk dropdown pengganti */
+  /* Daftar guru nyata dari Backend untuk pilihan guru pengganti */
   const [guruList, setGuruList] = useState([]);
   const [loadingGuru, setLoadingGuru] = useState(false);
 
@@ -506,7 +513,7 @@ export default function PermohonanIzinGuruPage() {
 
       setError("");
 
-      const response = await getDaftarIzin();
+      const response = await getDaftarIzin({ limit: 100 });
       const items = normalizeResponseData(response);
 
       const mapped = items
@@ -527,7 +534,10 @@ export default function PermohonanIzinGuruPage() {
     } catch (err) {
       console.error("Gagal mengambil data permohonan izin:", err);
       setError(
-        err?.message || "Gagal mengambil data permohonan izin."
+        formatIzinErrorMessage(
+          err,
+          "Gagal mengambil data permohonan izin.",
+        )
       );
     } finally {
       setLoading(false);
@@ -538,50 +548,38 @@ export default function PermohonanIzinGuruPage() {
   /* ---------- load daftar guru ---------- */
 
   const loadGuru = useCallback(async () => {
-    if (guruList.length > 0) return;
-
     try {
       setLoadingGuru(true);
 
-      const response = await getUsers({
-        role: "guru",
-        status: "aktif",
-        limit: 200,
-      });
-
-      const raw =
-        response?.data?.data ||
-        response?.data ||
-        response?.users ||
-        response;
-
-      const list = Array.isArray(raw) ? raw : [];
+      const list = await getDaftarGuruPengganti();
 
       setGuruList(
-        list
+        (Array.isArray(list) ? list : [])
           .map((item) => ({
-            id: item?.id,
+            id: String(item?.id || "").trim(),
             nama:
-              item?.namaLengkap ||
-              item?.nama ||
-              item?.name ||
+              String(item?.namaLengkap || "").trim() ||
               "Tanpa nama",
             nip: item?.nip || null,
             jabatan: item?.jabatan || null,
+            sekolahId: item?.sekolahId || null,
           }))
-          .filter((item) => item.id)
+          .filter((item) => Boolean(item.id))
       );
     } catch (err) {
-      console.error("Gagal memuat daftar guru:", err);
-      // Tidak dijadikan error fatal — dropdown tetap kosong.
+      console.error("Gagal memuat daftar guru pengganti:", err);
     } finally {
       setLoadingGuru(false);
     }
-  }, [guruList.length]);
+  }, []);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    const timer = setTimeout(() => {
+      loadData();
+      loadGuru();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadData, loadGuru]);
 
   /* ---------- derived ---------- */
 
@@ -591,6 +589,61 @@ export default function PermohonanIzinGuruPage() {
       null,
     [data, selectedId]
   );
+
+  const daftarGuruPengganti = useMemo(() => {
+    if (!selectedData) return [];
+
+    const pemohonId = String(selectedData.penggunaId || "").trim();
+    const targetSekolahId = String(
+      selectedData.sekolahId || ""
+    ).trim();
+
+    const map = new Map();
+
+    // Sertakan guru pengganti yang sudah diajukan pada permohonan (jika valid & bukan diri sendiri)
+    if (
+      selectedData.guruPenggantiId &&
+      selectedData.guruPenggantiNama &&
+      String(selectedData.guruPenggantiId).trim() !== pemohonId
+    ) {
+      const submittedId = String(
+        selectedData.guruPenggantiId
+      ).trim();
+      map.set(submittedId, {
+        id: submittedId,
+        nama: selectedData.guruPenggantiNama,
+        nip: selectedData.guruPenggantiNip || null,
+        jabatan: selectedData.guruPenggantiJabatan || null,
+        sekolahId: targetSekolahId || null,
+      });
+    }
+
+    for (const guru of guruList) {
+      const guruId = String(guru?.id || "").trim();
+      if (!guruId) continue;
+
+      // Kecualikan pemohon izin itu sendiri
+      if (pemohonId && guruId === pemohonId) continue;
+
+      // Sesuai kontrak Backend: guru pengganti harus dari sekolah yang sama dengan permohonan
+      if (
+        targetSekolahId &&
+        guru.sekolahId &&
+        String(guru.sekolahId).trim() !== targetSekolahId
+      ) {
+        continue;
+      }
+
+      map.set(guruId, guru);
+    }
+
+    return Array.from(map.values()).sort((a, b) =>
+      String(a.nama || "").localeCompare(
+        String(b.nama || ""),
+        "id-ID"
+      )
+    );
+  }, [guruList, selectedData]);
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -657,8 +710,12 @@ export default function PermohonanIzinGuruPage() {
 
   const handleSelectData = (item) => {
     setSelectedId(item.id);
+    setApproveGuruPenggantiId(
+      item.guruPenggantiId ? String(item.guruPenggantiId) : ""
+    );
+    setApproveCatatan(item.catatan || "");
+    setApproveFieldErrors({});
     setRejectCatatan(item.catatan || "");
-    setApproveGuruPenggantiId(item.guruPenggantiId || "");
     setError("");
   };
 
@@ -666,11 +723,20 @@ export default function PermohonanIzinGuruPage() {
     if (!selectedData) return;
 
     setError("");
-    setApproveGuruPenggantiId(selectedData.guruPenggantiId || "");
+    setApproveFieldErrors({});
+    setApproveGuruPenggantiId(
+      selectedData.guruPenggantiId
+        ? String(selectedData.guruPenggantiId)
+        : ""
+    );
+    setApproveCatatan(selectedData.catatan || "");
     setShowApproveModal(true);
 
-    // Hanya butuh daftar guru kalau pemohon adalah guru.
-    if (selectedData.kategori === "guru") {
+    if (
+      (selectedData.kategori === "guru" ||
+        selectedData.guruPenggantiId) &&
+      guruList.length === 0
+    ) {
       loadGuru();
     }
   };
@@ -686,30 +752,68 @@ export default function PermohonanIzinGuruPage() {
   const handleApprove = async () => {
     if (!selectedData) return;
 
+    const trimmedGuruId = String(
+      approveGuruPenggantiId || ""
+    ).trim();
+
+    if (trimmedGuruId) {
+      const uuidPattern =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+      if (!uuidPattern.test(trimmedGuruId)) {
+        setApproveFieldErrors({
+          guruPenggantiId: "ID guru pengganti tidak valid",
+        });
+        return;
+      }
+
+      if (
+        selectedData.penggunaId &&
+        trimmedGuruId === String(selectedData.penggunaId).trim()
+      ) {
+        setApproveFieldErrors({
+          guruPenggantiId:
+            "Guru pengganti tidak boleh sama dengan pemohon izin.",
+        });
+        return;
+      }
+    }
+
     try {
       setProcessingId(selectedData.id);
       setError("");
+      setApproveFieldErrors({});
 
-      const guruPenggantiId =
-        selectedData.kategori === "guru"
-          ? approveGuruPenggantiId || null
-          : null;
+      const canAssignGuruPengganti =
+        selectedData.kategori === "guru" ||
+        Boolean(selectedData.guruPenggantiId) ||
+        Boolean(trimmedGuruId);
 
-      // verifikasiPengajuan mendukung payload guruPenggantiId.
-      // Kalau backend belum mendukung, ia akan melempar error
-      // dengan pesan informatif dan ditangkap di catch.
-      await verifikasiPengajuan(selectedData.id, {
+      await verifikasiIzin(selectedData.id, {
         status: "disetujui",
-        catatan: "Permohonan izin disetujui.",
-        guruPenggantiId,
+        catatan: approveCatatan.trim() || null,
+        ...(canAssignGuruPengganti && {
+          guruPenggantiId: trimmedGuruId || null,
+        }),
       });
 
       setShowApproveModal(false);
       setApproveGuruPenggantiId("");
+      setApproveCatatan("");
+      setApproveFieldErrors({});
       await loadData(true);
     } catch (err) {
       console.error("Gagal menyetujui permohonan:", err);
-      setError(err?.message || "Gagal menyetujui permohonan izin.");
+      const fieldErrs = extractIzinFieldErrors(err);
+      if (Object.keys(fieldErrs).length > 0) {
+        setApproveFieldErrors(fieldErrs);
+      }
+      setError(
+        formatIzinErrorMessage(
+          err,
+          "Gagal menyetujui permohonan izin.",
+        ),
+      );
     } finally {
       setProcessingId(null);
     }
@@ -724,7 +828,7 @@ export default function PermohonanIzinGuruPage() {
 
       await verifikasiIzin(selectedData.id, {
         status: "ditolak",
-        catatan: rejectCatatan.trim() || "Permohonan izin ditolak.",
+        catatan: rejectCatatan.trim() || null,
       });
 
       setShowRejectModal(false);
@@ -732,7 +836,12 @@ export default function PermohonanIzinGuruPage() {
       await loadData(true);
     } catch (err) {
       console.error("Gagal menolak permohonan:", err);
-      setError(err?.message || "Gagal menolak permohonan izin.");
+      setError(
+        formatIzinErrorMessage(
+          err,
+          "Gagal menolak permohonan izin.",
+        ),
+      );
     } finally {
       setProcessingId(null);
     }
@@ -948,7 +1057,6 @@ export default function PermohonanIzinGuruPage() {
                       <option value="semua">Semua Jenis</option>
                       <option value="sakit">Sakit</option>
                       <option value="izin">Izin</option>
-                      <option value="cuti">Cuti</option>
                     </select>
                   </div>
                 </div>
@@ -1277,8 +1385,8 @@ export default function PermohonanIzinGuruPage() {
                                 </div>
                               ) : isMenunggu(selectedData.status) ? (
                                 <div className="rounded-xl border border-dashed theme-border-soft p-3 text-xs theme-text-muted">
-                                  Belum ditentukan. Pilih guru pengganti saat
-                                  menyetujui.
+                                  Belum ada guru pengganti yang diajukan. Pilih
+                                  guru pengganti saat verifikasi jika diperlukan.
                                 </div>
                               ) : (
                                 <div className="rounded-xl border border-dashed theme-border-soft p-3 text-xs theme-text-muted">
@@ -1401,10 +1509,26 @@ export default function PermohonanIzinGuruPage() {
                   Periode: {formatTanggalSingkat(selectedData.tanggalMulai)} -{" "}
                   {formatTanggalSingkat(selectedData.tanggalSelesai)}
                 </p>
+                {(selectedData.kategori === "guru" ||
+                  selectedData.guruPenggantiNama) && (
+                  <p className="mt-2 text-xs theme-text-muted">
+                    Guru Pengganti Diajukan:{" "}
+                    <span className="font-semibold theme-text-secondary">
+                      {selectedData.guruPenggantiNama
+                        ? `${selectedData.guruPenggantiNama}${
+                            selectedData.guruPenggantiNip
+                              ? ` (NIP: ${selectedData.guruPenggantiNip})`
+                              : ""
+                          }`
+                        : "Tidak ada"}
+                    </span>
+                  </p>
+                )}
               </div>
 
-              {/* DROPDOWN GURU PENGGANTI — hanya untuk pemohon guru */}
-              {selectedData.kategori === "guru" && (
+              {/* DROPDOWN GURU PENGGANTI — untuk permohonan guru atau yang memiliki guruPenggantiId */}
+              {(selectedData.kategori === "guru" ||
+                Boolean(selectedData.guruPenggantiId)) && (
                 <div>
                   <label className="mb-2 block text-sm font-bold theme-text">
                     Guru Pengganti{" "}
@@ -1415,11 +1539,17 @@ export default function PermohonanIzinGuruPage() {
 
                   <select
                     value={approveGuruPenggantiId}
-                    onChange={(event) =>
-                      setApproveGuruPenggantiId(event.target.value)
-                    }
+                    onChange={(event) => {
+                      setApproveGuruPenggantiId(event.target.value);
+                      if (approveFieldErrors.guruPenggantiId) {
+                        setApproveFieldErrors((prev) => ({
+                          ...prev,
+                          guruPenggantiId: "",
+                        }));
+                      }
+                    }}
                     disabled={loadingGuru || processingId != null}
-                    className="h-11 w-full rounded-xl border theme-border theme-input px-3 text-sm theme-text-secondary disabled:opacity-60"
+                    className="h-11 w-full rounded-xl border theme-border theme-input px-3 text-sm theme-text-secondary outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
                   >
                     <option value="">
                       {loadingGuru
@@ -1427,34 +1557,48 @@ export default function PermohonanIzinGuruPage() {
                         : "Tanpa guru pengganti"}
                     </option>
 
-                    {guruList
-                      .filter(
-                        (guru) =>
-                          String(guru.id) !==
-                          String(selectedData.penggunaId)
-                      )
-                      .map((guru) => (
-                        <option key={guru.id} value={guru.id}>
-                          {guru.nama}
-                          {guru.nip ? ` — ${guru.nip}` : ""}
-                        </option>
-                      ))}
+                    {daftarGuruPengganti.map((guru) => (
+                      <option key={guru.id} value={guru.id}>
+                        {guru.nama}
+                        {guru.nip ? ` — NIP: ${guru.nip}` : ""}
+                      </option>
+                    ))}
                   </select>
 
+                  {approveFieldErrors.guruPenggantiId && (
+                    <p className="mt-1.5 text-xs font-medium text-[var(--color-danger)]">
+                      {approveFieldErrors.guruPenggantiId}
+                    </p>
+                  )}
+
                   <p className="mt-1.5 text-xs leading-5 theme-text-muted">
-                    Guru pengganti akan ditugaskan untuk menggantikan guru yang
-                    mengajukan izin selama periode izin.
+                    Admin dapat mempertahankan guru pengganti yang diajukan,
+                    memilih guru aktif lain di sekolah yang sama, atau memilih
+                    tanpa guru pengganti.
                   </p>
                 </div>
               )}
 
-              <div className="flex gap-3 rounded-xl border theme-info p-3">
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                <p className="text-xs leading-5">
-                  Permohonan akan disetujui sesuai API backend. Jika backend
-                  belum mendukung penyimpanan guru pengganti, penugasan akan
-                  diabaikan dan pesan error akan ditampilkan.
-                </p>
+              <div>
+                <label className="mb-2 block text-sm font-bold theme-text">
+                  Catatan Verifikasi{" "}
+                  <span className="font-normal theme-text-muted">
+                    (opsional)
+                  </span>
+                </label>
+                <textarea
+                  value={approveCatatan}
+                  onChange={(event) => setApproveCatatan(event.target.value)}
+                  rows={3}
+                  placeholder="Tambahkan catatan persetujuan (opsional)..."
+                  disabled={processingId != null}
+                  className="w-full resize-y rounded-xl border theme-border theme-input px-3 py-2.5 text-sm theme-text-secondary outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
+                />
+                {approveFieldErrors.catatan && (
+                  <p className="mt-1.5 text-xs font-medium text-[var(--color-danger)]">
+                    {approveFieldErrors.catatan}
+                  </p>
+                )}
               </div>
             </div>
 

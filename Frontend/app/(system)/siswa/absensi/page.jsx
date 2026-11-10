@@ -46,7 +46,7 @@ import {
 } from "@/services/absensi.service";
 
 import { getKelasSayaDariAnggota } from "@/services/kelas.service";
-import { ajukanIzin } from "@/services/izin.service";
+import { ajukanIzin, formatIzinErrorMessage } from "@/services/izin.service";
 import { apiFetch } from "../../../../lib/api";
 
 const themePrimaryGradient =
@@ -866,6 +866,11 @@ export default function SiswaAbsensiPage() {
   };
 
   const handleSubmitManual = async () => {
+    if (!["izin", "sakit"].includes(jenisIzin)) {
+      setError("Jenis izin harus sakit atau izin.");
+      return;
+    }
+
     if (!tanggalMulai) {
       setError("Tanggal mulai wajib diisi.");
       return;
@@ -881,8 +886,14 @@ export default function SiswaAbsensiPage() {
       return;
     }
 
-    if (!keterangan.trim()) {
+    const trimmedAlasan = keterangan.trim();
+    if (!trimmedAlasan) {
       setError("Alasan wajib diisi.");
+      return;
+    }
+
+    if (trimmedAlasan.length < 5) {
+      setError("Alasan minimal 5 karakter.");
       return;
     }
 
@@ -895,7 +906,7 @@ export default function SiswaAbsensiPage() {
         jenis: jenisIzin,
         tanggalMulai,
         tanggalSelesai,
-        alasan: keterangan.trim(),
+        alasan: trimmedAlasan,
         bukti,
       });
 
@@ -912,7 +923,12 @@ export default function SiswaAbsensiPage() {
       setBukti(null);
       setShowIzinForm(false);
     } catch (err) {
-      setError(getErrorMessage(err, "Gagal mengajukan permohonan izin."));
+      setError(
+        formatIzinErrorMessage(
+          err,
+          getErrorMessage(err, "Gagal mengajukan permohonan izin."),
+        ),
+      );
     } finally {
       setLoadingAbsen(false);
     }
@@ -2185,7 +2201,7 @@ export default function SiswaAbsensiPage() {
                       Ajukan Keterangan
                     </h3>
                     <p className="mt-0.5 text-xs theme-text-muted">
-                      Izin, sakit, atau alpha
+                      Izin atau sakit
                     </p>
                   </div>
                 </div>
@@ -2202,8 +2218,8 @@ export default function SiswaAbsensiPage() {
                   </button>
                 ) : (
                   <div className="mt-3 space-y-3">
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {["izin", "sakit", "alpha"].map((jenis) => (
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {["izin", "sakit"].map((jenis) => (
                         <button
                           key={jenis}
                           type="button"

@@ -168,6 +168,153 @@ function normalizeMenuPath(value) {
   return path.replace(/\/+$/, "");
 }
 
+function toStableKeySlug(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function scopeDelegatedMenuItems(items, prefix = "jabatan") {
+  if (!Array.isArray(items)) return [];
+
+  return items.map((item) => {
+    if (!item || typeof item !== "object") return item;
+
+    if (item.type === "header") {
+      const baseHeaderKey =
+        String(item.key || "").trim() ||
+        `header-${toStableKeySlug(item.label) || "section"}`;
+      return {
+        ...item,
+        key: baseHeaderKey.startsWith(`${prefix}-`)
+          ? baseHeaderKey
+          : `${prefix}-${baseHeaderKey}`,
+      };
+    }
+
+    const baseKey =
+      String(item.key || "").trim() ||
+      toStableKeySlug(item.path) ||
+      toStableKeySlug(item.label) ||
+      "item";
+
+    const scopedKey = baseKey.startsWith(`${prefix}-`)
+      ? baseKey
+      : `${prefix}-${baseKey}`;
+
+    const scopedChildren = Array.isArray(item.children)
+      ? scopeDelegatedMenuItems(item.children, scopedKey)
+      : item.children;
+
+    return {
+      ...item,
+      key: scopedKey,
+      ...(Array.isArray(scopedChildren) ? { children: scopedChildren } : {}),
+    };
+  });
+}
+
+function deduplicateMenuItems(items, parentKey = "") {
+  if (!Array.isArray(items)) return [];
+
+  const result = [];
+  const indexByKeyAndPath = new Map();
+  const usedKeys = new Set();
+
+  for (const rawItem of items) {
+    if (!rawItem || typeof rawItem !== "object") continue;
+
+    if (rawItem.type === "header") {
+      const baseHeaderKey =
+        String(rawItem.key || "").trim() ||
+        `header-${toStableKeySlug(rawItem.label) || "section"}`;
+      const resolvedHeaderKey = usedKeys.has(baseHeaderKey)
+        ? `${baseHeaderKey}-${toStableKeySlug(rawItem.label) || "section"}`
+        : baseHeaderKey;
+
+      usedKeys.add(resolvedHeaderKey);
+      result.push({
+        ...rawItem,
+        key: resolvedHeaderKey,
+      });
+      continue;
+    }
+
+    const rawKey =
+      String(rawItem.key || "").trim() ||
+      toStableKeySlug(rawItem.path) ||
+      toStableKeySlug(rawItem.label) ||
+      "menu-item";
+    const normalizedPath = normalizeMenuPath(rawItem.path);
+    const identitySignature = `${rawKey}::${normalizedPath}`;
+
+    if (indexByKeyAndPath.has(identitySignature)) {
+      const existingIndex = indexByKeyAndPath.get(identitySignature);
+      const existingItem = result[existingIndex];
+
+      if (
+        Array.isArray(existingItem.children) ||
+        Array.isArray(rawItem.children)
+      ) {
+        const mergedChildren = deduplicateMenuItems(
+          [
+            ...(Array.isArray(existingItem.children)
+              ? existingItem.children
+              : []),
+            ...(Array.isArray(rawItem.children) ? rawItem.children : []),
+          ],
+          existingItem.key
+        );
+
+        result[existingIndex] = {
+          ...existingItem,
+          children: mergedChildren,
+        };
+      }
+      continue;
+    }
+
+    let resolvedKey = rawKey;
+    if (usedKeys.has(resolvedKey)) {
+      const pathSlug = toStableKeySlug(normalizedPath);
+      const candidateFromParent = parentKey
+        ? `${parentKey}-${rawKey}`
+        : "";
+      const candidateFromPath = pathSlug
+        ? `${rawKey}-${pathSlug}`
+        : "";
+
+      if (candidateFromParent && !usedKeys.has(candidateFromParent)) {
+        resolvedKey = candidateFromParent;
+      } else if (candidateFromPath && !usedKeys.has(candidateFromPath)) {
+        resolvedKey = candidateFromPath;
+      } else {
+        resolvedKey = `${rawKey}-${toStableKeySlug(rawItem.label) || "alt"}`;
+      }
+    }
+
+    usedKeys.add(resolvedKey);
+
+    const processedItem = {
+      ...rawItem,
+      key: resolvedKey,
+      ...(Array.isArray(rawItem.children)
+        ? {
+            children: deduplicateMenuItems(rawItem.children, resolvedKey),
+          }
+        : {}),
+    };
+
+    indexByKeyAndPath.set(identitySignature, result.length);
+    result.push(processedItem);
+  }
+
+  return result;
+}
+
 function matchesMenuPath(pathname, path) {
   const current = normalizeMenuPath(pathname);
   const target = normalizeMenuPath(path);
@@ -381,6 +528,11 @@ export default function Sidebar({
       );
 
       if (delegatedAdminItems.length > 0) {
+        const scopedDelegatedItems = scopeDelegatedMenuItems(
+          delegatedAdminItems,
+          "jabatan"
+        );
+
         baseSections = [
           ...baseSections,
           {
@@ -389,12 +541,12 @@ export default function Sidebar({
             label: "Menu Jabatan",
             __header: true,
           },
-          ...delegatedAdminItems,
+          ...scopedDelegatedItems,
         ];
       }
     }
 
-    return removeEmptyHeaders(baseSections);
+    return removeEmptyHeaders(deduplicateMenuItems(baseSections));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, permissions, modules, role, authTick]);
 
@@ -1002,18 +1154,18 @@ export default function Sidebar({
               "
             >
               {menuSections.length > 0 ? (
-                menuSections.map((item, index) => {
+                menuSections.map((item) => {
                   if (item.type === "header") {
                     if (!showLabels) {
                       return (
-                        <div key={`header-${index}`} className="px-3 py-2">
+                        <div key={item.key} className="px-3 py-2">
                           <div className="sidebar-divider h-px" />
                         </div>
                       );
                     }
 
                     return (
-                      <div key={`header-${index}`} className="px-2 pt-4 pb-2">
+                      <div key={item.key} className="px-2 pt-4 pb-2">
                         <div className="flex items-center gap-3">
                           <div className="sidebar-divider flex-1 h-px" />
                           <span

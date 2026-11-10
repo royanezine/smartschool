@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   FileText,
@@ -12,12 +12,19 @@ import {
   CheckCircle2,
   CalendarDays,
   Send,
+  UserCheck,
 } from "lucide-react";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
-import { ajukanIzin } from "@/services/izin.service";
+import {
+  ajukanIzin,
+  getDaftarGuruPengganti,
+  extractIzinFieldErrors,
+  formatIzinErrorMessage,
+} from "@/services/izin.service";
+import { getSessionUser } from "@/lib/auth";
 
 const JENIS_IZIN = [
   {
@@ -38,6 +45,9 @@ const ALLOWED_FILE_TYPES = [
   "application/pdf",
 ];
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export default function AjukanIzinPage() {
   const router = useRouter();
 
@@ -47,13 +57,67 @@ export default function AjukanIzinPage() {
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState({});
 
+  const [guruList, setGuruList] = useState([]);
+  const [loadingGuru, setLoadingGuru] = useState(false);
+  const [guruLoadError, setGuruLoadError] = useState("");
+
   const [form, setForm] = useState({
     jenis: "",
     tanggalMulai: "",
     tanggalSelesai: "",
     alasan: "",
+    guruPenggantiId: "",
     bukti: null,
   });
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadGuruPengganti() {
+      try {
+        setLoadingGuru(true);
+        setGuruLoadError("");
+
+        const sessionUser = getSessionUser();
+        const currentUserId =
+          sessionUser?.id || sessionUser?.userId || "";
+
+        const list = await getDaftarGuruPengganti();
+        if (!active) return;
+
+        const filtered = list.filter(
+          (guru) =>
+            guru?.id &&
+            (!currentUserId ||
+              String(guru.id) !== String(currentUserId)),
+        );
+
+        setGuruList(filtered);
+      } catch (err) {
+        if (!active) return;
+        console.error(
+          "Gagal memuat daftar guru pengganti:",
+          err,
+        );
+        setGuruLoadError(
+          formatIzinErrorMessage(
+            err,
+            "Tidak dapat memuat daftar guru pengganti saat ini.",
+          ),
+        );
+      } finally {
+        if (active) {
+          setLoadingGuru(false);
+        }
+      }
+    }
+
+    loadGuruPengganti();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
 
 
@@ -153,8 +217,8 @@ export default function AjukanIzinPage() {
   const validate = () => {
     const newErrors = {};
 
-    if (!form.jenis) {
-      newErrors.jenis = "Jenis izin wajib dipilih.";
+    if (!form.jenis || !["sakit", "izin"].includes(form.jenis)) {
+      newErrors.jenis = "Jenis izin wajib diisi dengan 'sakit' atau 'izin'.";
     }
 
     if (!form.tanggalMulai) {
@@ -174,8 +238,18 @@ export default function AjukanIzinPage() {
         "Tanggal selesai tidak boleh lebih awal dari tanggal mulai.";
     }
 
-    if (!form.alasan.trim()) {
+    const trimmedAlasan = form.alasan.trim();
+    if (!trimmedAlasan) {
       newErrors.alasan = "Alasan izin wajib diisi.";
+    } else if (trimmedAlasan.length < 5) {
+      newErrors.alasan = "Alasan minimal 5 karakter.";
+    }
+
+    if (
+      form.guruPenggantiId &&
+      !UUID_REGEX.test(form.guruPenggantiId.trim())
+    ) {
+      newErrors.guruPenggantiId = "ID guru pengganti tidak valid.";
     }
 
     setErrors(newErrors);
@@ -202,6 +276,9 @@ export default function AjukanIzinPage() {
         tanggalMulai: form.tanggalMulai,
         tanggalSelesai: form.tanggalSelesai,
         alasan: form.alasan.trim(),
+        guruPenggantiId: form.guruPenggantiId
+          ? form.guruPenggantiId.trim()
+          : null,
         bukti: form.bukti,
       };
 
@@ -215,9 +292,19 @@ export default function AjukanIzinPage() {
     } catch (error) {
       console.error("Gagal mengajukan izin:", error);
 
+      const fieldErrors = extractIzinFieldErrors(error);
+      if (Object.keys(fieldErrors).length > 0) {
+        setErrors((prev) => ({
+          ...prev,
+          ...fieldErrors,
+        }));
+      }
+
       setSubmitError(
-        error?.message ||
-          "Pengajuan izin gagal dilakukan. Silakan coba lagi."
+        formatIzinErrorMessage(
+          error,
+          "Pengajuan izin gagal dilakukan. Silakan coba lagi.",
+        ),
       );
     } finally {
       setSubmitting(false);
@@ -490,6 +577,67 @@ export default function AjukanIzinPage() {
 
                   <div>
                     <label
+                      htmlFor="guruPenggantiId"
+                      className={`mb-2 block text-sm font-medium ${themeText}`}
+                    >
+                      Guru Pengganti
+                      <span
+                        className={`ml-2 text-xs font-normal ${themeTextMuted}`}
+                      >
+                        (Opsional)
+                      </span>
+                    </label>
+
+                    <div className="relative">
+                      <UserCheck
+                        size={18}
+                        className={`pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 ${themeTextMuted}`}
+                      />
+
+                      <select
+                        id="guruPenggantiId"
+                        name="guruPenggantiId"
+                        value={form.guruPenggantiId}
+                        onChange={handleChange}
+                        disabled={loadingGuru || submitting}
+                        className={`w-full rounded-xl border py-3 pl-10 pr-4 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${themeInput}`}
+                      >
+                        <option value="">
+                          {loadingGuru
+                            ? "Memuat daftar guru..."
+                            : "Tanpa guru pengganti"}
+                        </option>
+
+                        {guruList.map((guru) => (
+                          <option
+                            key={guru.id}
+                            value={guru.id}
+                          >
+                            {guru.namaLengkap}
+                            {guru.nip ? ` — NIP: ${guru.nip}` : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {errors.guruPenggantiId ? (
+                      <p className="mt-1.5 text-sm text-[var(--color-danger)]">
+                        {errors.guruPenggantiId}
+                      </p>
+                    ) : guruLoadError ? (
+                      <p className="mt-1.5 text-xs text-[var(--color-warning)]">
+                        {guruLoadError}
+                      </p>
+                    ) : (
+                      <p className={`mt-1.5 text-xs ${themeTextMuted}`}>
+                        Pilih guru aktif di sekolah yang sama untuk menggantikan jadwal mengajar selama izin.
+                      </p>
+                    )}
+                  </div>
+
+
+                  <div>
+                    <label
                       htmlFor="alasan"
                       className={`mb-2 block text-sm font-medium ${themeText}`}
                     >
@@ -505,7 +653,7 @@ export default function AjukanIzinPage() {
                       value={form.alasan}
                       onChange={handleChange}
                       rows={5}
-                      placeholder="Tuliskan alasan pengajuan izin..."
+                      placeholder="Tuliskan alasan pengajuan izin (minimal 5 karakter)..."
                       className={`w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition ${themeInput}`}
                     />
 
