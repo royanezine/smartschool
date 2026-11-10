@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 
 import { getUserById } from "@/services/user.service";
+import ResetPasswordModal from "@/app/components/user/ResetPasswordModal";
 
 function getUserName(user) {
   return user?.namaLengkap || user?.namaPengguna || user?.nama || "-";
@@ -130,6 +131,7 @@ function DetailUserContent() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showResetModal, setShowResetModal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -208,18 +210,28 @@ function DetailUserContent() {
         </div>
 
         {user && (
-          <button
-            type="button"
-            onClick={() =>
-              router.push(
-                `/super-admin/kelola-user/edit-user?id=${encodeURIComponent(user.id)}`
-              )
-            }
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-          >
-            <Pencil className="h-4 w-4" />
-            Edit Pengguna
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowResetModal(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-700 shadow-sm transition hover:bg-amber-100"
+            >
+              <KeyRound className="h-4 w-4" />
+              Reset Password
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  `/super-admin/kelola-user/edit-user?id=${encodeURIComponent(user.id)}`
+                )
+              }
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            >
+              <Pencil className="h-4 w-4" />
+              Edit Pengguna
+            </button>
+          </div>
         )}
       </div>
 
@@ -390,10 +402,19 @@ function DetailUserContent() {
                   </h3>
 
                   <p className="mt-1 text-sm leading-6 text-amber-800">
-                    Password tidak ditampilkan pada halaman detail. Jika
-                    pengguna lupa password, gunakan fitur Reset Password dari
-                    halaman Kelola User.
+                    Password tidak ditampilkan pada halaman detail demi keamanan. Anda dapat mereset kata sandi pengguna ini secara langsung untuk membuat kata sandi sementara baru.
                   </p>
+
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowResetModal(true)}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-amber-700 transition"
+                    >
+                      <KeyRound className="h-3.5 w-3.5" />
+                      Reset Kata Sandi Pengguna Ini
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -405,6 +426,14 @@ function DetailUserContent() {
             Data pengguna tidak ditemukan.
           </div>
         )
+      )}
+
+      {user && (
+        <ResetPasswordModal
+          isOpen={showResetModal}
+          user={user}
+          onClose={() => setShowResetModal(false)}
+        />
       )}
     </div>
   );

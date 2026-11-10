@@ -210,9 +210,13 @@ function TambahAbsensiPageContent() {
         );
       }, 1000);
     } catch (err) {
-      setError(
-        err?.message || "Gagal menyimpan absensi."
-      );
+      if (err?.status === 429) {
+        setError("Terlalu banyak percobaan, mohon tunggu sebentar.");
+      } else {
+        setError(
+          err?.message || "Gagal menyimpan absensi."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -227,6 +231,19 @@ function TambahAbsensiPageContent() {
       return;
     }
 
+    const validMimes = ["image/png", "image/jpeg", "image/jpg"];
+    const validExtensions = [".png", ".jpg", ".jpeg"];
+    const fileName = (file.name || "").toLowerCase();
+    const hasValidExt = validExtensions.some((ext) => fileName.endsWith(ext));
+    const hasValidMime = !file.type || validMimes.includes(file.type.toLowerCase());
+
+    if (!hasValidExt && !hasValidMime) {
+      setError("Hanya file gambar (PNG, JPG, JPEG) yang diperbolehkan.");
+      setSnapshot(null);
+      return;
+    }
+
+    setError("");
     setSnapshot(file);
   };
 
@@ -558,7 +575,7 @@ function TambahAbsensiPageContent() {
                       >
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/png, image/jpeg, image/jpg"
                           capture="user"
                           onChange={
                             handleSnapshotChange

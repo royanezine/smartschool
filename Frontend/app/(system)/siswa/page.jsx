@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   getToken,
@@ -48,24 +47,34 @@ import {
   Banknote,
   TrendingUp,
   CheckCircle2,
+  UserRound,
+  Mail,
+  Hash,
+  BookMarked,
+  CalendarCheck,
   XCircle,
   Info,
+  CreditCard,
+  Award,
+  Star,
+  Zap,
+  Target,
+  CircleDot,
 } from "lucide-react";
 
-/* =========================================================
-   THEME
-========================================================= */
-
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_68%,var(--color-info)))]";
 
 const themePrimarySoft =
-  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 
 const themePrimaryText = "text-[var(--color-primary)]";
 
 const themeCardShadow =
-  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+  "shadow-[0_1px_2px_color-mix(in_srgb,var(--color-text)_4%,transparent),0_8px_28px_-8px_color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeCardHoverShadow =
+  "hover:shadow-[0_2px_4px_color-mix(in_srgb,var(--color-text)_5%,transparent),0_18px_48px_-12px_color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
@@ -74,92 +83,95 @@ const themeNeutralHover =
   "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
 
 const themeNeutralBorder =
-  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-text)_9%,transparent)]";
 
 const themeDivider =
-  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
 
 const themeSuccessSurface =
-  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+  "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]";
 
 const themeWarningSurface =
-  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+  "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]";
 
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]";
+
 const subjectThemes = [
   {
-    surface:
-      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    surface: "bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]",
     text: "text-[var(--color-primary)]",
-    hover:
-      "group-hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]",
+    ring: "group-hover:ring-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]",
+    glow: "group-hover:shadow-[0_20px_60px_-18px_color-mix(in_srgb,var(--color-primary)_45%,transparent)]",
   },
   {
-    surface:
-      "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+    surface: "bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)]",
     text: "text-[var(--color-success)]",
-    hover:
-      "group-hover:border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-success)_12%,transparent)]",
+    ring: "group-hover:ring-[color-mix(in_srgb,var(--color-success)_30%,transparent)]",
+    glow: "group-hover:shadow-[0_20px_60px_-18px_color-mix(in_srgb,var(--color-success)_45%,transparent)]",
   },
   {
-    surface:
-      "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
+    surface: "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
     text: "text-[var(--color-warning)]",
-    hover:
-      "group-hover:border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
+    ring: "group-hover:ring-[color-mix(in_srgb,var(--color-warning)_30%,transparent)]",
+    glow: "group-hover:shadow-[0_20px_60px_-18px_color-mix(in_srgb,var(--color-warning)_45%,transparent)]",
   },
   {
-    surface:
-      "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
+    surface: "bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)]",
     text: "text-[var(--color-info)]",
-    hover:
-      "group-hover:border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-info)_12%,transparent)]",
+    ring: "group-hover:ring-[color-mix(in_srgb,var(--color-info)_30%,transparent)]",
+    glow: "group-hover:shadow-[0_20px_60px_-18px_color-mix(in_srgb,var(--color-info)_45%,transparent)]",
   },
   {
-    surface:
-      "bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)]",
+    surface: "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
     text: "text-[var(--color-primary)]",
-    hover:
-      "group-hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    ring: "group-hover:ring-[color-mix(in_srgb,var(--color-primary)_26%,transparent)]",
+    glow: "group-hover:shadow-[0_20px_60px_-18px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]",
   },
   {
-    surface:
-      "bg-[color-mix(in_srgb,var(--color-info)_7%,transparent)]",
+    surface: "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]",
     text: "text-[var(--color-info)]",
-    hover:
-      "group-hover:border-[color-mix(in_srgb,var(--color-info)_22%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
+    ring: "group-hover:ring-[color-mix(in_srgb,var(--color-info)_26%,transparent)]",
+    glow: "group-hover:shadow-[0_20px_60px_-18px_color-mix(in_srgb,var(--color-info)_40%,transparent)]",
   },
 ];
 
-const iconMap = {
-  matematika: Calculator,
-  biologi: FlaskConical,
-  ipa: FlaskConical,
-  fisika: FlaskConical,
-  kimia: FlaskConical,
-  ekonomi: BookOpen,
-  ips: Globe2,
-  "bahasa indonesia": Languages,
-  bindo: Languages,
-  "bahasa inggris": Languages,
-  inggris: Languages,
-};
-
-/* =========================================================
-   HELPER
-========================================================= */
-
 function normalizeText(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function isObject(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function extractArray(response) {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.data?.list)) return response.data.list;
+  if (Array.isArray(response?.list)) return response.list;
+  if (Array.isArray(response?.items)) return response.items;
+  return [];
+}
+
+function extractObject(response) {
+  if (!isObject(response)) return null;
+
+  if (isObject(response.data)) {
+    if (isObject(response.data.data)) {
+      return response.data.data;
+    }
+    return response.data;
+  }
+
+  return response;
 }
 
 function getMapelIcon(nama = "") {
-  const value = String(nama).toLowerCase();
+  const value = normalizeText(nama);
 
   if (value.includes("matematika") || value.includes("math")) {
     return Calculator;
@@ -186,20 +198,11 @@ function getMapelIcon(nama = "") {
 
   if (value.includes("indonesia")) return Languages;
 
-  if (
-    value.includes("bahasa inggris") ||
-    value.includes("english")
-  ) {
+  if (value.includes("inggris") || value.includes("english")) {
     return BookOpen;
   }
 
-  if (
-    value.includes("seni budaya") ||
-    value.includes("seni rupa")
-  ) {
-    return Palette;
-  }
-
+  if (value.includes("seni")) return Palette;
   if (value.includes("musik")) return Music;
 
   if (
@@ -218,156 +221,65 @@ function getMapelTheme(index) {
 }
 
 function getUsername(user) {
-  if (!user || typeof user !== "object") return "";
+  if (!isObject(user)) return "";
 
   const candidates = [
     user.namaLengkap,
-    user.namalengkap,
     user.nama,
     user.name,
     user.fullName,
-    user.full_name,
-    user.namaPengguna,
-    user.nama_pengguna,
     user.username,
-    user.userName,
     user.siswa?.namaLengkap,
-    user.siswa?.nama,
     user.user?.namaLengkap,
     user.data?.namaLengkap,
   ];
 
-  const name = candidates.find(
-    (value) =>
-      typeof value === "string" && value.trim() !== ""
+  const result = candidates.find(
+    (value) => typeof value === "string" && value.trim()
   );
 
-  return name ? name.trim() : "";
+  return result ? result.trim() : "";
 }
 
 function getUserId(user) {
   if (!user) return "";
 
-  const userId =
+  return String(
     user.userId ||
-    user.id ||
-    user.penggunaId ||
-    user.siswaId ||
-    user.siswa?.id ||
-    user.data?.userId ||
-    user.data?.id ||
-    user.data?.penggunaId ||
-    user.data?.siswaId ||
-    user.data?.siswa?.id ||
-    "";
-
-  return userId ? String(userId) : "";
+      user.id ||
+      user.penggunaId ||
+      user.siswaId ||
+      user.siswa?.id ||
+      user.data?.id ||
+      ""
+  );
 }
 
 function getUserKelasId(user) {
   if (!user) return "";
 
-  const kelasId =
+  return String(
     user.kelasId ||
-    user.kelas_id ||
-    user.kelas?.id ||
-    user.siswa?.kelasId ||
-    user.siswa?.kelas?.id ||
-    user.data?.kelasId ||
-    user.data?.kelas?.id ||
-    user.data?.siswa?.kelasId ||
-    user.data?.siswa?.kelas?.id ||
-    "";
-
-  return kelasId ? String(kelasId) : "";
-}
-
-function getUserKelasName(user) {
-  if (!user) return "";
-
-  const kelasName =
-    user.kelas?.nama ||
-    user.kelas?.namaKelas ||
-    user.namaKelas ||
-    user.siswa?.kelas?.nama ||
-    user.siswa?.kelas?.namaKelas ||
-    user.data?.kelas?.nama ||
-    user.data?.kelas?.namaKelas ||
-    user.data?.siswa?.kelas?.nama ||
-    user.data?.siswa?.kelas?.namaKelas ||
-    "";
-
-  return typeof kelasName === "string"
-    ? kelasName.trim()
-    : "";
+      user.kelas?.id ||
+      user.siswa?.kelasId ||
+      user.siswa?.kelas?.id ||
+      user.data?.kelasId ||
+      user.data?.kelas?.id ||
+      ""
+  );
 }
 
 function readSessionUser() {
-  const sessionUser = getSessionUser();
+  const session = getSessionUser();
 
-  if (!sessionUser || typeof sessionUser !== "object") {
-    return null;
-  }
+  if (!isObject(session)) return null;
 
   return {
-    username: getUsername(sessionUser),
-    email: sessionUser.email || "",
-    userId: getUserId(sessionUser),
-    sekolahId:
-      sessionUser.sekolahId ||
-      sessionUser.schoolId ||
-      "",
-    kelasId: getUserKelasId(sessionUser),
-    kelasName: getUserKelasName(sessionUser),
+    username: getUsername(session),
+    email: session.email || "",
+    userId: getUserId(session),
+    kelasId: getUserKelasId(session),
   };
-}
-
-function extractArray(response) {
-  if (Array.isArray(response)) return response;
-
-  if (Array.isArray(response?.data)) {
-    return response.data;
-  }
-
-  if (Array.isArray(response?.data?.data)) {
-    return response.data.data;
-  }
-
-  if (Array.isArray(response?.data?.list)) {
-    return response.data.list;
-  }
-
-  if (Array.isArray(response?.list)) {
-    return response.list;
-  }
-
-  if (Array.isArray(response?.items)) {
-    return response.items;
-  }
-
-  return [];
-}
-
-function extractObject(response) {
-  if (!response || typeof response !== "object") {
-    return null;
-  }
-
-  if (
-    response.data &&
-    !Array.isArray(response.data)
-  ) {
-    if (
-      response.data.data &&
-      !Array.isArray(response.data.data)
-    ) {
-      return response.data.data;
-    }
-
-    return response.data;
-  }
-
-  return response;
 }
 
 function formatRupiah(value) {
@@ -383,9 +295,7 @@ function formatTanggal(value) {
 
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
+  if (Number.isNaN(date.getTime())) return "-";
 
   return new Intl.DateTimeFormat("id-ID", {
     day: "numeric",
@@ -394,71 +304,69 @@ function formatTanggal(value) {
   }).format(date);
 }
 
-/* =========================================================
-   DATA KELAS DAN MATA PELAJARAN
-========================================================= */
+function formatTanggalHariIni() {
+  return new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+}
+
+function getAvatarUrl(value) {
+  if (!value || typeof value !== "string") return null;
+  return value.trim() || null;
+}
 
 async function fetchKelasDetail(id) {
   if (!id) return null;
 
-  try {
-    const result = await getKelasById(id);
-    return extractObject(result);
-  } catch (error) {
-    console.warn(
-      "[KELAS] Gagal mengambil detail kelas:",
-      id,
-      error
-    );
-
-    throw error;
-  }
+  const result = await getKelasById(id);
+  return extractObject(result);
 }
 
-async function findStudentClass(
-  userId,
-  existingKelasId = ""
-) {
+async function findStudentClass(userId, existingKelasId = "") {
   if (existingKelasId) {
-    const detail = await fetchKelasDetail(existingKelasId);
+    try {
+      const detail = await fetchKelasDetail(existingKelasId);
 
-    if (detail) return detail;
+      if (detail) return detail;
+    } catch (error) {
+      console.warn("Gagal mengambil detail kelas:", error);
+    }
   }
 
-  const kelasResponse = await getKelas({
+  const response = await getKelas({
     page: 1,
     limit: 100,
   });
 
-  const daftarKelas = extractArray(kelasResponse);
-
-  if (daftarKelas.length === 0) return null;
+  const daftarKelas = extractArray(response);
 
   for (const kelas of daftarKelas) {
     if (!kelas?.id) continue;
 
-    const detail = await fetchKelasDetail(kelas.id);
+    try {
+      const detail = await fetchKelasDetail(kelas.id);
 
-    if (!detail) continue;
+      if (!detail) continue;
 
-    const anggota = Array.isArray(detail.anggota)
-      ? detail.anggota
-      : [];
+      const anggota = Array.isArray(detail.anggota) ? detail.anggota : [];
 
-    const siswaDitemukan = anggota.some(
-      (anggotaItem) => {
+      const ditemukan = anggota.some((item) => {
         const siswaId =
-          anggotaItem?.siswa?.id ||
-          anggotaItem?.siswaId ||
-          anggotaItem?.penggunaId ||
-          anggotaItem?.pengguna?.id ||
-          "";
+          item?.siswa?.id ||
+          item?.siswaId ||
+          item?.penggunaId ||
+          item?.pengguna?.id;
 
-        return String(siswaId) === String(userId);
-      }
-    );
+        return String(siswaId || "") === String(userId);
+      });
 
-    if (siswaDitemukan) return detail;
+      if (ditemukan) return detail;
+    } catch (error) {
+      console.warn("Gagal memeriksa kelas:", kelas.id, error);
+    }
   }
 
   return null;
@@ -467,17 +375,13 @@ async function findStudentClass(
 async function fetchJumlahTugas(kelasMapelId) {
   if (!kelasMapelId) return 0;
 
-  const result = await getTugasByKelasMapel(
-    kelasMapelId
-  );
-
+  const result = await getTugasByKelasMapel(kelasMapelId);
   return extractArray(result).length;
 }
 
 async function fetchSemuaMateri() {
-  return extractArray(
-    await getMateriPembelajaran()
-  );
+  const result = await getMateriPembelajaran();
+  return extractArray(result);
 }
 
 function normalizeKelasMapel(
@@ -485,14 +389,13 @@ function normalizeKelasMapel(
   index,
   kelasId,
   kelasName,
-  jumlahMateri = 0,
-  jumlahTugas = 0
+  jumlahMateri,
+  jumlahTugas
 ) {
   const nama =
     item?.mataPelajaran?.nama ||
     item?.mataPelajaran?.namaMapel ||
     item?.mataPelajaran?.namaMataPelajaran ||
-    item?.mataPelajaran?.nama_mata_pelajaran ||
     item?.namaMataPelajaran ||
     item?.namaMapel ||
     item?.nama ||
@@ -503,57 +406,38 @@ function normalizeKelasMapel(
     item?.guruPengajar?.nama ||
     item?.guru?.namaLengkap ||
     item?.guru?.nama ||
-    item?.guruNama ||
     "Guru belum tersedia";
 
   return {
-    id: item?.id || `mapel-${index}`,
-    kelasMapelId: item?.id || `mapel-${index}`,
-    kelasId:
-      item?.kelasId ||
-      item?.kelas?.id ||
-      kelasId ||
-      "",
-    kelas: kelasName || "",
+    id: item.id || `mapel-${index}`,
+    kelasMapelId: item.id || "",
+    kelasId: item.kelasId || item.kelas?.id || kelasId,
+    kelas: kelasName,
     nama: String(nama),
     guru: String(guru),
-    kode:
-      item?.mataPelajaran?.kode ||
-      item?.kode ||
-      "",
-    icon:
-      iconMap[normalizeText(nama)] ||
-      getMapelIcon(String(nama)),
+    icon: getMapelIcon(nama),
     theme: getMapelTheme(index),
     materi: Number(jumlahMateri) || 0,
     tugas: Number(jumlahTugas) || 0,
-    progress: 0,
   };
 }
 
-/* =========================================================
-   REUSABLE COMPONENT
-========================================================= */
-
-function EmptyState({
-  icon: Icon = Info,
-  title,
-  description,
-}) {
+function EmptyState({ icon: Icon = Info, title, description }) {
   return (
-    <div className="flex min-h-[150px] flex-col items-center justify-center px-5 py-8 text-center">
+    <div className="flex min-h-[170px] flex-col items-center justify-center px-6 py-10 text-center">
       <div
-        className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeNeutralSurface} theme-text-muted`}
+        className={`relative flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface} ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-text)_6%,transparent)]`}
       >
-        <Icon size={21} />
+        <Icon size={23} className="theme-text-secondary" />
+        <span className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_30%_20%,color-mix(in_srgb,var(--color-primary)_10%,transparent),transparent_70%)]" />
       </div>
 
-      <p className="theme-text mt-3 text-sm font-semibold">
+      <p className="theme-text mt-4 text-sm font-semibold tracking-tight">
         {title}
       </p>
 
       {description && (
-        <p className="theme-text-secondary mt-1 max-w-sm text-xs leading-5">
+        <p className="theme-text-secondary mt-1.5 max-w-sm text-xs leading-5">
           {description}
         </p>
       )}
@@ -565,22 +449,24 @@ function SectionHeader({
   icon: Icon,
   title,
   description,
-  iconClass = `${themePrimarySoft} ${themePrimaryText}`,
+  iconClass,
   rightContent,
 }) {
   return (
     <div
-      className={`flex flex-col gap-3 border-b ${themeDivider} px-5 py-4 sm:flex-row sm:items-center sm:justify-between`}
+      className={`flex flex-col gap-3 border-b ${themeDivider} px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6`}
     >
       <div className="flex items-center gap-3">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconClass}`}
+          className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-text)_5%,transparent)] ${
+            iconClass || `${themePrimarySoft} ${themePrimaryText}`
+          }`}
         >
           <Icon size={20} />
         </div>
 
         <div>
-          <h2 className="theme-text text-base font-bold">
+          <h2 className="theme-text text-base font-bold tracking-tight">
             {title}
           </h2>
 
@@ -597,9 +483,101 @@ function SectionHeader({
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
+function LoadingState({ text = "Memuat data..." }) {
+  return (
+    <div className="flex items-center gap-2.5 px-5 py-10 theme-text-secondary text-sm sm:px-6">
+      <Loader2 size={17} className="animate-spin" />
+      {text}
+    </div>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  surface,
+  color,
+  accent,
+}) {
+  return (
+    <div
+      className={`group relative overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] p-5 backdrop-blur-sm ${themeCardShadow} transition-all duration-300 hover:-translate-y-0.5 ${themeCardHoverShadow}`}
+    >
+      <div
+        className={`pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full opacity-40 blur-2xl transition-opacity duration-500 group-hover:opacity-70 ${
+          accent || "bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]"
+        }`}
+      />
+
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="theme-text-secondary text-[11px] font-semibold uppercase tracking-wider">
+            {title}
+          </p>
+
+          <p
+            className={`mt-2.5 break-words text-2xl font-bold tracking-tight ${
+              color || "theme-text"
+            }`}
+          >
+            {value}
+          </p>
+
+          <p className="theme-text-muted mt-1.5 text-xs">{description}</p>
+        </div>
+
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition-transform duration-300 group-hover:scale-105 ${
+            surface || themePrimarySoft
+          } ${color || themePrimaryText}`}
+        >
+          <Icon size={20} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProgressRing({ value = 0, size = 108, stroke = 9 }) {
+  const safe = Math.min(100, Math.max(0, Number(value) || 0));
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (safe / 100) * circumference;
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          strokeWidth={stroke}
+          className="stroke-[color-mix(in_srgb,var(--color-text)_8%,transparent)]"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="stroke-[var(--color-success)] transition-[stroke-dashoffset] duration-1000 ease-out"
+        />
+      </svg>
+
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-2xl font-bold tracking-tight text-[var(--color-success)]">
+          {safe}%
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function SiswaDashboardPage() {
   const router = useRouter();
@@ -610,36 +588,29 @@ export default function SiswaDashboardPage() {
     username: "",
     email: "",
     userId: "",
-    sekolahId: "",
     kelasId: "",
-    kelasName: "",
   });
 
   const [dashboard, setDashboard] = useState(null);
+
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [dashboardError, setDashboardError] = useState("");
-  const [loadingDashboard, setLoadingDashboard] =
-    useState(true);
 
-  const [mataPelajaranList, setMataPelajaranList] =
-    useState([]);
-
-  const [loadingMapel, setLoadingMapel] =
-    useState(true);
-
+  const [mataPelajaranList, setMataPelajaranList] = useState([]);
+  const [loadingMapel, setLoadingMapel] = useState(true);
   const [mapelError, setMapelError] = useState("");
-
-  /* =======================================================
-     AUTH SESSION
-  ======================================================= */
 
   useEffect(() => {
     setMounted(true);
 
     const syncUser = () => {
-      const sessionUser = readSessionUser();
+      const session = readSessionUser();
 
-      if (sessionUser) {
-        setUser(sessionUser);
+      if (session) {
+        setUser((previous) => ({
+          ...previous,
+          ...session,
+        }));
       }
     };
 
@@ -650,86 +621,46 @@ export default function SiswaDashboardPage() {
     return () => unsubscribe();
   }, []);
 
-  /* =======================================================
-     LOAD DASHBOARD
-  ======================================================= */
+  const loadDashboard = useCallback(async () => {
+    try {
+      setLoadingDashboard(true);
+      setDashboardError("");
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadDashboard() {
-      try {
-        setLoadingDashboard(true);
-        setDashboardError("");
-
-        if (!getToken()) {
-          router.replace("/login?sessionExpired=1");
-          return;
-        }
-
-        const data = await getDashboardSiswa();
-
-        if (cancelled) return;
-
-        setDashboard(data);
-
-        const profile = data?.profil || {};
-        const kelas = data?.kelas || {};
-
-        setUser((previous) => ({
-          ...previous,
-          username:
-            profile.namaLengkap ||
-            previous.username ||
-            "Siswa",
-          email:
-            profile.email ||
-            previous.email ||
-            "",
-          userId:
-            profile.id ||
-            previous.userId,
-          kelasId:
-            kelas.id ||
-            previous.kelasId,
-          kelasName:
-            kelas.nama ||
-            previous.kelasName,
-        }));
-      } catch (error) {
-        if (cancelled) return;
-
-        console.error(
-          "[DASHBOARD SISWA] Gagal memuat dashboard:",
-          error
-        );
-
-        if (error?.status === 401) {
-          router.replace("/login?sessionExpired=1");
-          return;
-        }
-
-        setDashboardError(
-          error?.message ||
-            "Gagal mengambil data dashboard siswa."
-        );
-      } finally {
-        if (!cancelled) {
-          setLoadingDashboard(false);
-        }
+      if (!getToken()) {
+        router.replace("/login?sessionExpired=1");
+        return;
       }
+
+      const data = await getDashboardSiswa();
+
+      setDashboard(data);
+
+      setUser((previous) => ({
+        ...previous,
+        username: data.profil.namaLengkap || previous.username,
+        email: data.profil.email || previous.email,
+        userId: data.profil.id || previous.userId,
+        kelasId: data.kelas?.id || previous.kelasId,
+      }));
+    } catch (error) {
+      console.error("[DASHBOARD SISWA]", error);
+
+      if (error?.status === 401) {
+        router.replace("/login?sessionExpired=1");
+        return;
+      }
+
+      setDashboardError(
+        error?.message || "Gagal mengambil dashboard siswa."
+      );
+    } finally {
+      setLoadingDashboard(false);
     }
-
-    loadDashboard();
-
-    return () => {
-      cancelled = true;
-    };
   }, [router]);
 
-  /* =======================================================
-     LOAD MATA PELAJARAN
-  ======================================================= */
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
   useEffect(() => {
     let cancelled = false;
@@ -744,60 +675,56 @@ export default function SiswaDashboardPage() {
           return;
         }
 
-        const sessionUser = readSessionUser();
-
-        if (!sessionUser) {
-          throw new Error(
-            "Data pengguna tidak ditemukan. Silakan login kembali."
-          );
-        }
-
-        const userId = sessionUser.userId;
-        const existingKelasId = sessionUser.kelasId;
+        const session = readSessionUser();
+        const userId = dashboard?.profil?.id || session?.userId;
 
         if (!userId) {
-          throw new Error(
-            "ID siswa tidak ditemukan dari sesi login."
-          );
+          if (dashboardError) {
+            setMapelError("Data siswa belum berhasil dimuat.");
+          }
+          return;
         }
 
-        const kelasSiswa = await findStudentClass(
-          userId,
-          existingKelasId
-        );
+        let kelasSiswa = null;
+
+        if (dashboard?.kelas?.id) {
+          try {
+            kelasSiswa = await fetchKelasDetail(dashboard.kelas.id);
+          } catch (error) {
+            console.warn("Gagal mengambil detail kelas:", error);
+          }
+        }
+
+        if (!kelasSiswa) {
+          kelasSiswa = await findStudentClass(
+            userId,
+            dashboard?.kelas?.id || session?.kelasId
+          );
+        }
 
         if (cancelled) return;
 
         if (!kelasSiswa) {
           setMataPelajaranList([]);
           setMapelError(
-            "Kelas siswa belum ditemukan. Pastikan siswa sudah dimasukkan ke kelas oleh Admin Sekolah."
+            "Kelas siswa belum ditemukan. Hubungi Admin Sekolah untuk memastikan siswa sudah dimasukkan ke kelas."
           );
           return;
         }
 
-        const kelasId = String(kelasSiswa.id);
+        const kelasId = String(kelasSiswa.id || dashboard?.kelas?.id);
 
         const kelasName =
           kelasSiswa.nama ||
           kelasSiswa.namaKelas ||
+          dashboard?.kelas?.nama ||
           "Kelas siswa";
 
-        setUser((previous) => ({
-          ...previous,
-          kelasId,
-          kelasName,
-        }));
-
-        const dataKelasSiswa = Array.isArray(
-          kelasSiswa.kelasMapel
-        )
-          ? kelasSiswa.kelasMapel.filter(
-              (item) => item?.dihapusPada == null
-            )
+        const kelasMapel = Array.isArray(kelasSiswa.kelasMapel)
+          ? kelasSiswa.kelasMapel.filter((item) => item?.dihapusPada == null)
           : [];
 
-        if (dataKelasSiswa.length === 0) {
+        if (kelasMapel.length === 0) {
           setMataPelajaranList([]);
           setMapelError(
             `Belum ada mata pelajaran yang terhubung dengan ${kelasName}.`
@@ -805,56 +732,43 @@ export default function SiswaDashboardPage() {
           return;
         }
 
-        const [materiData, tugasCounts] =
-          await Promise.all([
-            fetchSemuaMateri(),
-            Promise.all(
-              dataKelasSiswa.map((item) =>
-                fetchJumlahTugas(item?.id)
-              )
-            ),
-          ]);
+        const [materiData, tugasCounts] = await Promise.all([
+          fetchSemuaMateri(),
+          Promise.all(kelasMapel.map((item) => fetchJumlahTugas(item?.id))),
+        ]);
 
         if (cancelled) return;
 
-        const normalized = dataKelasSiswa.map(
-          (item, index) => {
-            const kelasMapelId = item?.id;
+        const normalized = kelasMapel.map((item, index) => {
+          const kelasMapelId = item.id;
 
-            const jumlahMateri = materiData.filter(
-              (materi) => {
-                const materiKelasMapelId =
-                  materi?.kelasMapelId ??
-                  materi?.kelas_mapel_id ??
-                  materi?.kelasMapel?.id ??
-                  null;
+          const jumlahMateri = materiData.filter((materi) => {
+            const materiKelasMapelId =
+              materi?.kelasMapelId ??
+              materi?.kelas_mapel_id ??
+              materi?.kelasMapel?.id;
 
-                return (
-                  String(materiKelasMapelId) ===
-                  String(kelasMapelId)
-                );
-              }
-            ).length;
-
-            return normalizeKelasMapel(
-              item,
-              index,
-              kelasId,
-              kelasName,
-              jumlahMateri,
-              tugasCounts[index]
+            return (
+              materiKelasMapelId != null &&
+              String(materiKelasMapelId) === String(kelasMapelId)
             );
-          }
-        );
+          }).length;
+
+          return normalizeKelasMapel(
+            item,
+            index,
+            kelasId,
+            kelasName,
+            jumlahMateri,
+            tugasCounts[index]
+          );
+        });
 
         setMataPelajaranList(normalized);
       } catch (error) {
         if (cancelled) return;
 
-        console.error(
-          "[MATA PELAJARAN] Gagal memuat:",
-          error
-        );
+        console.error("[MATA PELAJARAN]", error);
 
         if (error?.status === 401) {
           router.replace("/login?sessionExpired=1");
@@ -862,11 +776,7 @@ export default function SiswaDashboardPage() {
         }
 
         setMataPelajaranList([]);
-
-        setMapelError(
-          error?.message ||
-            "Gagal mengambil data mata pelajaran dari server."
-        );
+        setMapelError(error?.message || "Gagal mengambil mata pelajaran.");
       } finally {
         if (!cancelled) {
           setLoadingMapel(false);
@@ -874,331 +784,352 @@ export default function SiswaDashboardPage() {
       }
     }
 
-    loadMataPelajaran();
+    if (!loadingDashboard) {
+      loadMataPelajaran();
+    }
 
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [dashboard, dashboardError, loadingDashboard, router]);
 
-  /* =======================================================
-     DATA DISPLAY
-  ======================================================= */
-
-  const username = user.username || "Siswa";
-  const kelasName = user.kelasName || "Kelas siswa";
-
+  const profil = dashboard?.profil;
+  const kelas = dashboard?.kelas;
   const kehadiran = dashboard?.kehadiranBulanIni;
 
-  const quickStats = [
-    {
-      title: "Kehadiran",
-      value:
-        kehadiran &&
-        Number.isFinite(Number(kehadiran.persentase))
-          ? `${kehadiran.persentase}%`
-          : "—",
-      description: "Bulan ini",
-      icon: ClipboardCheck,
-      iconSurface: themeSuccessSurface,
-      iconText: "text-[var(--color-success)]",
-      valueText: "text-[var(--color-success)]",
-    },
-    {
-      title: "Tugas Belum Selesai",
-      value: dashboard
-        ? String(dashboard.tugasMendatang?.length ?? 0)
-        : "—",
-      description: "Perlu dikerjakan",
-      icon: ClipboardList,
-      iconSurface: themeWarningSurface,
-      iconText: "text-[var(--color-warning)]",
-      valueText: "text-[var(--color-warning)]",
-    },
-    {
-      title: "Notifikasi",
-      value: dashboard
-        ? String(dashboard.notifikasiBelumDibaca ?? 0)
-        : "—",
-      description: "Belum dibaca",
-      icon: Bell,
-      iconSurface: themePrimarySoft,
-      iconText: themePrimaryText,
-      valueText: themePrimaryText,
-    },
-  ];
+  const jadwal = dashboard?.jadwalHariIni || [];
+  const tugas = dashboard?.tugasMendatang || [];
+  const nilai = dashboard?.nilaiTerbaru || [];
 
-  const tugasMendatang =
-    dashboard?.tugasMendatang || [];
+  const tagihan = dashboard?.tagihan;
+  const tabungan = dashboard?.tabungan;
+  const pelanggaran = dashboard?.pelanggaran;
 
-  const nilaiTerbaru =
-    dashboard?.nilaiTerbaru || [];
+  const username = profil?.namaLengkap || user.username || "Siswa";
 
-  const jadwalHariIni =
-    dashboard?.jadwalHariIni || [];
+  const kelasName = kelas?.nama || "Kelas belum tersedia";
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
+  const avatar = getAvatarUrl(profil?.avatar);
+
+  const totalMateri = mataPelajaranList.reduce(
+    (total, item) => total + item.materi,
+    0
+  );
+
+  const totalTugasMapel = mataPelajaranList.reduce(
+    (total, item) => total + item.tugas,
+    0
+  );
 
   return (
     <div className="flex h-screen overflow-hidden theme-page theme-text">
       <div className="flex min-h-0 flex-1 flex-col">
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div
-            className={`w-full space-y-6 p-4 transition-all duration-700 sm:p-6 lg:p-8 ${
+            className={`relative w-full space-y-6 p-4 transition-all duration-700 sm:p-6 lg:p-8 ${
               mounted
                 ? "translate-y-0 opacity-100"
                 : "translate-y-4 opacity-0"
             }`}
           >
-            {/* =================================================
-                HERO
-            ================================================= */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--color-primary)_7%,transparent),transparent_60%)]" />
 
-            <section
-              className={`theme-card relative isolate overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
-            >
-              <div
-                className={`absolute inset-0 -z-30 ${themePrimarySoft}`}
-              />
+            <section className="theme-card relative isolate overflow-hidden rounded-3xl border border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] shadow-[0_1px_2px_color-mix(in_srgb,var(--color-text)_4%,transparent),0_24px_70px_-24px_color-mix(in_srgb,var(--color-primary)_28%,transparent)]">
+              <div className="absolute inset-0 -z-30 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-card)_96%,transparent),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))]" />
 
-              <div className="absolute -right-24 -top-28 -z-20 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] blur-3xl" />
+              <div className="absolute inset-0 -z-20 opacity-[0.35] [background-image:radial-gradient(color-mix(in_srgb,var(--color-text)_18%,transparent)_1px,transparent_1px)] [background-size:22px_22px]" />
 
-              <div className="absolute -bottom-32 right-[20%] -z-20 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] blur-3xl" />
+              <div className="absolute -right-28 -top-32 -z-10 h-96 w-96 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_16%,transparent)] blur-3xl" />
 
-              <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block">
-                <div className="absolute bottom-0 right-4 h-[90%] w-[400px]">
-                  <div className="absolute bottom-0 left-0 h-4 w-full rounded-full bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]" />
+              <div className="absolute -bottom-40 right-[18%] -z-10 h-96 w-96 rounded-full bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)] blur-3xl" />
 
-                  <div className="absolute bottom-0 left-10 h-[75%] w-[280px] rounded-t-xl border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_80%,transparent)] shadow-[0_20px_60px_color-mix(in_srgb,var(--color-primary)_10%,transparent)] backdrop-blur-md">
-                    <div
-                      className={`absolute -top-7 left-[-16px] h-8 w-[312px] rounded-t-lg ${themePrimaryGradient}`}
-                    />
+              <div className="absolute -left-24 top-1/3 -z-10 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--color-success)_8%,transparent)] blur-3xl" />
 
-                    <div className="absolute left-1/2 top-3 -translate-x-1/2 rounded-md border border-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_90%,transparent)] px-4 py-1.5 shadow-sm backdrop-blur">
-                      <div className="flex items-center gap-1.5">
-                        <School
-                          size={11}
-                          className={themePrimaryText}
-                        />
-                        <span className="whitespace-nowrap text-[8px] font-bold tracking-[0.18em] text-[var(--color-primary)]">
-                          SMART SCHOOL
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="absolute left-7 top-16 grid grid-cols-4 gap-5">
-                      {Array.from({ length: 8 }).map(
-                        (_, index) => (
-                          <div
-                            key={index}
-                            className="h-9 w-8 rounded-md border border-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] shadow-inner"
-                          >
-                            <div className="mx-auto mt-2 h-4 w-4 rounded-sm bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]" />
-                          </div>
-                        )
-                      )}
-                    </div>
-
-                    <div className="absolute bottom-0 left-1/2 h-28 w-20 -translate-x-1/2 rounded-t-xl border-x border-t border-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]">
-                      <div className="absolute bottom-0 left-1/2 h-20 w-12 -translate-x-1/2 rounded-t-lg bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative z-10 px-5 py-7 sm:px-7 sm:py-8 lg:px-9 lg:py-10">
+              <div className="relative z-10 flex flex-col gap-7 px-5 py-8 sm:px-8 sm:py-10 lg:flex-row lg:items-center lg:justify-between lg:px-10 lg:py-12">
                 <div className="max-w-2xl">
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_95%,transparent)] px-3 py-1.5 shadow-sm backdrop-blur">
-                    <div
-                      className={`flex h-6 w-6 items-center justify-center rounded-full ${themePrimarySoft} ${themePrimaryText}`}
-                    >
-                      <School size={14} />
-                    </div>
-
-                    <span className="text-xs font-semibold tracking-wide text-[var(--color-primary)]">
-                      SMARTSCHOOL STUDENT
+                  <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_88%,transparent)] px-3.5 py-1.5 shadow-[0_2px_10px_-2px_color-mix(in_srgb,var(--color-primary)_25%,transparent)] backdrop-blur-md">
+                    <Sparkles size={14} className={themePrimaryText} />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--color-primary)]">
+                      SmartSchool Student
                     </span>
-
-                    <span className="h-1 w-1 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_40%,transparent)]" />
-
-                    <span className="theme-text-secondary text-xs font-medium">
-                      Siswa
+                    <span className="h-1 w-1 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_50%,transparent)]" />
+                    <span className="theme-text-secondary text-[10px] font-medium">
+                      Dashboard Siswa
                     </span>
                   </div>
 
-                  <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                  <h1 className="theme-text text-[26px] font-bold leading-tight tracking-tight sm:text-3xl lg:text-[38px]">
                     Selamat datang kembali,
-
-                    <span className="mt-1 block bg-[linear-gradient(90deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_70%,var(--color-info)))] bg-clip-text text-transparent">
+                    <span className="mt-1.5 block bg-[linear-gradient(90deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,var(--color-info)),var(--color-info))] bg-clip-text text-transparent">
                       {username}
                     </span>
                   </h1>
 
-                  <p className="theme-text-secondary mt-3 max-w-xl text-sm leading-6 sm:text-base">
-                    Pantau pembelajaran, tugas, kehadiran,
-                    dan perkembangan akademikmu dalam satu
-                    tempat.
+                  <p className="theme-text-secondary mt-3.5 max-w-xl text-sm leading-6">
+                    Pantau pembelajaran, tugas, kehadiran, dan perkembangan
+                    akademikmu dalam satu tempat yang rapi dan menyenangkan.
                   </p>
 
-                  <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <div
-                      className={`inline-flex items-center gap-2 rounded-lg border ${themeNeutralBorder} ${themeCardShadow} bg-[color-mix(in_srgb,var(--color-card)_90%,transparent)] px-3 py-2 text-xs font-medium theme-text-secondary`}
-                    >
-                      <GraduationCap
-                        size={15}
-                        className={themePrimaryText}
-                      />
-                      {kelasName}
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    <div className="inline-flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_80%,transparent)] px-3 py-2 text-xs backdrop-blur-sm">
+                      <GraduationCap size={15} className={themePrimaryText} />
+                      <span className="theme-text font-medium">{kelasName}</span>
                     </div>
 
-                    <div
-                      className={`theme-text-secondary inline-flex items-center gap-2 rounded-lg border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_90%,transparent)] px-3 py-2 text-xs font-medium shadow-sm`}
-                    >
-                      <CalendarDays
-                        size={15}
-                        className={themePrimaryText}
-                      />
-
-                      {dashboard?.kelas?.tahunAjaran?.tahunAjaran
-                        ? `Tahun Ajaran ${dashboard.kelas.tahunAjaran.tahunAjaran}`
-                        : "Tahun ajaran belum tersedia"}
+                    <div className="inline-flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_80%,transparent)] px-3 py-2 text-xs backdrop-blur-sm">
+                      <CalendarDays size={15} className={themePrimaryText} />
+                      <span className="theme-text font-medium">
+                        {kelas?.tahunAjaran?.tahunAjaran
+                          ? `Tahun Ajaran ${kelas.tahunAjaran.tahunAjaran}`
+                          : "Tahun ajaran belum tersedia"}
+                      </span>
                     </div>
 
-                    <div
-                      className={`theme-text-secondary inline-flex items-center gap-2 rounded-lg border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_90%,transparent)] px-3 py-2 text-xs font-medium shadow-sm`}
-                    >
-                      <Sparkles
-                        size={14}
-                        className={themePrimaryText}
-                      />
-                      Semangat belajar hari ini
+                    <div className="inline-flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_80%,transparent)] px-3 py-2 text-xs backdrop-blur-sm">
+                      <CalendarCheck size={15} className={themePrimaryText} />
+                      <span className="theme-text font-medium">
+                        {formatTanggalHariIni()}
+                      </span>
                     </div>
                   </div>
 
                   {dashboardError && (
                     <div
-                      className={`mt-5 flex items-start gap-2 rounded-lg border ${themeWarningBorder} ${themeWarningSurface} p-3 text-sm`}
+                      className={`mt-6 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-4 backdrop-blur-sm`}
                     >
-                      <AlertCircle
-                        size={17}
-                        className="mt-0.5 shrink-0 text-[var(--color-warning)]"
-                      />
-
-                      <div>
-                        <p className="font-semibold theme-text">
-                          Dashboard belum dapat dimuat
-                        </p>
-
-                        <p className="mt-1 theme-text-secondary">
-                          {dashboardError}
-                        </p>
-
-                        <button
-                          type="button"
-                          onClick={() => window.location.reload()}
-                          className={`mt-2 inline-flex items-center gap-2 font-semibold ${themePrimaryText}`}
-                        >
-                          <RefreshCw size={14} />
-                          Coba lagi
-                        </button>
+                      <div className="flex items-start gap-2.5">
+                        <AlertCircle
+                          size={18}
+                          className="mt-0.5 shrink-0 text-[var(--color-warning)]"
+                        />
+                        <div>
+                          <p className="theme-text text-sm font-semibold">
+                            Dashboard belum dapat dimuat
+                          </p>
+                          <p className="theme-text-secondary mt-1 text-xs leading-5">
+                            {dashboardError}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={loadDashboard}
+                            className={`mt-2.5 inline-flex items-center gap-2 text-xs font-semibold ${themePrimaryText} transition-opacity hover:opacity-75`}
+                          >
+                            <RefreshCw size={13} />
+                            Coba lagi
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
                 </div>
-              </div>
 
-              <div className="absolute bottom-0 left-0 h-1 w-full bg-[linear-gradient(90deg,var(--color-primary),var(--color-info))]" />
-            </section>
-
-            {/* =================================================
-                QUICK STATS
-            ================================================= */}
-
-            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {quickStats.map((stat) => {
-                const Icon = stat.icon;
-
-                return (
-                  <div
-                    key={stat.title}
-                    className={`theme-card group relative overflow-hidden rounded-xl border ${themeNeutralBorder} p-5 ${themeCardShadow} transition-all duration-300 hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_10%,transparent)]`}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <p className="theme-text-secondary text-sm font-medium">
-                          {stat.title}
-                        </p>
-
-                        <div className="mt-2 flex items-end gap-2">
-                          <span
-                            className={`text-2xl font-bold ${stat.valueText}`}
-                          >
-                            {stat.value}
-                          </span>
-
-                          <span className="theme-text-muted mb-1 text-xs font-medium">
-                            {stat.description}
-                          </span>
-                        </div>
-                      </div>
-
+                <div className="w-full max-w-sm rounded-3xl border border-[color-mix(in_srgb,var(--color-text)_9%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_78%,transparent)] p-5 shadow-[0_8px_40px_-12px_color-mix(in_srgb,var(--color-text)_15%,transparent)] backdrop-blur-xl">
+                  <div className="flex items-center gap-4">
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt={username}
+                        className="h-16 w-16 rounded-2xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] object-cover shadow-sm ring-2 ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
+                      />
+                    ) : (
                       <div
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${stat.iconSurface} ${stat.iconText}`}
+                        className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-white shadow-[0_8px_24px_-8px_color-mix(in_srgb,var(--color-primary)_60%,transparent)]`}
                       >
-                        <Icon size={20} />
+                        <UserRound size={30} />
                       </div>
+                    )}
+
+                    <div className="min-w-0">
+                      <p className="theme-text truncate font-bold">
+                        {username}
+                      </p>
+                      <p className="theme-text-secondary mt-1 flex items-center gap-1 truncate text-xs">
+                        <Mail size={11} className="shrink-0" />
+                        {profil?.email || user.email || "-"}
+                      </p>
+                      <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-success)] ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-success)_20%,transparent)]">
+                        <CircleDot size={9} />
+                        Siswa
+                      </span>
                     </div>
                   </div>
-                );
-              })}
+
+                  <div
+                    className={`mt-4 grid grid-cols-2 gap-3 border-t ${themeDivider} pt-4`}
+                  >
+                    <div className={`rounded-xl ${themeNeutralSurface} px-3 py-2.5`}>
+                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                        NIS
+                      </p>
+                      <p className="theme-text mt-1 truncate text-sm font-bold">
+                        {profil?.nis || "-"}
+                      </p>
+                    </div>
+
+                    <div className={`rounded-xl ${themeNeutralSurface} px-3 py-2.5`}>
+                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                        NISN
+                      </p>
+                      <p className="theme-text mt-1 truncate text-sm font-bold">
+                        {profil?.nisn || "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute bottom-0 left-0 h-1 w-full bg-[linear-gradient(90deg,var(--color-primary),var(--color-info),var(--color-success),var(--color-primary))] opacity-90" />
             </section>
 
-            {/* =================================================
-                KEHADIRAN
-            ================================================= */}
+            <section
+              className={`theme-card rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] p-5 backdrop-blur-sm ${themeCardShadow} sm:p-6`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText} ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]`}
+                >
+                  <School size={20} />
+                </div>
+                <div>
+                  <h2 className="theme-text text-base font-bold tracking-tight">
+                    Informasi Kelas
+                  </h2>
+                  <p className="theme-text-secondary text-xs">
+                    Informasi akademik dan wali kelas
+                  </p>
+                </div>
+              </div>
+
+              {loadingDashboard ? (
+                <LoadingState text="Memuat informasi kelas..." />
+              ) : kelas ? (
+                <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+                  {[
+                    { label: "Nama Kelas", value: kelas.nama, icon: School },
+                    { label: "Tingkat", value: kelas.tingkat, icon: GraduationCap },
+                    { label: "Shift", value: kelas.shift || "-", icon: Clock3 },
+                    { label: "Wali Kelas", value: kelas.waliKelas || "-", icon: UserRound },
+                    {
+                      label: "Tahun Ajaran",
+                      value: kelas.tahunAjaran?.tahunAjaran || "-",
+                      icon: CalendarDays,
+                    },
+                    {
+                      label: "Semester",
+                      value: kelas.tahunAjaran?.semester || "-",
+                      icon: CalendarCheck,
+                    },
+                  ].map((item) => {
+                    const Icon = item.icon;
+
+                    return (
+                      <div
+                        key={item.label}
+                        className={`group rounded-xl border border-transparent ${themeNeutralSurface} p-3.5 transition-all duration-300 hover:border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]`}
+                      >
+                        <Icon
+                          size={17}
+                          className={`${themePrimaryText} transition-transform duration-300 group-hover:scale-110`}
+                        />
+                        <p className="theme-text-muted mt-3 text-[10px] font-semibold uppercase tracking-wider">
+                          {item.label}
+                        </p>
+                        <p className="theme-text mt-1 break-words text-sm font-semibold">
+                          {item.value || "-"}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={School}
+                  title="Belum terdaftar di kelas"
+                  description="Informasi kelas belum tersedia pada akun siswa."
+                />
+              )}
+            </section>
+
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <StatCard
+                title="Kehadiran"
+                value={
+                  loadingDashboard ? "..." : `${kehadiran?.persentase ?? 0}%`
+                }
+                description="Persentase bulan ini"
+                icon={ClipboardCheck}
+                surface={themeSuccessSurface}
+                color="text-[var(--color-success)]"
+                accent="bg-[color-mix(in_srgb,var(--color-success)_20%,transparent)]"
+              />
+
+              <StatCard
+                title="Tugas Mendatang"
+                value={loadingDashboard ? "..." : tugas.length}
+                description="Belum dikumpulkan"
+                icon={ClipboardList}
+                surface={themeWarningSurface}
+                color="text-[var(--color-warning)]"
+                accent="bg-[color-mix(in_srgb,var(--color-warning)_20%,transparent)]"
+              />
+
+              <StatCard
+                title="Rata-rata Nilai"
+                value={loadingDashboard ? "..." : dashboard?.rataRataNilai ?? 0}
+                description="Nilai akhir seluruh mapel"
+                icon={Award}
+                surface={themePrimarySoft}
+                color={themePrimaryText}
+                accent="bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]"
+              />
+
+              <StatCard
+                title="Notifikasi"
+                value={
+                  loadingDashboard ? "..." : dashboard?.notifikasiBelumDibaca ?? 0
+                }
+                description="Belum dibaca"
+                icon={Bell}
+                surface={themePrimarySoft}
+                color={themePrimaryText}
+                accent="bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)]"
+              />
+            </section>
 
             <section
-              className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 sm:p-6 ${themeCardShadow}`}
+              className={`theme-card rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] p-5 backdrop-blur-sm ${themeCardShadow} sm:p-6`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="theme-text text-lg font-bold">
-                    Kehadiran Bulan Ini
+                  <h2 className="theme-text text-lg font-bold tracking-tight">
+                    Rekap Kehadiran
                   </h2>
-
                   <p className="theme-text-secondary mt-1 text-xs">
-                    Rekap kehadiran berdasarkan data absensi
+                    Rekap absensi bulan ini
                   </p>
                 </div>
 
                 <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeSuccessSurface} text-[var(--color-success)]`}
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeSuccessSurface} text-[var(--color-success)] ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-success)_14%,transparent)]`}
                 >
                   <ClipboardCheck size={21} />
                 </div>
               </div>
 
               {loadingDashboard ? (
-                <div className="mt-5 flex items-center gap-2 theme-text-secondary text-sm">
-                  <Loader2 size={16} className="animate-spin" />
-                  Memuat data kehadiran...
-                </div>
+                <LoadingState text="Memuat rekap kehadiran..." />
               ) : (
-                <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center">
-                  <div className="min-w-[130px]">
-                    <p className="text-3xl font-bold text-[var(--color-success)]">
-                      {kehadiran?.persentase ?? 0}%
-                    </p>
-
-                    <p className="theme-text-muted mt-1 text-xs">
-                      Persentase kehadiran
-                    </p>
-
-                    <p className="theme-text-secondary mt-1 text-xs">
-                      Total {kehadiran?.total ?? 0} absensi
-                    </p>
+                <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
+                  <div className="flex shrink-0 flex-col items-center gap-3">
+                    <ProgressRing value={kehadiran?.persentase ?? 0} />
+                    <div className="text-center">
+                      <p className="theme-text-secondary text-xs font-medium">
+                        Persentase kehadiran
+                      </p>
+                      <p className="theme-text-muted mt-1 text-xs">
+                        Total {kehadiran?.total ?? 0} absensi
+                      </p>
+                    </div>
                   </div>
 
                   <div className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
@@ -1207,34 +1138,36 @@ export default function SiswaDashboardPage() {
                         label: "Hadir",
                         value: kehadiran?.hadir ?? 0,
                         color: "text-[var(--color-success)]",
+                        surface: themeSuccessSurface,
                       },
                       {
                         label: "Izin",
                         value: kehadiran?.izin ?? 0,
                         color: "text-[var(--color-info)]",
+                        surface:
+                          "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
                       },
                       {
                         label: "Sakit",
                         value: kehadiran?.sakit ?? 0,
                         color: "text-[var(--color-warning)]",
+                        surface: themeWarningSurface,
                       },
                       {
                         label: "Alpha",
                         value: kehadiran?.alpha ?? 0,
                         color: "text-[var(--color-danger)]",
+                        surface: themeDangerSurface,
                       },
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className={`rounded-xl ${themeNeutralSurface} p-3`}
+                        className={`rounded-xl border border-transparent ${item.surface} p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]`}
                       >
-                        <p className="theme-text-secondary text-xs">
+                        <p className="theme-text-secondary text-[11px] font-semibold uppercase tracking-wider">
                           {item.label}
                         </p>
-
-                        <p
-                          className={`mt-1 text-xl font-bold ${item.color}`}
-                        >
+                        <p className={`mt-2 text-2xl font-bold tracking-tight ${item.color}`}>
                           {item.value}
                         </p>
                       </div>
@@ -1244,41 +1177,33 @@ export default function SiswaDashboardPage() {
               )}
             </section>
 
-            {/* =================================================
-                JADWAL HARI INI
-            ================================================= */}
-
             <section
-              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] backdrop-blur-sm ${themeCardShadow}`}
             >
               <SectionHeader
                 icon={CalendarClock}
                 title="Jadwal Hari Ini"
                 description="Jadwal pelajaran sesuai kelasmu"
                 rightContent={
-                  <span className="theme-text-secondary text-xs">
-                    {jadwalHariIni.length} jadwal
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-2.5 py-1 text-[11px] font-semibold theme-text-secondary">
+                    <CalendarDays size={11} />
+                    {jadwal.length} jadwal
                   </span>
                 }
               />
 
               {loadingDashboard ? (
-                <div className="flex items-center gap-2 px-5 py-8 theme-text-secondary text-sm">
-                  <Loader2 size={16} className="animate-spin" />
-                  Memuat jadwal...
-                </div>
-              ) : jadwalHariIni.length > 0 ? (
-                <div
-                  className={`divide-y ${themeDivider}`}
-                >
-                  {jadwalHariIni.map((item) => (
+                <LoadingState text="Memuat jadwal pelajaran..." />
+              ) : jadwal.length > 0 ? (
+                <div className={`divide-y ${themeDivider}`}>
+                  {jadwal.map((item) => (
                     <div
                       key={item.id}
-                      className="flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] sm:flex-row sm:items-center sm:justify-between"
+                      className="group flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_3%,transparent)] sm:flex-row sm:items-center sm:justify-between sm:px-6"
                     >
-                      <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex min-w-0 items-center gap-3.5">
                         <div
-                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText} ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] transition-transform duration-300 group-hover:scale-105`}
                         >
                           <BookOpen size={20} />
                         </div>
@@ -1287,28 +1212,21 @@ export default function SiswaDashboardPage() {
                           <p className="theme-text truncate text-sm font-bold">
                             {item.mataPelajaran}
                           </p>
-
                           <p className="theme-text-secondary mt-1 text-xs">
                             {item.guru}
                           </p>
-
                           <p className="theme-text-muted mt-1 flex items-center gap-1 text-xs">
                             <MapPin size={12} />
-                            {item.ruangan ||
-                              "Ruangan belum ditentukan"}
+                            {item.ruangan || "Ruangan belum ditentukan"}
                           </p>
                         </div>
                       </div>
 
                       <div
-                        className={`flex shrink-0 items-center gap-2 self-start rounded-lg ${themeNeutralSurface} px-3 py-2 sm:self-center`}
+                        className={`flex shrink-0 items-center gap-2 self-start rounded-lg border border-[color-mix(in_srgb,var(--color-text)_7%,transparent)] ${themeNeutralSurface} px-3 py-2 sm:self-center`}
                       >
-                        <Clock3
-                          size={15}
-                          className={themePrimaryText}
-                        />
-
-                        <span className="theme-text text-xs font-semibold">
+                        <Clock3 size={14} className={themePrimaryText} />
+                        <span className="theme-text text-xs font-semibold tabular-nums">
                           {item.jamMulai} - {item.jamSelesai}
                         </span>
                       </div>
@@ -1324,15 +1242,9 @@ export default function SiswaDashboardPage() {
               )}
             </section>
 
-            {/* =================================================
-                TUGAS DAN NILAI
-            ================================================= */}
-
             <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-              {/* TUGAS */}
-
               <div
-                className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] backdrop-blur-sm ${themeCardShadow}`}
               >
                 <SectionHeader
                   icon={ClipboardList}
@@ -1340,39 +1252,44 @@ export default function SiswaDashboardPage() {
                   description="Tugas yang belum dikumpulkan"
                   iconClass={`${themeWarningSurface} text-[var(--color-warning)]`}
                   rightContent={
-                    <span className="theme-text-secondary text-xs">
-                      {tugasMendatang.length} tugas
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-warning)]">
+                      <ClipboardList size={11} />
+                      {tugas.length} tugas
                     </span>
                   }
                 />
 
                 {loadingDashboard ? (
-                  <div className="flex items-center gap-2 px-5 py-8 theme-text-secondary text-sm">
-                    <Loader2 size={16} className="animate-spin" />
-                    Memuat tugas...
-                  </div>
-                ) : tugasMendatang.length > 0 ? (
+                  <LoadingState text="Memuat tugas..." />
+                ) : tugas.length > 0 ? (
                   <div className={`divide-y ${themeDivider}`}>
-                    {tugasMendatang.map((item) => (
+                    {tugas.map((item) => (
                       <div
                         key={item.id}
-                        className="px-5 py-4"
+                        className="group px-5 py-4 transition-colors hover:bg-[color-mix(in_srgb,var(--color-warning)_3%,transparent)] sm:px-6"
                       >
-                        <p className="theme-text text-sm font-semibold">
-                          {item.judul}
-                        </p>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="theme-text text-sm font-semibold">
+                              {item.judul}
+                            </p>
+                            <p className="theme-text-secondary mt-2 flex items-center gap-1.5 text-xs">
+                              <BookOpen size={12} />
+                              {item.mataPelajaran}
+                            </p>
+                          </div>
 
-                        <div className="theme-text-secondary mt-2 flex flex-wrap items-center gap-3 text-xs">
-                          <span className="inline-flex items-center gap-1">
-                            <BookOpen size={12} />
-                            {item.mataPelajaran}
-                          </span>
-
-                          <span className="inline-flex items-center gap-1">
-                            <CalendarDays size={12} />
-                            {formatTanggal(item.batasWaktu)}
+                          <span
+                            className={`shrink-0 rounded-lg ${themeWarningSurface} px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-warning)] ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-warning)_14%,transparent)]`}
+                          >
+                            Belum dikumpulkan
                           </span>
                         </div>
+
+                        <p className="theme-text-muted mt-3 flex items-center gap-1.5 text-xs">
+                          <CalendarDays size={12} />
+                          Batas: {formatTanggal(item.batasWaktu)}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -1385,10 +1302,8 @@ export default function SiswaDashboardPage() {
                 )}
               </div>
 
-              {/* NILAI */}
-
               <div
-                className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] backdrop-blur-sm ${themeCardShadow}`}
               >
                 <SectionHeader
                   icon={GraduationCap}
@@ -1398,54 +1313,49 @@ export default function SiswaDashboardPage() {
                 />
 
                 <div
-                  className={`border-b ${themeDivider} px-5 py-4`}
+                  className={`relative overflow-hidden border-b ${themeDivider} px-5 py-5 sm:px-6`}
                 >
-                  <p className="theme-text-secondary text-xs">
-                    Rata-rata nilai akhir
-                  </p>
+                  <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] blur-2xl" />
 
-                  <div className="mt-1 flex items-center gap-2">
-                    <p
-                      className={`text-2xl font-bold ${themePrimaryText}`}
-                    >
-                      {dashboard?.rataRataNilai ?? 0}
+                  <div className="relative">
+                    <p className="theme-text-secondary text-xs font-medium">
+                      Rata-rata nilai akhir
                     </p>
-
-                    <TrendingUp
-                      size={17}
-                      className="text-[var(--color-success)]"
-                    />
+                    <div className="mt-1.5 flex items-baseline gap-2.5">
+                      <p className={`text-4xl font-bold tracking-tight ${themePrimaryText}`}>
+                        {dashboard?.rataRataNilai ?? 0}
+                      </p>
+                      <span className="inline-flex items-center gap-1 rounded-md bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--color-success)]">
+                        <TrendingUp size={11} />
+                        Aktif
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {loadingDashboard ? (
-                  <div className="flex items-center gap-2 px-5 py-8 theme-text-secondary text-sm">
-                    <Loader2 size={16} className="animate-spin" />
-                    Memuat nilai...
-                  </div>
-                ) : nilaiTerbaru.length > 0 ? (
+                  <LoadingState text="Memuat nilai..." />
+                ) : nilai.length > 0 ? (
                   <div className={`divide-y ${themeDivider}`}>
-                    {nilaiTerbaru.map((item) => (
+                    {nilai.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between gap-3 px-5 py-4"
+                        className="flex items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-[color-mix(in_srgb,var(--color-success)_3%,transparent)] sm:px-6"
                       >
                         <div className="min-w-0">
                           <p className="theme-text truncate text-sm font-semibold">
                             {item.mataPelajaran}
                           </p>
-
                           <p className="theme-text-secondary mt-1 text-xs">
                             {item.komponen} · {item.jenis}
                           </p>
-
                           <p className="theme-text-muted mt-1 text-xs">
                             {formatTanggal(item.tanggal)}
                           </p>
                         </div>
 
                         <span
-                          className={`shrink-0 rounded-lg ${themeSuccessSurface} px-3 py-2 text-sm font-bold text-[var(--color-success)]`}
+                          className={`shrink-0 rounded-xl ${themeSuccessSurface} px-3.5 py-2 text-sm font-bold text-[var(--color-success)] ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-success)_14%,transparent)]`}
                         >
                           {item.nilai}
                         </span>
@@ -1462,340 +1372,428 @@ export default function SiswaDashboardPage() {
               </div>
             </section>
 
-            {/* =================================================
-                KEUANGAN DAN KEDISIPLINAN
-            ================================================= */}
-
-            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {/* TAGIHAN */}
-
-              <div
-                className={`theme-card rounded-xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl ${themeWarningSurface} text-[var(--color-warning)]`}
-                  >
-                    <Wallet size={20} />
-                  </div>
-
-                  <span className="theme-text-muted text-xs">
-                    Keuangan
-                  </span>
+            <section>
+              <div className="mb-4 flex items-center gap-2">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
+                  <Wallet size={16} />
                 </div>
-
-                <p className="theme-text-secondary mt-4 text-xs">
-                  Total sisa tagihan
-                </p>
-
-                <p className="theme-text mt-1 break-words text-xl font-bold">
-                  {formatRupiah(
-                    dashboard?.tagihan?.totalSisa
-                  )}
-                </p>
-
-                <p className="theme-text-muted mt-2 text-xs">
-                  {dashboard?.tagihan?.jumlahBelumLunas ?? 0}{" "}
-                  tagihan belum lunas
-                </p>
-
-                {dashboard?.tagihan?.terdekat && (
-                  <div
-                    className={`mt-4 border-t ${themeDivider} pt-3`}
-                  >
-                    <p className="theme-text-secondary text-xs">
-                      Tagihan terdekat:{" "}
-                      {dashboard.tagihan.terdekat.kategori}
-                    </p>
-
-                    <p className="theme-text mt-1 text-xs font-semibold">
-                      Jatuh tempo:{" "}
-                      {formatTanggal(
-                        dashboard.tagihan.terdekat.jatuhTempo
-                      )}
-                    </p>
-
-                    <p className="theme-text mt-1 text-xs">
-                      Sisa:{" "}
-                      {formatRupiah(
-                        dashboard.tagihan.terdekat.sisa
-                      )}
-                    </p>
-                  </div>
-                )}
+                <div>
+                  <h2 className="theme-text text-lg font-bold tracking-tight">
+                    Keuangan Siswa
+                  </h2>
+                  <p className="theme-text-secondary mt-0.5 text-xs">
+                    Ringkasan tagihan dan tabungan sekolah
+                  </p>
+                </div>
               </div>
 
-              {/* TABUNGAN */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div
+                  className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] p-5 backdrop-blur-sm ${themeCardShadow} sm:p-6`}
+                >
+                  <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] blur-2xl" />
 
-              <div
-                className={`theme-card rounded-xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
-                  >
-                    <Banknote size={20} />
+                  <div className="relative flex items-center justify-between">
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeWarningSurface} text-[var(--color-warning)] ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]`}
+                    >
+                      <Wallet size={21} />
+                    </div>
+
+                    <span className="theme-text-muted text-[11px] font-semibold uppercase tracking-wider">
+                      Tagihan sekolah
+                    </span>
                   </div>
 
-                  <span className="theme-text-muted text-xs">
-                    Keuangan
-                  </span>
+                  <p className="theme-text-secondary mt-5 text-xs font-medium">
+                    Total sisa tagihan
+                  </p>
+
+                  <p className="theme-text mt-1.5 break-words text-2xl font-bold tracking-tight sm:text-3xl">
+                    {loadingDashboard ? "..." : formatRupiah(tagihan?.totalSisa)}
+                  </p>
+
+                  <p className="theme-text-secondary mt-2 text-xs">
+                    {tagihan?.jumlahBelumLunas ?? 0} tagihan belum lunas
+                  </p>
+
+                  {tagihan?.terdekat ? (
+                    <div
+                      className={`mt-5 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_14%,transparent)] ${themeWarningSurface} p-4`}
+                    >
+                      <div className="flex items-center gap-2 text-[var(--color-warning)]">
+                        <CalendarClock size={15} />
+                        <p className="text-xs font-bold uppercase tracking-wide">
+                          Tagihan Terdekat
+                        </p>
+                      </div>
+
+                      <p className="theme-text mt-3 text-sm font-semibold">
+                        {tagihan.terdekat.kategori}
+                      </p>
+
+                      <p className="theme-text-secondary mt-1 text-xs">
+                        Nomor: {tagihan.terdekat.nomorTagihan}
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap justify-between gap-2">
+                        <div>
+                          <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                            Jatuh tempo
+                          </p>
+                          <p className="theme-text mt-1 text-xs font-semibold">
+                            {formatTanggal(tagihan.terdekat.jatuhTempo)}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                            Sisa pembayaran
+                          </p>
+                          <p className="theme-text mt-1 text-xs font-bold">
+                            {formatRupiah(tagihan.terdekat.sisa)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className={`mt-5 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_14%,transparent)] ${themeSuccessSurface} p-4`}
+                    >
+                      <div className="flex items-center gap-2 text-[var(--color-success)]">
+                        <CheckCircle2 size={17} />
+                        <p className="text-xs font-semibold">
+                          Tidak ada tagihan yang belum lunas
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <p className="theme-text-secondary mt-4 text-xs">
-                  Saldo tabungan
-                </p>
+                <div
+                  className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] p-5 backdrop-blur-sm ${themeCardShadow} sm:p-6`}
+                >
+                  <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] blur-2xl" />
 
-                <p className="theme-text mt-1 break-words text-xl font-bold">
-                  {formatRupiah(
-                    dashboard?.tabungan?.saldo
-                  )}
-                </p>
+                  <div className="relative flex items-center justify-between">
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText} ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]`}
+                    >
+                      <Banknote size={21} />
+                    </div>
 
-                <p className="theme-text-muted mt-2 text-xs">
-                  Saldo tabungan siswa
-                </p>
-              </div>
-
-              {/* PELANGGARAN */}
-
-              <div
-                className={`theme-card rounded-xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl ${themeWarningSurface} text-[var(--color-warning)]`}
-                  >
-                    <ShieldAlert size={20} />
+                    <span className="theme-text-muted text-[11px] font-semibold uppercase tracking-wider">
+                      Tabungan siswa
+                    </span>
                   </div>
 
-                  <span className="theme-text-muted text-xs">
+                  <p className="theme-text-secondary mt-5 text-xs font-medium">
+                    Saldo tabungan saat ini
+                  </p>
+
+                  <p className="theme-text mt-1.5 break-words text-2xl font-bold tracking-tight sm:text-3xl">
+                    {loadingDashboard ? "..." : formatRupiah(tabungan?.saldo)}
+                  </p>
+
+                  <p className="theme-text-secondary mt-2 text-xs">
+                    Informasi saldo tabungan siswa
+                  </p>
+
+                  <div
+                    className={`mt-5 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] ${themePrimarySoft} p-4`}
+                  >
+                    <div className={`flex items-center gap-2 ${themePrimaryText}`}>
+                      <CreditCard size={16} />
+                      <p className="text-xs font-bold uppercase tracking-wide">
+                        Ringkasan tabungan
+                      </p>
+                    </div>
+                    <p className="theme-text-secondary mt-2 text-xs leading-5">
+                      Saldo ditampilkan berdasarkan data tabungan yang tercatat
+                      pada sistem sekolah.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div
+                className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] p-5 backdrop-blur-sm ${themeCardShadow} sm:p-6`}
+              >
+                <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] blur-2xl" />
+
+                <div className="relative flex items-center justify-between">
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeWarningSurface} text-[var(--color-warning)] ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]`}
+                  >
+                    <ShieldAlert size={21} />
+                  </div>
+                  <span className="theme-text-muted text-[11px] font-semibold uppercase tracking-wider">
                     Kedisiplinan
                   </span>
                 </div>
 
-                <p className="theme-text-secondary mt-4 text-xs">
+                <p className="theme-text-secondary mt-5 text-xs font-medium">
                   Jumlah pelanggaran
                 </p>
 
-                <p className="theme-text mt-1 text-xl font-bold">
-                  {dashboard?.pelanggaran?.jumlah ?? 0}
+                <p className="theme-text mt-1.5 text-3xl font-bold tracking-tight">
+                  {loadingDashboard ? "..." : pelanggaran?.jumlah ?? 0}
                 </p>
 
-                <p className="theme-text-muted mt-2 text-xs">
-                  Total{" "}
-                  {dashboard?.pelanggaran?.totalPoin ?? 0}{" "}
-                  poin pelanggaran
-                </p>
+                <div
+                  className={`mt-4 flex items-center justify-between rounded-xl ${themeNeutralSurface} p-3.5`}
+                >
+                  <span className="theme-text-secondary text-xs">
+                    Total poin pelanggaran
+                  </span>
+                  <span className="theme-text text-sm font-bold">
+                    {pelanggaran?.totalPoin ?? 0} poin
+                  </span>
+                </div>
               </div>
 
-              {/* NOTIFIKASI */}
-
               <div
-                className={`theme-card rounded-xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
+                className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] p-5 backdrop-blur-sm ${themeCardShadow} sm:p-6`}
               >
-                <div className="flex items-center justify-between">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
-                  >
-                    <Bell size={20} />
-                  </div>
+                <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] blur-2xl" />
 
-                  <span className="theme-text-muted text-xs">
+                <div className="relative flex items-center justify-between">
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText} ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]`}
+                  >
+                    <Bell size={21} />
+                  </div>
+                  <span className="theme-text-muted text-[11px] font-semibold uppercase tracking-wider">
                     Informasi
                   </span>
                 </div>
 
-                <p className="theme-text-secondary mt-4 text-xs">
+                <p className="theme-text-secondary mt-5 text-xs font-medium">
                   Notifikasi belum dibaca
                 </p>
 
-                <p className="theme-text mt-1 text-xl font-bold">
-                  {dashboard?.notifikasiBelumDibaca ?? 0}
+                <p className="theme-text mt-1.5 text-3xl font-bold tracking-tight">
+                  {loadingDashboard ? "..." : dashboard?.notifikasiBelumDibaca ?? 0}
                 </p>
 
-                <p className="theme-text-muted mt-2 text-xs">
-                  Informasi yang perlu diperiksa
-                </p>
+                <div
+                  className={`mt-4 flex items-center justify-between rounded-xl ${themeNeutralSurface} p-3.5`}
+                >
+                  <span className="theme-text-secondary text-xs">
+                    Status notifikasi
+                  </span>
+                  <span className="theme-text text-xs font-semibold">
+                    {(dashboard?.notifikasiBelumDibaca ?? 0) > 0
+                      ? "Perlu diperiksa"
+                      : "Sudah diperiksa"}
+                  </span>
+                </div>
               </div>
             </section>
 
-            {/* =================================================
-                MATA PELAJARAN
-            ================================================= */}
-
             <section
-              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] backdrop-blur-sm ${themeCardShadow}`}
             >
-              <div
-                className={`border-b ${themeDivider} px-5 py-5 sm:px-6`}
-              >
+              <div className={`border-b ${themeDivider} px-5 py-5 sm:px-6`}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText} ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]`}
                     >
                       <BookOpen size={19} />
                     </div>
 
                     <div>
-                      <h2 className="theme-text text-lg font-bold">
+                      <h2 className="theme-text text-lg font-bold tracking-tight">
                         Mata Pelajaran
                       </h2>
-
                       <p className="theme-text-secondary mt-0.5 text-xs">
-                        {user.kelasName
-                          ? `Mata pelajaran untuk kelas ${user.kelasName}`
-                          : "Mata pelajaran sesuai kelasmu"}
+                        {kelasName}
                       </p>
                     </div>
                   </div>
 
                   <button
                     type="button"
-                    onClick={() =>
-                      router.push("/siswa/mataPelajaran")
-                    }
-                    className={`group inline-flex items-center justify-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-3.5 py-2 text-sm font-semibold theme-text-secondary transition-all ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] hover:text-[var(--color-primary)]`}
+                    onClick={() => router.push("/siswa/mataPelajaran")}
+                    className={`group inline-flex items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_90%,transparent)] px-4 py-2.5 text-sm font-semibold theme-text-secondary transition-all hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)] hover:text-[var(--color-primary)] ${themeNeutralHover} hover:shadow-sm`}
                   >
                     Lihat semua
-
                     <ArrowUpRight
                       size={15}
                       className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                     />
                   </button>
                 </div>
+
+                {!loadingMapel && mataPelajaranList.length > 0 && (
+                  <div className="mt-5 grid grid-cols-3 gap-3">
+                    <div
+                      className={`rounded-xl border border-transparent ${themeNeutralSurface} p-3.5 transition-colors hover:border-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
+                    >
+                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                        Mata pelajaran
+                      </p>
+                      <p className="theme-text mt-1.5 text-2xl font-bold tracking-tight">
+                        {mataPelajaranList.length}
+                      </p>
+                    </div>
+
+                    <div
+                      className={`rounded-xl border border-transparent ${themeNeutralSurface} p-3.5 transition-colors hover:border-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
+                    >
+                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                        Total materi
+                      </p>
+                      <p className="theme-text mt-1.5 text-2xl font-bold tracking-tight">
+                        {totalMateri}
+                      </p>
+                    </div>
+
+                    <div
+                      className={`rounded-xl border border-transparent ${themeNeutralSurface} p-3.5 transition-colors hover:border-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
+                    >
+                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                        Total tugas
+                      </p>
+                      <p className="theme-text mt-1.5 text-2xl font-bold tracking-tight">
+                        {totalTugasMapel}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="p-5 sm:p-6">
                 {loadingMapel && (
                   <div className="flex min-h-[220px] flex-col items-center justify-center">
-                    <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft} ${themePrimaryText}`}
-                    >
+                    <div className="relative">
                       <Loader2
-                        size={22}
-                        className="animate-spin"
+                        size={30}
+                        className={`animate-spin ${themePrimaryText}`}
                       />
+                      <span className="absolute inset-0 animate-ping rounded-full bg-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] opacity-20" />
                     </div>
-
-                    <p className="theme-text mt-4 text-sm font-medium">
+                    <p className="theme-text mt-5 text-sm font-semibold">
                       Memuat mata pelajaran...
                     </p>
-
-                    <p className="theme-text-muted mt-1 text-center text-xs">
-                      Mengambil kelas dan mata pelajaran dari server
+                    <p className="theme-text-muted mt-1 text-xs">
+                      Mengambil data pembelajaran dari server
                     </p>
                   </div>
                 )}
 
-                {!loadingMapel &&
-                  mapelError &&
-                  mataPelajaranList.length === 0 && (
-                    <div
-                      className={`flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed ${themeWarningBorder} ${themeWarningSurface} px-5 text-center`}
-                    >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-warning)_14%,transparent)] text-[var(--color-warning)]">
-                        <AlertCircle size={22} />
-                      </div>
-
-                      <h3 className="theme-text mt-4 text-sm font-bold">
-                        Data mata pelajaran belum tersedia
-                      </h3>
-
-                      <p className="theme-text-secondary mt-1 max-w-md text-xs leading-5">
-                        {mapelError}
-                      </p>
+                {!loadingMapel && mapelError && mataPelajaranList.length === 0 && (
+                  <div
+                    className={`flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed ${themeWarningBorder} ${themeWarningSurface} px-6 py-8 text-center`}
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-warning)_14%,transparent)]">
+                      <AlertCircle
+                        size={24}
+                        className="text-[var(--color-warning)]"
+                      />
                     </div>
-                  )}
+                    <h3 className="theme-text mt-4 text-sm font-bold">
+                      Data mata pelajaran belum tersedia
+                    </h3>
+                    <p className="theme-text-secondary mt-2 max-w-md text-xs leading-5">
+                      {mapelError}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMapelError("");
+                        setLoadingMapel(true);
+                        loadDashboard();
+                      }}
+                      className={`mt-4 inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_80%,transparent)] px-3.5 py-2 text-xs font-semibold ${themePrimaryText} transition-all hover:-translate-y-0.5 hover:shadow-sm`}
+                    >
+                      <RefreshCw size={14} />
+                      Muat ulang
+                    </button>
+                  </div>
+                )}
 
-                {!loadingMapel &&
-                  !mapelError &&
-                  mataPelajaranList.length === 0 && (
-                    <EmptyState
-                      icon={BookOpen}
-                      title="Belum ada mata pelajaran"
-                      description="Belum ada mata pelajaran yang terhubung dengan kelas kamu."
-                    />
-                  )}
+                {!loadingMapel && !mapelError && mataPelajaranList.length === 0 && (
+                  <EmptyState
+                    icon={BookOpen}
+                    title="Belum ada mata pelajaran"
+                    description="Belum ada mata pelajaran yang terhubung dengan kelas kamu."
+                  />
+                )}
 
-                {!loadingMapel &&
-                  mataPelajaranList.length > 0 && (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                      {mataPelajaranList.map((mapel) => {
-                        const Icon = mapel.icon;
+                {!loadingMapel && mataPelajaranList.length > 0 && (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {mataPelajaranList.map((mapel) => {
+                      const Icon = mapel.icon;
+                      const theme = mapel.theme || subjectThemes[0];
 
-                        const theme =
-                          mapel.theme || subjectThemes[0];
+                      return (
+                        <button
+                          key={mapel.kelasMapelId || mapel.id}
+                          type="button"
+                          onClick={() =>
+                            router.push(
+                              `/siswa/mataPelajaran?kelasMapelId=${encodeURIComponent(mapel.kelasMapelId)}&mapel=${encodeURIComponent(normalizeText(mapel.nama))}`
+                            )
+                          }
+                          className={`theme-card group relative overflow-hidden rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_94%,transparent)] p-4 text-left ${themeCardShadow} ring-1 ring-inset ring-transparent transition-all duration-300 hover:-translate-y-1 ${theme.ring} ${theme.glow}`}
+                        >
+                          <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)] opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
 
-                        return (
-                          <button
-                            key={
-                              mapel.kelasMapelId ||
-                              mapel.id
-                            }
-                            type="button"
-                            onClick={() =>
-                              router.push(
-                                `/siswa/mataPelajaran?kelasMapelId=${encodeURIComponent(
-                                  mapel.kelasMapelId ||
-                                    mapel.id
-                                )}&mapel=${encodeURIComponent(
-                                  String(
-                                    mapel.nama
-                                  ).toLowerCase()
-                                )}`
-                              )
-                            }
-                            className={`theme-card group relative overflow-hidden rounded-xl border ${themeNeutralBorder} p-4 text-left ${themeCardShadow} transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_color-mix(in_srgb,var(--color-text)_10%,transparent)] ${theme.hover}`}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div
-                                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${theme.surface} ${theme.text} transition-transform duration-300 group-hover:scale-105`}
-                              >
-                                <Icon size={20} />
-                              </div>
-
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] text-[var(--color-text-muted)] transition-all group-hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] group-hover:text-[var(--color-primary)]">
-                                <ChevronRight size={16} />
-                              </div>
-                            </div>
-
-                            <div className="mt-5">
-                              <h3 className="theme-text truncate text-sm font-bold">
-                                {mapel.nama}
-                              </h3>
-
-                              <p className="theme-text-secondary mt-1 truncate text-xs">
-                                {mapel.guru}
-                              </p>
-
-                              {mapel.kelas && (
-                                <p className="theme-text-muted mt-1 truncate text-[11px]">
-                                  {mapel.kelas}
-                                </p>
-                              )}
+                          <div className="relative flex items-start justify-between gap-3">
+                            <div
+                              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${theme.surface} ${theme.text} ring-1 ring-inset ring-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition-transform duration-300 group-hover:scale-110`}
+                            >
+                              <Icon size={20} />
                             </div>
 
                             <div
-                              className={`mt-4 flex items-center gap-2 border-t ${themeDivider} pt-3`}
+                              className={`flex h-8 w-8 items-center justify-center rounded-full ${themeNeutralSurface} theme-text-secondary transition-all duration-300 group-hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] group-hover:${themePrimaryText}`}
                             >
-                              <span className="inline-flex items-center gap-1 rounded-md bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-2 py-1 text-[10px] font-semibold theme-text-secondary">
-                                <FileText size={10} />
-                                {mapel.materi} materi
-                              </span>
-
-                              <span className="inline-flex items-center gap-1 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] px-2 py-1 text-[10px] font-semibold text-[var(--color-primary)]">
-                                <ClipboardList size={10} />
-                                {mapel.tugas} tugas
-                              </span>
+                              <ChevronRight
+                                size={16}
+                                className="transition-transform duration-300 group-hover:translate-x-0.5"
+                              />
                             </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+                          </div>
+
+                          <div className="relative mt-5">
+                            <h3 className="theme-text truncate text-sm font-bold tracking-tight">
+                              {mapel.nama}
+                            </h3>
+                            <p className="theme-text-secondary mt-1 truncate text-xs">
+                              {mapel.guru}
+                            </p>
+                            <p className="theme-text-muted mt-1 truncate text-[11px]">
+                              {mapel.kelas}
+                            </p>
+                          </div>
+
+                          <div
+                            className={`relative mt-4 flex flex-wrap items-center gap-2 border-t ${themeDivider} pt-3`}
+                          >
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-md ${themeNeutralSurface} px-2 py-1 text-[10px] font-semibold theme-text-secondary`}
+                            >
+                              <FileText size={10} />
+                              {mapel.materi} materi
+                            </span>
+
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-md ${themePrimarySoft} px-2 py-1 text-[10px] font-semibold ${themePrimaryText}`}
+                            >
+                              <ClipboardList size={10} />
+                              {mapel.tugas} tugas
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div
@@ -1809,29 +1807,36 @@ export default function SiswaDashboardPage() {
                     </strong>{" "}
                     mata pelajaran
                   </span>
-
                   <span className="theme-text-muted font-medium">
-                    {user.kelasName
-                      ? `Kelas ${user.kelasName}`
-                      : "Data pembelajaran"}
+                    {kelasName}
                   </span>
                 </div>
               </div>
             </section>
 
-            {/* =================================================
-                LOADING FOOTER
-            ================================================= */}
+            <div
+              className={`flex flex-col gap-2 border-t ${themeDivider} pt-5 sm:flex-row sm:items-center sm:justify-between`}
+            >
+              <p className="theme-text-muted flex items-center gap-1.5 text-xs">
+                <Sparkles size={12} className={themePrimaryText} />
+                SmartSchool · Dashboard Siswa
+              </p>
 
-            {loadingDashboard && (
-              <div className="theme-text-secondary flex items-center gap-2 text-sm">
-                <Loader2
-                  size={16}
-                  className="animate-spin"
+              <button
+                type="button"
+                onClick={() => {
+                  loadDashboard();
+                }}
+                disabled={loadingDashboard}
+                className={`inline-flex items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_80%,transparent)] px-3.5 py-2 text-xs font-semibold theme-text-secondary transition-all hover:-translate-y-0.5 hover:text-[var(--color-primary)] ${themeNeutralHover} disabled:opacity-50`}
+              >
+                <RefreshCw
+                  size={13}
+                  className={loadingDashboard ? "animate-spin" : ""}
                 />
-                Memuat ringkasan dashboard...
-              </div>
-            )}
+                Perbarui dashboard
+              </button>
+            </div>
           </div>
         </main>
       </div>

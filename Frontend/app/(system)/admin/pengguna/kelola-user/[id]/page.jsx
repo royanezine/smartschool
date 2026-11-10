@@ -23,7 +23,10 @@ import {
   AlertCircle,
   RefreshCw,
   Clock3,
+  KeyRound,
 } from "lucide-react";
+
+import ResetPasswordModal from "@/app/components/user/ResetPasswordModal";
 
 
 function getErrorMessage(error) {
@@ -181,6 +184,7 @@ export default function DetailUserPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showResetModal, setShowResetModal] = useState(false);
 
   const loadUser = useCallback(async () => {
     if (!id) {
@@ -259,16 +263,27 @@ export default function DetailUserPage() {
               </div>
 
               {!loading && user && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(`/admin/pengguna/kelola-user/${id}/edit`)
-                  }
-                  className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90"
-                >
-                  <Pencil size={17} />
-                  Edit Pengguna
-                </button>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowResetModal(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-700 shadow-sm transition hover:bg-amber-100"
+                  >
+                    <KeyRound size={17} />
+                    Reset Password
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(`/admin/pengguna/kelola-user/${id}/edit`)
+                    }
+                    className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90"
+                  >
+                    <Pencil size={17} />
+                    Edit Pengguna
+                  </button>
+                </div>
               )}
             </div>
 
@@ -406,6 +421,14 @@ export default function DetailUserPage() {
           </div>
         </main>
       </div>
+
+      {user && (
+        <ResetPasswordModal
+          isOpen={showResetModal}
+          user={user}
+          onClose={() => setShowResetModal(false)}
+        />
+      )}
     </div>
   );
 }

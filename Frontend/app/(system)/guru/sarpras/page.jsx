@@ -15,10 +15,18 @@ import {
   Clock,
   Loader2,
   RefreshCw,
+  Wrench,
+  Plus,
+  CheckCircle2,
+  Eye,
+  Edit,
+  CalendarDays,
 } from "lucide-react";
+
 import {
   getKetersediaanAset,
   getDaftarPeminjaman,
+  getLaporanKerusakan,
 } from "@/services/sarpras.service";
 
 const themePrimaryGradient =
@@ -100,9 +108,16 @@ const statusClasses = {
   menunggu: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
   menunggu_persetujuan: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
   disetujui: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
-  terlambat: `${themeDangerSurface} theme-danger ${themeDangerBorder}`,
-  ditolak: `${themeDangerSurface} theme-danger ${themeDangerBorder}`,
+  terlambat: `${themeDangerSurface} text-[var(--color-danger)] ${themeDangerBorder}`,
+  ditolak: `${themeDangerSurface} text-[var(--color-danger)] ${themeDangerBorder}`,
   selesai: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+};
+
+const statusLaporanClasses = {
+  menunggu: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+  diproses: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+  selesai: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+  ditolak: `${themeDangerSurface} text-[var(--color-danger)] ${themeDangerBorder}`,
 };
 
 const statusLabel = {
@@ -116,42 +131,75 @@ const statusLabel = {
   selesai: "Selesai",
 };
 
+const statusLaporanLabel = {
+  menunggu: "Menunggu",
+  diproses: "Diproses",
+  selesai: "Selesai",
+  ditolak: "Ditolak",
+};
+
 function extractList(response) {
   if (Array.isArray(response)) return response;
   if (Array.isArray(response?.data)) return response.data;
   if (Array.isArray(response?.data?.data)) return response.data.data;
   if (Array.isArray(response?.items)) return response.items;
+  if (Array.isArray(response?.data?.items)) return response.data.items;
   return [];
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 export default function GuruSarprasIndexPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [stats, setStats] = useState({
     tersedia: 0,
     aktif: 0,
     riwayat: 0,
+    laporan: 0,
+    menunggu: 0,
+    diproses: 0,
+    selesai: 0,
   });
+
   const [peminjamanAktif, setPeminjamanAktif] = useState([]);
+  const [laporanTerbaru, setLaporanTerbaru] = useState([]);
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
 
-      const [asetRes, pinjamRes] = await Promise.allSettled([
+      const [asetRes, pinjamRes, laporanRes] = await Promise.allSettled([
         getKetersediaanAset(),
         getDaftarPeminjaman({ limit: 50 }),
+        getLaporanKerusakan(),
       ]);
 
       let countTersedia = 0;
+
       if (asetRes.status === "fulfilled") {
         const asets = extractList(asetRes.value);
+
         countTersedia = asets.reduce((acc, curr) => {
           const stok = Number(curr?.jumlahStok ?? curr?.jumlah ?? 0);
           return acc + (stok > 0 ? 1 : 0);
         }, 0);
+
         if (countTersedia === 0 && asets.length > 0) {
           countTersedia = asets.length;
         }
@@ -163,15 +211,17 @@ export default function GuruSarprasIndexPage() {
 
       if (pinjamRes.status === "fulfilled") {
         const allLoans = extractList(pinjamRes.value);
+
         activeItems = allLoans.filter((item) => {
           const st = String(item?.status || "").toLowerCase();
-          return (
-            st === "menunggu_persetujuan" ||
-            st === "menunggu" ||
-            st === "disetujui" ||
-            st === "sedang_dipinjam" ||
-            st === "dipinjam"
-          );
+
+          return [
+            "menunggu_persetujuan",
+            "menunggu",
+            "disetujui",
+            "sedang_dipinjam",
+            "dipinjam",
+          ].includes(st);
         });
 
         const completedItems = allLoans.filter((item) => {
@@ -183,13 +233,38 @@ export default function GuruSarprasIndexPage() {
         countRiwayat = completedItems.length;
       }
 
+      let laporanList = [];
+      let countLaporan = 0;
+      let countMenunggu = 0;
+      let countDiproses = 0;
+      let countSelesai = 0;
+
+      if (laporanRes.status === "fulfilled") {
+        laporanList = extractList(laporanRes.value);
+
+        countLaporan = laporanList.length;
+
+        laporanList.forEach((item) => {
+          const status = String(item?.status || "").toLowerCase();
+
+          if (status === "menunggu") countMenunggu++;
+          else if (status === "diproses") countDiproses++;
+          else if (status === "selesai") countSelesai++;
+        });
+      }
+
       setStats({
         tersedia: countTersedia,
         aktif: countAktif,
         riwayat: countRiwayat,
+        laporan: countLaporan,
+        menunggu: countMenunggu,
+        diproses: countDiproses,
+        selesai: countSelesai,
       });
 
       setPeminjamanAktif(activeItems.slice(0, 5));
+      setLaporanTerbaru(laporanList.slice(0, 5));
     } catch (err) {
       console.error("Gagal memuat data dashboard sarpras guru:", err);
       setError(
@@ -204,6 +279,7 @@ export default function GuruSarprasIndexPage() {
     const timer = setTimeout(() => {
       loadData();
     }, 0);
+
     return () => clearTimeout(timer);
   }, [loadData]);
 
@@ -216,9 +292,7 @@ export default function GuruSarprasIndexPage() {
       label: "Pinjam",
       deskripsi:
         "Ajukan peminjaman alat, ruangan, atau fasilitas sekolah untuk kebutuhan mengajar.",
-      info: loading
-        ? "Memuat..."
-        : `${stats.tersedia} item tersedia`,
+      info: loading ? "Memuat..." : `${stats.tersedia} item tersedia`,
     },
     {
       key: "peminjaman",
@@ -228,9 +302,7 @@ export default function GuruSarprasIndexPage() {
       label: "Peminjaman",
       deskripsi:
         "Pantau status pengajuan peminjaman yang sedang berjalan atau menunggu persetujuan.",
-      info: loading
-        ? "Memuat..."
-        : `${stats.aktif} pengajuan aktif`,
+      info: loading ? "Memuat..." : `${stats.aktif} pengajuan aktif`,
     },
     {
       key: "riwayat",
@@ -240,9 +312,7 @@ export default function GuruSarprasIndexPage() {
       label: "Riwayat",
       deskripsi:
         "Lihat catatan lengkap seluruh peminjaman yang telah selesai atau dikembalikan.",
-      info: loading
-        ? "Memuat..."
-        : `${stats.riwayat} riwayat selesai`,
+      info: loading ? "Memuat..." : `${stats.riwayat} riwayat selesai`,
     },
   ];
 
@@ -279,10 +349,8 @@ export default function GuruSarprasIndexPage() {
                     size={14}
                     className="theme-text-muted flex-shrink-0"
                   />
-
                   <span className="truncate">
-                    Kelola peminjaman alat, ruangan, dan fasilitas sekolah —
-                    pilih menu di bawah.
+                    Kelola peminjaman alat, ruangan, dan fasilitas sekolah.
                   </span>
                 </p>
               </div>
@@ -343,7 +411,6 @@ export default function GuruSarprasIndexPage() {
                       <h2 className="theme-text text-sm font-semibold">
                         {s.label}
                       </h2>
-
                       <p className="theme-text-secondary mt-1 text-xs leading-relaxed">
                         {s.deskripsi}
                       </p>
@@ -358,6 +425,227 @@ export default function GuruSarprasIndexPage() {
                 );
               })}
             </div>
+
+            <section
+              className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
+              <div
+                className={`flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5 ${themeDivider}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl border ${themeWarningSurface} ${themeWarningBorder}`}
+                  >
+                    <Wrench
+                      size={19}
+                      className="text-[var(--color-warning)]"
+                    />
+                  </div>
+
+                  <div>
+                    <h2 className="theme-text text-sm font-semibold">
+                      Laporan Kerusakan
+                    </h2>
+                    <p className="theme-text-muted mt-0.5 text-xs">
+                      Laporkan kerusakan aset dan pantau penanganannya.
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/guru/sarpras/tambah"
+                  className="theme-primary inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold shadow-sm transition hover:opacity-90"
+                >
+                  <Plus size={15} />
+                  Tambah Laporan
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0">
+                <div className={`p-4 ${themeDivider}`}>
+                  <p className="theme-text-muted text-xs">Total Laporan</p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <ClipboardList
+                      size={17}
+                      className="theme-text-secondary"
+                    />
+                    <span className="theme-text text-xl font-semibold">
+                      {loading ? "-" : stats.laporan}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={`p-4 ${themeDivider}`}>
+                  <p className="theme-text-muted text-xs">Menunggu</p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <Clock
+                      size={17}
+                      className="text-[var(--color-warning)]"
+                    />
+                    <span className="theme-text text-xl font-semibold">
+                      {loading ? "-" : stats.menunggu}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={`p-4 ${themeDivider}`}>
+                  <p className="theme-text-muted text-xs">Diproses</p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <Wrench
+                      size={17}
+                      className="text-[var(--color-info)]"
+                    />
+                    <span className="theme-text text-xl font-semibold">
+                      {loading ? "-" : stats.diproses}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={`p-4 ${themeDivider}`}>
+                  <p className="theme-text-muted text-xs">Selesai</p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <CheckCircle2
+                      size={17}
+                      className="text-[var(--color-success)]"
+                    />
+                    <span className="theme-text text-xl font-semibold">
+                      {loading ? "-" : stats.selesai}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`border-t p-4 ${themeDivider}`}>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="theme-text text-sm font-semibold">
+                      Laporan Terbaru
+                    </h3>
+                    <p className="theme-text-muted mt-0.5 text-xs">
+                      Daftar laporan kerusakan yang terakhir dibuat.
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/guru/sarpras"
+                    className="theme-text-muted inline-flex shrink-0 items-center gap-1 text-xs hover:text-[var(--color-primary)]"
+                  >
+                    Lihat Semua
+                    <ArrowRight size={13} />
+                  </Link>
+                </div>
+
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2 py-8 text-xs theme-text-muted">
+                    <Loader2 size={16} className="animate-spin" />
+                    Memuat laporan...
+                  </div>
+                ) : laporanTerbaru.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-[var(--color-border)] p-6 text-center">
+                    <FileText
+                      size={28}
+                      className="mx-auto theme-text-muted"
+                    />
+                    <p className="theme-text mt-2 text-sm font-medium">
+                      Belum ada laporan kerusakan
+                    </p>
+                    <p className="theme-text-muted mt-1 text-xs">
+                      Tambahkan laporan jika menemukan aset yang rusak.
+                    </p>
+                    <Link
+                      href="/guru/sarpras/tambah"
+                      className="theme-primary mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold"
+                    >
+                      <Plus size={14} />
+                      Buat Laporan
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {laporanTerbaru.map((item, index) => {
+                      const statusKey = String(
+                        item?.status || "menunggu"
+                      ).toLowerCase();
+
+                      return (
+                        <div
+                          key={item.id || index}
+                          className={`flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between ${themeNeutralBorder} ${themeNeutralHover}`}
+                        >
+                          <div className="flex min-w-0 items-start gap-3">
+                            <div
+                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface}`}
+                            >
+                              <Wrench
+                                size={17}
+                                className="theme-text-secondary"
+                              />
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="theme-text truncate text-sm font-semibold">
+                                {item?.aset?.nama || "Aset tidak diketahui"}
+                              </p>
+                              <p className="theme-text-secondary mt-0.5 line-clamp-2 text-xs">
+                                {item?.deskripsi || "Tidak ada deskripsi"}
+                              </p>
+                              <div className="theme-text-muted mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
+                                <CalendarDays size={12} />
+                                {formatDate(item?.tanggalLaporan)}
+                                {item?.aset?.kode && (
+                                  <>
+                                    <span>·</span>
+                                    <span>{item.aset.kode}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
+                            <span
+                              className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+                                statusLaporanClasses[statusKey] ||
+                                statusLaporanClasses.menunggu
+                              }`}
+                            >
+                              {statusLaporanLabel[statusKey] ||
+                                statusKey}
+                            </span>
+
+                            <div className="flex items-center gap-1.5">
+                              <Link
+                                href={`/guru/sarpras/${item.id}`}
+                                title="Detail laporan"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-border)] theme-text-secondary transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                              >
+                                <Eye size={15} />
+                              </Link>
+
+                              <Link
+                                href={`/guru/sarpras/${item.id}/edit`}
+                                title="Edit laporan"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-border)] theme-text-secondary transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                              >
+                                <Edit size={15} />
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className={`border-t p-4 ${themeDivider}`}>
+                <p className="theme-text-muted text-xs leading-relaxed">
+                  Gunakan menu ini untuk melaporkan kerusakan aset sekolah,
+                  melihat detail laporan, dan memperbarui informasi
+                  penanganan kerusakan.
+                </p>
+              </div>
+            </section>
 
             <div
               className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -397,6 +685,7 @@ export default function GuruSarprasIndexPage() {
                     <p className="theme-text-muted text-xs">
                       Belum ada peminjaman aktif saat ini.
                     </p>
+
                     <Link
                       href="/guru/sarpras/pinjam"
                       className="theme-primary mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium shadow-sm transition"
@@ -408,30 +697,26 @@ export default function GuruSarprasIndexPage() {
                 ) : (
                   peminjamanAktif.map((p, idx) => {
                     const isLast = idx === peminjamanAktif.length - 1;
+
                     const namaAset =
                       p?.detailPeminjaman?.[0]?.aset?.nama ||
                       p?.nomorPeminjaman ||
                       "Peminjaman Sarpras";
+
                     const kategori =
                       p?.detailPeminjaman?.[0]?.aset?.kategoriAset?.nama ||
                       p?.keperluan ||
                       "Keperluan Mengajar";
-                    const statusKey = String(p?.status || "").toLowerCase();
+
+                    const statusKey = String(
+                      p?.status || ""
+                    ).toLowerCase();
+
                     const batasWaktu = p?.tanggalRencanaKembali
-                      ? `Kembali: ${new Date(
-                          p.tanggalRencanaKembali
-                        ).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                        })}`
+                      ? `Kembali: ${formatDate(p.tanggalRencanaKembali)}`
                       : p?.tanggalPinjam
-                      ? `Pinjam: ${new Date(
-                          p.tanggalPinjam
-                        ).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                        })}`
-                      : "-";
+                        ? `Pinjam: ${formatDate(p.tanggalPinjam)}`
+                        : "-";
 
                     return (
                       <Link
@@ -445,17 +730,16 @@ export default function GuruSarprasIndexPage() {
                           <p className="theme-text truncate text-sm font-medium">
                             {namaAset}
                           </p>
-
-                          <p className="theme-text-muted mt-0.5 text-xs truncate">
+                          <p className="theme-text-muted mt-0.5 truncate text-xs">
                             {kategori}
                           </p>
                         </div>
 
-                        <div className="theme-text-secondary flex flex-shrink-0 items-center gap-1.5 text-xs">
+                        <div className="theme-text-secondary flex shrink-0 items-center gap-1.5 text-xs">
                           {statusKey === "terlambat" ? (
                             <AlertTriangle
                               size={12}
-                              className="theme-danger"
+                              className="text-[var(--color-danger)]"
                             />
                           ) : (
                             <Clock
@@ -470,8 +754,9 @@ export default function GuruSarprasIndexPage() {
                         </div>
 
                         <span
-                          className={`flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
-                            statusClasses[statusKey] || statusClasses.menunggu
+                          className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+                            statusClasses[statusKey] ||
+                            statusClasses.menunggu
                           }`}
                         >
                           {statusLabel[statusKey] || statusKey || "Diproses"}

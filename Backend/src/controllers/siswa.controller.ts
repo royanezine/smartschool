@@ -1,6 +1,5 @@
 import { studentProfiles } from "./studentProfile.controller";
 import { publicUser } from "../utils/publicUser";
-// src/controllers/siswa.controller.ts
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
@@ -86,22 +85,14 @@ export const deleteSiswa = async (
     const id = req.params.id as string;
     const sekolahId = req.user?.sekolahId;
 
-    const result = await prisma.pengguna.updateMany({
-      where: {
-        id,
-        sekolahId,
-        dihapusPada: null,
-      },
+    await prisma.pengguna.update({
+      where: { id },
       data: {
         dihapusPada: new Date(),
         dihapusOleh: req.user?.userId,
         status: "nonaktif",
       },
     });
-
-    if (result.count === 0) {
-      throw new AppError("Siswa tidak ditemukan", 404);
-    }
 
     return successResponse(res, "Siswa berhasil dihapus");
   } catch (error) {

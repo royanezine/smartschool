@@ -24,7 +24,10 @@ import {
   UserCheck,
   UserX,
   Activity,
+  KeyRound,
 } from "lucide-react";
+
+import ResetPasswordModal from "@/app/components/user/ResetPasswordModal";
 
 import {
   getUsers,
@@ -119,6 +122,7 @@ export default function KelolaUserPage() {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [statusUserToToggle, setStatusUserToToggle] = useState(null);
+  const [userToResetPassword, setUserToResetPassword] = useState(null);
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
@@ -922,6 +926,15 @@ export default function KelolaUserPage() {
 
                               <button
                                 type="button"
+                                title="Reset kata sandi"
+                                onClick={() => setUserToResetPassword(user)}
+                                className={`rounded-lg p-2 theme-text-muted transition ${themeNeutralHover} hover:text-amber-500`}
+                              >
+                                <KeyRound className="h-4 w-4" />
+                              </button>
+
+                              <button
+                                type="button"
                                 title="Hapus user"
                                 onClick={() =>
                                   openDeleteModal(
@@ -1193,6 +1206,20 @@ export default function KelolaUserPage() {
             </div>
           </div>
         </ModalOverlay>
+      )}
+
+      {userToResetPassword && (
+        <ResetPasswordModal
+          isOpen={!!userToResetPassword}
+          user={userToResetPassword}
+          onClose={() => setUserToResetPassword(null)}
+          onSuccess={() => {
+            setToast({
+              type: "success",
+              message: `Kata sandi untuk "${getUserName(userToResetPassword)}" berhasil direset.`,
+            });
+          }}
+        />
       )}
 
       {toast && (

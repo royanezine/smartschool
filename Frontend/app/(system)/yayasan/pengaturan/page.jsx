@@ -13,17 +13,12 @@ import {
   Sparkles,
   User,
   Lock,
-  Bell,
-  Palette,
   Building2,
   Save,
   Eye,
   EyeOff,
   Camera,
   Check,
-  Moon,
-  Sun,
-  Globe,
   Mail,
   Phone,
   Shield,
@@ -57,9 +52,6 @@ const themeNeutralHover =
 const themeNeutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
 
-const themeDivider =
-  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
-
 const themeWarningSurface =
   "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
 
@@ -79,8 +71,6 @@ const TABS = [
   { id: "profil", label: "Profil", icon: User },
   { id: "yayasan", label: "Info Yayasan", icon: Building2 },
   { id: "keamanan", label: "Keamanan", icon: Lock },
-  { id: "notifikasi", label: "Notifikasi", icon: Bell },
-  { id: "tampilan", label: "Tampilan", icon: Palette },
 ];
 
 const initialProfil = {
@@ -98,33 +88,6 @@ const initialYayasan = {
   email: "",
   telepon: "",
 };
-
-const initialNotifikasi = [
-  {
-    id: "pengumuman",
-    label: "Pengumuman sekolah",
-    desc: "Notifikasi libur, acara, dan info umum",
-    aktif: true,
-  },
-  {
-    id: "nilai",
-    label: "Deadline input nilai",
-    desc: "Pengingat batas waktu penginputan nilai",
-    aktif: true,
-  },
-  {
-    id: "pembayaran",
-    label: "Status pembayaran SPP",
-    desc: "Update pembayaran dan tunggakan siswa",
-    aktif: false,
-  },
-  {
-    id: "laporan",
-    label: "Laporan mingguan",
-    desc: "Ringkasan aktivitas seluruh unit sekolah",
-    aktif: true,
-  },
-];
 
 function Toggle({ checked, onChange }) {
   return (
@@ -178,10 +141,6 @@ export default function PengaturanPage() {
 
   const [profil, setProfil] = useState(initialProfil);
   const [yayasan, setYayasan] = useState(initialYayasan);
-  const [notifikasi, setNotifikasi] = useState(initialNotifikasi);
-
-  const [tema, setTema] = useState("terang");
-  const [bahasa, setBahasa] = useState("id");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordBaru, setShowPasswordBaru] = useState(false);
@@ -240,12 +199,6 @@ export default function PengaturanPage() {
     };
   }, []);
 
-  const toggleNotifikasi = (id) => {
-    setNotifikasi((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, aktif: !n.aktif } : n))
-    );
-  };
-
   const handleSimpan = async () => {
     try {
       setSaving(true);
@@ -298,12 +251,6 @@ export default function PengaturanPage() {
         });
 
         setPasswordForm({ lama: "", baru: "", konfirmasi: "" });
-      } else {
-        setErrorMsg(
-          "Pengaturan pada tab ini belum memiliki endpoint Backend. " +
-            "Hanya data profil, informasi yayasan, dan keamanan akun yang dapat disimpan saat ini."
-        );
-        return;
       }
 
       setSaved(true);
@@ -782,98 +729,6 @@ export default function PengaturanPage() {
                         Keluar dari Semua Perangkat
                       </button>
                     </div>
-                  </div>
-                </SectionCard>
-              </>
-            )}
-
-            {activeTab === "notifikasi" && (
-              <SectionCard>
-                <h3 className="theme-text-secondary mb-1 text-sm font-semibold">
-                  Preferensi Notifikasi
-                </h3>
-                <p className="theme-text-muted mb-4 text-xs">
-                  Pilih jenis notifikasi yang ingin Anda terima.
-                </p>
-
-                <div className={`divide-y ${themeDivider}`}>
-                  {notifikasi.map((n) => (
-                    <div
-                      key={n.id}
-                      className="flex items-center justify-between gap-3 py-3.5"
-                    >
-                      <div className="min-w-0">
-                        <p className="theme-text-secondary truncate text-sm font-medium">
-                          {n.label}
-                        </p>
-                        <p className="theme-text-muted mt-0.5 text-xs">
-                          {n.desc}
-                        </p>
-                      </div>
-                      <Toggle
-                        checked={n.aktif}
-                        onChange={() => toggleNotifikasi(n.id)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </SectionCard>
-            )}
-
-            {activeTab === "tampilan" && (
-              <>
-                <SectionCard>
-                  <h3 className="theme-text-secondary mb-4 text-sm font-semibold">
-                    Tema
-                  </h3>
-
-                  <div className="grid max-w-sm grid-cols-1 gap-3 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={() => setTema("terang")}
-                      className={`flex items-center gap-2.5 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
-                        tema === "terang"
-                          ? `${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)]`
-                          : `theme-border theme-text-secondary ${themeNeutralHover}`
-                      }`}
-                    >
-                      <Sun size={16} />
-                      Terang
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setTema("gelap")}
-                      className={`flex items-center gap-2.5 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
-                        tema === "gelap"
-                          ? `${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)]`
-                          : `theme-border theme-text-secondary ${themeNeutralHover}`
-                      }`}
-                    >
-                      <Moon size={16} />
-                      Gelap
-                    </button>
-                  </div>
-                </SectionCard>
-
-                <SectionCard>
-                  <h3 className="theme-text-secondary mb-4 text-sm font-semibold">
-                    Bahasa
-                  </h3>
-
-                  <div className="relative max-w-sm">
-                    <Globe
-                      size={15}
-                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
-                    />
-                    <select
-                      value={bahasa}
-                      onChange={(e) => setBahasa(e.target.value)}
-                      className={`theme-input w-full cursor-pointer appearance-none rounded-lg py-2.5 pl-9 pr-3 text-sm font-medium transition-colors ${themeFocus}`}
-                    >
-                      <option value="id">Bahasa Indonesia</option>
-                      <option value="en">English</option>
-                    </select>
                   </div>
                 </SectionCard>
               </>

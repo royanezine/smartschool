@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import {
   AlertCircle,
   ArrowLeft,
-  Boxes,
   Calendar,
   CheckCircle2,
   Edit,
@@ -22,25 +21,26 @@ import {
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
-import { deleteAset, getAsetById } from "@/services/sarpras.service";
+import {
+  deleteAset,
+  getAsetById,
+} from "@/services/sarpras.service";
+
 import {
   formatDate,
   formatKondisi,
   formatNumber,
-  getStokStatus,
   kondisiBadgeClass,
 } from "../_utils";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 
-const themePrimaryShadow =
-  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
-
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 
-const themePrimaryText = "text-[var(--color-primary)]";
+const themePrimaryText =
+  "text-[var(--color-primary)]";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
@@ -59,7 +59,7 @@ const themeCardShadow =
 
 function InfoRow({ icon: Icon, label, children }) {
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex min-w-0 items-start gap-3">
       <div
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-muted`}
       >
@@ -67,29 +67,56 @@ function InfoRow({ icon: Icon, label, children }) {
       </div>
 
       <div className="min-w-0">
-        <p className="text-[11px] theme-text-placeholder">{label}</p>
-        <div className="mt-0.5 text-sm font-medium theme-text">
-          {children}
+        <p className="text-[11px] theme-text-placeholder">
+          {label}
+        </p>
+
+        <div className="mt-0.5 break-words text-sm font-medium theme-text">
+          {children || "-"}
         </div>
       </div>
     </div>
   );
 }
 
+function getResponseData(response) {
+  if (response?.data?.data) {
+    return response.data.data;
+  }
+
+  if (response?.data) {
+    return response.data;
+  }
+
+  if (response?.result?.data) {
+    return response.result.data;
+  }
+
+  if (response?.result) {
+    return response.result;
+  }
+
+  return response;
+}
+
 export default function InventarisDetailPage() {
   const router = useRouter();
   const params = useParams();
 
-  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const id = Array.isArray(params?.id)
+    ? params.id[0]
+    : params?.id;
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [aset, setAset] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!id) {
+      setAset(null);
       setError("ID inventaris tidak ditemukan pada URL.");
       setLoading(false);
       return;
@@ -100,11 +127,28 @@ export default function InventarisDetailPage() {
 
     try {
       const response = await getAsetById(id);
-      setAset(response?.data || response);
+      const data = getResponseData(response);
+
+      const asetData = Array.isArray(data)
+        ? data.find(
+            (item) => String(item.id) === String(id)
+          )
+        : data;
+
+      if (
+        !asetData ||
+        String(asetData.id) !== String(id)
+      ) {
+        throw new Error("Data inventaris tidak ditemukan.");
+      }
+
+      setAset(asetData);
     } catch (err) {
       setAset(null);
+
       setError(
-        err?.message || "Gagal memuat detail inventaris dari server."
+        err?.message ||
+          "Gagal memuat detail inventaris dari server."
       );
     } finally {
       setLoading(false);
@@ -112,40 +156,46 @@ export default function InventarisDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    Promise.resolve().then(() => {
-      loadData();
-    });
+    loadData();
   }, [loadData]);
 
   async function handleDelete() {
-    if (!aset) return;
+    if (!aset || deleting) return;
 
-    if (
-      typeof window !== "undefined" &&
-      !window.confirm(
-        `Hapus inventaris "${aset.nama}" (${aset.kode})? Data akan dinonaktifkan.`
-      )
-    ) {
-      return;
-    }
+    const confirmed = window.confirm(
+      `Hapus inventaris "${aset.nama}" (${aset.kode})?`
+    );
+
+    if (!confirmed) return;
 
     try {
       setDeleting(true);
       setError("");
 
-      await deleteAset(aset.id);
+      const response = await deleteAset(aset.id);
+
+      if (response?.success === false) {
+        throw new Error(
+          response.message || "Gagal menghapus inventaris."
+        );
+      }
 
       router.push("/admin/sarpras/iventaris");
       router.refresh();
     } catch (err) {
-      setError(err?.message || "Gagal menghapus data inventaris.");
+      setError(
+        err?.message || "Gagal menghapus data inventaris."
+      );
+
       setDeleting(false);
     }
   }
 
-  const stok = aset ? getStokStatus(aset) : null;
-  const statusAktif =
-    String(aset?.status || "aktif").toLowerCase() === "aktif";
+  const kondisi = aset?.kondisi
+    ? formatKondisi(aset.kondisi)
+    : "-";
+
+  const jumlah = Number(aset?.jumlah ?? 0);
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -153,14 +203,18 @@ export default function InventarisDetailPage() {
         active="sarpras"
         setActive={() => {}}
         collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen((value) => !value)}
+        setCollapsed={() =>
+          setSidebarOpen((value) => !value)
+        }
         role="admin"
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0 border-b theme-border">
           <Header
-            toggleSidebar={() => setSidebarOpen((value) => !value)}
+            toggleSidebar={() =>
+              setSidebarOpen((value) => !value)
+            }
             notifications={[]}
             user={{
               name: "Admin Sekolah",
@@ -171,11 +225,12 @@ export default function InventarisDetailPage() {
         </div>
 
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="w-full min-w-0 px-4 py-6 sm:px-6 lg:px-8 space-y-5">
-            
+          <div className="w-full min-w-0 space-y-5 px-4 py-6 sm:px-6 lg:px-8">
             <button
               type="button"
-              onClick={() => router.push("/admin/sarpras/iventaris")}
+              onClick={() =>
+                router.push("/admin/sarpras/iventaris")
+              }
               className="theme-text-muted inline-flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-[var(--color-primary)]"
             >
               <ArrowLeft size={14} />
@@ -192,10 +247,12 @@ export default function InventarisDetailPage() {
                     size={18}
                     className="mt-0.5 shrink-0 text-[var(--color-danger)]"
                   />
+
                   <div>
                     <p className="text-sm font-semibold text-[var(--color-danger)]">
                       Gagal memuat detail inventaris
                     </p>
+
                     <p className="mt-0.5 text-xs theme-text-secondary">
                       {error}
                     </p>
@@ -210,7 +267,9 @@ export default function InventarisDetailPage() {
                 >
                   <RefreshCw
                     size={13}
-                    className={loading ? "animate-spin" : ""}
+                    className={
+                      loading ? "animate-spin" : ""
+                    }
                   />
                   Coba lagi
                 </button>
@@ -226,6 +285,7 @@ export default function InventarisDetailPage() {
                     size={30}
                     className={`mx-auto animate-spin ${themePrimaryText}`}
                   />
+
                   <p className="mt-3 text-xs font-medium theme-text-muted">
                     Memuat detail inventaris...
                   </p>
@@ -241,16 +301,21 @@ export default function InventarisDetailPage() {
                   >
                     <Package size={26} />
                   </div>
+
                   <h1 className="mt-4 text-sm font-bold theme-text">
                     Data inventaris tidak ditemukan
                   </h1>
+
                   <p className="mt-1 text-xs theme-text-muted">
-                    Barang mungkin sudah dihapus atau tidak tersedia untuk
-                    sekolah Anda.
+                    Barang mungkin sudah dihapus atau tidak
+                    tersedia untuk sekolah Anda.
                   </p>
+
                   <button
                     type="button"
-                    onClick={() => router.push("/admin/sarpras/iventaris")}
+                    onClick={() =>
+                      router.push("/admin/sarpras/iventaris")
+                    }
                     className={`mt-4 inline-flex items-center gap-2 rounded-xl border ${themeNeutralBorder} px-4 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover}`}
                   >
                     <ArrowLeft size={13} />
@@ -266,18 +331,28 @@ export default function InventarisDetailPage() {
                       Detail Inventaris
                     </p>
 
-                    <h1 className="mt-1 truncate text-xl font-bold tracking-tight theme-text sm:text-2xl lg:text-[28px]">
-                      {aset.nama}
+                    <h1 className="mt-1 break-words text-xl font-bold tracking-tight theme-text sm:text-2xl lg:text-[28px]">
+                      {aset.nama || "-"}
                     </h1>
 
                     <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm theme-text-secondary">
                       <span className="inline-flex items-center gap-1.5">
-                        <Package size={14} className="shrink-0" />
-                        {aset.kode}
+                        <Package
+                          size={14}
+                          className="shrink-0"
+                        />
+                        {aset.kode || "-"}
                       </span>
+
                       <span className="inline-flex items-center gap-1.5">
-                        <MapPin size={14} className="shrink-0" />
-                        {aset.lokasi || aset.gudang?.lokasi || "-"}
+                        <MapPin
+                          size={14}
+                          className="shrink-0"
+                        />
+                        {aset.ruangan?.nama ||
+                          aset.gudang?.lokasi ||
+                          aset.ruangan?.lokasi ||
+                          "-"}
                       </span>
                     </div>
                   </div>
@@ -305,11 +380,17 @@ export default function InventarisDetailPage() {
                       className="inline-flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-2.5 text-sm font-medium text-[var(--color-danger)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {deleting ? (
-                        <Loader2 size={15} className="animate-spin" />
+                        <Loader2
+                          size={15}
+                          className="animate-spin"
+                        />
                       ) : (
                         <Trash2 size={15} />
                       )}
-                      {deleting ? "Menghapus..." : "Hapus"}
+
+                      {deleting
+                        ? "Menghapus..."
+                        : "Hapus"}
                     </button>
                   </div>
                 </div>
@@ -327,10 +408,12 @@ export default function InventarisDetailPage() {
                         >
                           <Package size={17} />
                         </div>
+
                         <div>
                           <h2 className="text-sm font-semibold theme-text">
                             Informasi Barang
                           </h2>
+
                           <p className="text-xs theme-text-muted">
                             Data inventaris yang tersimpan di server
                           </p>
@@ -338,44 +421,70 @@ export default function InventarisDetailPage() {
                       </div>
 
                       <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3">
-                        <InfoRow icon={Tag} label="Kategori">
-                          {aset.kategoriAset?.nama || "-"}
+                        <InfoRow
+                          icon={Package}
+                          label="Kode Barang"
+                        >
+                          {aset.kode}
                         </InfoRow>
 
-                        <InfoRow icon={Warehouse} label="Gudang">
-                          {aset.gudang?.nama || "-"}
+                        <InfoRow
+                          icon={Tag}
+                          label="Kategori Aset"
+                        >
+                          {aset.kategoriAset?.nama}
                         </InfoRow>
 
-                        <InfoRow icon={MapPin} label="Lokasi Fisik">
-                          {aset.lokasi || aset.gudang?.lokasi || "-"}
+                        <InfoRow
+                          icon={Warehouse}
+                          label="Gudang"
+                        >
+                          {aset.gudang?.nama}
                         </InfoRow>
 
-                        <InfoRow icon={Layers} label="Kondisi">
-                          <span
-                            className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${kondisiBadgeClass(
-                              aset.kondisi
-                            )}`}
-                          >
-                            {formatKondisi(aset.kondisi)}
-                          </span>
+                        <InfoRow
+                          icon={MapPin}
+                          label="Ruangan"
+                        >
+                          {aset.ruangan?.nama}
                         </InfoRow>
 
-                        <InfoRow icon={CheckCircle2} label="Status Aset">
-                          <span
-                            className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
-                              statusAktif
-                                ? "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-[var(--color-success)]"
-                                : "border-[color-mix(in_srgb,var(--color-text)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary"
-                            }`}
-                          >
-                            {statusAktif ? "Aktif" : "Nonaktif"}
-                          </span>
+                        <InfoRow
+                          icon={MapPin}
+                          label="Lokasi Ruangan"
+                        >
+                          {aset.ruangan?.lokasi}
                         </InfoRow>
 
-                        <InfoRow icon={Calendar} label="Terdaftar">
-                          {formatDate(
-                            aset.dibuatPada || aset.createdAt
+                        <InfoRow
+                          icon={Layers}
+                          label="Kondisi Barang"
+                        >
+                          {aset.kondisi ? (
+                            <span
+                              className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${kondisiBadgeClass(
+                                aset.kondisi
+                              )}`}
+                            >
+                              {kondisi}
+                            </span>
+                          ) : (
+                            "-"
                           )}
+                        </InfoRow>
+
+                        <InfoRow
+                          icon={Calendar}
+                          label="Tanggal Terdaftar"
+                        >
+                          {formatDate(aset.dibuatPada)}
+                        </InfoRow>
+
+                        <InfoRow
+                          icon={Calendar}
+                          label="Terakhir Diperbarui"
+                        >
+                          {formatDate(aset.diperbaruiPada)}
                         </InfoRow>
                       </div>
                     </div>
@@ -383,14 +492,28 @@ export default function InventarisDetailPage() {
                     <div
                       className={`theme-card ${themeNeutralBorder} rounded-2xl border p-5 ${themeCardShadow}`}
                     >
-                      <h2 className="text-sm font-semibold theme-text">
-                        Catatan
-                      </h2>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                        >
+                          <Layers size={17} />
+                        </div>
 
-                      <p className="mt-2 text-sm theme-text-secondary">
-                        {aset.catatan?.trim()
-                          ? aset.catatan
-                          : "Belum ada catatan tersimpan untuk barang ini."}
+                        <div>
+                          <h2 className="text-sm font-semibold theme-text">
+                            Keterangan Barang
+                          </h2>
+
+                          <p className="text-xs theme-text-muted">
+                            Informasi tambahan inventaris
+                          </p>
+                        </div>
+                      </div>
+
+                      <p className="mt-4 whitespace-pre-wrap break-words text-sm theme-text-secondary">
+                        {aset.keterangan?.trim()
+                          ? aset.keterangan
+                          : "Belum ada keterangan untuk barang ini."}
                       </p>
                     </div>
                   </div>
@@ -399,65 +522,46 @@ export default function InventarisDetailPage() {
                     <div
                       className={`theme-card ${themeNeutralBorder} rounded-2xl border p-5 ${themeCardShadow}`}
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <h2 className="text-sm font-semibold theme-text">
-                          Stok
-                        </h2>
-                        <span
-                          className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${stok.className}`}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
                         >
-                          {stok.label}
-                        </span>
+                          <Package size={17} />
+                        </div>
+
+                        <div>
+                          <h2 className="text-sm font-semibold theme-text">
+                            Jumlah Barang
+                          </h2>
+
+                          <p className="text-xs theme-text-muted">
+                            Total unit inventaris
+                          </p>
+                        </div>
                       </div>
 
-                      <p className="mt-4 text-3xl font-bold theme-text">
-                        {formatNumber(aset.jumlahStok)}{" "}
-                        <span className="text-sm font-medium theme-text-muted">
-                          tersedia
+                      <p className="mt-5 text-3xl font-bold theme-text">
+                        {formatNumber(jumlah)}
+                        <span className="ml-2 text-sm font-medium theme-text-muted">
+                          unit
                         </span>
                       </p>
 
-                      <div className="mt-4 space-y-2.5">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="theme-text-secondary">
-                            Jumlah unit
-                          </span>
-                          <span className="font-semibold theme-text">
-                            {formatNumber(aset.jumlah)}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="theme-text-secondary">
-                            Stok minimum
-                          </span>
-                          <span className="font-semibold theme-text">
-                            {formatNumber(aset.stokMinimum)}
-                          </span>
-                        </div>
-                        <div
-                          className={`h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
-                        >
-                          <div
-                            className={`h-full rounded-full ${themePrimaryGradient}`}
-                            style={{
-                              width: `${
-                                Number(aset.jumlah) > 0
-                                  ? Math.min(
-                                      100,
-                                      (Number(aset.jumlahStok) /
-                                        Number(aset.jumlah)) *
-                                        100
-                                    )
-                                  : 0
-                              }%`,
-                            }}
-                          />
-                        </div>
+                      <div
+                        className={`mt-4 flex items-center justify-between rounded-xl ${themeNeutralSurface} px-3 py-3`}
+                      >
+                        <span className="text-xs theme-text-secondary">
+                          Total jumlah
+                        </span>
+
+                        <span className="text-sm font-semibold theme-text">
+                          {formatNumber(jumlah)} unit
+                        </span>
                       </div>
 
                       <p className="mt-4 text-[11px] theme-text-muted">
-                        Stok diperbarui melalui proses peminjaman dan
-                        pengembalian sarpras.
+                        Jumlah barang sesuai data inventaris yang
+                        tersimpan pada sistem.
                       </p>
                     </div>
 
@@ -465,28 +569,47 @@ export default function InventarisDetailPage() {
                       className={`theme-card ${themeNeutralBorder} rounded-2xl border p-5 ${themeCardShadow}`}
                     >
                       <h2 className="text-sm font-semibold theme-text">
-                        Riwayat Data
+                        Informasi Data
                       </h2>
 
-                      <div className="mt-3 space-y-3">
-                        <div>
-                          <p className="text-[11px] theme-text-placeholder">
-                            Terakhir diperbarui
-                          </p>
-                          <p className="mt-0.5 text-sm font-medium theme-text">
-                            {formatDate(
-                              aset.diperbaruiPada ||
-                                aset.updatedAt ||
-                                aset.dibuatPada
-                            )}
-                          </p>
-                        </div>
+                      <div className="mt-4 space-y-4">
                         <div>
                           <p className="text-[11px] theme-text-placeholder">
                             ID Aset
                           </p>
-                          <p className="mt-0.5 break-all text-xs theme-text-secondary">
+
+                          <p className="mt-1 break-all text-xs font-medium theme-text-secondary">
                             {aset.id}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-[11px] theme-text-placeholder">
+                            ID Kategori
+                          </p>
+
+                          <p className="mt-1 break-all text-xs font-medium theme-text-secondary">
+                            {aset.kategoriAsetId || "-"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-[11px] theme-text-placeholder">
+                            ID Gudang
+                          </p>
+
+                          <p className="mt-1 break-all text-xs font-medium theme-text-secondary">
+                            {aset.gudangId || "-"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-[11px] theme-text-placeholder">
+                            ID Ruangan
+                          </p>
+
+                          <p className="mt-1 break-all text-xs font-medium theme-text-secondary">
+                            {aset.ruanganId || "-"}
                           </p>
                         </div>
                       </div>

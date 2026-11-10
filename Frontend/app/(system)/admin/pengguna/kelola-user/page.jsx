@@ -39,7 +39,10 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
+  KeyRound,
 } from "lucide-react";
+
+import ResetPasswordModal from "@/app/components/user/ResetPasswordModal";
 
 const getRoleIcon = (role = "") => {
   const value = String(role).toLowerCase();
@@ -187,6 +190,7 @@ export default function KelolaUserPage() {
 
   const [deletingId, setDeletingId] = useState(null);
   const [updatingStatusId, setUpdatingStatusId] = useState(null);
+  const [userToResetPassword, setUserToResetPassword] = useState(null);
 
   const loadUsers = useCallback(
     async ({ page = currentPage, showRefresh = false } = {}) => {
@@ -771,6 +775,17 @@ export default function KelolaUserPage() {
                                       </button>
 
                                       <button
+                                        type="button"
+                                        onClick={() => setUserToResetPassword(item)}
+                                        disabled={isDeleting || isUpdatingStatus}
+                                        className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-amber-500/10 hover:text-amber-600 disabled:opacity-40"
+                                        title="Reset Kata Sandi"
+                                        aria-label={`Reset kata sandi ${item.namaLengkap || "pengguna"}`}
+                                      >
+                                        <KeyRound size={15} />
+                                      </button>
+
+                                      <button
                                         onClick={() => handleDelete(item)}
                                         disabled={isDeleting || isUpdatingStatus}
                                         className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)] disabled:cursor-not-allowed disabled:opacity-40"
@@ -916,6 +931,17 @@ export default function KelolaUserPage() {
           </main>
         </div>
       </div>
+
+      {userToResetPassword && (
+        <ResetPasswordModal
+          isOpen={!!userToResetPassword}
+          user={userToResetPassword}
+          onClose={() => setUserToResetPassword(null)}
+          onSuccess={() => {
+            setNotice(`Kata sandi untuk ${userToResetPassword.namaLengkap || "pengguna"} berhasil direset.`);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
-﻿
-import { getToken, clearSession } from "../lib/auth";
+
+import { getToken, getRefreshToken, clearSession } from "../lib/auth";
+import { apiFetch } from "../lib/api";
 
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -243,8 +244,9 @@ async function request<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const token = getToken();
+  const refreshToken = getRefreshToken();
 
-  if (!token) {
+  if (!token && !refreshToken) {
     throw new Error(
       "Token login tidak ditemukan. Silakan login kembali."
     );
@@ -254,82 +256,106 @@ async function request<T>(
     ? endpoint
     : `/${endpoint}`;
 
-  const url = `${API_URL}/api${normalizedEndpoint}`;
-  const headers = new Headers(options.headers);
+  const apiEndpoint = normalizedEndpoint.startsWith("/api/")
+    ? normalizedEndpoint
+    : `/api${normalizedEndpoint}`;
 
-  headers.set("Accept", "application/json");
-  headers.set("Authorization", `Bearer ${token}`);
+  const url = `${API_URL}${apiEndpoint}`;
 
-  const isFormData =
-    typeof FormData !== "undefined" &&
-    options.body instanceof FormData;
+  const plainHeaders: Record<string, string> = {
+    Accept: "application/json",
+  };
 
-  if (isFormData) {
-    headers.delete("Content-Type");
-  } else if (
-    options.body != null &&
-    !headers.has("Content-Type")
-  ) {
-    headers.set("Content-Type", "application/json");
+  if (options.headers) {
+    if (options.headers instanceof Headers) {
+      options.headers.forEach((v, k) => {
+        plainHeaders[k] = v;
+      });
+    } else if (Array.isArray(options.headers)) {
+      for (const [k, v] of options.headers) {
+        plainHeaders[k] = v;
+      }
+    } else {
+      Object.assign(plainHeaders, options.headers);
+    }
   }
-
-  let response: Response;
 
   try {
-    response = await fetch(url, {
+    const result = await apiFetch(apiEndpoint, {
       ...options,
-      headers,
+      headers: plainHeaders,
       cache: "no-store",
     });
-  } catch (error) {
-    console.error("USER API NETWORK ERROR:", error);
+    return result as T;
+  } catch (error: any) {
+    if (error?.isNetworkError || error?.status === 0) {
+      console.error("USER API NETWORK ERROR:", error);
 
-    const netErr = new Error(
-      `Tidak dapat terhubung ke server ${API_URL}. Periksa koneksi backend dan konfigurasi API.`
-    ) as Error & { status?: number; isNetworkError?: boolean };
-    netErr.status = 0;
-    netErr.isNetworkError = true;
-    throw netErr;
-  }
+      const netErr = new Error(
+        `Tidak dapat terhubung ke server ${API_URL}. Periksa koneksi backend dan konfigurasi API.`
+      ) as Error & { status?: number; isNetworkError?: boolean };
+      netErr.status = 0;
+      netErr.isNetworkError = true;
+      throw netErr;
+    }
 
-  const result = await parseResponse(response);
+    const status = error?.status ?? 500;
+    const result = error?.raw ?? error?.response?.data ?? error?.data ?? null;
 
-  if (!response.ok) {
-    if (response.status === 401) {
+    if (status === 401) {
       clearSession();
     }
+
+    const safeLogResult =
+      result && typeof result === "object"
+        ? {
+            ...result,
+            ...(result.data && typeof result.data === "object"
+              ? {
+                  data: {
+                    ...result.data,
+                    kataSandi: result.data.kataSandi ? "[REDACTED]" : undefined,
+                    password: result.data.password ? "[REDACTED]" : undefined,
+                  },
+                }
+              : {}),
+          }
+        : result;
 
     console.error("GAGAL REQUEST USER:", {
       url,
       method: options.method || "GET",
-      status: response.status,
-      statusText: response.statusText,
-      response: result,
+      status,
+      response: safeLogResult,
     });
 
-    const message =
+    const customMsg =
       result?.message ||
       result?.error ||
       result?.detail ||
-      (response.status === 400
+      (error?.message && !/^Request gagal\.\s*Status:/i.test(error.message)
+        ? error.message
+        : null);
+
+    const message =
+      customMsg ||
+      (status === 400
         ? "Data pengguna tidak valid."
-        : response.status === 401
+        : status === 401
           ? "Sesi login tidak valid. Silakan login kembali."
-          : response.status === 403
+          : status === 403
             ? "Anda tidak memiliki izin untuk melakukan tindakan ini."
-            : response.status === 404
+            : status === 404
               ? "Data pengguna atau endpoint tidak ditemukan."
-              : response.status === 409
+              : status === 409
                 ? "Data pengguna sudah digunakan."
-                : `Request gagal (${response.status}).`);
+                : `Request gagal (${status}).`);
 
     const err = new Error(message) as Error & { status?: number; data?: any };
-    err.status = response.status;
+    err.status = status;
     err.data = result?.data ?? result;
     throw err;
   }
-
-  return result as T;
 }
 
 
@@ -531,18 +557,44 @@ export async function getGuruById(id: string) {
 }
 
 
+export interface ResetPasswordData {
+  id: string;
+  password?: string;
+  kataSandi?: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+  data: ResetPasswordData;
+}
+
 export async function resetUserPassword(
-  id: string
-): Promise<UserMutationResponse> {
+  id: string,
+  payload?: { kataSandi?: string } | string
+): Promise<ResetPasswordResponse> {
   if (!id?.trim()) {
     throw new Error("ID pengguna tidak ditemukan.");
   }
 
-  return request<UserMutationResponse>(
+  const options: RequestInit = {
+    method: "PATCH",
+  };
+
+  const customPassword =
+    typeof payload === "string"
+      ? payload.trim()
+      : typeof payload === "object" && payload !== null && typeof payload.kataSandi === "string"
+        ? payload.kataSandi.trim()
+        : "";
+
+  if (customPassword) {
+    options.body = JSON.stringify({ kataSandi: customPassword });
+  }
+
+  return request<ResetPasswordResponse>(
     `/users/${encodeURIComponent(id)}/reset-password`,
-    {
-      method: "PATCH",
-    }
+    options
   );
 }
 

@@ -386,10 +386,11 @@ export async function createAbsensi(
     if (data.snapshot instanceof File) {
       formData.append("snapshot", data.snapshot);
     } else {
+      const isPng = (data.snapshot.type || "").toLowerCase().includes("png");
       formData.append(
         "snapshot",
-        new File([data.snapshot], "snapshot.jpg", {
-          type: data.snapshot.type || "image/jpeg",
+        new File([data.snapshot], isPng ? "snapshot.png" : "snapshot.jpg", {
+          type: data.snapshot.type || (isPng ? "image/png" : "image/jpeg"),
         }),
       );
     }
@@ -429,12 +430,33 @@ function getCurrentPosition(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(
       resolve,
-      () =>
+      (geoErr) => {
+        if (geoErr?.code === 1) {
+          reject(
+            new Error(
+              "Izin lokasi ditolak. Aktifkan akses lokasi pada browser.",
+            ),
+          );
+          return;
+        }
+        if (geoErr?.code === 2) {
+          reject(
+            new Error("Lokasi tidak tersedia. Periksa GPS perangkat."),
+          );
+          return;
+        }
+        if (geoErr?.code === 3) {
+          reject(
+            new Error("Pengambilan lokasi terlalu lama. Silakan coba lagi."),
+          );
+          return;
+        }
         reject(
           new Error(
             "Lokasi tidak dapat diakses. Periksa izin GPS browser.",
           ),
-        ),
+        );
+      },
       {
         enableHighAccuracy: true,
         timeout: 15000,
@@ -487,16 +509,30 @@ export async function absenDenganFace(data: {
   snapshot: Blob | File;
   status?: AbsensiStatus;
   keterangan?: string;
-  lintang: number;
-  bujur: number;
+  lintang?: number;
+  bujur?: number;
 }): Promise<Absensi> {
+  let lintang = data.lintang;
+  let bujur = data.bujur;
+
+  if (
+    lintang === undefined ||
+    bujur === undefined ||
+    !Number.isFinite(lintang) ||
+    !Number.isFinite(bujur)
+  ) {
+    const position = await getCurrentPosition();
+    lintang = position.coords.latitude;
+    bujur = position.coords.longitude;
+  }
+
   return createAbsensi({
     kelasId: data.kelasId,
     status: data.status || "hadir",
     metode: "face",
     keterangan: data.keterangan,
-    lintang: data.lintang,
-    bujur: data.bujur,
+    lintang,
+    bujur,
     snapshot: data.snapshot,
   });
 }
@@ -617,12 +653,13 @@ export async function checkInShift(
     });
 
     const snapshot = data.snapshot!;
+    const isPng = (snapshot.type || "").toLowerCase().includes("png");
 
     const file =
       snapshot instanceof File
         ? snapshot
-        : new File([snapshot], "snapshot.jpg", {
-            type: snapshot.type || "image/jpeg",
+        : new File([snapshot], isPng ? "snapshot.png" : "snapshot.jpg", {
+            type: snapshot.type || (isPng ? "image/png" : "image/jpeg"),
           });
 
     formData.append("snapshot", file);

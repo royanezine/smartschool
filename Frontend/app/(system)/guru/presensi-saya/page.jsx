@@ -303,6 +303,14 @@ const getMethodLabel = (method) => {
 };
 
 const getErrorMessage = (error) => {
+  if (
+    error?.status === 429 ||
+    error?.statusCode === 429 ||
+    error?.response?.status === 429
+  ) {
+    return "Terlalu banyak percobaan, mohon tunggu sebentar.";
+  }
+
   const message = String(error?.message ?? "").trim();
   const lowerMessage = message.toLowerCase();
 

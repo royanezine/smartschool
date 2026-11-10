@@ -9,6 +9,9 @@ import Sidebar from "@/app/components/Sidebar";
 import {
   getPelanggaranSiswa,
   deletePelanggaranSiswa,
+  exportPelanggaranExcel,
+  exportPelanggaranPdf,
+  downloadBlob,
 } from "@/services/bk.service";
 
 export default function PelanggaranPage() {
@@ -17,24 +20,79 @@ export default function PelanggaranPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [exportSuccess, setExportSuccess] = useState("");
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState("tanggal_desc");
 
   const [page, setPage] = useState(1);
-  const perPage = 7;
+  const [meta, setMeta] = useState({
+    totalData: 0,
+    totalPages: 1,
+    currentPage: 1,
+  });
+  const limit = 10;
 
-  async function loadData() {
+  const isExporting = exportingPdf || exportingExcel;
+
+  async function loadData(targetPage = page, keyword = debouncedSearch) {
     try {
       setLoading(true);
       setError("");
 
-      const result = await getPelanggaranSiswa();
-      setData(Array.isArray(result) ? result : []);
+      const result = await getPelanggaranSiswa({
+        page: targetPage,
+        limit,
+        search: keyword?.trim() || undefined,
+      });
+
+      const items = Array.isArray(result?.data)
+        ? result.data
+        : Array.isArray(result)
+        ? result
+        : [];
+
+      const resultMeta = result?.meta || result?.pagination || {};
+
+      const totalData = Number(
+        resultMeta.totalData ??
+        resultMeta.total ??
+        result?.totalData ??
+        items.length
+      );
+
+      const totalPages = Number(
+        resultMeta.totalPages ??
+        result?.totalPages ??
+        (totalData > 0 ? Math.ceil(totalData / limit) : 1)
+      );
+
+      const currentPage = Number(
+        resultMeta.currentPage ??
+        resultMeta.page ??
+        result?.currentPage ??
+        targetPage
+      );
+
+      setData(items);
+      setMeta({
+        totalData,
+        totalPages: Math.max(1, totalPages),
+        currentPage,
+      });
     } catch (err) {
       setError(
         err?.message || "Gagal mengambil data pelanggaran."
       );
+      setData([]);
+      setMeta({
+        totalData: 0,
+        totalPages: 1,
+        currentPage: 1,
+      });
     } finally {
       setLoading(false);
     }
@@ -44,9 +102,7 @@ export default function PelanggaranPage() {
     try {
       setRefreshing(true);
       setError("");
-
-      const result = await getPelanggaranSiswa();
-      setData(Array.isArray(result) ? result : []);
+      await loadData(page, debouncedSearch);
     } catch (err) {
       setError(
         err?.message || "Gagal memuat ulang data."
@@ -56,28 +112,62 @@ export default function PelanggaranPage() {
     }
   }
 
+  async function handleExportExcel() {
+    if (isExporting) return;
+    try {
+      setExportingExcel(true);
+      setError("");
+      setExportSuccess("");
+
+      const { blob, filename } = await exportPelanggaranExcel({
+        search: debouncedSearch?.trim() || undefined,
+      });
+
+      downloadBlob(blob, filename);
+      setExportSuccess(`Berhasil mengunduh ${filename}`);
+      setTimeout(() => setExportSuccess(""), 4000);
+    } catch (err) {
+      setError(err?.message || "Gagal mengekspor file Excel pelanggaran.");
+    } finally {
+      setExportingExcel(false);
+    }
+  }
+
+  async function handleExportPdf() {
+    if (isExporting) return;
+    try {
+      setExportingPdf(true);
+      setError("");
+      setExportSuccess("");
+
+      const { blob, filename } = await exportPelanggaranPdf({
+        search: debouncedSearch?.trim() || undefined,
+      });
+
+      downloadBlob(blob, filename);
+      setExportSuccess(`Berhasil mengunduh ${filename}`);
+      setTimeout(() => setExportSuccess(""), 4000);
+    } catch (err) {
+      setError(err?.message || "Gagal mengekspor file PDF pelanggaran.");
+    } finally {
+      setExportingPdf(false);
+    }
+  }
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      loadData();
-    }, 0);
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
     return () => clearTimeout(timer);
-  }, []);
+  }, [search]);
 
-  const filteredData = useMemo(() => {
-    const keyword = search.toLowerCase();
+  useEffect(() => {
+    loadData(page, debouncedSearch);
+  }, [page, debouncedSearch]);
 
-    const filtered = data.filter((item) => {
-      const nama = item.siswa?.namaLengkap || "";
-      const kategoriNama =
-        item.kategoriPelanggaran?.nama || "";
-
-      return (
-        nama.toLowerCase().includes(keyword) ||
-        kategoriNama.toLowerCase().includes(keyword)
-      );
-    });
-
-    const sorted = [...filtered];
+  const displayData = useMemo(() => {
+    const sorted = [...data];
 
     const compareTanggal = (a, b) => {
       const ta = a.tanggal
@@ -125,29 +215,14 @@ export default function PelanggaranPage() {
     }
 
     return sorted;
-  }, [data, search, sortBy]);
+  }, [data, sortBy]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setPage(1);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [search, sortBy]);
+  const totalPage = Math.max(1, meta.totalPages);
 
-  const totalPage = Math.max(
-    1,
-    Math.ceil(filteredData.length / perPage)
-  );
-
-  const startIndex = (page - 1) * perPage;
-
-  const paginatedData = filteredData.slice(
-    startIndex,
-    startIndex + perPage
-  );
+  const startIndex = (page - 1) * limit;
 
   const stats = {
-    total: data.length,
+    total: meta.totalData,
 
     totalPoin: data.reduce(
       (s, i) => s + (Number(i.poin) || 0),
@@ -177,7 +252,7 @@ export default function PelanggaranPage() {
 
     try {
       await deletePelanggaranSiswa(id);
-      await loadData();
+      await loadData(page, debouncedSearch);
     } catch (err) {
       setError(
         err?.message || "Gagal menghapus pelanggaran."
@@ -229,6 +304,7 @@ export default function PelanggaranPage() {
   function resetFilter() {
     setSearch("");
     setSortBy("tanggal_desc");
+    setPage(1);
   }
 
   return (
@@ -272,10 +348,11 @@ export default function PelanggaranPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
+                  type="button"
                   onClick={handleRefresh}
-                  disabled={refreshing}
+                  disabled={refreshing || isExporting}
                   title="Muat ulang data"
                   className="
                     inline-flex items-center justify-center gap-2
@@ -307,6 +384,119 @@ export default function PelanggaranPage() {
                 </button>
 
                 <button
+                  type="button"
+                  onClick={handleExportExcel}
+                  disabled={isExporting}
+                  title="Ekspor daftar pelanggaran ke Excel"
+                  className="
+                    inline-flex items-center justify-center gap-2
+                    rounded-xl border theme-border
+                    theme-card
+                    px-4 py-2.5
+                    text-sm font-bold text-emerald-600 dark:text-emerald-400
+                    shadow-sm transition
+                    theme-sidebar-hover
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
+                  "
+                >
+                  {exportingExcel ? (
+                    <svg
+                      className="h-4 w-4 animate-spin text-emerald-600 dark:text-emerald-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="h-4 w-4 text-emerald-600 dark:text-emerald-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  )}
+
+                  {exportingExcel ? "Mengekspor Excel..." : "Export Excel"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportPdf}
+                  disabled={isExporting}
+                  title="Ekspor daftar pelanggaran ke PDF"
+                  className="
+                    inline-flex items-center justify-center gap-2
+                    rounded-xl border theme-border
+                    theme-card
+                    px-4 py-2.5
+                    text-sm font-bold text-rose-600 dark:text-rose-400
+                    shadow-sm transition
+                    theme-sidebar-hover
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
+                  "
+                >
+                  {exportingPdf ? (
+                    <svg
+                      className="h-4 w-4 animate-spin text-rose-600 dark:text-rose-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="h-4 w-4 text-rose-600 dark:text-rose-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                      />
+                    </svg>
+                  )}
+
+                  {exportingPdf ? "Mengekspor PDF..." : "Export PDF"}
+                </button>
+
+                <button
+                  type="button"
                   onClick={() =>
                     router.push("/admin/bk/pelanggaran/tambah")
                   }
@@ -336,6 +526,26 @@ export default function PelanggaranPage() {
                 </button>
               </div>
             </div>
+
+            {exportSuccess && (
+              <div className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-50/80 px-4 py-3.5 text-sm font-semibold text-emerald-800 shadow-sm dark:bg-emerald-950/40 dark:text-emerald-300">
+                <svg
+                  className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+
+                <span>{exportSuccess}</span>
+              </div>
+            )}
 
             {error && (
               <div className="mb-6 flex items-start gap-3 rounded-xl border theme-border theme-danger px-4 py-3.5 text-sm font-semibold shadow-sm">
@@ -558,7 +768,7 @@ export default function PelanggaranPage() {
                           </div>
                         </td>
                       </tr>
-                    ) : paginatedData.length === 0 ? (
+                    ) : displayData.length === 0 ? (
                       <tr>
                         <td
                           colSpan="6"
@@ -568,7 +778,7 @@ export default function PelanggaranPage() {
                         </td>
                       </tr>
                     ) : (
-                      paginatedData.map((item) => (
+                      displayData.map((item) => (
                         <tr
                           key={item.id}
                           className="theme-table-hover transition"
@@ -723,20 +933,20 @@ export default function PelanggaranPage() {
                 </table>
               </div>
 
-              {!loading && filteredData.length > 0 && (
+              {!loading && meta.totalData > 0 && (
                 <div className="flex flex-col items-center justify-between gap-3 border-t theme-border px-5 py-4 sm:flex-row">
                   <p className="text-sm font-medium theme-text-secondary">
                     Menampilkan{" "}
                     <span className="font-bold theme-text">
-                      {startIndex + 1} -{" "}
+                      {meta.totalData === 0 ? 0 : startIndex + 1} -{" "}
                       {Math.min(
-                        startIndex + perPage,
-                        filteredData.length
+                        startIndex + data.length,
+                        meta.totalData
                       )}
                     </span>{" "}
                     dari{" "}
                     <span className="font-bold theme-text">
-                      {filteredData.length}
+                      {meta.totalData}
                     </span>{" "}
                     data
                   </p>
@@ -744,7 +954,7 @@ export default function PelanggaranPage() {
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
+                      disabled={page <= 1 || loading}
                       className="
                         flex h-9 w-9 items-center justify-center
                         rounded-xl border theme-border
@@ -755,6 +965,7 @@ export default function PelanggaranPage() {
                         disabled:cursor-not-allowed
                         disabled:opacity-40
                       "
+                      aria-label="Previous"
                     >
                       <svg
                         className="h-4 w-4"
@@ -779,6 +990,7 @@ export default function PelanggaranPage() {
                         <button
                           key={p}
                           onClick={() => setPage(p)}
+                          disabled={loading}
                           className={`
                             flex h-9 min-w-9
                             items-center justify-center
@@ -801,7 +1013,7 @@ export default function PelanggaranPage() {
                       onClick={() =>
                         setPage((p) => Math.min(totalPage, p + 1))
                       }
-                      disabled={page === totalPage}
+                      disabled={page >= totalPage || loading}
                       className="
                         flex h-9 w-9 items-center justify-center
                         rounded-xl border theme-border
@@ -812,6 +1024,7 @@ export default function PelanggaranPage() {
                         disabled:cursor-not-allowed
                         disabled:opacity-40
                       "
+                      aria-label="Next"
                     >
                       <svg
                         className="h-4 w-4"

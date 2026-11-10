@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
+import CanAccess from "@/app/components/auth/CanAccess";
 import Sidebar from "@/app/components/Sidebar";
 
 import {
@@ -588,13 +589,15 @@ export default function JurnalKasPage() {
                     Muat Ulang
                   </button>
 
-                  <Link
-                    href="/admin/keuangan/jurnalKas/tambah"
-                    className="theme-primary inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold"
-                  >
-                    <Plus size={17} />
-                    Tambah Transaksi
-                  </Link>
+                  <CanAccess menu="keuangan dan kas" action="create">
+                    <Link
+                      href="/admin/keuangan/jurnalKas/tambah"
+                      className="theme-primary inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold"
+                    >
+                      <Plus size={17} />
+                      Tambah Transaksi
+                    </Link>
+                  </CanAccess>
                 </div>
               </section>
 

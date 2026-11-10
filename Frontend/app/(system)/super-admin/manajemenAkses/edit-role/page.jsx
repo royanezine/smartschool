@@ -310,6 +310,7 @@ function EditRolePageContent() {
       : 0;
 
   const togglePermission = (permissionId) => {
+    const isActivating = !selectedPermissions.has(permissionId);
     setSelectedPermissions((prev) => {
       const next = new Set(prev);
       if (next.has(permissionId)) {
@@ -320,6 +321,9 @@ function EditRolePageContent() {
       return next;
     });
     setSaved(false);
+    if (isActivating || selectedPermissions.size > 1) {
+      setErrors((prev) => ({ ...prev, izinIds: "" }));
+    }
   };
 
   const toggleModulPenuh = (aksiMap) => {
@@ -343,11 +347,17 @@ function EditRolePageContent() {
       return next;
     });
     setSaved(false);
+    if (!semuaTerpilih) {
+      setErrors((prev) => ({ ...prev, izinIds: "" }));
+    }
   };
 
   const pilihSemua = () => {
     setSelectedPermissions(new Set(permissions.map((permission) => permission.id)));
     setSaved(false);
+    if (permissions.length > 0) {
+      setErrors((prev) => ({ ...prev, izinIds: "" }));
+    }
   };
 
   const hapusSemua = () => {
@@ -382,6 +392,10 @@ function EditRolePageContent() {
       errorBaru.namaTampilan = "Nama tampilan minimal 3 karakter.";
     } else if (namaTampilanBersih.length > 100) {
       errorBaru.namaTampilan = "Nama tampilan maksimal 100 karakter.";
+    }
+
+    if (selectedPermissions.size === 0) {
+      errorBaru.izinIds = "Pilih minimal 1 hak akses / izin.";
     }
 
     setErrors(errorBaru);
@@ -733,6 +747,13 @@ function EditRolePageContent() {
                       </button>
                     </div>
                   </div>
+
+                  {errors.izinIds && (
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--color-warning)]">
+                      <AlertCircle size={13} className="shrink-0" />
+                      <span>{errors.izinIds}</span>
+                    </div>
+                  )}
 
                   <div className="relative">
                     <Search size={16} className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />

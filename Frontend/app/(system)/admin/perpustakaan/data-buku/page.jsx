@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import CanAccess from "@/app/components/auth/CanAccess";
 
 import {
   BookOpen,
@@ -348,16 +349,18 @@ export default function DataBukuPage() {
                   <span className="hidden sm:inline">Reset</span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push("/admin/perpustakaan/data-buku/tambah")
-                  }
-                  className={`flex h-10 items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 ${themePrimaryShadow}`}
-                >
-                  <Plus size={17} />
-                  Tambah Buku
-                </button>
+                <CanAccess menu="perpustakaan" action="create">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push("/admin/perpustakaan/data-buku/tambah")
+                    }
+                    className={`flex h-10 items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 ${themePrimaryShadow}`}
+                  >
+                    <Plus size={17} />
+                    Tambah Buku
+                  </button>
+                </CanAccess>
               </div>
             </div>
 
@@ -673,27 +676,31 @@ export default function DataBukuPage() {
                                 <Eye size={16} />
                               </button>
 
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  router.push(
-                                    `/admin/perpustakaan/data-buku/${book.id}/edit`
-                                  )
-                                }
-                                title="Edit"
-                                className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
-                              >
-                                <Pencil size={16} />
-                              </button>
+                              <CanAccess menu="perpustakaan" action="update">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    router.push(
+                                      `/admin/perpustakaan/data-buku/${book.id}/edit`
+                                    )
+                                  }
+                                  title="Edit"
+                                  className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
+                                >
+                                  <Pencil size={16} />
+                                </button>
+                              </CanAccess>
 
-                              <button
-                                type="button"
-                                onClick={() => setDeleteBook(book)}
-                                title="Hapus"
-                                className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-danger"
-                              >
-                                <Trash2 size={16} />
-                              </button>
+                              <CanAccess menu="perpustakaan" action="delete">
+                                <button
+                                  type="button"
+                                  onClick={() => setDeleteBook(book)}
+                                  title="Hapus"
+                                  className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-danger"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </CanAccess>
                             </div>
                           </td>
                         </tr>

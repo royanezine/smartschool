@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
+import CanAccess from "@/app/components/auth/CanAccess";
 import Sidebar from "@/app/components/Sidebar";
 
 import {
@@ -304,16 +305,18 @@ export default function SPPPage() {
                       Laporan
                     </Link>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push("/admin/keuangan/SPP/generate")
-                      }
-                      className="theme-primary inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition hover:brightness-95"
-                    >
-                      <Plus size={16} />
-                      Generate Tagihan
-                    </button>
+                    <CanAccess menu="keuangan dan kas" action="create">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push("/admin/keuangan/SPP/generate")
+                        }
+                        className="theme-primary inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition hover:brightness-95"
+                      >
+                        <Plus size={16} />
+                        Generate Tagihan
+                      </button>
+                    </CanAccess>
                   </div>
                 </div>
               </section>
@@ -594,31 +597,35 @@ export default function SPPPage() {
                                 />
 
                                 {canBayar(item) && (
-                                  <ActionButton
-                                    title="Catat pembayaran"
-                                    icon={
-                                      <CreditCard size={16} />
-                                    }
-                                    onClick={() =>
-                                      router.push(
-                                        `/admin/keuangan/SPP/${item.id}/bayar`
-                                      )
-                                    }
-                                    type="primary"
-                                  />
+                                  <CanAccess menu="keuangan dan kas" action="create">
+                                    <ActionButton
+                                      title="Catat pembayaran"
+                                      icon={
+                                        <CreditCard size={16} />
+                                      }
+                                      onClick={() =>
+                                        router.push(
+                                          `/admin/keuangan/SPP/${item.id}/bayar`
+                                        )
+                                      }
+                                      type="primary"
+                                    />
+                                  </CanAccess>
                                 )}
 
                                 {canBatal(item) && (
-                                  <ActionButton
-                                    title="Batalkan tagihan"
-                                    icon={<XCircle size={16} />}
-                                    onClick={() =>
-                                      router.push(
-                                        `/admin/keuangan/SPP/${item.id}/batal`
-                                      )
-                                    }
-                                    type="danger"
-                                  />
+                                  <CanAccess menu="keuangan dan kas" action="update">
+                                    <ActionButton
+                                      title="Batalkan tagihan"
+                                      icon={<XCircle size={16} />}
+                                      onClick={() =>
+                                        router.push(
+                                          `/admin/keuangan/SPP/${item.id}/batal`
+                                        )
+                                      }
+                                      type="danger"
+                                    />
+                                  </CanAccess>
                                 )}
                               </div>
                             </td>
