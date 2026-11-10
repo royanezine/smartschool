@@ -44,39 +44,21 @@ export const requireAksesMenu = (
         });
       }
 
-      // 1. Fallback Super Admin: Caching hasil cek izin super_admin di Redis dengan TTL 5 menit (300 detik)
-      const redis = getRedisClient();
-      const superAdminCacheKey = `cache:superadmin:${user.userId}`;
-      let isSuper: boolean | null = null;
-
-      if (redis) {
-        try {
-          const cachedVal = await redis.get(superAdminCacheKey);
-          if (cachedVal !== null) {
-            isSuper = cachedVal === "1";
-          }
-        } catch {
-          // Abaikan error koneksi redis
-        }
-      }
-
-      if (isSuper === null) {
-        isSuper = isSuperAdmin(user.role);
-        if (redis) {
-          try {
-            await redis.set(superAdminCacheKey, isSuper ? "1" : "0", "EX", 300);
-          } catch {
-            // Abaikan error koneksi redis
-          }
-        }
-      }
-
-      if (isSuper) {
+      // 1. Bypass untuk role administratif bawaan (Admin Sekolah, Super Admin, Yayasan)
+      const role = normalizeRole(user.role);
+      if (
+        role === "admin" ||
+        role === "admin_sekolah" ||
+        role === "super_admin" ||
+        role === "yayasan" ||
+        role === "admin_yayasan" ||
+        isSuperAdmin(role)
+      ) {
         return next();
       }
 
       // 2. Siswa memiliki akses bawaan baca ke menu publik/siswa, serta create & view pada "absen saya"
-      if (normalizeRole(user.role) === "siswa") {
+      if (role === "siswa") {
         const normalizedTarget = normalizeMenuName(menuName);
         if (
           action === "view" ||
@@ -89,6 +71,7 @@ export const requireAksesMenu = (
       }
 
       // 3. Ambil daftar aksesMenu dari session req.user atau fallback fetch dari database (dengan Redis cache)
+      const redis = getRedisClient();
       let daftarAkses: ItemAksesMenu[] = Array.isArray(user.aksesMenu)
         ? (user.aksesMenu as ItemAksesMenu[])
         : [];
