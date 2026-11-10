@@ -17,4 +17,9 @@ export const ajukanIzinSchema = z.object({
 export const verifikasiIzinSchema = z.object({
   status: z.enum(["disetujui", "ditolak"]),
   catatan: z.string().optional().nullable(),
+  guruPenggantiId: z
+    .string()
+    .uuid("ID guru pengganti tidak valid")
+    .optional()
+    .nullable(),
 });

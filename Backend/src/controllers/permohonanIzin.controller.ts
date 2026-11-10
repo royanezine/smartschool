@@ -21,7 +21,6 @@ export const ajukanIzin = async (
 
     const validated = ajukanIzinSchema.parse(req.body);
 
-    // Validasi: Guru pengganti harus ada di sekolah yang sama
     if (validated.guruPenggantiId) {
       const guru = await prisma.pengguna.findFirst({
         where: {
@@ -151,12 +150,27 @@ export const verifikasiIzin = async (
     if (existing.status !== "menunggu")
       throw new AppError(`Permohonan sudah berstatus ${existing.status}`, 400);
 
+    if (validated.guruPenggantiId) {
+      const guru = await prisma.pengguna.findFirst({
+        where: {
+          id: validated.guruPenggantiId,
+          sekolahId: existing.sekolahId,
+          dihapusPada: null,
+          status: "aktif",
+        },
+      });
+      if (!guru) throw new AppError("Guru pengganti tidak ditemukan", 404);
+    }
+
     const izin = await prisma.permohonanIzin.update({
       where: { id },
       data: {
         status: validated.status,
         catatan: validated.catatan || null,
         penyetujuId,
+        ...(validated.guruPenggantiId !== undefined && {
+          guruPenggantiId: validated.guruPenggantiId,
+        }),
       },
     });
 
