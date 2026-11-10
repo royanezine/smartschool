@@ -12,6 +12,7 @@ import {
   getAuthRole,
   hasMenuAccess,
   getMenuKeyForAdminPath,
+  getRequiredActionForAdminPath,
   getDefaultAdminPath,
 } from "@/lib/auth";
 
@@ -50,9 +51,56 @@ export default function AuthGuard({ allowedRoles = [], children }) {
 
       if (result.valid) {
         const role = result.role || getAuthRole();
+        const currentPath =
+          pathname ||
+          (typeof window !== "undefined" ? window.location.pathname : "");
+        const isAdminRoute = String(currentPath || "")
+          .trim()
+          .toLowerCase()
+          .startsWith("/admin");
+        const requiredMenu = isAdminRoute
+          ? getMenuKeyForAdminPath(currentPath)
+          : null;
+        const requiredAction = isAdminRoute
+          ? getRequiredActionForAdminPath(currentPath)
+          : "view";
+
+        // Delegasi RBAC Jabatan: Guru/Pegawai yang memiliki aksesMenu Jabatan untuk menu terkait
+        const isDelegatedAdminAccess =
+          isAdminRoute &&
+          Boolean(requiredMenu) &&
+          role !== "siswa" &&
+          hasMenuAccess(requiredMenu, requiredAction);
 
         // Tier 1: Validasi Role dasar
-        if (allowed.length > 0 && role && !allowed.includes(role)) {
+        if (
+          allowed.length > 0 &&
+          role &&
+          !allowed.includes(role) &&
+          !isDelegatedAdminAccess
+        ) {
+          if (
+            isAdminRoute &&
+            requiredMenu &&
+            requiredAction !== "view" &&
+            role !== "siswa" &&
+            hasMenuAccess(requiredMenu, "view")
+          ) {
+            const baseViewPath = currentPath.replace(
+              /\/(tambah|create|buat|edit|kalkulasi)(\/.*)?$/i,
+              ""
+            );
+            const target =
+              baseViewPath && baseViewPath !== currentPath
+                ? baseViewPath
+                : getDefaultAdminPath();
+            if (!isRedirectingRef.current) {
+              isRedirectingRef.current = true;
+              router.replace(target);
+            }
+            return;
+          }
+
           const home = getRoleHome(role);
 
           if (!home || home === "/login") {
@@ -68,29 +116,31 @@ export default function AuthGuard({ allowedRoles = [], children }) {
           return;
         }
 
-        // Tier 2: Validasi Delegated RBAC (Jabatan / aksesMenu) khusus admin_sekolah
-        if (role === "admin_sekolah") {
-          const currentPath =
-            pathname ||
-            (typeof window !== "undefined" ? window.location.pathname : "");
-          const requiredMenu = getMenuKeyForAdminPath(currentPath);
-
+        // Tier 2: Validasi Delegated RBAC (Jabatan / aksesMenu) pada rute /admin
+        if (isAdminRoute && role !== "super_admin") {
           if (requiredMenu) {
-            let requiredAction = "view";
-            if (
-              currentPath.endsWith("/tambah") ||
-              currentPath.includes("/tambah/")
-            ) {
-              requiredAction = "create";
-            } else if (
-              currentPath.includes("/edit") ||
-              currentPath.endsWith("/edit")
-            ) {
-              requiredAction = "update";
-            }
-
             if (!hasMenuAccess(requiredMenu, requiredAction)) {
-              const fallbackHome = getDefaultAdminPath();
+              if (
+                requiredAction !== "view" &&
+                hasMenuAccess(requiredMenu, "view")
+              ) {
+                const baseViewPath = currentPath.replace(
+                  /\/(tambah|create|buat|edit|kalkulasi)(\/.*)?$/i,
+                  ""
+                );
+                if (baseViewPath && baseViewPath !== currentPath) {
+                  if (!isRedirectingRef.current) {
+                    isRedirectingRef.current = true;
+                    router.replace(baseViewPath);
+                  }
+                  return;
+                }
+              }
+
+              const fallbackHome =
+                role === "admin_sekolah" || role === "admin"
+                  ? getDefaultAdminPath()
+                  : getRoleHome(role);
               const targetRedirect =
                 fallbackHome && fallbackHome !== currentPath
                   ? fallbackHome

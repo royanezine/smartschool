@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import CanAccess from "@/app/components/auth/CanAccess";
 
 import {
   getKategoriPelanggaran,
@@ -240,34 +241,36 @@ export default function KategoriPelanggaranPage() {
                   {refreshing ? "Memuat..." : "Refresh"}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push("/admin/bk/kategori-point/tambah")
-                  }
-                  className="
-                    theme-primary
-                    inline-flex items-center gap-2
-                    rounded-xl px-4 py-2.5
-                    text-sm font-bold shadow-lg transition
-                  "
-                >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    viewBox="0 0 24 24"
+                <CanAccess menu="bimbingan konseling" action="create">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push("/admin/bk/kategori-point/tambah")
+                    }
+                    className="
+                      theme-primary
+                      inline-flex items-center gap-2
+                      rounded-xl px-4 py-2.5
+                      text-sm font-bold shadow-lg transition
+                    "
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
 
-                  Tambah Kategori
-                </button>
+                    Tambah Kategori
+                  </button>
+                </CanAccess>
               </div>
             </div>
 
@@ -563,63 +566,67 @@ export default function KategoriPelanggaranPage() {
                                 </svg>
                               </button>
 
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  router.push(
-                                    `/admin/bk/kategori-point/${item.id}/edit`
-                                  )
-                                }
-                                title="Edit"
-                                className="
-                                  theme-text-muted
-                                  rounded-lg p-2
-                                  transition
-                                  hover:bg-[var(--color-sidebar-active)]
-                                  hover:text-[var(--color-primary)]
-                                "
-                              >
-                                <svg
-                                  className="h-4 w-4"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  viewBox="0 0 24 24"
+                              <CanAccess menu="bimbingan konseling" action="update">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    router.push(
+                                      `/admin/bk/kategori-point/${item.id}/edit`
+                                    )
+                                  }
+                                  title="Edit"
+                                  className="
+                                    theme-text-muted
+                                    rounded-lg p-2
+                                    transition
+                                    hover:bg-[var(--color-sidebar-active)]
+                                    hover:text-[var(--color-primary)]
+                                  "
                                 >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
-                                  />
-                                </svg>
-                              </button>
+                                  <svg
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                                    />
+                                  </svg>
+                                </button>
+                              </CanAccess>
 
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(item.id)}
-                                title="Hapus"
-                                className="
-                                  theme-text-muted
-                                  rounded-lg p-2
-                                  transition
-                                  hover:bg-[var(--color-danger-background)]
-                                  hover:text-[var(--color-danger)]
-                                "
-                              >
-                                <svg
-                                  className="h-4 w-4"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  viewBox="0 0 24 24"
+                              <CanAccess menu="bimbingan konseling" action="delete">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDelete(item.id)}
+                                  title="Hapus"
+                                  className="
+                                    theme-text-muted
+                                    rounded-lg p-2
+                                    transition
+                                    hover:bg-[var(--color-danger-background)]
+                                    hover:text-[var(--color-danger)]
+                                  "
                                 >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
-                                  />
-                                </svg>
-                              </button>
+                                  <svg
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                                    />
+                                  </svg>
+                                </button>
+                              </CanAccess>
                             </div>
                           </td>
                         </tr>

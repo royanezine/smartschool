@@ -7,6 +7,7 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
 import { getRoles } from "@/services/role.service";
+import { getAllJabatan } from "@/services/jabatan.service";
 import { getKategoriJabatan } from "@/services/kategoriJabatan.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
 
@@ -51,6 +52,10 @@ function canAssignRole(actorRole, targetRole) {
 
 function isGuruRole(role) {
   return normalizeRole(role) === "guru";
+}
+
+function isSiswaRole(role) {
+  return normalizeRole(role) === "siswa";
 }
 
 function getUserData(result) {
@@ -137,6 +142,36 @@ function getCurrentShiftId(user) {
     user?.shiftKerjaData?.id ??
     ""
   );
+}
+
+function resolveCurrentJabatanId(user, jabatanList = []) {
+  const directId =
+    user?.jabatanId ??
+    user?.jabatan_id ??
+    user?.jabatanRef?.id ??
+    (typeof user?.jabatan === "object" ? user?.jabatan?.id : "");
+
+  if (directId) {
+    return String(directId);
+  }
+
+  const rawName =
+    user?.jabatanRef?.namaJabatan ??
+    (typeof user?.jabatan === "string" ? user.jabatan : "") ??
+    "";
+
+  const normalizedName = String(rawName).trim().toLowerCase();
+  if (!normalizedName) return "";
+
+  const matched = jabatanList.find(
+    (item) =>
+      String(item?.id) === String(rawName).trim() ||
+      String(item?.namaJabatan || item?.nama || "")
+        .trim()
+        .toLowerCase() === normalizedName
+  );
+
+  return matched?.id ? String(matched.id) : "";
 }
 
 function getCurrentShiftName(user) {
@@ -253,6 +288,7 @@ export default function EditPenggunaPage() {
     namaPengguna: "",
     email: "",
     noTelepon: "",
+    jabatanId: "",
     kategoriJabatanId: "",
     golongan: "",
     status: "aktif",
@@ -262,12 +298,15 @@ export default function EditPenggunaPage() {
   });
 
   const [roleOptions, setRoleOptions] = useState([]);
+  const [initialRoleName, setInitialRoleName] = useState("");
+  const [jabatanOptions, setJabatanOptions] = useState([]);
   const [kategoriJabatanOptions, setKategoriJabatanOptions] = useState([]);
   const [shiftOptions, setShiftOptions] = useState([]);
 
   const [roleHint, setRoleHint] = useState("");
 
   const [loading, setLoading] = useState(true);
+  const [loadingJabatan, setLoadingJabatan] = useState(false);
   const [loadingKategoriJabatan, setLoadingKategoriJabatan] = useState(false);
   const [loadingShift, setLoadingShift] = useState(false);
 
@@ -276,10 +315,26 @@ export default function EditPenggunaPage() {
   const [notice, setNotice] = useState("");
 
   const updateField = (field, value) => {
-    setForm((previous) => ({
-      ...previous,
-      [field]: value,
-    }));
+    setForm((previous) => {
+      if (field === "peranId") {
+        const nextRole = roleOptions.find((role) => role.value === value);
+        const nextRoleName = nextRole?.roleName || nextRole?.label || "";
+        if (isSiswaRole(nextRoleName)) {
+          return {
+            ...previous,
+            peranId: value,
+            jabatanId: "",
+            kategoriJabatanId: "",
+            shiftKerjaId: "",
+            shiftKerja: "",
+          };
+        }
+      }
+      return {
+        ...previous,
+        [field]: value,
+      };
+    });
   };
 
   const loadData = useCallback(async () => {
@@ -319,12 +374,22 @@ export default function EditPenggunaPage() {
         ""
       );
 
-      const currentKategoriJabatanId = String(
-        user.kategoriJabatan?.id ??
-        user.kategoriJabatanId ??
-        user.kategori_jabatan_id ??
-        ""
-      );
+      const userRoleName =
+        user.peran?.nama ??
+        user.peran?.namaTampilan ??
+        user.role ??
+        "";
+      setInitialRoleName(userRoleName);
+      const isUserSiswa = isSiswaRole(userRoleName);
+
+      const currentKategoriJabatanId = isUserSiswa
+        ? ""
+        : String(
+            user.kategoriJabatan?.id ??
+            user.kategoriJabatanId ??
+            user.kategori_jabatan_id ??
+            ""
+          );
 
       const currentShiftId = getCurrentShiftId(user);
       const currentShiftName = getCurrentShiftName(user);
@@ -332,11 +397,49 @@ export default function EditPenggunaPage() {
       const currentShiftValue =
         normalizeShiftValue(currentShiftName);
 
+      setLoadingJabatan(true);
+      let jabatanList = [];
+      try {
+        const jabatanResult = await getAllJabatan();
+        jabatanList = extractList(jabatanResult);
+      } catch (jabatanError) {
+        console.warn("Daftar jabatan tidak dapat dimuat:", jabatanError);
+      } finally {
+        setLoadingJabatan(false);
+      }
+
+      const currentJabatanId = isUserSiswa
+        ? ""
+        : resolveCurrentJabatanId(user, jabatanList);
+
+      const mappedJabatan = jabatanList
+        .filter((item) => item?.id)
+        .map((item) => ({
+          value: String(item.id),
+          label: item.namaJabatan ?? item.nama ?? "Jabatan",
+          disabled: false,
+        }));
+
+      if (
+        currentJabatanId &&
+        !mappedJabatan.some((item) => item.value === currentJabatanId) &&
+        (user.jabatanRef?.namaJabatan || user.jabatan)
+      ) {
+        mappedJabatan.unshift({
+          value: currentJabatanId,
+          label: `${user.jabatanRef?.namaJabatan || user.jabatan} (jabatan saat ini)`,
+          disabled: false,
+        });
+      }
+
+      setJabatanOptions(mappedJabatan);
+
       setForm({
         namaLengkap: user.namaLengkap ?? "",
         namaPengguna: user.namaPengguna ?? "",
         email: user.email ?? "",
         noTelepon: user.noTelepon ?? "",
+        jabatanId: currentJabatanId,
         kategoriJabatanId: currentKategoriJabatanId,
         golongan: user.golongan ?? "",
         status: user.status ?? "aktif",
@@ -566,12 +669,18 @@ export default function EditPenggunaPage() {
     (role) => role.value === form.peranId
   );
 
+  const selectedJabatan = jabatanOptions.find(
+    (item) => item.value === form.jabatanId
+  );
+
   const selectedRoleName =
-    selectedRole?.roleName ??
-    selectedRole?.label ??
+    selectedRole?.roleName ||
+    selectedRole?.label ||
+    initialRoleName ||
     "";
 
   const selectedIsGuru = isGuruRole(selectedRoleName);
+  const selectedIsSiswa = isSiswaRole(selectedRoleName);
 
   const handleShiftChange = (shiftId) => {
     const selectedShift = shiftOptions.find(
@@ -594,9 +703,9 @@ export default function EditPenggunaPage() {
       return;
     }
 
-    if (loadingKategoriJabatan || loadingShift) {
+    if (loadingJabatan || loadingKategoriJabatan || loadingShift) {
       setError(
-        "Tunggu sampai data kategori jabatan dan shift selesai dimuat."
+        "Tunggu sampai data jabatan dan shift selesai dimuat."
       );
       return;
     }
@@ -626,7 +735,13 @@ export default function EditPenggunaPage() {
         namaPengguna: form.namaPengguna.trim(),
         email: form.email.trim(),
         noTelepon: form.noTelepon.trim() || null,
-        kategoriJabatanId: form.kategoriJabatanId || null,
+        ...(!selectedIsSiswa
+          ? {
+              jabatanId: form.jabatanId || null,
+              jabatan: selectedJabatan?.label || null,
+              kategoriJabatanId: form.kategoriJabatanId || null,
+            }
+          : {}),
         golongan: form.golongan.trim() || null,
         status: form.status,
         peranId: form.peranId,
@@ -826,38 +941,56 @@ export default function EditPenggunaPage() {
                       </div>
 
                       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                        <FormSelect
-                          label="Kategori Jabatan"
-                          value={form.kategoriJabatanId}
-                          onChange={(value) => updateField("kategoriJabatanId", value)}
-                          options={kategoriJabatanOptions}
-                          placeholder={
-                            loadingKategoriJabatan
-                              ? "Memuat kategori jabatan..."
-                              : "Pilih kategori jabatan"
-                          }
-                          disabled={loadingKategoriJabatan}
-                          hint="Pilihan berasal dari Master Kategori Jabatan."
-                        />
+                        {!selectedIsSiswa && (
+                          <>
+                            <FormSelect
+                              label="Jabatan"
+                              value={form.jabatanId}
+                              onChange={(value) => updateField("jabatanId", value)}
+                              options={jabatanOptions}
+                              placeholder={
+                                loadingJabatan
+                                  ? "Memuat jabatan..."
+                                  : "Pilih jabatan (opsional)"
+                              }
+                              disabled={loadingJabatan}
+                              hint="Pilihan berasal dari Manajemen Jabatan (/api/jabatan)."
+                            />
 
-                        <FormSelect
-                          label="Shift Kerja"
-                          value={form.shiftKerjaId}
-                          onChange={handleShiftChange}
-                          options={shiftOptions}
-                          placeholder={
-                            loadingShift
-                              ? "Memuat shift kerja..."
-                              : "Pilih shift kerja"
-                          }
-                          disabled={loadingShift}
-                          required={selectedIsGuru}
-                          hint={
-                            selectedIsGuru
-                              ? "Shift kerja wajib dipilih untuk Guru."
-                              : "Pilih shift jika pengguna memiliki jadwal kerja."
-                          }
-                        />
+                            <FormSelect
+                              label="Kategori Jabatan"
+                              value={form.kategoriJabatanId}
+                              onChange={(value) => updateField("kategoriJabatanId", value)}
+                              options={kategoriJabatanOptions}
+                              placeholder={
+                                loadingKategoriJabatan
+                                  ? "Memuat kategori jabatan..."
+                                  : "Pilih kategori jabatan"
+                              }
+                              disabled={loadingKategoriJabatan}
+                              hint="Pilihan berasal dari Master Kategori Jabatan."
+                            />
+
+                            <FormSelect
+                              label="Shift Kerja"
+                              value={form.shiftKerjaId}
+                              onChange={handleShiftChange}
+                              options={shiftOptions}
+                              placeholder={
+                                loadingShift
+                                  ? "Memuat shift kerja..."
+                                  : "Pilih shift kerja"
+                              }
+                              disabled={loadingShift}
+                              required={selectedIsGuru}
+                              hint={
+                                selectedIsGuru
+                                  ? "Shift kerja wajib dipilih untuk Guru."
+                                  : "Pilih shift jika pengguna memiliki jadwal kerja."
+                              }
+                            />
+                          </>
+                        )}
 
                         <FormInput
                           label="Golongan"
@@ -904,6 +1037,17 @@ export default function EditPenggunaPage() {
                               {selectedRole ? selectedRole.label : "Belum dipilih"}
                             </p>
                           </div>
+                          {!selectedIsSiswa && (
+                            <>
+                              <div className="theme-border-soft h-px" />
+                              <div>
+                                <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">Jabatan</p>
+                                <p className="theme-text mt-1 text-sm font-semibold">
+                                  {selectedJabatan ? selectedJabatan.label : "Tanpa Jabatan"}
+                                </p>
+                              </div>
+                            </>
+                          )}
                           <div className="theme-border-soft h-px" />
                           <div>
                             <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">Status</p>

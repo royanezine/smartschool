@@ -38,7 +38,7 @@ import {
   getUserById,
   updateUser,
 } from "@/services/user.service";
-
+import { getAllJabatan } from "@/services/jabatan.service";
 import {
   getShiftKerja,
   assignUserShiftAndJabatan,
@@ -57,6 +57,7 @@ const EMPTY_FORM = {
   alamat: "",
   noTelepon: "",
   jabatan: "",
+  jabatanId: "",
   golongan: "",
   tanggalBergabung: "",
   shiftKerja: "",
@@ -213,6 +214,8 @@ export default function AdminGuruEditPage() {
   const [shiftList, setShiftList] = useState([]);
   const [loadingShift, setLoadingShift] = useState(true);
   const [shiftError, setShiftError] = useState("");
+  const [jabatanList, setJabatanList] = useState([]);
+  const [loadingJabatan, setLoadingJabatan] = useState(true);
 
   const [originalMasterShiftId, setOriginalMasterShiftId] = useState("");
 
@@ -314,6 +317,7 @@ export default function AdminGuruEditPage() {
           item.telepon ??
           "",
         jabatan: item.jabatan ?? "",
+        jabatanId: String(item.jabatanId ?? item.jabatanRef?.id ?? ""),
         golongan: item.golongan ?? "",
         tanggalBergabung: formatDateInput(
           item.tanggalBergabung ??
@@ -345,10 +349,27 @@ export default function AdminGuruEditPage() {
     }
   }, [id]);
 
+  const fetchJabatan = useCallback(async () => {
+    try {
+      setLoadingJabatan(true);
+      const list = await getAllJabatan();
+      setJabatanList(Array.isArray(list) ? list : []);
+    } catch (err) {
+      console.error("[EditGuru] Gagal load jabatan:", err);
+      setJabatanList([]);
+    } finally {
+      setLoadingJabatan(false);
+    }
+  }, []);
+
   useEffect(() => {
-    fetchGuru();
-    fetchShift();
-  }, [fetchGuru, fetchShift]);
+    const timer = setTimeout(() => {
+      fetchGuru();
+      fetchShift();
+      fetchJabatan();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchGuru, fetchShift, fetchJabatan]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -438,6 +459,7 @@ export default function AdminGuruEditPage() {
         alamat: form.alamat.trim() || null,
         noTelepon: form.noTelepon.trim() || null,
         jabatan: form.jabatan.trim() || null,
+        jabatanId: form.jabatanId ? form.jabatanId : null,
         golongan: form.golongan.trim() || null,
         tanggalBergabung: form.tanggalBergabung || null,
         shiftKerja: form.shiftKerja,
@@ -812,13 +834,28 @@ export default function AdminGuruEditPage() {
                         />
                       </Field>
 
-                      <Field label="Jabatan" icon={Briefcase}>
-                        <input
-                          name="jabatan"
-                          value={form.jabatan}
+                      <Field label="Jabatan (Hak Akses Menu)" icon={Briefcase}>
+                        <select
+                          name="jabatanId"
+                          value={form.jabatanId}
                           onChange={handleChange}
-                          className={inputClass}
-                          placeholder="Contoh: Guru Matematika"
+                          disabled={loadingJabatan}
+                          className={selectClass}
+                        >
+                          <option value="">
+                            {loadingJabatan
+                              ? "Memuat daftar jabatan..."
+                              : "-- Tanpa Jabatan --"}
+                          </option>
+                          {jabatanList.map((jab) => (
+                            <option key={jab.id} value={String(jab.id)}>
+                              {jab.namaJabatan || jab.nama}
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDown
+                          size={17}
+                          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 theme-text-placeholder"
                         />
                       </Field>
 

@@ -86,6 +86,16 @@ function formatStatus(value) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function getJabatanName(user) {
+  if (user?.jabatanRef?.namaJabatan) return user.jabatanRef.namaJabatan;
+  const jabatan = user?.jabatan;
+  if (typeof jabatan === "string" && jabatan.trim()) return jabatan.trim();
+  if (jabatan && typeof jabatan === "object") {
+    return jabatan.namaJabatan ?? jabatan.nama ?? "-";
+  }
+  return "-";
+}
+
 function getKategoriJabatanName(user) {
   const kategori = user?.kategoriJabatan;
   if (typeof kategori === "string" && kategori.trim()) return kategori;
@@ -223,8 +233,10 @@ export default function DetailUserPage() {
     .replace(/[\s-]+/g, "_");
 
   const isGuru = role === "guru";
+  const isSiswa = role === "siswa";
   const isAktif = String(user?.status || "").toLowerCase() === "aktif";
 
+  const jabatanName = getJabatanName(user);
   const kategoriJabatan = getKategoriJabatanName(user);
   const shiftName = getShiftName(user);
   const shiftTime = getShiftTime(user);
@@ -345,6 +357,13 @@ export default function DetailUserPage() {
                           {formatRole(user)}
                         </span>
 
+                        {!isSiswa && jabatanName !== "-" && (
+                          <span className="theme-card-soft theme-border inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold theme-text-secondary">
+                            <BriefcaseBusiness size={14} />
+                            {jabatanName}
+                          </span>
+                        )}
+
                         <span
                           className={
                             isAktif
@@ -381,8 +400,12 @@ export default function DetailUserPage() {
                   <InfoItem icon={IdCard} label="NIPD" value={user.nipd} />
                   <InfoItem icon={IdCard} label="NISN" value={user.nisn} />
                   <InfoItem icon={IdCard} label="NIK" value={user.nik} />
-                  <InfoItem icon={BriefcaseBusiness} label="Kategori jabatan" value={kategoriJabatan} />
-                  <InfoItem icon={BriefcaseBusiness} label="Jabatan pada profil" value={user.jabatan} />
+                  {!isSiswa && (
+                    <>
+                      <InfoItem icon={BriefcaseBusiness} label="Jabatan" value={jabatanName} />
+                      <InfoItem icon={BriefcaseBusiness} label="Kategori jabatan" value={kategoriJabatan} />
+                    </>
+                  )}
                   <InfoItem icon={BriefcaseBusiness} label="Golongan" value={user.golongan} />
 
                   {isGuru && (

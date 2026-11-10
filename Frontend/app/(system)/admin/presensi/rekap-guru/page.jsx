@@ -20,7 +20,7 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { getToken } from "@/lib/auth";
+import { getToken, hasMenuAccess } from "@/lib/auth";
 
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -388,6 +388,13 @@ export default function RekapGuruPage() {
 
   const loadData = useCallback(
     async (isRefresh = false) => {
+      if (!hasMenuAccess("monitoring absensi", "view")) {
+        setError("Anda tidak memiliki akses ke halaman Monitoring Kehadiran Guru.");
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+
       if (isRefresh) {
         setRefreshing(true);
       } else {

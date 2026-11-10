@@ -41,7 +41,9 @@ const JENIS_RAPOT_OPTIONS = [
 function unwrapList(result) {
   if (Array.isArray(result)) return result;
   if (Array.isArray(result?.data)) return result.data;
+  if (Array.isArray(result?.data?.kelasWali)) return result.data.kelasWali;
   if (Array.isArray(result?.data?.data)) return result.data.data;
+  if (Array.isArray(result?.kelasWali)) return result.kelasWali;
   return [];
 }
 

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import CanAccess from "@/app/components/auth/CanAccess";
 
 import { getSesiKonseling } from "@/services/bk.service";
 
@@ -163,36 +164,38 @@ export default function DetailSesiKonselingPage() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(`/admin/bk/sesi-konseling/${id}/edit`)
-                }
-                className="
-                  theme-primary
-                  inline-flex items-center gap-2
-                  rounded-lg
-                  px-4 py-2.5
-                  text-sm font-bold
-                  shadow-sm
-                  transition
-                "
-              >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
+              <CanAccess menu="bimbingan konseling" action="update">
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(`/admin/bk/sesi-konseling/${id}/edit`)
+                  }
+                  className="
+                    theme-primary
+                    inline-flex items-center gap-2
+                    rounded-lg
+                    px-4 py-2.5
+                    text-sm font-bold
+                    shadow-sm
+                    transition
+                  "
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
-                  />
-                </svg>
-                Edit Sesi
-              </button>
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                    />
+                  </svg>
+                  Edit Sesi
+                </button>
+              </CanAccess>
             </div>
 
             {error && (
@@ -380,37 +383,39 @@ export default function DetailSesiKonselingPage() {
                     </h3>
 
                     <div className="space-y-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          router.push(
-                            `/admin/bk/sesi-konseling/${id}/edit`
-                          )
-                        }
-                        className="
-                          theme-primary
-                          flex w-full items-center justify-center gap-2
-                          rounded-lg
-                          px-4 py-2.5
-                          text-sm font-bold
-                          transition
-                        "
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
+                      <CanAccess menu="bimbingan konseling" action="update">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            router.push(
+                              `/admin/bk/sesi-konseling/${id}/edit`
+                            )
+                          }
+                          className="
+                            theme-primary
+                            flex w-full items-center justify-center gap-2
+                            rounded-lg
+                            px-4 py-2.5
+                            text-sm font-bold
+                            transition
+                          "
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
-                          />
-                        </svg>
-                        Edit Sesi
-                      </button>
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                            />
+                          </svg>
+                          Edit Sesi
+                        </button>
+                      </CanAccess>
 
                       <button
                         type="button"

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { hasMenuAccess } from "@/lib/auth";
 
 import {
   ClipboardCheck,
@@ -56,6 +57,12 @@ export default function RangkumanPresensiPage() {
   });
 
   const loadDashboard = useCallback(async () => {
+    if (!hasMenuAccess("monitoring absensi", "view")) {
+      setError("Anda tidak memiliki akses ke menu Monitoring Absensi.");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
@@ -139,7 +146,10 @@ export default function RangkumanPresensiPage() {
   }, []);
 
   useEffect(() => {
-    loadDashboard();
+    const timer = setTimeout(() => {
+      loadDashboard();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadDashboard]);
 
   const menuItems = [

@@ -125,7 +125,7 @@ export default function ManajemenJabatanPage() {
   };
 
   return (
-    <div className="theme-page min-h-screen">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="pengguna"
         collapsed={isCollapsed}
@@ -133,15 +133,11 @@ export default function ManajemenJabatanPage() {
         role="admin"
       />
 
-      <div
-        className={`flex min-h-screen flex-col transition-all duration-300 ${
-          isCollapsed ? "lg:pl-[72px]" : "lg:pl-64"
-        }`}
-      >
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto max-w-7xl space-y-6">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full min-w-0 space-y-6 p-4 sm:p-6 lg:p-8">
             {/* Header & Breadcrumb */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -264,7 +260,7 @@ export default function ManajemenJabatanPage() {
             {/* Tabel Daftar Jabatan */}
             <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
+                <table className="w-full min-w-[760px] text-left text-sm">
                   <thead className="theme-card-soft border-b theme-border text-xs uppercase tracking-wider theme-text-muted">
                     <tr>
                       <th className="px-6 py-4 font-semibold">No</th>

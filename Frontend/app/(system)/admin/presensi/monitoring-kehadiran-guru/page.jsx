@@ -29,6 +29,7 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { hasMenuAccess } from "@/lib/auth";
 import { getMonitoringKehadiranGuru } from "@/services/absensi.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
 
@@ -338,6 +339,7 @@ export default function MonitoringKehadiranGuruPage() {
     let active = true;
 
     async function fetchShifts() {
+      if (!hasMenuAccess("monitoring absensi", "view")) return;
       try {
         const res = await getShiftKerja();
         const list = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
@@ -361,6 +363,13 @@ export default function MonitoringKehadiranGuruPage() {
 
   const loadData = useCallback(
     async (showRefresh = false, silent = false) => {
+      if (!hasMenuAccess("monitoring absensi", "view")) {
+        setError("Anda tidak memiliki akses ke halaman Monitoring Kehadiran Guru.");
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+
       if (!tanggal) {
         setError("Silakan pilih tanggal monitoring terlebih dahulu.");
         setLoading(false);

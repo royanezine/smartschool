@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { getProfile, getUsers } from "@/services/user.service";
+import { getAllJabatan } from "@/services/jabatan.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
 import { getKelas } from "@/services/kelas.service";
 import { getToken } from "@/lib/auth";
@@ -186,6 +187,7 @@ export default function TambahPenggunaPage() {
 
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [loadingMasterJabatan, setLoadingMasterJabatan] = useState(false);
   const [loadingJabatan, setLoadingJabatan] = useState(false);
   const [loadingShift, setLoadingShift] = useState(false);
   const [loadingKelas, setLoadingKelas] = useState(false);
@@ -193,6 +195,7 @@ export default function TambahPenggunaPage() {
   const [error, setError] = useState("");
 
   const [roles, setRoles] = useState([]);
+  const [daftarJabatan, setDaftarJabatan] = useState([]);
   const [kategoriJabatan, setKategoriJabatan] = useState([]);
   const [shiftKerja, setShiftKerja] = useState([]);
   const [kelasList, setKelasList] = useState([]);
@@ -205,6 +208,7 @@ export default function TambahPenggunaPage() {
     email: "",
     password: "",
     noTelepon: "",
+    jabatanId: "",
     kategoriJabatanId: "",
     shiftKerjaId: "",
     nip: "",
@@ -215,6 +219,28 @@ export default function TambahPenggunaPage() {
     peran: "",
     kelasId: "",
   });
+
+  // ============================================================
+  // AMBIL MASTER JABATAN (/api/jabatan)
+  // ============================================================
+
+  const loadMasterJabatan = async () => {
+    try {
+      setLoadingMasterJabatan(true);
+      const response = await getAllJabatan();
+      const data = Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response)
+        ? response
+        : [];
+      setDaftarJabatan(data.filter((item) => item?.id && item?.namaJabatan));
+    } catch (err) {
+      console.error("LOAD MASTER JABATAN ERROR:", err);
+      setDaftarJabatan([]);
+    } finally {
+      setLoadingMasterJabatan(false);
+    }
+  };
 
   // ============================================================
   // AMBIL MASTER KATEGORI JABATAN
@@ -352,6 +378,7 @@ export default function TambahPenggunaPage() {
         setSekolahId(currentSekolahId);
 
         await Promise.all([
+          loadMasterJabatan(),
           loadKategoriJabatan(),
           loadShiftKerja(currentSekolahId),
           loadKelasData(),
@@ -499,7 +526,12 @@ export default function TambahPenggunaPage() {
       [name]: value,
 
       ...(name === "peran"
-        ? { shiftKerjaId: "", kelasId: "" }
+        ? {
+            shiftKerjaId: "",
+            kelasId: "",
+            jabatanId: "",
+            kategoriJabatanId: "",
+          }
         : {}),
     }));
 
@@ -544,6 +576,15 @@ export default function TambahPenggunaPage() {
   // ============================================================
   // OPTIONS JABATAN
   // ============================================================
+
+  const masterJabatanOptions = daftarJabatan.map((item) => ({
+    value: item.id,
+    label: item.namaJabatan || item.nama,
+  }));
+
+  const selectedMasterJabatan = daftarJabatan.find(
+    (item) => String(item.id) === String(form.jabatanId)
+  );
 
   const jabatanOptions = kategoriJabatan.map((item) => ({
     value: item.id,
@@ -661,8 +702,13 @@ export default function TambahPenggunaPage() {
         noTelepon:
           form.noTelepon.trim() || undefined,
 
-        kategoriJabatanId:
-          form.kategoriJabatanId || undefined,
+        ...(!isSiswa
+          ? {
+              jabatanId: form.jabatanId || null,
+              jabatan: selectedMasterJabatan?.namaJabatan || null,
+              kategoriJabatanId: form.kategoriJabatanId || undefined,
+            }
+          : {}),
 
         ...(isGuru
           ? {
@@ -929,24 +975,44 @@ export default function TambahPenggunaPage() {
                       }
                     />
 
-                    <FormSelect
-                      label="Jabatan"
-                      name="kategoriJabatanId"
-                      value={form.kategoriJabatanId}
-                      onChange={handleChange}
-                      disabled={
-                        loadingJabatan ||
-                        kategoriJabatan.length === 0
-                      }
-                      options={jabatanOptions}
-                      placeholder={
-                        loadingJabatan
-                          ? "Memuat jabatan..."
-                          : kategoriJabatan.length === 0
-                            ? "Master jabatan belum tersedia"
-                            : "Pilih Jabatan"
-                      }
-                    />
+                    {!isSiswa && (
+                      <>
+                        <FormSelect
+                          label="Jabatan"
+                          name="jabatanId"
+                          value={form.jabatanId}
+                          onChange={handleChange}
+                          disabled={loadingMasterJabatan}
+                          options={masterJabatanOptions}
+                          placeholder={
+                            loadingMasterJabatan
+                              ? "Memuat jabatan..."
+                              : daftarJabatan.length === 0
+                                ? "Master jabatan belum tersedia"
+                                : "Pilih Jabatan (Opsional)"
+                          }
+                        />
+
+                        <FormSelect
+                          label="Kategori Jabatan"
+                          name="kategoriJabatanId"
+                          value={form.kategoriJabatanId}
+                          onChange={handleChange}
+                          disabled={
+                            loadingJabatan ||
+                            kategoriJabatan.length === 0
+                          }
+                          options={jabatanOptions}
+                          placeholder={
+                            loadingJabatan
+                              ? "Memuat kategori jabatan..."
+                              : kategoriJabatan.length === 0
+                                ? "Master kategori jabatan belum tersedia"
+                                : "Pilih Kategori Jabatan"
+                          }
+                        />
+                      </>
+                    )}
 
                     {/* SHIFT KERJA KHUSUS GURU */}
 

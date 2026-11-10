@@ -23,6 +23,13 @@ export interface User {
   nik?: string | null;
 
   jabatan?: string | null;
+  jabatanId?: string | null;
+  jabatanRef?: {
+    id?: string;
+    namaJabatan?: string | null;
+    deskripsi?: string | null;
+    aksesMenu?: any;
+  } | null;
   golongan?: string | null;
 
   shiftKerja?: string | null;
@@ -130,6 +137,13 @@ export interface CreateUserPayload {
   nik?: string | null;
 
   jabatan?: string | null;
+  jabatanId?: string | null;
+  jabatanRef?: {
+    id?: string;
+    namaJabatan?: string | null;
+    deskripsi?: string | null;
+    aksesMenu?: any;
+  } | null;
   golongan?: string | null;
   status?: string;
 
@@ -166,6 +180,13 @@ export interface UpdateUserPayload {
   nik?: string | null;
 
   jabatan?: string | null;
+  jabatanId?: string | null;
+  jabatanRef?: {
+    id?: string;
+    namaJabatan?: string | null;
+    deskripsi?: string | null;
+    aksesMenu?: any;
+  } | null;
   golongan?: string | null;
   status?: string;
 
@@ -437,7 +458,12 @@ export async function createUser(
     kelurahan: payload.kelurahan?.trim() || null,
     kota: payload.kota?.trim() || null,
 
-    jabatan: payload.jabatan?.trim() || null,
+    ...(payload.jabatan !== undefined
+      ? { jabatan: payload.jabatan?.trim() || null }
+      : {}),
+    ...(payload.jabatanId !== undefined
+      ? { jabatanId: payload.jabatanId || null }
+      : {}),
     golongan: payload.golongan?.trim() || null,
     shiftKerja: payload.shiftKerja || null,
     ...(payload.kelasId ? { kelasId: payload.kelasId } : {}),

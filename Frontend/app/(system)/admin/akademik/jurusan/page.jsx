@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import CanAccess from "@/app/components/auth/CanAccess";
 import { getJurusan, deleteJurusan } from "@/services/jurusan.service";
 import {
   GraduationCap,
@@ -241,14 +242,16 @@ export default function ListJurusanPage() {
                   />
                   <span className="hidden sm:inline">Refresh</span>
                 </button>
-                <button
-                  onClick={() => router.push("/admin/akademik/jurusan/tambah")}
-                  className="flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 active:scale-95 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-                >
-                  <Plus size={17} />
-                  <span className="hidden xs:inline">Tambah Jurusan</span>
-                  <span className="xs:hidden">Tambah</span>
-                </button>
+                <CanAccess menu="jurusan" action="create">
+                  <button
+                    onClick={() => router.push("/admin/akademik/jurusan/tambah")}
+                    className="flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 active:scale-95 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+                  >
+                    <Plus size={17} />
+                    <span className="hidden xs:inline">Tambah Jurusan</span>
+                    <span className="xs:hidden">Tambah</span>
+                  </button>
+                </CanAccess>
               </div>
             </div>
 
@@ -498,24 +501,28 @@ export default function ListJurusanPage() {
                                 >
                                   <Eye size={15} />
                                 </button>
-                                <button
-                                  onClick={() =>
-                                    router.push(
-                                      `/admin/akademik/jurusan/${j.id}/edit`
-                                    )
-                                  }
-                                  title="Edit"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-secondary transition hover:bg-slate-500/10 hover:theme-text"
-                                >
-                                  <Pencil size={15} />
-                                </button>
-                                <button
-                                  onClick={() => setConfirmDeleteItem(j)}
-                                  title="Hapus"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-secondary transition hover:bg-slate-500/10 hover:theme-text"
-                                >
-                                  <Trash2 size={15} />
-                                </button>
+                                <CanAccess menu="jurusan" action="update">
+                                  <button
+                                    onClick={() =>
+                                      router.push(
+                                        `/admin/akademik/jurusan/${j.id}/edit`
+                                      )
+                                    }
+                                    title="Edit"
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-secondary transition hover:bg-slate-500/10 hover:theme-text"
+                                  >
+                                    <Pencil size={15} />
+                                  </button>
+                                </CanAccess>
+                                <CanAccess menu="jurusan" action="delete">
+                                  <button
+                                    onClick={() => setConfirmDeleteItem(j)}
+                                    title="Hapus"
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-secondary transition hover:bg-slate-500/10 hover:theme-text"
+                                  >
+                                    <Trash2 size={15} />
+                                  </button>
+                                </CanAccess>
                               </div>
                             </td>
                           </tr>
@@ -539,15 +546,17 @@ export default function ListJurusanPage() {
                               : "Coba ubah kata kunci atau filter pencarian."}
                           </p>
                           {data.length === 0 && (
-                            <button
-                              onClick={() =>
-                                router.push("/admin/akademik/jurusan/tambah")
-                              }
-                              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-                            >
-                              <Plus size={16} />
-                              Tambah Jurusan
-                            </button>
+                            <CanAccess menu="jurusan" action="create">
+                              <button
+                                onClick={() =>
+                                  router.push("/admin/akademik/jurusan/tambah")
+                                }
+                                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+                              >
+                                <Plus size={16} />
+                                Tambah Jurusan
+                              </button>
+                            </CanAccess>
                           )}
                         </td>
                       </tr>

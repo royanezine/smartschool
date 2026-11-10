@@ -104,9 +104,8 @@ function canViewMenu(item, permissions, modules, currentRole) {
   const isSuperAdmin = authRole === "super_admin";
   if (isSuperAdmin) return true;
 
-  // Jika item berada dalam konfigurasi menu admin (role admin/admin_sekolah)
-  if (currentRole === "admin") {
-    // Menu item untuk admin WAJIB memiliki menuKey dan diizinkan aksinya ("view")
+  // Jika item berada dalam konfigurasi menu admin atau memiliki menuKey RBAC Jabatan
+  if (currentRole === "admin" || item.menuKey) {
     if (!item.menuKey) {
       return false;
     }
@@ -354,9 +353,48 @@ export default function Sidebar({
   const menuSections = useMemo(() => {
     if (!config || !Array.isArray(config.menuSections)) return [];
 
-    const filtered = filterMenuItems(config.menuSections, permissions, modules, role);
+    let baseSections = filterMenuItems(
+      config.menuSections,
+      permissions,
+      modules,
+      role
+    );
 
-    return removeEmptyHeaders(filtered);
+    const authRole = normalizeRole(getAuthRole());
+    const userAksesMenu = getUserAksesMenu();
+
+    // Jika Guru memiliki Jabatan dengan aksesMenu, tampilkan juga menu Jabatan yang diizinkan
+    if (
+      role === "guru" &&
+      authRole === "guru" &&
+      Array.isArray(userAksesMenu) &&
+      userAksesMenu.length > 0 &&
+      Array.isArray(adminSidebarConfig?.menuSections)
+    ) {
+      const delegatedAdminItems = filterMenuItems(
+        adminSidebarConfig.menuSections.filter(
+          (item) => item.type !== "header" && item.key !== "dashboard"
+        ),
+        permissions,
+        modules,
+        "admin"
+      );
+
+      if (delegatedAdminItems.length > 0) {
+        baseSections = [
+          ...baseSections,
+          {
+            type: "header",
+            key: "menu-jabatan-header",
+            label: "Menu Jabatan",
+            __header: true,
+          },
+          ...delegatedAdminItems,
+        ];
+      }
+    }
+
+    return removeEmptyHeaders(baseSections);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, permissions, modules, role, authTick]);
 
@@ -878,7 +916,7 @@ export default function Sidebar({
                   className="
                     relative w-12 h-12 shrink-0
                     rounded-full
-                    bg-white dark:bg-blue-100
+                    bg-white dark:!bg-white
                     shadow-md shadow-black/10 dark:shadow-black/30
                     ring-2 ring-white/40 dark:ring-blue-300/20
                   "

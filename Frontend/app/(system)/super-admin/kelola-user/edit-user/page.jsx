@@ -96,6 +96,7 @@ function EditUserContent() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [userRoleName, setUserRoleName] = useState("");
 
   const [form, setForm] = useState({
     email: "",
@@ -143,6 +144,14 @@ function EditUserContent() {
 
         if (cancelled) return;
 
+        const normalizedRole = String(
+          user.peran?.nama || user.peran?.namaTampilan || user.role || ""
+        )
+          .trim()
+          .toLowerCase()
+          .replace(/[\s-]+/g, "_");
+        setUserRoleName(normalizedRole);
+
         setForm({
           email: user.email || "",
           namaPengguna:
@@ -160,7 +169,7 @@ function EditUserContent() {
           nip: user.nip || "",
           nipd: user.nipd || "",
           nisn: user.nisn || "",
-          jabatan: user.jabatan || "",
+          jabatan: normalizedRole === "siswa" ? "" : user.jabatan || "",
           golongan: user.golongan || "",
           status: user.status || "aktif",
         });
@@ -197,6 +206,12 @@ function EditUserContent() {
   };
 
 
+  const isSiswa =
+    userRoleName === "siswa" ||
+    String(form.peranId || "")
+      .trim()
+      .toLowerCase() === "siswa";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -231,7 +246,9 @@ function EditUserContent() {
         nip: form.nip.trim() || null,
         nipd: form.nipd.trim() || null,
         nisn: form.nisn.trim() || null,
-        jabatan: form.jabatan.trim() || null,
+        ...(!isSiswa
+          ? { jabatan: form.jabatan.trim() || null }
+          : {}),
         golongan: form.golongan.trim() || null,
         status: form.status,
       };
@@ -533,14 +550,16 @@ function EditUserContent() {
                 icon={GraduationCap}
               />
 
-              <FormInput
-                label="Jabatan"
-                name="jabatan"
-                value={form.jabatan}
-                onChange={handleChange}
-                placeholder="Contoh: Guru"
-                icon={BriefcaseBusiness}
-              />
+              {!isSiswa && (
+                <FormInput
+                  label="Jabatan"
+                  name="jabatan"
+                  value={form.jabatan}
+                  onChange={handleChange}
+                  placeholder="Contoh: Guru"
+                  icon={BriefcaseBusiness}
+                />
+              )}
 
               <FormInput
                 label="Golongan"

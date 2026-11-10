@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import CanAccess from "@/app/components/auth/CanAccess";
 
 import {
   Search,
@@ -151,25 +152,27 @@ const getInitials = (name) => {
 
 const normalizeJabatan = (user) => {
   const jabatan =
-    user?.kategoriJabatan?.nama ||
-    user?.kategoriJabatan?.namaJabatan ||
-    user?.kategori_jabatan?.nama ||
-    user?.kategori_jabatan?.nama_jabatan ||
-
+    user?.jabatanRef?.namaJabatan ||
+    user?.jabatan?.namaJabatan ||
     user?.jabatan?.namaTampilan ||
     user?.jabatan?.nama ||
-    user?.jabatan?.namaJabatan ||
     user?.jabatan?.label ||
 
     (typeof user?.jabatan === "string"
       ? user.jabatan
       : null) ||
 
+    user?.namaJabatan ||
+
+    user?.kategoriJabatan?.nama ||
+    user?.kategoriJabatan?.namaJabatan ||
+    user?.kategori_jabatan?.nama ||
+    user?.kategori_jabatan?.nama_jabatan ||
+
     user?.pegawai?.kategoriJabatan?.nama ||
     user?.pegawai?.jabatan?.nama ||
     user?.pegawai?.jabatan ||
 
-    user?.namaJabatan ||
     user?.posisi ||
     user?.keterangan;
 
@@ -883,19 +886,21 @@ export default function PenggunaPage() {
                   Export
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => router.push("/admin/pengguna/tambah")}
-                  className="
-                    inline-flex items-center justify-center gap-2
-                    px-4 py-2.5 rounded-xl
-                    bg-[var(--color-primary)] text-white
-                    text-sm font-semibold hover:brightness-110 transition
-                  "
-                >
-                  <Plus size={16} />
-                  Tambah Pengguna
-                </button>
+                <CanAccess menu="manajemen pengguna" action="create">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/admin/pengguna/tambah")}
+                    className="
+                      inline-flex items-center justify-center gap-2
+                      px-4 py-2.5 rounded-xl
+                      bg-[var(--color-primary)] text-white
+                      text-sm font-semibold hover:brightness-110 transition
+                    "
+                  >
+                    <Plus size={16} />
+                    Tambah Pengguna
+                  </button>
+                </CanAccess>
               </div>
             </div>
 
@@ -1508,47 +1513,49 @@ export default function PenggunaPage() {
                                 <Eye size={14} />
                               </button>
 
-                              <button
-                                type="button"
-                                onClick={() => handleEdit(user)}
-                                className="
-                                  w-8 h-8 rounded-lg border theme-border
-                                  theme-card theme-text-muted
-                                  hover:text-[var(--color-primary)]
-                                  hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
-                                  transition flex items-center justify-center
-                                "
-                                title="Edit"
-                              >
-                                <Pencil size={14} />
-                              </button>
+                              <CanAccess menu="manajemen pengguna" action="update">
+                                <button
+                                  type="button"
+                                  onClick={() => handleEdit(user)}
+                                  className="
+                                    w-8 h-8 rounded-lg border theme-border
+                                    theme-card theme-text-muted
+                                    hover:text-[var(--color-primary)]
+                                    hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                                    transition flex items-center justify-center
+                                  "
+                                  title="Edit"
+                                >
+                                  <Pencil size={14} />
+                                </button>
 
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleOpenStatusModal(user)
-                                }
-                                className={`
-                                  w-8 h-8 rounded-lg border theme-card
-                                  flex items-center justify-center transition
-                                  ${
-                                    user.status === "Aktif"
-                                      ? "theme-danger"
-                                      : "theme-success"
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleOpenStatusModal(user)
                                   }
-                                `}
-                                title={
-                                  user.status === "Aktif"
-                                    ? "Nonaktifkan"
-                                    : "Aktifkan"
-                                }
-                              >
-                                {user.status === "Aktif" ? (
-                                  <UserX size={14} />
-                                ) : (
-                                  <UserCheck size={14} />
-                                )}
-                              </button>
+                                  className={`
+                                    w-8 h-8 rounded-lg border theme-card
+                                    flex items-center justify-center transition
+                                    ${
+                                      user.status === "Aktif"
+                                        ? "theme-danger"
+                                        : "theme-success"
+                                    }
+                                  `}
+                                  title={
+                                    user.status === "Aktif"
+                                      ? "Nonaktifkan"
+                                      : "Aktifkan"
+                                  }
+                                >
+                                  {user.status === "Aktif" ? (
+                                    <UserX size={14} />
+                                  ) : (
+                                    <UserCheck size={14} />
+                                  )}
+                                </button>
+                              </CanAccess>
 
                               <button
                                 type="button"

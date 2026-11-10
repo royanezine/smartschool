@@ -6,12 +6,14 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import { createUser } from "@/services/user.service";
 import { getRoles } from "@/services/role.service";
+import { getAllJabatan } from "@/services/jabatan.service";
 import {
   ArrowLeft,
   User,
   Mail,
   Phone,
   Shield,
+  Briefcase,
   Save,
   UserPlus,
   Lock,
@@ -80,6 +82,8 @@ export default function TambahStafPage() {
   const [activeMenu] = useState("staf");
   const [roles, setRoles] = useState([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
+  const [jabatanList, setJabatanList] = useState([]);
+  const [loadingJabatan, setLoadingJabatan] = useState(true);
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
@@ -89,6 +93,7 @@ export default function TambahStafPage() {
     email: "",
     telepon: "",
     role: "",
+    jabatanId: "",
     status: "aktif",
     password: "",
   });
@@ -96,10 +101,14 @@ export default function TambahStafPage() {
   useEffect(() => {
     let cancelled = false;
 
-    const loadRoles = async () => {
+    const loadRolesAndJabatan = async () => {
       setLoadingRoles(true);
+      setLoadingJabatan(true);
       try {
-        const roleData = await getRoles();
+        const [roleData, jabData] = await Promise.all([
+          getRoles().catch(() => []),
+          getAllJabatan().catch(() => []),
+        ]);
         if (cancelled) return;
         const roleList = Array.isArray(roleData) ? roleData : [];
         setRoles(
@@ -107,16 +116,20 @@ export default function TambahStafPage() {
             (role) => normalizeRoleName(role?.nama) !== "siswa"
           )
         );
+        setJabatanList(Array.isArray(jabData) ? jabData : []);
       } catch (err) {
         if (cancelled) return;
-        console.error("[TambahStafPage] Gagal memuat role:", err);
+        console.error("[TambahStafPage] Gagal memuat role/jabatan:", err);
       } finally {
-        if (!cancelled) setLoadingRoles(false);
+        if (!cancelled) {
+          setLoadingRoles(false);
+          setLoadingJabatan(false);
+        }
       }
     };
 
     const timer = setTimeout(() => {
-      loadRoles();
+      loadRolesAndJabatan();
     }, 0);
 
     return () => {
@@ -167,6 +180,7 @@ export default function TambahStafPage() {
         email: formData.email.trim(),
         kataSandi: formData.password,
         peranId: formData.role,
+        jabatanId: formData.jabatanId ? formData.jabatanId : null,
         noTelepon: formData.telepon.trim() || null,
         status: formData.status.toLowerCase() === "nonaktif" ? "nonaktif" : "aktif",
       });
@@ -477,6 +491,27 @@ export default function TambahStafPage() {
                         {roles.map((r) => (
                           <option key={r.id} value={r.id}>
                             {r.namaTampilan || r.nama}
+                          </option>
+                        ))}
+                      </select>
+                    </FormField>
+
+                    <FormField
+                      label="Jabatan (Opsional)"
+                      icon={Briefcase}
+                    >
+                      <select
+                        name="jabatanId"
+                        value={formData.jabatanId}
+                        onChange={handleChange}
+                        className={`${inputClass} cursor-pointer appearance-none`}
+                      >
+                        <option value="">
+                          {loadingJabatan ? "Memuat daftar jabatan..." : "-- Tanpa Jabatan --"}
+                        </option>
+                        {jabatanList.map((j) => (
+                          <option key={j.id} value={j.id}>
+                            {j.namaJabatan || j.nama}
                           </option>
                         ))}
                       </select>

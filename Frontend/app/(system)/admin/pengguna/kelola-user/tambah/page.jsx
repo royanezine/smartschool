@@ -8,6 +8,7 @@ import Sidebar from "@/app/components/Sidebar";
 import { createUser } from "@/services/user.service";
 import { getRoles } from "@/services/role.service";
 import { getKelas } from "@/services/kelas.service";
+import { getAllJabatan } from "@/services/jabatan.service";
 
 import {
   ArrowLeft,
@@ -22,6 +23,7 @@ import {
   MapPin,
   Calendar,
   Shield,
+  Briefcase,
   Hash,
   UserPlus,
   UserCog,
@@ -96,6 +98,8 @@ export default function TambahUserPage() {
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
+  const [jabatanList, setJabatanList] = useState([]);
+  const [isLoadingJabatan, setIsLoadingJabatan] = useState(true);
   const [kelasList, setKelasList] = useState([]);
   const [isLoadingKelas, setIsLoadingKelas] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -109,6 +113,7 @@ export default function TambahUserPage() {
     email: "",
     noTelepon: "",
     peranId: "",
+    jabatanId: "",
     nip: "",
     jenisKelamin: "",
     tanggalLahir: "",
@@ -121,8 +126,27 @@ export default function TambahUserPage() {
 
   useEffect(() => {
     loadRoles();
+    loadJabatanList();
     loadKelasList();
   }, []);
+
+  async function loadJabatanList() {
+    try {
+      setIsLoadingJabatan(true);
+      const response = await getAllJabatan();
+      const list = Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response)
+        ? response
+        : [];
+      setJabatanList(list.filter((item) => item?.id && item?.namaJabatan));
+    } catch (error) {
+      console.error("LOAD JABATAN ERROR:", error);
+      setJabatanList([]);
+    } finally {
+      setIsLoadingJabatan(false);
+    }
+  }
 
   async function loadRoles() {
     try {
@@ -170,13 +194,17 @@ export default function TambahUserPage() {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-      ...(field === "peranId" ? { shiftKerja: "", kelasId: "" } : {}),
+      ...(field === "peranId"
+        ? { shiftKerja: "", kelasId: "", jabatanId: "" }
+        : {}),
     }));
 
     setErrors((prev) => ({
       ...prev,
       [field]: "",
-      ...(field === "peranId" ? { shiftKerja: "", kelasId: "" } : {}),
+      ...(field === "peranId"
+        ? { shiftKerja: "", kelasId: "", jabatanId: "" }
+        : {}),
     }));
 
     setServerError("");
@@ -186,7 +214,13 @@ export default function TambahUserPage() {
     (role) => String(role.id) === String(formData.peranId)
   );
 
-  const selectedRoleName = normalizeRole(selectedRole?.nama);
+  const selectedJabatan = jabatanList.find(
+    (item) => String(item.id) === String(formData.jabatanId)
+  );
+
+  const selectedRoleName = normalizeRole(
+    selectedRole?.nama || selectedRole?.namaTampilan
+  );
   const isGuru = selectedRoleName === "guru";
   const isSiswa = selectedRoleName === "siswa";
 
@@ -270,6 +304,12 @@ export default function TambahUserPage() {
         kataSandi: formData.kataSandi,
         namaLengkap: formData.namaLengkap.trim(),
         peranId: formData.peranId,
+        ...(!isSiswa
+          ? {
+              jabatanId: formData.jabatanId || null,
+              jabatan: selectedJabatan?.namaJabatan || null,
+            }
+          : {}),
         noTelepon: formData.noTelepon.trim() || null,
         nip: formData.nip.trim() || null,
         jenisKelamin:
@@ -588,6 +628,45 @@ export default function TambahUserPage() {
                         )}
                       </div>
 
+                      {!isSiswa && (
+                        <div className="min-w-0">
+                          <label className="theme-text-secondary mb-1.5 block text-sm font-semibold">
+                            Jabatan
+                          </label>
+                          <div className="relative">
+                            <Briefcase
+                              size={17}
+                              className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+                            />
+                            <select
+                              name="jabatanId"
+                              value={formData.jabatanId}
+                              onChange={(e) =>
+                                handleChange("jabatanId", e.target.value)
+                              }
+                              disabled={isLoadingJabatan}
+                              className={`${inputClass(errors.jabatanId)} appearance-none`}
+                            >
+                              <option value="">
+                                {isLoadingJabatan
+                                  ? "Memuat jabatan..."
+                                  : jabatanList.length === 0
+                                    ? "Belum ada jabatan tersedia"
+                                    : "Pilih Jabatan (Opsional)"}
+                              </option>
+                              {jabatanList.map((item) => (
+                                <option key={item.id} value={item.id}>
+                                  {item.namaJabatan}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          {errors.jabatanId && (
+                            <ErrorText>{errors.jabatanId}</ErrorText>
+                          )}
+                        </div>
+                      )}
+
                       {isGuru && (
                         <div className="min-w-0">
                           <label className="theme-text-secondary mb-1.5 block text-sm font-semibold">
@@ -738,6 +817,11 @@ export default function TambahUserPage() {
                           <p className="theme-text-secondary mt-0.5">
                             {selectedRole ? (selectedRole.namaTampilan || selectedRole.nama) : "Role belum dipilih"}
                           </p>
+                          {!isSiswa && (
+                            <p className="theme-text-muted mt-0.5">
+                              Jabatan: {selectedJabatan?.namaJabatan || "Belum dipilih"}
+                            </p>
+                          )}
                         </div>
                         <div className="theme-border-soft h-px" />
                         <div>

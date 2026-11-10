@@ -8,6 +8,7 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { createUser, getUsers } from "@/services/user.service";
 import { getKategoriJabatan } from "@/services/kategoriJabatan.service";
+import { getAllJabatan } from "@/services/jabatan.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
 
 import {
@@ -49,6 +50,7 @@ const INITIAL_FORM = {
   noTelepon: "",
   alamat: "",
   jabatan: "",
+  jabatanId: "",
   kategoriJabatanId: "",
   golongan: "",
   nik: "",
@@ -169,6 +171,8 @@ export default function TambahGuruPage() {
 
   const [guruRoleId, setGuruRoleId] = useState("");
   const [daftarKategoriJabatan, setDaftarKategoriJabatan] = useState([]);
+  const [daftarJabatan, setDaftarJabatan] = useState([]);
+  const [loadingJabatan, setLoadingJabatan] = useState(true);
   const [daftarShiftKerja, setDaftarShiftKerja] = useState([]);
 
   const [showPassword, setShowPassword] = useState(false);
@@ -269,6 +273,33 @@ export default function TambahGuruPage() {
     }
 
     loadKategoriJabatan();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // =========================================================
+  // AMBIL JABATAN (RBAC / HAK AKSES MENU)
+  // =========================================================
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadJabatan() {
+      try {
+        setLoadingJabatan(true);
+        const list = await getAllJabatan();
+        if (!mounted) return;
+        setDaftarJabatan(Array.isArray(list) ? list : []);
+      } catch (err) {
+        if (!mounted) return;
+        console.error("Gagal mengambil daftar jabatan:", err);
+      } finally {
+        if (mounted) setLoadingJabatan(false);
+      }
+    }
+
+    loadJabatan();
 
     return () => {
       mounted = false;
@@ -558,8 +589,9 @@ export default function TambahGuruPage() {
         noTelepon: form.noTelepon.trim() || null,
         alamat: form.alamat.trim() || null,
 
-        // KATEGORI JABATAN
+        // KATEGORI JABATAN & JABATAN RBAC
         kategoriJabatanId: form.kategoriJabatanId,
+        jabatanId: form.jabatanId ? form.jabatanId : null,
         jabatan: selectedKategoriJabatan?.nama || null,
 
         golongan: form.golongan.trim() || null,
@@ -1023,23 +1055,39 @@ export default function TambahGuruPage() {
                           </p>
                         </div>
 
-                        {/* JABATAN OTOMATIS */}
+                        {/* JABATAN (HAK AKSES MENU) */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
-                            Jabatan
+                            Jabatan (Hak Akses Menu)
                           </label>
 
-                          <input
-                            type="text"
-                            name="jabatan"
-                            value={form.jabatan}
-                            readOnly
-                            placeholder="Otomatis dari kategori jabatan"
-                            className="theme-input h-11 w-full cursor-not-allowed rounded-xl border px-4 text-sm outline-none opacity-80"
-                          />
+                          <div className="relative">
+                            <BriefcaseBusiness
+                              size={18}
+                              className="theme-text-placeholder pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
+                            />
+                            <select
+                              name="jabatanId"
+                              value={form.jabatanId}
+                              onChange={handleChange}
+                              disabled={loadingJabatan}
+                              className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              <option value="">
+                                {loadingJabatan
+                                  ? "Memuat daftar jabatan..."
+                                  : "-- Tanpa Jabatan --"}
+                              </option>
+                              {daftarJabatan.map((jab) => (
+                                <option key={jab.id} value={jab.id}>
+                                  {jab.namaJabatan || jab.nama}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
 
                           <p className="theme-text-muted mt-1.5 text-xs">
-                            Jabatan mengikuti kategori yang dipilih.
+                            Menentukan hak akses menu RBAC (terpisah dari Kategori Jabatan).
                           </p>
                         </div>
 

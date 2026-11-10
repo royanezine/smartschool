@@ -99,12 +99,21 @@ export default function TambahUserPage() {
   });
 
 
+  const isSiswa =
+    String(form.peranId || "")
+      .trim()
+      .toLowerCase() === "siswa";
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     setForm((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === "peranId" &&
+      String(value || "").trim().toLowerCase() === "siswa"
+        ? { jabatan: "" }
+        : {}),
     }));
 
     if (error) setError("");
@@ -167,7 +176,9 @@ export default function TambahUserPage() {
         nip: form.nip.trim() || null,
         nipd: form.nipd.trim() || null,
         nisn: form.nisn.trim() || null,
-        jabatan: form.jabatan.trim() || null,
+        ...(!isSiswa
+          ? { jabatan: form.jabatan.trim() || null }
+          : {}),
         golongan: form.golongan.trim() || null,
         status: form.status,
       };
@@ -553,14 +564,16 @@ export default function TambahUserPage() {
                     helper="Opsional"
                   />
 
-                  <InputField
-                    label="Jabatan"
-                    name="jabatan"
-                    value={form.jabatan}
-                    onChange={handleChange}
-                    placeholder="Contoh: Guru Mata Pelajaran"
-                    helper="Opsional"
-                  />
+                  {!isSiswa && (
+                    <InputField
+                      label="Jabatan"
+                      name="jabatan"
+                      value={form.jabatan}
+                      onChange={handleChange}
+                      placeholder="Contoh: Guru Mata Pelajaran"
+                      helper="Opsional"
+                    />
+                  )}
 
                   <InputField
                     label="Golongan"
