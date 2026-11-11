@@ -23,6 +23,7 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { hasMenuAccess } from "@/lib/auth";
 import { getMonitoringKehadiranGuru } from "@/services/absensi.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
 
@@ -228,6 +229,7 @@ export default function RekapAbsensiShiftPage() {
     let active = true;
 
     async function fetchShifts() {
+      if (!hasMenuAccess("monitoring absensi", "view")) return;
       try {
         const res = await getShiftKerja();
         const list = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
@@ -251,6 +253,13 @@ export default function RekapAbsensiShiftPage() {
 
   const loadData = useCallback(
     async (showRefresh = false, silent = false) => {
+      if (!hasMenuAccess("monitoring absensi", "view")) {
+        setError("Anda tidak memiliki akses ke halaman Rekap Absensi Shift.");
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+
       if (!tanggal) {
         setError("Silakan pilih tanggal rekap.");
         setLoading(false);

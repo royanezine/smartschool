@@ -546,18 +546,34 @@ export default function DetailPenggunaPage() {
       )
     : null;
 
+  const normalizedUserRole = String(
+    firstValue(
+      user.peran?.nama,
+      user.peran?.namaTampilan,
+      user.role?.nama,
+      user.roleName,
+      user.role,
+      ""
+    )
+  )
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+  const isSiswa = normalizedUserRole === "siswa";
+
   const shiftLabel = getShiftLabel(user, matchedShift);
   const shiftTime = getShiftTime(user, matchedShift);
   const shiftCode = getShiftCode(user, matchedShift);
   const categoryLabel = getCategoryLabel(user, matchedCategory);
-  const jabatanLabel = categoryLabel !== "-"
-  ? categoryLabel
-  : firstValue(
-      user.jabatan?.nama,
-      user.jabatan,
-      user.namaJabatan,
-      "-"
-    );
+  const jabatanLabel = firstValue(
+    user.jabatanRef?.namaJabatan,
+    user.jabatan?.namaJabatan,
+    user.jabatan?.nama,
+    typeof user.jabatan === "string" ? user.jabatan : null,
+    user.namaJabatan,
+    categoryLabel !== "-" ? categoryLabel : null,
+    "-"
+  );
 
   const hasShiftAssignment =
     Boolean(assignedShiftId) ||
@@ -660,7 +676,7 @@ export default function DetailPenggunaPage() {
                     {getRoleLabel(user)}
                   </span>
 
-                 {jabatanLabel !== "-" && (
+                 {!isSiswa && jabatanLabel !== "-" && (
   <span className="inline-flex items-center gap-1.5 rounded-lg border theme-border theme-card-soft px-2.5 py-1.5 text-xs font-semibold theme-text-secondary">
     <Briefcase size={13} />
     {jabatanLabel}
@@ -691,11 +707,13 @@ export default function DetailPenggunaPage() {
               label="Peran"
               value={getRoleLabel(user)}
             />
-            <InfoItem
-  icon={Briefcase}
-  label="Jabatan"
-  value={jabatanLabel}
-/>
+            {!isSiswa && (
+              <InfoItem
+                icon={Briefcase}
+                label="Jabatan"
+                value={jabatanLabel}
+              />
+            )}
             <InfoItem icon={CreditCard} label="NIP" value={user.nip} />
             <InfoItem
               icon={CreditCard}

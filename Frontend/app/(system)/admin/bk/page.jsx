@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import CanAccess from "@/app/components/auth/CanAccess";
 
 import {
   getSesiKonseling,
@@ -422,16 +423,18 @@ export default function BKPage() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  router.push("/admin/bk/sesi-konseling/tambah")
-                }
-                className="theme-primary inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition"
-              >
-                <Plus size={17} />
-                Tambah Sesi
-              </button>
+              <CanAccess menu="bimbingan konseling" action="create">
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push("/admin/bk/sesi-konseling/tambah")
+                  }
+                  className="theme-primary inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition"
+                >
+                  <Plus size={17} />
+                  Tambah Sesi
+                </button>
+              </CanAccess>
             </div>
 
             <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">

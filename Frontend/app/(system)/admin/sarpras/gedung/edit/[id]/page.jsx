@@ -49,57 +49,26 @@ export default function EditGedungPage() {
 
   const BACK_URL = "/admin/sarpras/gedung";
 
-  const themePrimarySoft =
-    "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
-
-  const themePrimaryBorder =
-    "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
-
-  const themePrimaryTextHover =
-    "hover:text-[var(--color-primary)]";
-
-  const themePrimaryShadow =
-    "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
-
-  const themeCardShadow =
-    "shadow-[0_3px_15px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-  const themeButtonShadow =
-    "shadow-[0_7px_18px_color-mix(in_srgb,var(--color-text)_14%,transparent)]";
-
-  const themeFocus =
-    "focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
-
-  const themePrimaryGradient =
-    "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
-
+  const themePrimarySoft = "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
+  const themePrimaryBorder = "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+  const themePrimaryTextHover = "hover:text-[var(--color-primary)]";
+  const themePrimaryShadow = "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+  const themeCardShadow = "shadow-[0_3px_15px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+  const themeButtonShadow = "shadow-[0_7px_18px_color-mix(in_srgb,var(--color-text)_14%,transparent)]";
+  const themeFocus = "focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+  const themePrimaryGradient = "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
   const themePrimaryGradientHover = "hover:brightness-95";
-
-  const themeNeutralHover =
-    "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-  const themeSoftSurface =
-    "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-  const themeDangerSoft =
-    "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-  const themeDangerBorder =
-    "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
-
+  const themeNeutralHover = "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+  const themeSoftSurface = "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+  const themeDangerSoft = "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+  const themeDangerBorder = "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
   const themeDangerText = "theme-danger";
-
-  const themeSuccessSoft =
-    "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]";
-
-  const themeSuccessBorder =
-    "border-[color-mix(in_srgb,var(--color-success)_25%,transparent)]";
-
-  const themeInfoSoft =
-    "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-  const themeInfoBorder =
-    "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+  const themeSuccessSoft = "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]";
+  const themeSuccessBorder = "border-[color-mix(in_srgb,var(--color-success)_25%,transparent)]";
+  
+  // Perbaikan Warna Info Box (Lebih Soft dan Profesional)
+  const themeInfoBoxBg = "bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)]";
+  const themeInfoBoxBorder = "border-[color-mix(in_srgb,var(--color-info)_15%,transparent)]";
 
   useEffect(() => {
     let cancelled = false;
@@ -116,20 +85,10 @@ export default function EditGedungPage() {
         setErrorMessage("");
 
         const response = await getGedung();
+        const result = response?.data ?? response?.result ?? response ?? [];
+        const gedungList = Array.isArray(result) ? result : [];
 
-        const result =
-          response?.data ??
-          response?.result ??
-          response ??
-          [];
-
-        const gedungList = Array.isArray(result)
-          ? result
-          : [];
-
-        const data = gedungList.find(
-          (item) => String(item?.id) === String(id)
-        );
+        const data = gedungList.find((item) => String(item?.id) === String(id));
 
         if (cancelled) return;
 
@@ -150,11 +109,8 @@ export default function EditGedungPage() {
         setImageError(false);
       } catch (error) {
         if (cancelled) return;
-
         console.error("Error fetch detail gedung:", error);
-        setErrorMessage(
-          error?.message || "Gagal mengambil data gedung."
-        );
+        setErrorMessage(error?.message || "Gagal mengambil data gedung.");
       } finally {
         if (!cancelled) {
           setIsLoading(false);
@@ -186,18 +142,12 @@ export default function EditGedungPage() {
       }));
     }
 
-    if (errorMessage) {
-      setErrorMessage("");
-    }
-
-    if (saved) {
-      setSaved(false);
-    }
+    if (errorMessage) setErrorMessage("");
+    if (saved) setSaved(false);
   };
 
   const validate = () => {
     const newErrors = {};
-
     const nama = formData.nama.trim();
     const kode = formData.kode.trim();
     const fotoGedung = formData.fotoGedung.trim();
@@ -217,10 +167,8 @@ export default function EditGedungPage() {
     } else if (fotoGedung) {
       try {
         const url = new URL(fotoGedung);
-
         if (!["http:", "https:"].includes(url.protocol)) {
-          newErrors.fotoGedung =
-            "URL foto harus menggunakan HTTP atau HTTPS.";
+          newErrors.fotoGedung = "URL foto harus menggunakan HTTP atau HTTPS.";
         }
       } catch {
         newErrors.fotoGedung = "Masukkan URL foto yang valid.";
@@ -228,16 +176,13 @@ export default function EditGedungPage() {
     }
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (isSaving) return;
     if (!validate()) return;
-
     if (!id) {
       setErrorMessage("ID gedung tidak ditemukan.");
       return;
@@ -263,11 +208,7 @@ export default function EditGedungPage() {
       }, 1200);
     } catch (error) {
       console.error("Error update gedung:", error);
-
-      setErrorMessage(
-        error?.message ||
-          "Gedung gagal diperbarui. Silakan coba lagi."
-      );
+      setErrorMessage(error?.message || "Gedung gagal diperbarui. Silakan coba lagi.");
     } finally {
       setIsSaving(false);
     }
@@ -276,43 +217,18 @@ export default function EditGedungPage() {
   if (isLoading) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
-        <Sidebar
-          active="sarpras"
-          setActive={() => {}}
-          collapsed={isCollapsed}
-          setCollapsed={setIsCollapsed}
-        />
-
+        <Sidebar active="sarpras" setActive={() => {}} collapsed={isCollapsed} setCollapsed={setIsCollapsed} />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0">
-            <Header
-              toggleSidebar={() => setIsCollapsed(!isCollapsed)}
-              notifications={[]}
-              user={{
-                name: "Admin Sekolah",
-                email: "admin@smartschool.com",
-                avatar: "AD",
-              }}
-            />
+            <Header toggleSidebar={() => setIsCollapsed(!isCollapsed)} notifications={[]} user={{ name: "Admin Sekolah", email: "admin@smartschool.com", avatar: "AD" }} />
           </div>
-
           <main className="theme-page flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto p-6">
-            <div
-              className={`theme-card theme-border w-full max-w-sm rounded-2xl border p-8 text-center ${themeCardShadow}`}
-            >
-              <div
-                className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimarySoft}`}
-              >
+            <div className={`theme-card theme-border w-full max-w-sm rounded-2xl border p-8 text-center ${themeCardShadow}`}>
+              <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimarySoft}`}>
                 <div className="h-6 w-6 animate-spin rounded-full border-[2.5px] border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] border-t-[var(--color-primary)]" />
               </div>
-
-              <h2 className="theme-text mt-5 text-sm font-semibold">
-                Memuat data gedung
-              </h2>
-
-              <p className="theme-text-muted mt-1 text-xs">
-                Mohon tunggu sebentar...
-              </p>
+              <h2 className="theme-text mt-5 text-sm font-semibold">Memuat data gedung</h2>
+              <p className="theme-text-muted mt-1 text-xs">Mohon tunggu sebentar...</p>
             </div>
           </main>
         </div>
@@ -322,24 +238,11 @@ export default function EditGedungPage() {
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      <Sidebar
-        active="sarpras"
-        setActive={() => {}}
-        collapsed={isCollapsed}
-        setCollapsed={setIsCollapsed}
-      />
+      <Sidebar active="sarpras" setActive={() => {}} collapsed={isCollapsed} setCollapsed={setIsCollapsed} />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0">
-          <Header
-            toggleSidebar={() => setIsCollapsed(!isCollapsed)}
-            notifications={[]}
-            user={{
-              name: "Admin Sekolah",
-              email: "admin@smartschool.com",
-              avatar: "AD",
-            }}
-          />
+          <Header toggleSidebar={() => setIsCollapsed(!isCollapsed)} notifications={[]} user={{ name: "Admin Sekolah", email: "admin@smartschool.com", avatar: "AD" }} />
         </div>
 
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
@@ -350,11 +253,7 @@ export default function EditGedungPage() {
                 onClick={() => router.push(BACK_URL)}
                 className={`group inline-flex items-center gap-2 self-start rounded-lg py-1 text-sm font-medium theme-text-secondary transition-colors ${themePrimaryTextHover}`}
               >
-                <ArrowLeft
-                  size={17}
-                  strokeWidth={2}
-                  className="transition-transform duration-200 group-hover:-translate-x-1"
-                />
+                <ArrowLeft size={17} strokeWidth={2} className="transition-transform duration-200 group-hover:-translate-x-1" />
                 <span>Kembali ke Daftar Gedung</span>
               </button>
 
@@ -363,54 +262,32 @@ export default function EditGedungPage() {
                 <span>/</span>
                 <span>Gedung</span>
                 <span>/</span>
-                <span className="theme-text-secondary font-medium">
-                  Edit
-                </span>
+                <span className="theme-text-secondary font-medium">Edit</span>
               </div>
             </div>
 
-            <section
-              className={`theme-card theme-border relative overflow-hidden rounded-2xl border ${themeCardShadow}`}
-            >
-              <div
-                className={`pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full ${themePrimarySoft} blur-3xl`}
-              />
-
-              <div
-                className={`pointer-events-none absolute -bottom-20 right-48 h-40 w-40 rounded-full ${themeInfoSoft} blur-3xl`}
-              />
+            <section className={`theme-card theme-border relative overflow-hidden rounded-2xl border ${themeCardShadow}`}>
+              <div className={`pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full ${themePrimarySoft} blur-3xl`} />
+              <div className={`pointer-events-none absolute -bottom-20 right-48 h-40 w-40 rounded-full ${themePrimarySoft} blur-3xl`} />
 
               <div className="relative flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between lg:px-7 lg:py-6">
                 <div className="flex min-w-0 items-center gap-4">
-                  <div
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} sm:h-14 sm:w-14`}
-                  >
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} sm:h-14 sm:w-14`}>
                     <Edit size={23} strokeWidth={1.9} />
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="theme-text text-xl font-bold tracking-[-0.025em] sm:text-2xl">
-                        Edit Gedung
-                      </h1>
-
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimaryBorder} ${themePrimarySoft} px-2.5 py-1 text-[10px] font-semibold text-[var(--color-primary)]`}
-                      >
+                      <h1 className="theme-text text-xl font-bold tracking-[-0.025em] sm:text-2xl">Edit Gedung</h1>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimaryBorder} ${themePrimarySoft} px-2.5 py-1 text-[10px] font-semibold text-[var(--color-primary)]`}>
                         <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
                         ID #{id}
                       </span>
                     </div>
-
                     <div className="mt-1.5 flex items-center gap-2">
-                      <Building
-                        size={14}
-                        className="shrink-0 text-[var(--color-primary)]"
-                      />
-
+                      <Building size={14} className="shrink-0 text-[var(--color-primary)]" />
                       <p className="theme-text-secondary text-xs leading-5 sm:text-sm">
-                        Perbarui informasi gedung yang tersimpan di
-                        SmartSchool.
+                        Perbarui informasi gedung yang tersimpan di SmartSchool.
                       </p>
                     </div>
                   </div>
@@ -422,10 +299,8 @@ export default function EditGedungPage() {
                     onClick={() => router.push(BACK_URL)}
                     className={`theme-card theme-border inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium theme-text-secondary transition-all ${themeNeutralHover} hover:text-[var(--color-text)] active:scale-[0.98] lg:h-11 lg:flex-none lg:px-5`}
                   >
-                    <X size={16} />
-                    Batal
+                    <X size={16} /> Batal
                   </button>
-
                   <button
                     type="button"
                     onClick={handleSubmit}
@@ -440,234 +315,133 @@ export default function EditGedungPage() {
             </section>
 
             {errorMessage && (
-              <div
-                className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSoft} px-4 py-3.5`}
-              >
-                <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card ${themeDangerText} ${themeCardShadow}`}
-                >
+              <div className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSoft} px-4 py-3.5`}>
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card ${themeDangerText} ${themeCardShadow}`}>
                   <AlertCircle size={17} />
                 </div>
-
                 <div className="min-w-0">
-                  <p className="theme-text text-sm font-semibold">
-                    Terjadi kesalahan
-                  </p>
-                  <p className="theme-danger mt-0.5 text-xs leading-5">
-                    {errorMessage}
-                  </p>
+                  <p className="theme-text text-sm font-semibold">Terjadi kesalahan</p>
+                  <p className="theme-danger mt-0.5 text-xs leading-5">{errorMessage}</p>
                 </div>
               </div>
             )}
 
             {saved && (
-              <div
-                className={`flex items-center gap-3 rounded-xl border ${themeSuccessBorder} ${themeSuccessSoft} px-4 py-3.5`}
-              >
-                <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card theme-success ${themeCardShadow}`}
-                >
+              <div className={`flex items-center gap-3 rounded-xl border ${themeSuccessBorder} ${themeSuccessSoft} px-4 py-3.5`}>
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card theme-success ${themeCardShadow}`}>
                   <CheckCircle size={17} />
                 </div>
-
                 <div>
-                  <p className="theme-success text-sm font-semibold">
-                    Perubahan berhasil disimpan
-                  </p>
-                  <p className="theme-success mt-0.5 text-xs">
-                    Mengalihkan kembali ke daftar gedung...
-                  </p>
+                  <p className="theme-success text-sm font-semibold">Perubahan berhasil disimpan</p>
+                  <p className="theme-success mt-0.5 text-xs">Mengalihkan kembali ke daftar gedung...</p>
                 </div>
               </div>
             )}
 
             <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
-              <section
-                className={`theme-card theme-border min-w-0 overflow-hidden rounded-2xl border ${themeCardShadow}`}
-              >
+              
+              <section className={`theme-card theme-border min-w-0 overflow-hidden rounded-2xl border ${themeCardShadow}`}>
                 <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
                   <div className="flex min-w-0 items-center gap-3">
-                    <div
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}
-                    >
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}>
                       <Building size={17} strokeWidth={1.9} />
                     </div>
-
                     <div className="min-w-0">
-                      <h2 className="theme-text text-sm font-semibold">
-                        Informasi Gedung
-                      </h2>
-                      <p className="theme-text-muted mt-0.5 text-[11px]">
-                        Perbarui data dasar gedung
-                      </p>
+                      <h2 className="theme-text text-sm font-semibold">Informasi Gedung</h2>
                     </div>
                   </div>
-
-                  <span
-                    className={`hidden rounded-lg ${themeSoftSurface} px-2.5 py-1 text-[10px] font-medium theme-text-muted sm:block`}
-                  >
-                    Data Gedung
-                  </span>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-5 sm:p-6">
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     <div>
-                      <label
-                        htmlFor="nama"
-                        className="theme-text mb-2 block text-xs font-semibold"
-                      >
+                      <label htmlFor="nama" className="theme-text mb-2 block text-xs font-semibold">
                         Nama Gedung <span className="theme-danger">*</span>
                       </label>
-
                       <div className="relative">
                         <div className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 flex -translate-y-1/2 items-center">
                           <Building size={16} />
                         </div>
-
                         <input
                           id="nama"
                           type="text"
                           value={formData.nama}
-                          onChange={(e) =>
-                            handleChange("nama", e.target.value)
-                          }
+                          onChange={(e) => handleChange("nama", e.target.value)}
                           maxLength={100}
                           placeholder="Contoh: Gedung Utama"
                           autoComplete="off"
                           className={`theme-input theme-border theme-text w-full rounded-xl border py-3 pl-10 pr-4 text-sm font-medium outline-none transition-all placeholder:font-normal theme-text-placeholder ${themeFocus}`}
                         />
                       </div>
-
-                      <div className="mt-1.5 flex min-h-[17px] items-center justify-between">
-                        {errors.nama ? (
-                          <p className="theme-danger flex items-center gap-1 text-[11px] font-medium">
-                            <AlertCircle size={12} />
-                            {errors.nama}
-                          </p>
-                        ) : (
-                          <span className="theme-text-muted text-[11px]">
-                            Gunakan nama gedung yang mudah dikenali.
-                          </span>
-                        )}
-
-                        <span className="theme-text-muted ml-auto text-[10px]">
-                          {formData.nama.length}/100
-                        </span>
-                      </div>
+                      {errors.nama && (
+                        <p className="theme-danger mt-1.5 flex items-center gap-1 text-[11px] font-medium">
+                          <AlertCircle size={12} /> {errors.nama}
+                        </p>
+                      )}
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="kode"
-                        className="theme-text mb-2 block text-xs font-semibold"
-                      >
+                      <label htmlFor="kode" className="theme-text mb-2 block text-xs font-semibold">
                         Kode Gedung
                       </label>
-
                       <div className="relative">
                         <div className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 flex -translate-y-1/2 items-center">
                           <Hash size={16} />
                         </div>
-
                         <input
                           id="kode"
                           type="text"
                           value={formData.kode}
-                          onChange={(e) =>
-                            handleChange("kode", e.target.value)
-                          }
+                          onChange={(e) => handleChange("kode", e.target.value)}
                           maxLength={20}
                           placeholder="Contoh: A, B, GDG-01"
                           autoComplete="off"
                           className={`theme-input theme-border theme-text w-full rounded-xl border py-3 pl-10 pr-4 text-sm font-medium outline-none transition-all placeholder:font-normal theme-text-placeholder ${themeFocus}`}
                         />
                       </div>
-
-                      <div className="mt-1.5 flex min-h-[17px] items-center justify-between">
-                        {errors.kode ? (
-                          <p className="theme-danger flex items-center gap-1 text-[11px] font-medium">
-                            <AlertCircle size={12} />
-                            {errors.kode}
-                          </p>
-                        ) : (
-                          <span className="theme-text-muted text-[11px]">
-                            Kode bersifat opsional.
-                          </span>
-                        )}
-
-                        <span className="theme-text-muted ml-auto text-[10px]">
-                          {formData.kode.length}/20
-                        </span>
-                      </div>
+                      {errors.kode && (
+                        <p className="theme-danger mt-1.5 flex items-center gap-1 text-[11px] font-medium">
+                          <AlertCircle size={12} /> {errors.kode}
+                        </p>
+                      )}
                     </div>
 
                     <div>
-                      <div className="mb-2 flex items-center justify-between">
-                        <label
-                          htmlFor="fotoGedung"
-                          className="theme-text block text-xs font-semibold"
-                        >
-                          URL Foto Gedung
-                        </label>
-
-                        <span
-                          className={`theme-border ${themeSoftSurface} theme-text-muted rounded-full border px-2 py-0.5 text-[9px] font-semibold tracking-wide`}
-                        >
-                          OPSIONAL
-                        </span>
-                      </div>
-
+                      <label htmlFor="fotoGedung" className="theme-text mb-2 block text-xs font-semibold">
+                        URL Foto Gedung
+                      </label>
                       <div className="relative">
                         <div className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 flex -translate-y-1/2 items-center">
                           <Link2 size={16} />
                         </div>
-
                         <input
                           id="fotoGedung"
                           type="url"
                           value={formData.fotoGedung}
-                          onChange={(e) =>
-                            handleChange("fotoGedung", e.target.value)
-                          }
+                          onChange={(e) => handleChange("fotoGedung", e.target.value)}
                           maxLength={255}
                           placeholder="https://contoh.com/foto-gedung.jpg"
                           autoComplete="off"
                           className={`theme-input theme-border theme-text w-full rounded-xl border py-3 pl-10 pr-4 text-sm font-medium outline-none transition-all placeholder:font-normal theme-text-placeholder ${themeFocus}`}
                         />
                       </div>
-
-                      {errors.fotoGedung ? (
+                      {errors.fotoGedung && (
                         <p className="theme-danger mt-1.5 flex items-center gap-1 text-[11px] font-medium">
-                          <AlertCircle size={12} />
-                          {errors.fotoGedung}
-                        </p>
-                      ) : (
-                        <p className="theme-text-muted mt-1.5 text-[11px] leading-5">
-                          Masukkan URL gambar maksimal 255 karakter untuk
-                          menampilkan foto pada preview.
+                          <AlertCircle size={12} /> {errors.fotoGedung}
                         </p>
                       )}
                     </div>
 
-                    <div
-                      className={`rounded-xl border ${themeInfoBorder} ${themeInfoSoft} p-4`}
-                    >
+                    {/* Info Box diperbaiki warnanya agar tidak menyala seperti link */}
+                    <div className={`rounded-xl border ${themeInfoBoxBorder} ${themeInfoBoxBg} p-4`}>
                       <div className="flex items-start gap-3">
-                        <div
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card theme-info ${themeCardShadow}`}
-                        >
-                          <Info size={15} />
+                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-card)] text-[var(--color-info)] shadow-sm`}>
+                          <Info size={16} />
                         </div>
-
                         <div className="min-w-0">
-                          <p className="theme-info text-xs font-semibold">
-                            Informasi Pengelolaan
-                          </p>
-                          <p className="theme-info mt-1 text-[11px] leading-5">
-                            Data yang dapat diperbarui adalah nama, kode,
-                            dan URL foto. Pengelolaan lantai dilakukan
-                            melalui fitur terpisah.
+                          <p className="theme-text text-xs font-semibold">Informasi Pengelolaan</p>
+                          <p className="theme-text-secondary mt-1 text-[11px] leading-5">
+                            Data yang dapat diperbarui adalah nama, kode, dan URL foto. Pengelolaan lantai dilakukan melalui fitur terpisah.
                           </p>
                         </div>
                       </div>
@@ -682,7 +456,6 @@ export default function EditGedungPage() {
                     >
                       Batal
                     </button>
-
                     <button
                       type="submit"
                       disabled={isSaving}
@@ -696,37 +469,21 @@ export default function EditGedungPage() {
               </section>
 
               <aside className="min-w-0">
-                <div
-                  className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow} lg:sticky lg:top-5`}
-                >
+                <div className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow} lg:sticky lg:top-5`}>
                   <div className="theme-border flex items-center justify-between border-b px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div
-                        className={`flex h-9 w-9 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)]`}
-                      >
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)]`}>
                         <Eye size={16} />
                       </div>
-
                       <div>
-                        <h2 className="theme-text text-sm font-semibold">
-                          Preview
-                        </h2>
-                        <p className="theme-text-muted mt-0.5 text-[10px]">
-                          Tampilan data gedung
-                        </p>
+                        <h2 className="theme-text text-sm font-semibold">Preview</h2>
                       </div>
                     </div>
-
-                    <Sparkles
-                      size={15}
-                      className="text-[var(--color-primary)]"
-                    />
+                    <Sparkles size={15} className="text-[var(--color-primary)]" />
                   </div>
 
                   <div className="p-4">
-                    <div
-                      className={`relative aspect-[16/9] overflow-hidden rounded-xl ${themeSoftSurface}`}
-                    >
+                    <div className={`relative aspect-[16/9] overflow-hidden rounded-xl ${themeSoftSurface}`}>
                       {formData.fotoGedung && !imageError ? (
                         <>
                           <img
@@ -735,34 +492,23 @@ export default function EditGedungPage() {
                             className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]"
                             onError={() => setImageError(true)}
                           />
-
                           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-
                           <div className="absolute bottom-3 left-3">
                             <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-black/60 px-2.5 py-1.5 text-[9px] font-semibold text-white backdrop-blur-md">
-                              <ImageIcon size={11} />
-                              Foto Gedung
+                              <ImageIcon size={11} /> Foto Gedung
                             </span>
                           </div>
                         </>
                       ) : (
                         <div className="flex h-full flex-col items-center justify-center px-5 text-center">
-                          <div
-                            className={`flex h-12 w-12 items-center justify-center rounded-xl theme-card theme-text-muted ${themeCardShadow}`}
-                          >
+                          <div className={`flex h-12 w-12 items-center justify-center rounded-xl theme-card theme-text-muted ${themeCardShadow}`}>
                             <Building size={23} />
                           </div>
-
                           <p className="theme-text-secondary mt-3 text-xs font-semibold">
-                            {imageError
-                              ? "Foto tidak dapat ditampilkan"
-                              : "Belum ada foto gedung"}
+                            {imageError ? "Foto tidak dapat ditampilkan" : "Belum ada foto gedung"}
                           </p>
-
                           <p className="theme-text-muted mt-1 max-w-[220px] text-[10px] leading-4">
-                            {imageError
-                              ? "Periksa kembali URL foto yang dimasukkan."
-                              : "Tambahkan URL foto untuk melihat preview."}
+                            {imageError ? "Periksa kembali URL foto yang dimasukkan." : "Tambahkan URL foto untuk melihat preview."}
                           </p>
                         </div>
                       )}
@@ -770,20 +516,13 @@ export default function EditGedungPage() {
                   </div>
 
                   <div className="px-5 pb-5">
-                    <div
-                      className={`theme-border ${themeSoftSurface} rounded-xl border p-4`}
-                    >
+                    <div className={`theme-border ${themeSoftSurface} rounded-xl border p-4`}>
                       <div className="flex items-start gap-3">
-                        <div
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
-                        >
+                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}>
                           <Building size={16} />
                         </div>
-
                         <div className="min-w-0 flex-1">
-                          <p className="theme-text-muted text-[10px] font-medium uppercase tracking-[0.08em]">
-                            Nama Gedung
-                          </p>
+                          <p className="theme-text-muted text-[10px] font-medium uppercase tracking-[0.08em]">Nama Gedung</p>
                           <p className="theme-text mt-1 break-words text-sm font-bold">
                             {formData.nama || "Nama Gedung"}
                           </p>
@@ -794,15 +533,9 @@ export default function EditGedungPage() {
 
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-2.5">
-                          <Hash
-                            size={14}
-                            className="theme-text-muted shrink-0"
-                          />
-                          <span className="theme-text-secondary text-xs">
-                            Kode
-                          </span>
+                          <Hash size={14} className="theme-text-muted shrink-0" />
+                          <span className="theme-text-secondary text-xs">Kode</span>
                         </div>
-
                         <span className="theme-border theme-card theme-text-secondary max-w-[150px] truncate rounded-md border px-2.5 py-1 font-mono text-[10px] font-semibold">
                           {formData.kode || "—"}
                         </span>
@@ -810,15 +543,9 @@ export default function EditGedungPage() {
 
                       <div className="mt-3 flex items-center justify-between gap-4">
                         <div className="flex items-center gap-2.5">
-                          <Info
-                            size={14}
-                            className="theme-text-muted shrink-0"
-                          />
-                          <span className="theme-text-secondary text-xs">
-                            ID Gedung
-                          </span>
+                          <Info size={14} className="theme-text-muted shrink-0" />
+                          <span className="theme-text-secondary text-xs">ID Gedung</span>
                         </div>
-
                         <span className="theme-text-secondary max-w-[160px] truncate font-mono text-[10px] font-semibold">
                           #{id}
                         </span>
@@ -828,13 +555,9 @@ export default function EditGedungPage() {
 
                   <div className="theme-border theme-card border-t px-5 py-4">
                     <div className="flex items-start gap-2.5">
-                      <CheckCircle
-                        size={14}
-                        className="theme-success mt-0.5 shrink-0"
-                      />
+                      <CheckCircle size={14} className="theme-success mt-0.5 shrink-0" />
                       <p className="theme-text-muted text-[10px] leading-4">
-                        Preview diperbarui secara otomatis mengikuti
-                        data yang kamu masukkan.
+                        Preview diperbarui secara otomatis mengikuti data yang kamu masukkan.
                       </p>
                     </div>
                   </div>

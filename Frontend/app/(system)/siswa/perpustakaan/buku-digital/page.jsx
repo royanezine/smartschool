@@ -562,9 +562,7 @@ export default function BukuDigitalSiswaPage() {
                   <div
                     className={`mb-4 inline-flex items-center gap-2 rounded-full border ${themePrimaryBorder} ${themePrimarySoft} px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)]`}
                   >
-                    <Sparkles
-                      size={13}
-                    />
+                   
                     Perpustakaan Digital
                   </div>
 

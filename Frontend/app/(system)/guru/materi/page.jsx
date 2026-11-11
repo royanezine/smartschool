@@ -104,9 +104,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-const themeOverlay =
-  "bg-[color-mix(in_srgb,var(--color-text)_70%,transparent)]";
-
 
 function getKelasName(materi) {
   return (
@@ -832,81 +829,376 @@ export default function GuruMateriPage() {
         <main className="theme-page min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
 
+            {/* === BANNER HERO (KONSISTEN DENGAN HALAMAN LAIN) === */}
+            <section
+              className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 ${themePrimaryGradient} shadow-lg`}
+            >
+              <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
-              <section
-                className={`relative overflow-hidden rounded-2xl ${themeCardShadow} border ${themePrimarySoftBorder} p-6 sm:p-8`}
-                style={{
-                  background:
-                    "linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 18%, var(--color-card)), color-mix(in srgb, var(--color-info) 10%, var(--color-card)))",
-                }}
-              >
-                <div
-                  className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 opacity-40"
-                  style={{
-                    background:
-                      "color-mix(in srgb, var(--color-primary) 22%, transparent)",
-                  }}
-                />
-
-                <div
-                  className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 opacity-30"
-                  style={{
-                    background:
-                      "color-mix(in srgb, var(--color-info) 20%, transparent)",
-                  }}
-                />
-
-                <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`hidden sm:flex items-center justify-center w-12 h-12 rounded-xl ${themePrimarySoft} border ${themePrimarySoftBorder}`}
-                    >
-                      <BookOpen
-                        size={24}
-                        className={themePrimaryText}
-                      />
+              <div className="relative z-10">
+                <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="min-w-0">
+                    <div className="mb-4 flex flex-wrap items-center gap-3">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
+                        <BookOpen size={25} />
+                      </div>
+                      <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
+                        Guru
+                      </span>
                     </div>
 
-                    <div>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <h1 className="text-2xl sm:text-3xl font-bold theme-text tracking-tight">
-                          Materi Pembelajaran
-                        </h1>
+                    <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                      Materi Pembelajaran
+                    </h1>
 
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${themePrimarySoft} border ${themePrimarySoftBorder} ${themePrimaryText} text-xs font-medium`}
-                        >
-                          <Sparkles size={12} />
-                          Guru
-                        </span>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90 sm:text-base">
+                      Kelola bahan ajar untuk siswa berdasarkan kelas dan mata pelajaran.
+                    </p>
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
+                        <Layers size={14} />
+                        {loading ? "—" : summary.total} materi
                       </div>
-
-                      <p className="theme-text-secondary text-sm mt-1">
-                        Kelola bahan ajar untuk siswa berdasarkan kelas dan mata pelajaran
-                      </p>
+                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
+                        <CalendarDays size={14} />
+                        {loading ? "—" : summary.bulanIni} bulan ini
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-2.5 shrink-0">
+                  <div className="flex shrink-0 flex-wrap gap-2">
                     <button
                       type="button"
-                      onClick={() =>
-                        loadMateri(true)
-                      }
+                      onClick={() => loadMateri(true)}
                       disabled={refreshing}
-                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl theme-card ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} text-sm font-medium transition-all disabled:opacity-60`}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <RefreshCw
-                        size={15}
-                        className={
-                          refreshing
-                            ? "animate-spin"
-                            : ""
-                        }
+                        size={16}
+                        className={refreshing ? "animate-spin" : ""}
                       />
-                      Refresh
+                      <span className="hidden sm:inline">Refresh</span>
                     </button>
 
+                    <button
+                      type="button"
+                      onClick={() => router.push("/guru/materi/tambah")}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 active:scale-[0.98]"
+                    >
+                      <Plus size={17} />
+                      Tambah Materi
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 Kartu Statistik (Tanpa Border Kaku) */}
+                <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
+                    <div className="flex items-center gap-2 text-white/70">
+                      <Layers size={15} />
+                      <span className="text-xs font-medium">Total Materi</span>
+                    </div>
+                    <p className="mt-2 text-2xl font-bold text-white">
+                      {loading ? "—" : summary.total}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
+                    <div className="flex items-center gap-2 text-white/70">
+                      <CalendarDays size={15} />
+                      <span className="text-xs font-medium">Bulan Ini</span>
+                    </div>
+                    <p className="mt-2 text-2xl font-bold text-white">
+                      {loading ? "—" : summary.bulanIni}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
+                    <div className="flex items-center gap-2 text-white/70">
+                      <GraduationCap size={15} />
+                      <span className="text-xs font-medium">Kelas</span>
+                    </div>
+                    <p className="mt-2 text-2xl font-bold text-white">
+                      {loading ? "—" : summary.kelasTercakup}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
+                    <div className="flex items-center gap-2 text-white/70">
+                      <HardDrive size={15} />
+                      <span className="text-xs font-medium">Sumber</span>
+                    </div>
+                    <p className="mt-2 text-sm font-bold text-white truncate">
+                      {loading ? "Memuat..." : `${summary.totalFile} file · ${summary.totalLink} link`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+            {successMessage && (
+              <div
+                className={`flex items-center gap-3 p-4 rounded-xl ${themeSuccessSurface} border ${themeSuccessBorder}`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-lg ${themeSuccessSurface} text-[var(--color-success)] flex items-center justify-center shrink-0`}
+                >
+                  <CheckCircle2 size={17} />
+                </div>
+
+                <p className="text-sm font-medium text-[var(--color-success)]">
+                  {successMessage}
+                </p>
+              </div>
+            )}
+
+
+            {error && (
+              <div
+                className={`flex items-start gap-3 p-4 rounded-xl ${themeDangerSurface} border ${themeDangerBorder}`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-lg ${themeDangerSurface} theme-danger flex items-center justify-center shrink-0`}
+                >
+                  <AlertCircle size={17} />
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold theme-danger">
+                    Terjadi kesalahan
+                  </p>
+
+                  <p className="text-sm theme-danger mt-1 break-words leading-relaxed">
+                    {error}
+                  </p>
+                </div>
+              </div>
+            )}
+
+
+            <section
+              className={`theme-card rounded-2xl ${themeCardShadow} border ${themeNeutralBorder} p-4 sm:p-5`}
+            >
+              <div className="flex flex-col lg:flex-row lg:items-end gap-4">
+
+                <div className="lg:w-36 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-8 h-8 rounded-lg ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center`}
+                    >
+                      <Filter size={15} />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold theme-text">
+                        Filter
+                      </p>
+
+                      <p className="text-xs theme-text-muted">
+                        Daftar materi
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+
+                <div className="w-full lg:w-64">
+                  <KelasSearchDropdown
+                    value={kelas}
+                    options={kelasOptions}
+                    onChange={setKelas}
+                    disabled={loading}
+                  />
+                </div>
+
+
+                <div className="w-full lg:w-56">
+                  <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                    Tipe Materi
+                  </label>
+
+                  <div className="relative">
+                    <select
+                      value={tipe}
+                      onChange={(e) =>
+                        setTipe(
+                          e.target.value
+                        )
+                      }
+                      disabled={loading}
+                      className={`theme-input w-full appearance-none px-3.5 pr-10 py-2.5 rounded-xl text-sm font-medium outline-none transition-all ${themeFocus} disabled:opacity-60`}
+                    >
+                      {tipeOptions.map(
+                        (item) => (
+                          <option
+                            key={item}
+                            value={item}
+                          >
+                            {item ===
+                            "Semua Tipe"
+                              ? item
+                              : getTipeInfo(
+                                  item
+                                ).label}
+                          </option>
+                        )
+                      )}
+                    </select>
+
+                    <ChevronDown
+                      size={15}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 theme-text-muted pointer-events-none"
+                    />
+                  </div>
+                </div>
+
+
+                <div className="flex-1 min-w-0">
+                  <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                    Pencarian
+                  </label>
+
+                  <div className="relative">
+                    <Search
+                      size={16}
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
+                    />
+
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={(e) =>
+                        setSearch(
+                          e.target.value
+                        )
+                      }
+                      disabled={loading}
+                      placeholder="Cari judul, kelas, mapel, atau kategori..."
+                      className={`theme-input w-full pl-10 pr-10 py-2.5 rounded-xl text-sm outline-none transition-all ${themeFocus} placeholder:text-[var(--color-text-placeholder)] disabled:opacity-60`}
+                    />
+
+                    {search && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSearch("")
+                        }
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md theme-text-muted ${themeNeutralHover}`}
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+
+                {hasFilter && (
+                  <button
+                    type="button"
+                    onClick={resetFilter}
+                    className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl theme-card ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} text-sm font-medium shrink-0 transition-all`}
+                  >
+                    <X size={14} />
+                    Reset Filter
+                  </button>
+                )}
+              </div>
+
+
+              {!loading &&
+                kelasOptions.length > 1 && (
+                  <div
+                    className={`mt-4 pt-4 border-t ${themeDivider} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}
+                  >
+                    <div className="flex items-center gap-2 text-xs theme-text-muted">
+                      <GraduationCap
+                        size={14}
+                        className={themePrimaryText}
+                      />
+
+                      <span>
+                        {kelasOptions.length - 1}{" "}
+                        kelas tersedia pada materi yang diajar
+                      </span>
+                    </div>
+
+                    {kelas !==
+                      "Semua Kelas" && (
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${themePrimarySoft} border ${themePrimarySoftBorder} ${themePrimaryText} text-xs font-semibold`}
+                      >
+                        Kelas: {kelas}
+                      </span>
+                    )}
+                  </div>
+                )}
+            </section>
+
+
+            {!loading && (
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+                <div>
+                  <h2 className="text-lg font-semibold theme-text">
+                    Daftar Materi
+                  </h2>
+
+                  <p className="text-sm theme-text-muted mt-0.5">
+                    {filteredMateri.length}{" "}
+                    materi ditampilkan dari{" "}
+                    {materiList.length} data
+                  </p>
+                </div>
+
+                {hasFilter && (
+                  <span
+                    className={`text-xs ${themePrimaryText} font-medium ${themePrimarySoft} px-3 py-1 rounded-full`}
+                  >
+                    Filter aktif
+                  </span>
+                )}
+              </div>
+            )}
+
+
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 xl:gap-5">
+                {[1, 2, 3, 4, 5, 6].map(
+                  (i) => (
+                    <SkeletonCard key={i} />
+                  )
+                )}
+              </div>
+            ) : filteredMateri.length === 0 ? (
+
+              <section
+                className={`theme-card rounded-2xl ${themeCardShadow} border ${themeNeutralBorder} p-12 sm:p-16 text-center`}
+              >
+                <div className="max-w-md mx-auto">
+                  <div
+                    className={`w-20 h-20 mx-auto rounded-2xl ${themePrimarySoft} border ${themePrimarySoftBorder} flex items-center justify-center`}
+                  >
+                    <BookOpen
+                      size={36}
+                      className={themePrimaryText}
+                    />
+                  </div>
+
+                  <h3 className="text-xl font-bold theme-text mt-6">
+                    {materiList.length === 0
+                      ? "Belum Ada Materi"
+                      : "Materi Tidak Ditemukan"}
+                  </h3>
+
+                  <p className="text-sm theme-text-secondary mt-2 leading-relaxed">
+                    {materiList.length === 0
+                      ? "Anda belum memiliki bahan ajar. Mulai bagikan materi untuk siswa."
+                      : "Coba ubah filter kelas, tipe materi, atau kata pencarian."}
+                  </p>
+
+                  {materiList.length === 0 ? (
                     <button
                       type="button"
                       onClick={() =>
@@ -914,603 +1206,264 @@ export default function GuruMateriPage() {
                           "/guru/materi/tambah"
                         )
                       }
-                      className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold transition-all ${themePrimaryShadow}`}
+                      className={`inline-flex items-center gap-2 mt-6 px-5 py-3 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold transition-all ${themePrimaryShadow}`}
                     >
                       <Plus size={16} />
-                      Tambah Materi
+                      Tambah Materi Sekarang
                     </button>
-                  </div>
-                </div>
-
-
-                <div className="relative mt-5 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-3">
-                  {[
-                    {
-                      label: "Total Materi",
-                      value: loading
-                        ? "—"
-                        : summary.total,
-                      icon: Layers,
-                    },
-                    {
-                      label: "Bulan Ini",
-                      value: loading
-                        ? "—"
-                        : summary.bulanIni,
-                      icon: CalendarDays,
-                    },
-                    {
-                      label: "Kelas",
-                      value: loading
-                        ? "—"
-                        : summary.kelasTercakup,
-                      icon: GraduationCap,
-                    },
-                    {
-                      label: "Sumber",
-                      value: loading
-                        ? "Memuat..."
-                        : `${summary.totalFile} file · ${summary.totalLink} link`,
-                      icon: HardDrive,
-                    },
-                  ].map(
-                    (stat, idx) => (
-                      <div
-                        key={idx}
-                        className={`theme-card-soft rounded-xl p-3.5 border ${themeNeutralBorder} ${themeNeutralHover} transition-all`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div
-                            className={`w-8 h-8 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
-                          >
-                            <stat.icon
-                              size={16}
-                              className={themePrimaryText}
-                            />
-                          </div>
-
-                          <div className="min-w-0">
-                            <p className="text-lg font-bold theme-text truncate">
-                              {stat.value}
-                            </p>
-
-                            <p className="text-[10px] theme-text-muted uppercase tracking-wider truncate">
-                              {stat.label}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </section>
-
-
-              {successMessage && (
-                <div
-                  className={`flex items-center gap-3 p-4 rounded-xl ${themeSuccessSurface} border ${themeSuccessBorder}`}
-                >
-                  <div
-                    className={`w-8 h-8 rounded-lg ${themeSuccessSurface} text-[var(--color-success)] flex items-center justify-center shrink-0`}
-                  >
-                    <CheckCircle2 size={17} />
-                  </div>
-
-                  <p className="text-sm font-medium text-[var(--color-success)]">
-                    {successMessage}
-                  </p>
-                </div>
-              )}
-
-
-              {error && (
-                <div
-                  className={`flex items-start gap-3 p-4 rounded-xl ${themeDangerSurface} border ${themeDangerBorder}`}
-                >
-                  <div
-                    className={`w-8 h-8 rounded-lg ${themeDangerSurface} theme-danger flex items-center justify-center shrink-0`}
-                  >
-                    <AlertCircle size={17} />
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold theme-danger">
-                      Terjadi kesalahan
-                    </p>
-
-                    <p className="text-sm theme-danger mt-1 break-words leading-relaxed">
-                      {error}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-
-              <section
-                className={`theme-card rounded-2xl ${themeCardShadow} border ${themeNeutralBorder} p-4 sm:p-5`}
-              >
-                <div className="flex flex-col lg:flex-row lg:items-end gap-4">
-
-                  <div className="lg:w-36 shrink-0">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-8 h-8 rounded-lg ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center`}
-                      >
-                        <Filter size={15} />
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-semibold theme-text">
-                          Filter
-                        </p>
-
-                        <p className="text-xs theme-text-muted">
-                          Daftar materi
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div className="w-full lg:w-64">
-                    <KelasSearchDropdown
-                      value={kelas}
-                      options={kelasOptions}
-                      onChange={setKelas}
-                      disabled={loading}
-                    />
-                  </div>
-
-
-                  <div className="w-full lg:w-56">
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Tipe Materi
-                    </label>
-
-                    <div className="relative">
-                      <select
-                        value={tipe}
-                        onChange={(e) =>
-                          setTipe(
-                            e.target.value
-                          )
-                        }
-                        disabled={loading}
-                        className={`theme-input w-full appearance-none px-3.5 pr-10 py-2.5 rounded-xl text-sm font-medium outline-none transition-all ${themeFocus} disabled:opacity-60`}
-                      >
-                        {tipeOptions.map(
-                          (item) => (
-                            <option
-                              key={item}
-                              value={item}
-                            >
-                              {item ===
-                              "Semua Tipe"
-                                ? item
-                                : getTipeInfo(
-                                    item
-                                  ).label}
-                            </option>
-                          )
-                        )}
-                      </select>
-
-                      <ChevronDown
-                        size={15}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 theme-text-muted pointer-events-none"
-                      />
-                    </div>
-                  </div>
-
-
-                  <div className="flex-1 min-w-0">
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Pencarian
-                    </label>
-
-                    <div className="relative">
-                      <Search
-                        size={16}
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
-                      />
-
-                      <input
-                        type="text"
-                        value={search}
-                        onChange={(e) =>
-                          setSearch(
-                            e.target.value
-                          )
-                        }
-                        disabled={loading}
-                        placeholder="Cari judul, kelas, mapel, atau kategori..."
-                        className={`theme-input w-full pl-10 pr-10 py-2.5 rounded-xl text-sm outline-none transition-all ${themeFocus} placeholder:text-[var(--color-text-placeholder)] disabled:opacity-60`}
-                      />
-
-                      {search && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setSearch("")
-                          }
-                          className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md theme-text-muted ${themeNeutralHover}`}
-                        >
-                          <X size={14} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-
-                  {hasFilter && (
+                  ) : (
                     <button
                       type="button"
                       onClick={resetFilter}
-                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl theme-card ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} text-sm font-medium shrink-0 transition-all`}
+                      className={`inline-flex items-center gap-2 mt-6 px-5 py-3 theme-card border ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} rounded-xl text-sm font-semibold transition-all`}
                     >
-                      <X size={14} />
+                      <RefreshCw size={16} />
                       Reset Filter
                     </button>
                   )}
                 </div>
-
-
-                {!loading &&
-                  kelasOptions.length > 1 && (
-                    <div
-                      className={`mt-4 pt-4 border-t ${themeDivider} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}
-                    >
-                      <div className="flex items-center gap-2 text-xs theme-text-muted">
-                        <GraduationCap
-                          size={14}
-                          className={themePrimaryText}
-                        />
-
-                        <span>
-                          {kelasOptions.length - 1}{" "}
-                          kelas tersedia pada materi yang diajar
-                        </span>
-                      </div>
-
-                      {kelas !==
-                        "Semua Kelas" && (
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${themePrimarySoft} border ${themePrimarySoftBorder} ${themePrimaryText} text-xs font-semibold`}
-                        >
-                          Kelas: {kelas}
-                        </span>
-                      )}
-                    </div>
-                  )}
               </section>
+            ) : (
 
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 xl:gap-5">
+                {filteredMateri.map(
+                  (materi) => {
+                    const kelasName =
+                      getKelasName(
+                        materi
+                      );
 
-              {!loading && (
-                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                  <div>
-                    <h2 className="text-lg font-semibold theme-text">
-                      Daftar Materi
-                    </h2>
+                    const mapelName =
+                      getMapelName(
+                        materi
+                      );
 
-                    <p className="text-sm theme-text-muted mt-0.5">
-                      {filteredMateri.length}{" "}
-                      materi ditampilkan dari{" "}
-                      {materiList.length} data
-                    </p>
-                  </div>
+                    const guruName =
+                      getGuruName(
+                        materi
+                      );
 
-                  {hasFilter && (
-                    <span
-                      className={`text-xs ${themePrimaryText} font-medium ${themePrimarySoft} px-3 py-1 rounded-full`}
-                    >
-                      Filter aktif
-                    </span>
-                  )}
-                </div>
-              )}
+                    const tipeInfo =
+                      getTipeInfo(
+                        materi?.tipe
+                      );
 
+                    const TypeIcon =
+                      tipeInfo.icon;
 
-              {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 xl:gap-5">
-                  {[1, 2, 3, 4, 5, 6].map(
-                    (i) => (
-                      <SkeletonCard key={i} />
-                    )
-                  )}
-                </div>
-              ) : filteredMateri.length === 0 ? (
-
-                <section
-                  className={`theme-card rounded-2xl ${themeCardShadow} border ${themeNeutralBorder} p-12 sm:p-16 text-center`}
-                >
-                  <div className="max-w-md mx-auto">
-                    <div
-                      className={`w-20 h-20 mx-auto rounded-2xl ${themePrimarySoft} border ${themePrimarySoftBorder} flex items-center justify-center`}
-                    >
-                      <BookOpen
-                        size={36}
-                        className={themePrimaryText}
-                      />
-                    </div>
-
-                    <h3 className="text-xl font-bold theme-text mt-6">
-                      {materiList.length === 0
-                        ? "Belum Ada Materi"
-                        : "Materi Tidak Ditemukan"}
-                    </h3>
-
-                    <p className="text-sm theme-text-secondary mt-2 leading-relaxed">
-                      {materiList.length === 0
-                        ? "Anda belum memiliki bahan ajar. Mulai bagikan materi untuk siswa."
-                        : "Coba ubah filter kelas, tipe materi, atau kata pencarian."}
-                    </p>
-
-                    {materiList.length === 0 ? (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          router.push(
-                            "/guru/materi/tambah"
-                          )
+                    return (
+                      <article
+                        key={
+                          materi.id
                         }
-                        className={`inline-flex items-center gap-2 mt-6 px-5 py-3 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold transition-all ${themePrimaryShadow}`}
+                        className={`group flex flex-col min-w-0 theme-card border ${themeNeutralBorder} rounded-2xl ${themeSmallShadow} hover:border-[var(--color-primary)] hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_10%,transparent)] transition-all duration-300 overflow-hidden`}
                       >
-                        <Plus size={16} />
-                        Tambah Materi Sekarang
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={resetFilter}
-                        className={`inline-flex items-center gap-2 mt-6 px-5 py-3 theme-card border ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} rounded-xl text-sm font-semibold transition-all`}
-                      >
-                        <RefreshCw size={16} />
-                        Reset Filter
-                      </button>
-                    )}
-                  </div>
-                </section>
-              ) : (
+                        <div className="p-5 flex flex-col flex-1">
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 xl:gap-5">
-                  {filteredMateri.map(
-                    (materi) => {
-                      const kelasName =
-                        getKelasName(
-                          materi
-                        );
-
-                      const mapelName =
-                        getMapelName(
-                          materi
-                        );
-
-                      const guruName =
-                        getGuruName(
-                          materi
-                        );
-
-                      const tipeInfo =
-                        getTipeInfo(
-                          materi?.tipe
-                        );
-
-                      const TypeIcon =
-                        tipeInfo.icon;
-
-                      return (
-                        <article
-                          key={
-                            materi.id
-                          }
-                          className={`group flex flex-col min-w-0 theme-card border ${themeNeutralBorder} rounded-2xl ${themeSmallShadow} hover:border-[var(--color-primary)] hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_10%,transparent)] transition-all duration-300 overflow-hidden`}
-                        >
-                          <div className="p-5 flex flex-col flex-1">
-
-                            <div className="flex items-start justify-between gap-3">
-                              <div
-                                className={`w-11 h-11 rounded-xl border flex items-center justify-center shrink-0 ${tipeInfo.bg} ${tipeInfo.color} ${tipeInfo.border}`}
-                              >
-                                <TypeIcon size={20} />
-                              </div>
-
-                              <span
-                                className={`inline-flex items-center px-2.5 py-1 rounded-full border text-[11px] font-semibold shrink-0 ${getKelasColor(
-                                  kelasName
-                                )}`}
-                              >
-                                {kelasName}
-                              </span>
-                            </div>
-
-
-                            <h3
-                              className={`mt-4 text-base sm:text-[17px] font-semibold leading-6 theme-text break-words line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors`}
-                            >
-                              {materi.judul ||
-                                "Tanpa Judul"}
-                            </h3>
-
-
-                            <div className="flex items-center gap-2 mt-2">
-                              <BookOpen
-                                size={14}
-                                className={`${themePrimaryText} shrink-0`}
-                              />
-
-                              <p
-                                className={`text-sm font-medium ${themePrimaryText} truncate`}
-                              >
-                                {mapelName}
-                              </p>
-                            </div>
-
-
-                            {materi.kategori && (
-                              <div className="mt-3">
-                                <span
-                                  className={`inline-flex max-w-full px-2.5 py-1 rounded-md ${themeNeutralSurface} border ${themeNeutralBorder} text-xs font-medium theme-text-secondary truncate`}
-                                >
-                                  {materi.kategori}
-                                </span>
-                              </div>
-                            )}
-
-
-                            <p className="mt-3 text-sm theme-text-secondary leading-6 line-clamp-3 min-h-[72px]">
-                              {materi.deskripsi ||
-                                "Belum ada deskripsi materi."}
-                            </p>
-
-
+                          <div className="flex items-start justify-between gap-3">
                             <div
-                              className={`mt-4 pt-4 border-t ${themeDivider} flex-1`}
+                              className={`w-11 h-11 rounded-xl border flex items-center justify-center shrink-0 ${tipeInfo.bg} ${tipeInfo.color} ${tipeInfo.border}`}
                             >
-                              <div className="grid grid-cols-2 gap-3">
-                                <div className="min-w-0">
-                                  <p className="text-[11px] uppercase tracking-wider font-semibold theme-text-muted">
-                                    Tanggal
-                                  </p>
-
-                                  <div className="flex items-center gap-1.5 mt-1">
-                                    <CalendarDays
-                                      size={13}
-                                      className="theme-text-muted shrink-0"
-                                    />
-
-                                    <p className="text-xs font-medium theme-text-secondary truncate">
-                                      {formatTanggal(
-                                        materi.dibuatPada
-                                      )}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="min-w-0">
-                                  <p className="text-[11px] uppercase tracking-wider font-semibold theme-text-muted">
-                                    Sumber
-                                  </p>
-
-                                  <div className="flex items-center gap-1.5 mt-1">
-                                    <TypeIcon
-                                      size={13}
-                                      className="theme-text-muted shrink-0"
-                                    />
-
-                                    <p className="text-xs font-medium theme-text-secondary">
-                                      {tipeInfo.label}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="mt-3">
-                                <p className="text-[11px] uppercase tracking-wider font-semibold theme-text-muted">
-                                  Pengajar
-                                </p>
-
-                                <p className="text-xs font-medium theme-text-secondary mt-1 truncate">
-                                  {guruName}
-                                </p>
-                              </div>
+                              <TypeIcon size={20} />
                             </div>
+
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-full border text-[11px] font-semibold shrink-0 ${getKelasColor(
+                                kelasName
+                              )}`}
+                            >
+                              {kelasName}
+                            </span>
                           </div>
 
 
-                          <div className="px-5 pb-5">
-                            <div className="grid grid-cols-2 gap-2">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  router.push(
-                                    `/guru/materi/${materi.id}`
-                                  )
-                                }
-                                className={`inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl theme-card border ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} text-sm font-medium transition-all`}
-                              >
-                                <Eye size={15} />
-                                Lihat
-                              </button>
+                          <h3
+                            className={`mt-4 text-base sm:text-[17px] font-semibold leading-6 theme-text break-words line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors`}
+                          >
+                            {materi.judul ||
+                              "Tanpa Judul"}
+                          </h3>
 
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  router.push(
-                                    `/guru/materi/${materi.id}/edit`
-                                  )
-                                }
-                                className={`inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl ${themePrimarySoft} border ${themePrimarySoftBorder} ${themePrimaryText} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] text-sm font-medium transition-all`}
+
+                          <div className="flex items-center gap-2 mt-2">
+                            <BookOpen
+                              size={14}
+                              className={`${themePrimaryText} shrink-0`}
+                            />
+
+                            <p
+                              className={`text-sm font-medium ${themePrimaryText} truncate`}
+                            >
+                              {mapelName}
+                            </p>
+                          </div>
+
+
+                          {materi.kategori && (
+                            <div className="mt-3">
+                              <span
+                                className={`inline-flex max-w-full px-2.5 py-1 rounded-md ${themeNeutralSurface} border ${themeNeutralBorder} text-xs font-medium theme-text-secondary truncate`}
                               >
-                                <Pencil size={15} />
-                                Edit
-                              </button>
+                                {materi.kategori}
+                              </span>
                             </div>
+                          )}
+
+
+                          <p className="mt-3 text-sm theme-text-secondary leading-6 line-clamp-3 min-h-[72px]">
+                            {materi.deskripsi ||
+                              "Belum ada deskripsi materi."}
+                          </p>
+
+
+                          <div
+                            className={`mt-4 pt-4 border-t ${themeDivider} flex-1`}
+                          >
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="min-w-0">
+                                <p className="text-[11px] uppercase tracking-wider font-semibold theme-text-muted">
+                                  Tanggal
+                                </p>
+
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  <CalendarDays
+                                    size={13}
+                                    className="theme-text-muted shrink-0"
+                                  />
+
+                                  <p className="text-xs font-medium theme-text-secondary truncate">
+                                    {formatTanggal(
+                                      materi.dibuatPada
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="min-w-0">
+                                <p className="text-[11px] uppercase tracking-wider font-semibold theme-text-muted">
+                                  Sumber
+                                </p>
+
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  <TypeIcon
+                                    size={13}
+                                    className="theme-text-muted shrink-0"
+                                  />
+
+                                  <p className="text-xs font-medium theme-text-secondary">
+                                    {tipeInfo.label}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mt-3">
+                              <p className="text-[11px] uppercase tracking-wider font-semibold theme-text-muted">
+                                Pengajar
+                              </p>
+
+                              <p className="text-xs font-medium theme-text-secondary mt-1 truncate">
+                                {guruName}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+
+                        <div className="px-5 pb-5">
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                router.push(
+                                  `/guru/materi/${materi.id}`
+                                )
+                              }
+                              className={`inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl theme-card border ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} text-sm font-medium transition-all`}
+                            >
+                              <Eye size={15} />
+                              Lihat
+                            </button>
 
                             <button
                               type="button"
                               onClick={() =>
-                                handleDelete(
-                                  materi.id
+                                router.push(
+                                  `/guru/materi/${materi.id}/edit`
                                 )
                               }
-                              disabled={
-                                deletingId ===
-                                materi.id
-                              }
-                              className={`mt-2.5 w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl ${themeDangerSurface} border ${themeDangerBorder} theme-danger hover:bg-[color-mix(in_srgb,var(--color-text)_9%,transparent)] text-sm font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed`}
+                              className={`inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl ${themePrimarySoft} border ${themePrimarySoftBorder} ${themePrimaryText} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] text-sm font-medium transition-all`}
                             >
-                              {deletingId ===
-                              materi.id ? (
-                                <>
-                                  <Loader2
-                                    size={15}
-                                    className="animate-spin"
-                                  />
-                                  Menghapus...
-                                </>
-                              ) : (
-                                <>
-                                  <Trash2 size={15} />
-                                  Hapus
-                                </>
-                              )}
+                              <Pencil size={15} />
+                              Edit
                             </button>
                           </div>
-                        </article>
-                      );
-                    }
-                  )}
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDelete(
+                                materi.id
+                              )
+                            }
+                            disabled={
+                              deletingId ===
+                              materi.id
+                            }
+                            className={`mt-2.5 w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl ${themeDangerSurface} border ${themeDangerBorder} theme-danger hover:bg-[color-mix(in_srgb,var(--color-text)_9%,transparent)] text-sm font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed`}
+                          >
+                            {deletingId ===
+                            materi.id ? (
+                              <>
+                                <Loader2
+                                  size={15}
+                                  className="animate-spin"
+                                />
+                                Menghapus...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 size={15} />
+                                Hapus
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  }
+                )}
+              </div>
+            )}
+
+
+            {!loading &&
+              filteredMateri.length > 0 && (
+                <div
+                  className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 border-t ${themeDivider}`}
+                >
+                  <p className="text-xs sm:text-sm theme-text-muted">
+                    Menampilkan{" "}
+                    <span className="font-semibold theme-text-secondary">
+                      {
+                        filteredMateri.length
+                      }
+                    </span>{" "}
+                    dari{" "}
+                    <span className="font-semibold theme-text-secondary">
+                      {
+                        materiList.length
+                      }
+                    </span>{" "}
+                    materi
+                  </p>
+
+                  <p className="text-xs theme-text-muted flex items-center gap-1.5">
+                    <Clock size={12} />
+                    Data berasal dari sistem SmartSchool
+                  </p>
                 </div>
               )}
-
-
-              {!loading &&
-                filteredMateri.length > 0 && (
-                  <div
-                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 border-t ${themeDivider}`}
-                  >
-                    <p className="text-xs sm:text-sm theme-text-muted">
-                      Menampilkan{" "}
-                      <span className="font-semibold theme-text-secondary">
-                        {
-                          filteredMateri.length
-                        }
-                      </span>{" "}
-                      dari{" "}
-                      <span className="font-semibold theme-text-secondary">
-                        {
-                          materiList.length
-                        }
-                      </span>{" "}
-                      materi
-                    </p>
-
-                    <p className="text-xs theme-text-muted flex items-center gap-1.5">
-                      <Clock size={12} />
-                      Data berasal dari sistem SmartSchool
-                    </p>
-                  </div>
-                )}
           </div>
         </main>
       </div>

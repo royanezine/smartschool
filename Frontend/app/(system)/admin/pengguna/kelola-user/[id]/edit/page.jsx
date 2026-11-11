@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { getUserById, updateUser } from "@/services/user.service";
+import { getAllJabatan } from "@/services/jabatan.service";
 import { getKategoriJabatan } from "@/services/kategoriJabatan.service";
 import {
   getShiftKerja,
@@ -40,6 +41,7 @@ const initialForm = {
   tanggalLahir: "",
   alamat: "",
   jabatan: "",
+  jabatanId: "",
   golongan: "",
   status: "aktif",
   kategoriJabatanId: "",
@@ -92,6 +94,36 @@ function getKategoriId(user) {
   );
 }
 
+function resolveJabatanId(user, jabatanList = []) {
+  const directId =
+    user?.jabatanId ??
+    user?.jabatan_id ??
+    user?.jabatanRef?.id ??
+    (typeof user?.jabatan === "object" ? user?.jabatan?.id : "");
+
+  if (directId) {
+    return String(directId);
+  }
+
+  const rawName =
+    user?.jabatanRef?.namaJabatan ??
+    (typeof user?.jabatan === "string" ? user.jabatan : "") ??
+    "";
+
+  const normalizedName = String(rawName).trim().toLowerCase();
+  if (!normalizedName) return "";
+
+  const matched = jabatanList.find(
+    (item) =>
+      String(item?.id) === String(rawName).trim() ||
+      String(item?.namaJabatan || item?.nama || "")
+        .trim()
+        .toLowerCase() === normalizedName
+  );
+
+  return matched?.id ? String(matched.id) : "";
+}
+
 function getShiftId(user) {
   return String(
     user?.shiftKerjaId ?? user?.shiftKerjaMaster?.id ?? ""
@@ -118,6 +150,7 @@ export default function EditUserPage() {
   const [form, setForm] = useState(initialForm);
   const [userRole, setUserRole] = useState("");
   const [schoolName, setSchoolName] = useState("-");
+  const [jabatanOptions, setJabatanOptions] = useState([]);
   const [kategoriOptions, setKategoriOptions] = useState([]);
   const [shiftOptions, setShiftOptions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -139,11 +172,14 @@ export default function EditUserPage() {
     setError("");
 
     try {
-      const [userResponse, kategoriResponse, shiftResponse] =
+      const [userResponse, jabatanResponse, kategoriResponse, shiftResponse] =
         await Promise.all([
           getUserById(String(id)),
-          getKategoriJabatan({ page: 1, limit: 100, status: "aktif" }),
-          getShiftKerja({ page: 1, limit: 100 }),
+          getAllJabatan().catch(() => ({ data: [] })),
+          getKategoriJabatan({ page: 1, limit: 100, status: "aktif" }).catch(
+            () => ({ data: [] })
+          ),
+          getShiftKerja({ page: 1, limit: 100 }).catch(() => ({ data: [] })),
         ]);
 
       const user = userResponse?.data;
@@ -155,17 +191,33 @@ export default function EditUserPage() {
       }
 
       const role = normalizeRoleName(user);
+      const isSiswaUser = role === "siswa";
+      const jabatanList = unwrapList(jabatanResponse);
       const kategoriList = unwrapList(kategoriResponse);
       const shiftList = unwrapList(shiftResponse);
 
       setUserRole(role);
       setSchoolName(user?.sekolah?.nama || "-");
 
+      const currentJabatanId = isSiswaUser
+        ? ""
+        : resolveJabatanId(user, jabatanList);
       const kategoriId = getKategoriId(user);
       const shiftId = getShiftId(user);
 
+      const savedJabatanRef = user?.jabatanRef;
       const savedKategori = user?.kategoriJabatan;
       const savedShift = user?.shiftKerjaMaster;
+
+      const finalJabatanList =
+        savedJabatanRef &&
+        typeof savedJabatanRef === "object" &&
+        savedJabatanRef.id &&
+        !jabatanList.some(
+          (item) => String(item.id) === String(savedJabatanRef.id)
+        )
+          ? [...jabatanList, savedJabatanRef]
+          : jabatanList;
 
       const finalKategoriList =
         savedKategori &&
@@ -192,8 +244,13 @@ export default function EditUserPage() {
           ? [...activeShifts, savedShift]
           : activeShifts;
 
+      setJabatanOptions(finalJabatanList);
       setKategoriOptions(finalKategoriList);
       setShiftOptions(finalShiftList);
+
+      const matchedJabatan = finalJabatanList.find(
+        (item) => String(item.id) === String(currentJabatanId)
+      );
 
       setForm({
         namaLengkap: user?.namaLengkap || "",
@@ -209,7 +266,13 @@ export default function EditUserPage() {
         tempatLahir: user?.tempatLahir || "",
         tanggalLahir: toDateInput(user?.tanggalLahir),
         alamat: user?.alamat || "",
-        jabatan: user?.jabatan || "",
+        jabatan: isSiswaUser
+          ? ""
+          : matchedJabatan?.namaJabatan ||
+            user?.jabatanRef?.namaJabatan ||
+            (typeof user?.jabatan === "string" ? user.jabatan : "") ||
+            "",
+        jabatanId: isSiswaUser ? "" : currentJabatanId,
         golongan: user?.golongan || "",
         status: user?.status || "aktif",
         kategoriJabatanId: kategoriId,
@@ -231,6 +294,21 @@ export default function EditUserPage() {
 
   function handleChange(event) {
     const { name, value } = event.target;
+    if (name === "jabatanId") {
+      const selectedJabatan = jabatanOptions.find(
+        (item) => String(item.id) === String(value)
+      );
+      setForm((previous) => ({
+        ...previous,
+        jabatanId: value,
+        jabatan: selectedJabatan
+          ? selectedJabatan.namaJabatan || selectedJabatan.nama || ""
+          : "",
+      }));
+      setError("");
+      setSuccess("");
+      return;
+    }
     setForm((previous) => ({ ...previous, [name]: value }));
     setError("");
     setSuccess("");
@@ -260,15 +338,21 @@ export default function EditUserPage() {
       return;
     }
 
-    if (!isSiswa && !form.kategoriJabatanId) {
-      setError("Kategori jabatan wajib dipilih.");
-      return;
-    }
-
-    if (isGuru && !form.shiftKerjaId) {
+    if (isGuru && form.kategoriJabatanId && !form.shiftKerjaId) {
       setError("Shift kerja guru wajib dipilih.");
       return;
     }
+
+    const selectedJabatan = jabatanOptions.find(
+      (item) => String(item.id) === String(form.jabatanId)
+    );
+
+    const resolvedJabatanName = form.jabatanId
+      ? selectedJabatan?.namaJabatan ||
+        selectedJabatan?.nama ||
+        form.jabatan.trim() ||
+        null
+      : null;
 
     const payload = {
       namaLengkap,
@@ -284,7 +368,12 @@ export default function EditUserPage() {
       tempatLahir: form.tempatLahir.trim() || null,
       tanggalLahir: form.tanggalLahir || null,
       alamat: form.alamat.trim() || null,
-      jabatan: form.jabatan.trim() || null,
+      ...(!isSiswa
+        ? {
+            jabatanId: form.jabatanId ? String(form.jabatanId) : null,
+            jabatan: resolvedJabatanName,
+          }
+        : {}),
       golongan: form.golongan.trim() || null,
       status: form.status,
     };
@@ -300,7 +389,7 @@ export default function EditUserPage() {
         );
       }
 
-      if (!isSiswa) {
+      if (!isSiswa && form.kategoriJabatanId) {
         const shiftIdToSave = isGuru
           ? form.shiftKerjaId
           : form.shiftKerjaId || null;
@@ -372,6 +461,14 @@ export default function EditUserPage() {
       </div>
     );
   }
+
+  const jabatanSelectOptions = [
+    { value: "", label: "Pilih jabatan (Tanpa Jabatan)" },
+    ...jabatanOptions.map((item) => ({
+      value: String(item.id),
+      label: item.namaJabatan || item.nama || "Jabatan",
+    })),
+  ];
 
   const kategoriSelectOptions = [
     { value: "", label: "Pilih kategori jabatan" },
@@ -540,19 +637,41 @@ export default function EditUserPage() {
 
                     {!isSiswa && (
                       <div>
+                        <label className={labelClass} htmlFor="jabatanId">
+                          Jabatan
+                        </label>
+                        <select
+                          id="jabatanId"
+                          name="jabatanId"
+                          value={form.jabatanId}
+                          onChange={handleChange}
+                          className={inputClass}
+                        >
+                          {jabatanSelectOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="mt-1 text-xs theme-text-muted">
+                          Pilihan berasal dari manajemen jabatan (/api/jabatan).
+                        </p>
+                      </div>
+                    )}
+
+                    {!isSiswa && (
+                      <div>
                         <label
                           className={labelClass}
                           htmlFor="kategoriJabatanId"
                         >
-                          Kategori jabatan{" "}
-                          <span className="text-[var(--color-danger)]">*</span>
+                          Kategori jabatan
                         </label>
                         <select
                           id="kategoriJabatanId"
                           name="kategoriJabatanId"
                           value={form.kategoriJabatanId}
                           onChange={handleChange}
-                          required
                           className={inputClass}
                         >
                           {kategoriSelectOptions.map((option) => (
@@ -567,7 +686,6 @@ export default function EditUserPage() {
                       </div>
                     )}
 
-                    {field("jabatan", "Jabatan (data profil lama)")}
                     {field("golongan", "Golongan")}
 
                     {field("jenisKelamin", "Jenis kelamin", {

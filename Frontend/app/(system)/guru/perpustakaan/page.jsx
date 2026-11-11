@@ -30,6 +30,9 @@ import {
 
 const PAGE_SIZE = 8;
 
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
 const themeCardShadow = "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 const themePrimarySoft = "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 const themePrimaryBorder = "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
@@ -322,10 +325,10 @@ export default function PerpustakaanGuruPage() {
   };
 
   const stats = [
-    { label: "Total Koleksi", value: buku.length, icon: BookOpen, iconClass: `${themePrimarySoft} text-[var(--color-primary)]` },
-    { label: "Buku Tersedia", value: availableBooksCount, icon: Package, iconClass: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]" },
-    { label: "Sedang Dipinjam", value: activeBorrowings.length, icon: BookMarked, iconClass: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]" },
-    { label: "Dikembalikan", value: returnedBorrowings.length, icon: RotateCcw, iconClass: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]" },
+    { label: "Total Koleksi", value: buku.length, icon: BookOpen },
+    { label: "Buku Tersedia", value: availableBooksCount, icon: Package },
+    { label: "Sedang Dipinjam", value: activeBorrowings.length, icon: BookMarked },
+    { label: "Dikembalikan", value: returnedBorrowings.length, icon: RotateCcw },
   ];
 
   return (
@@ -340,30 +343,80 @@ export default function PerpustakaanGuruPage() {
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
             
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-              <div>
-                <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider theme-text-muted">
-                  <Library size={14} />
-                  Perpustakaan
-                </div>
-                <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
-                  Katalog & Peminjaman
-                </h1>
-                <p className="theme-text-secondary mt-1 text-sm">
-                  Cari koleksi buku dan pantau peminjaman buku Anda.
-                </p>
-              </div>
+            {/* === BANNER HERO (KONSISTEN DENGAN HALAMAN LAIN) === */}
+            <section
+              className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 ${themePrimaryGradient} shadow-lg`}
+            >
+              <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
-              <button
-                type="button"
-                onClick={() => loadData(true)}
-                disabled={loading || refreshing}
-                className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-4 text-sm font-semibold theme-text-secondary shadow-sm transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-60`}
-              >
-                <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
-                Segarkan
-              </button>
-            </div>
+              <div className="relative z-10">
+                <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="min-w-0">
+                    <div className="mb-4 flex flex-wrap items-center gap-3">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
+                        <Library size={25} />
+                      </div>
+                      <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
+                        Perpustakaan
+                      </span>
+                    </div>
+
+                    <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                      Katalog & Peminjaman
+                    </h1>
+
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90 sm:text-base">
+                      Cari koleksi buku dan pantau peminjaman buku Anda.
+                    </p>
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
+                        <BookOpen size={14} />
+                        {loading ? "—" : buku.length} Koleksi
+                      </div>
+                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
+                        <BookMarked size={14} />
+                        {loading ? "—" : activeBorrowings.length} Dipinjam
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => loadData(true)}
+                      disabled={loading || refreshing}
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <RefreshCw
+                        size={16}
+                        className={refreshing ? "animate-spin" : ""}
+                      />
+                      <span className="hidden sm:inline">Segarkan</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 Kartu Statistik (Tanpa Border Kaku) */}
+                <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  {stats.map((stat) => (
+                    <div
+                      key={stat.label}
+                      className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15"
+                    >
+                      <div className="flex items-center gap-2 text-white/70">
+                        <stat.icon size={15} />
+                        <span className="text-xs font-medium">{stat.label}</span>
+                      </div>
+                      <p className="mt-2 text-2xl font-bold text-white">
+                        {loading ? "—" : stat.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
             {error && (
               <div className="flex items-center gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] p-3 text-sm text-[var(--color-danger)]">
@@ -380,20 +433,6 @@ export default function PerpustakaanGuruPage() {
                 <button type="button" onClick={() => setNotice("")}><X size={16} /></button>
               </div>
             )}
-
-            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
-              {stats.map((stat) => (
-                <div key={stat.label} className={`theme-card ${themeNeutralBorder} ${themeCardShadow} flex items-center justify-between rounded-xl border p-5`}>
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wider theme-text-muted">{stat.label}</p>
-                    <p className="theme-text mt-2 text-3xl font-bold">{loading ? "—" : stat.value}</p>
-                  </div>
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-full ${stat.iconClass}`}>
-                    <stat.icon size={24} />
-                  </div>
-                </div>
-              ))}
-            </section>
 
             {overdueBorrowings.length > 0 && (
               <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] p-4 text-sm text-[var(--color-warning)]">

@@ -3,7 +3,7 @@ import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError } from "../utils/appError";
 import { paginatedResponse, successResponse } from "../utils/responseFormatter";
-import { ajukanIzinSchema } from "../validations/permohonanIzin.validation";
+import { ajukanIzinSchema, verifikasiIzinSchema } from "../validations/permohonanIzin.validation";
 import { normalizeRole } from "../utils/rbac";
 
 export const ajukanIzin = async (
@@ -19,14 +19,25 @@ export const ajukanIzin = async (
     if (!penggunaId || !sekolahId)
       throw new AppError("Data otentikasi tidak valid", 401);
 
-    // 1. Zod otomatis memvalidasi req.body (menggantikan pengecekan if manual)
     const validated = ajukanIzinSchema.parse(req.body);
 
-    // 2. Simpan ke database menggunakan data yang sudah tervalidasi
+    if (validated.guruPenggantiId) {
+      const guru = await prisma.pengguna.findFirst({
+        where: {
+          id: validated.guruPenggantiId,
+          sekolahId,
+          dihapusPada: null,
+          status: "aktif",
+        },
+      });
+      if (!guru) throw new AppError("Guru pengganti tidak ditemukan", 404);
+    }
+
     const permohonan = await prisma.permohonanIzin.create({
       data: {
         sekolahId,
         penggunaId,
+        guruPenggantiId: validated.guruPenggantiId || null,
         jenis: validated.jenis,
         tanggalMulai: new Date(validated.tanggalMulai),
         tanggalSelesai: new Date(validated.tanggalSelesai),
@@ -94,6 +105,7 @@ export const getDaftarIzin = async (
             },
           },
           penyetuju: { select: { id: true, namaLengkap: true } },
+          guruPengganti: { select: { id: true, namaLengkap: true, nip: true } },
         },
         orderBy: { dibuatPada: "desc" },
       }),
@@ -126,11 +138,7 @@ export const verifikasiIzin = async (
 
     const penyetujuId = req.user?.userId;
     const actorRole = normalizeRole(req.user?.role);
-    const { status, catatan } = req.body; // status harus "disetujui" atau "ditolak"
-
-    if (!["disetujui", "ditolak"].includes(status)) {
-      throw new AppError("Status hanya boleh 'disetujui' atau 'ditolak'", 400);
-    }
+    const validated = verifikasiIzinSchema.parse(req.body);
 
     const existing = await prisma.permohonanIzin.findUnique({ where: { id } });
     if (!existing) throw new AppError("Permohonan izin tidak ditemukan", 404);
@@ -142,19 +150,32 @@ export const verifikasiIzin = async (
     if (existing.status !== "menunggu")
       throw new AppError(`Permohonan sudah berstatus ${existing.status}`, 400);
 
+    if (validated.guruPenggantiId) {
+      const guru = await prisma.pengguna.findFirst({
+        where: {
+          id: validated.guruPenggantiId,
+          sekolahId: existing.sekolahId,
+          dihapusPada: null,
+          status: "aktif",
+        },
+      });
+      if (!guru) throw new AppError("Guru pengganti tidak ditemukan", 404);
+    }
+
     const izin = await prisma.permohonanIzin.update({
       where: { id },
       data: {
-        status,
-        catatan: catatan || null,
+        status: validated.status,
+        catatan: validated.catatan || null,
         penyetujuId,
+        ...(validated.guruPenggantiId !== undefined && {
+          guruPenggantiId: validated.guruPenggantiId,
+        }),
       },
     });
 
-    return successResponse(res, `Permohonan izin berhasil di-${status}`, izin);
+    return successResponse(res, `Permohonan izin berhasil di-${validated.status}`, izin);
   } catch (error) {
     next(error);
   }
 };
-
-

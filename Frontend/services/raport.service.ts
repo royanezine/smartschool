@@ -145,7 +145,7 @@ export const getRaportSiswa = async (
   }
 
   return apiFetch(
-    `raport/${encodeURIComponent(
+    `raport/siswa/${encodeURIComponent(
       siswaId,
     )}/tahun-ajaran/${encodeURIComponent(
       tahunAjaranId,
@@ -155,7 +155,14 @@ export const getRaportSiswa = async (
 
 
 export const getKelasWali = async () => {
-  return apiFetch("raport/wali-kelas/kelas-saya");
+  const result = await apiFetch("raport/dashboard");
+  if (Array.isArray(result?.data?.kelasWali)) {
+    return {
+      ...result,
+      data: result.data.kelasWali,
+    };
+  }
+  return result;
 };
 
 export const getRapotKelas = async (
@@ -175,7 +182,7 @@ export const getRapotKelas = async (
   const suffix = query.toString();
 
   return apiFetch(
-    `raport/wali-kelas/kelas/${encodeURIComponent(
+    `raport/kelas/${encodeURIComponent(
       kelasId,
     )}${suffix ? `?${suffix}` : ""}`,
   );
@@ -197,7 +204,7 @@ export const generateRapotKelas = async (
   }
 
   return apiFetch(
-    `raport/wali-kelas/kelas/${encodeURIComponent(
+    `raport/kelas/${encodeURIComponent(
       kelasId,
     )}/generate`,
     {
@@ -231,7 +238,7 @@ export const isiCatatanRapot = async (
   }
 
   return apiFetch(
-    `raport/wali-kelas/rapot/${encodeURIComponent(
+    `raport/${encodeURIComponent(
       rapotId,
     )}/catatan`,
     {
@@ -264,7 +271,7 @@ export const setPublishRapot = async (
   }
 
   return apiFetch(
-    `raport/wali-kelas/rapot/${encodeURIComponent(
+    `raport/${encodeURIComponent(
       rapotId,
     )}/publish`,
     {
@@ -276,7 +283,7 @@ export const setPublishRapot = async (
 
 
 export const getRapotSaya = async () => {
-  return apiFetch("raport/siswa");
+  return apiFetch("raport/siswa/saya");
 };
 
 export const getDetailRapotSaya = async (
@@ -287,10 +294,10 @@ export const getDetailRapotSaya = async (
   }
 
   return apiFetch(
-    `raport/siswa/${encodeURIComponent(rapotId)}`,
+    `raport/siswa/saya/${encodeURIComponent(rapotId)}`,
   );
 };
 
 export const getDashboardRapot = async () => {
-  return apiFetch("/api/raport/dashboard");
+  return apiFetch("raport/dashboard");
 };

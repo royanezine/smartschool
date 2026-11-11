@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import CanAccess from "@/app/components/auth/CanAccess";
 import {
   getUsers,
   updateUser,
@@ -155,6 +156,10 @@ const normalizeUser = (user) => {
     nipd: user?.nipd || "",
     nisn: user?.nisn || "",
     avatar: user?.avatar || "",
+    jabatan:
+      user?.jabatanRef?.namaJabatan ||
+      (typeof user?.jabatan === "string" ? user.jabatan : "") ||
+      "",
     status: String(user?.status || "nonaktif").toLowerCase(),
     terakhirLogin,
     peran: {
@@ -468,13 +473,15 @@ export default function KelolaUserPage() {
                         <RefreshCw size={17} className={refreshing ? "animate-spin" : ""} />
                       </button>
 
-                      <button
-                        onClick={() => router.push("/admin/pengguna/kelola-user/tambah")}
-                        className="theme-primary inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold shadow-lg transition-all sm:h-11 sm:px-5"
-                      >
-                        <Plus size={16} strokeWidth={2.3} />
-                        Tambah User
-                      </button>
+                      <CanAccess menu="manajemen pengguna" action="create">
+                        <button
+                          onClick={() => router.push("/admin/pengguna/kelola-user/tambah")}
+                          className="theme-primary inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold shadow-lg transition-all sm:h-11 sm:px-5"
+                        >
+                          <Plus size={16} strokeWidth={2.3} />
+                          Tambah User
+                        </button>
+                      </CanAccess>
                     </div>
                   </div>
                 </section>
@@ -701,8 +708,14 @@ export default function KelolaUserPage() {
                                         <p className="theme-text-secondary truncate text-sm font-medium">
                                           {roleName}
                                         </p>
-                                        {roleKey && roleKey !== roleName && (
-                                          <p className="theme-text-muted text-[10px]">{roleKey}</p>
+                                        {item.jabatan ? (
+                                          <p className="text-[11px] font-medium text-[var(--color-primary)] truncate">
+                                            {item.jabatan}
+                                          </p>
+                                        ) : (
+                                          roleKey && roleKey !== roleName && (
+                                            <p className="theme-text-muted text-[10px]">{roleKey}</p>
+                                          )
                                         )}
                                       </div>
                                     </div>
@@ -737,33 +750,35 @@ export default function KelolaUserPage() {
 
                                   <td className="px-4 py-3.5">
                                     <div className="flex items-center justify-center gap-0.5">
-                                      <button
-                                        onClick={() => handleToggleStatus(item)}
-                                        disabled={isUpdatingStatus || isDeleting}
-                                        className={
-                                          isActive
-                                            ? "theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-warning-background)] hover:text-[var(--color-warning)] disabled:cursor-not-allowed disabled:opacity-40"
-                                            : "theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-success-background)] hover:text-[var(--color-success)] disabled:cursor-not-allowed disabled:opacity-40"
-                                        }
-                                        title={isActive ? "Nonaktifkan" : "Aktifkan"}
-                                      >
-                                        {isUpdatingStatus ? (
-                                          <RefreshCw size={15} className="animate-spin" />
-                                        ) : isActive ? (
-                                          <UserX size={15} />
-                                        ) : (
-                                          <UserCheck size={15} />
-                                        )}
-                                      </button>
+                                      <CanAccess menu="manajemen pengguna" action="update">
+                                        <button
+                                          onClick={() => handleToggleStatus(item)}
+                                          disabled={isUpdatingStatus || isDeleting}
+                                          className={
+                                            isActive
+                                              ? "theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-warning-background)] hover:text-[var(--color-warning)] disabled:cursor-not-allowed disabled:opacity-40"
+                                              : "theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-success-background)] hover:text-[var(--color-success)] disabled:cursor-not-allowed disabled:opacity-40"
+                                          }
+                                          title={isActive ? "Nonaktifkan" : "Aktifkan"}
+                                        >
+                                          {isUpdatingStatus ? (
+                                            <RefreshCw size={15} className="animate-spin" />
+                                          ) : isActive ? (
+                                            <UserX size={15} />
+                                          ) : (
+                                            <UserCheck size={15} />
+                                          )}
+                                        </button>
 
-                                      <button
-                                        onClick={() => router.push(`/admin/pengguna/kelola-user/${item.id}/edit`)}
-                                        disabled={isDeleting}
-                                        className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-warning-background)] hover:text-[var(--color-warning)] disabled:opacity-40"
-                                        title="Edit"
-                                      >
-                                        <Edit size={15} />
-                                      </button>
+                                        <button
+                                          onClick={() => router.push(`/admin/pengguna/kelola-user/${item.id}/edit`)}
+                                          disabled={isDeleting}
+                                          className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-warning-background)] hover:text-[var(--color-warning)] disabled:opacity-40"
+                                          title="Edit"
+                                        >
+                                          <Edit size={15} />
+                                        </button>
+                                      </CanAccess>
 
                                       <button
                                         onClick={() => router.push(`/admin/pengguna/kelola-user/${item.id}`)}
@@ -774,29 +789,33 @@ export default function KelolaUserPage() {
                                         <Eye size={15} />
                                       </button>
 
-                                      <button
-                                        type="button"
-                                        onClick={() => setUserToResetPassword(item)}
-                                        disabled={isDeleting || isUpdatingStatus}
-                                        className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-amber-500/10 hover:text-amber-600 disabled:opacity-40"
-                                        title="Reset Kata Sandi"
-                                        aria-label={`Reset kata sandi ${item.namaLengkap || "pengguna"}`}
-                                      >
-                                        <KeyRound size={15} />
-                                      </button>
+                                      <CanAccess menu="manajemen pengguna" action="update">
+                                        <button
+                                          type="button"
+                                          onClick={() => setUserToResetPassword(item)}
+                                          disabled={isDeleting || isUpdatingStatus}
+                                          className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-amber-500/10 hover:text-amber-600 disabled:opacity-40"
+                                          title="Reset Kata Sandi"
+                                          aria-label={`Reset kata sandi ${item.namaLengkap || "pengguna"}`}
+                                        >
+                                          <KeyRound size={15} />
+                                        </button>
+                                      </CanAccess>
 
-                                      <button
-                                        onClick={() => handleDelete(item)}
-                                        disabled={isDeleting || isUpdatingStatus}
-                                        className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)] disabled:cursor-not-allowed disabled:opacity-40"
-                                        title="Hapus"
-                                      >
-                                        {isDeleting ? (
-                                          <RefreshCw size={15} className="animate-spin" />
-                                        ) : (
-                                          <Trash2 size={15} />
-                                        )}
-                                      </button>
+                                      <CanAccess menu="manajemen pengguna" action="delete">
+                                        <button
+                                          onClick={() => handleDelete(item)}
+                                          disabled={isDeleting || isUpdatingStatus}
+                                          className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)] disabled:cursor-not-allowed disabled:opacity-40"
+                                          title="Hapus"
+                                        >
+                                          {isDeleting ? (
+                                            <RefreshCw size={15} className="animate-spin" />
+                                          ) : (
+                                            <Trash2 size={15} />
+                                          )}
+                                        </button>
+                                      </CanAccess>
                                     </div>
                                   </td>
                                 </tr>

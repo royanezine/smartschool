@@ -661,6 +661,7 @@ export const adminSidebarConfig = {
       icon: FileText,
       label: "Konten",
       path: "/admin/cms/menu",
+      menuKey: "CMS",
     },
    
    

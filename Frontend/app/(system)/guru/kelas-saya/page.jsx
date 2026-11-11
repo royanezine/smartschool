@@ -30,6 +30,8 @@ import { getKelasById } from "@/services/kelas.service";
 import { getTahunAjaran } from "@/services/tahunAjaran.service";
 
 
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -339,7 +341,7 @@ export default function GuruKelasSayaPage() {
   const [selectedMapel, setSelectedMapel] = useState("semua");
   const [selectedTingkat, setSelectedTingkat] = useState("semua");
   const [tahunAjaranAktif, setTahunAjaranAktif] = useState(null);
-const [loadingTahunAjaran, setLoadingTahunAjaran] = useState(true);
+  const [loadingTahunAjaran, setLoadingTahunAjaran] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -357,166 +359,167 @@ const [loadingTahunAjaran, setLoadingTahunAjaran] = useState(true);
   }, []);
 
   useEffect(() => {
-  let isMounted = true;
+    let isMounted = true;
 
-  async function loadTahunAjaranAktif() {
-    setLoadingTahunAjaran(true);
+    async function loadTahunAjaranAktif() {
+      setLoadingTahunAjaran(true);
+
+      try {
+        const data = await getTahunAjaran();
+
+        const aktif = data.find(
+          (item) =>
+            String(item.status).toLowerCase() === "aktif"
+        );
+
+        if (isMounted) {
+          setTahunAjaranAktif(aktif || null);
+        }
+      } catch (error) {
+        console.error(
+          "[KELAS SAYA] Gagal mengambil tahun ajaran:",
+          error
+        );
+
+        if (isMounted) {
+          setTahunAjaranAktif(null);
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingTahunAjaran(false);
+        }
+      }
+    }
+
+    loadTahunAjaranAktif();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+
+  async function loadKelasSaya() {
+    setLoading(true);
+    setErrorMessage("");
 
     try {
-      const data = await getTahunAjaran();
+      const user = getStoredUser();
+      const teacherId = getTeacherId(user);
 
-      const aktif = data.find(
-        (item) =>
-          String(item.status).toLowerCase() === "aktif"
+      if (!user) {
+        throw new Error(
+          "Data akun belum ditemukan. Silakan login kembali."
+        );
+      }
+
+      if (!teacherId) {
+        throw new Error(
+          "ID guru tidak ditemukan pada data login."
+        );
+      }
+
+      const response = await getKelasMapel();
+      const data = unwrapArray(response);
+
+      if (!Array.isArray(data)) {
+        throw new Error(
+          "Data kelas-mapel dari server tidak valid."
+        );
+      }
+
+      const teacherAssignments = data.filter((item) => {
+        const ids = getTeacherRelationIds(item);
+        return ids.includes(String(teacherId));
+      });
+
+      const normalized = teacherAssignments
+        .map((item, index) =>
+          normalizeTeachingAssignment(item, index)
+        )
+        .filter((item) => item.kelasId || item.kelasNama);
+
+      const uniqueAssignments = [];
+      const seen = new Set();
+
+      for (const item of normalized) {
+        const key =
+          `${item.kelasId}|${normalizeText(item.mapel)}`;
+
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueAssignments.push(item);
+        }
+      }
+
+      const classIds = [
+        ...new Set(
+          uniqueAssignments
+            .map((item) => item.kelasId)
+            .filter(Boolean)
+        ),
+      ];
+
+      const classCounts = new Map();
+
+      await Promise.all(
+        classIds.map(async (kelasId) => {
+          try {
+            const detailResponse =
+              await getKelasById(kelasId);
+
+            const detail = unwrapObject(detailResponse);
+
+            const jumlahSiswa =
+              countStudentsInClass(detail);
+
+            classCounts.set(
+              String(kelasId),
+              jumlahSiswa
+            );
+          } catch (error) {
+            console.warn(
+              `[KELAS SAYA] Gagal mengambil detail kelas ${kelasId}:`,
+              error
+            );
+          }
+        })
       );
 
-      if (isMounted) {
-        setTahunAjaranAktif(aktif || null);
+      const result = uniqueAssignments.map((item) => ({
+        ...item,
+        jumlahSiswa: item.kelasId
+          ? classCounts.get(String(item.kelasId)) ?? null
+          : null,
+      }));
+
+      setKelasList(result);
+
+      if (result.length === 0) {
+        setErrorMessage(
+          "Belum ditemukan kelas atau mata pelajaran yang terhubung dengan akun guru ini. Pastikan penugasan guru dan kelas-mapel sudah diatur oleh Admin Sekolah."
+        );
+      } else if (classCounts.size === 0 && classIds.length > 0) {
+        setErrorMessage(
+          "Penugasan kelas ditemukan, tetapi jumlah siswa belum berhasil diambil dari detail kelas."
+        );
       }
     } catch (error) {
       console.error(
-        "[KELAS SAYA] Gagal mengambil tahun ajaran:",
+        "[KELAS SAYA] Gagal memuat data:",
         error
       );
 
-      if (isMounted) {
-        setTahunAjaranAktif(null);
-      }
+      setKelasList([]);
+
+      setErrorMessage(
+        error?.message ||
+          "Terjadi kesalahan saat mengambil data kelas. Silakan coba lagi."
+      );
     } finally {
-      if (isMounted) {
-        setLoadingTahunAjaran(false);
-      }
+      setLoading(false);
     }
   }
-
-  loadTahunAjaranAktif();
-
-  return () => {
-    isMounted = false;
-  };
-}, []);
-  
-async function loadKelasSaya() {
-  setLoading(true);
-  setErrorMessage("");
-
-  try {
-    const user = getStoredUser();
-    const teacherId = getTeacherId(user);
-
-    if (!user) {
-      throw new Error(
-        "Data akun belum ditemukan. Silakan login kembali."
-      );
-    }
-
-    if (!teacherId) {
-      throw new Error(
-        "ID guru tidak ditemukan pada data login."
-      );
-    }
-
-    const response = await getKelasMapel();
-    const data = unwrapArray(response);
-
-    if (!Array.isArray(data)) {
-      throw new Error(
-        "Data kelas-mapel dari server tidak valid."
-      );
-    }
-
-    const teacherAssignments = data.filter((item) => {
-      const ids = getTeacherRelationIds(item);
-      return ids.includes(String(teacherId));
-    });
-
-    const normalized = teacherAssignments
-      .map((item, index) =>
-        normalizeTeachingAssignment(item, index)
-      )
-      .filter((item) => item.kelasId || item.kelasNama);
-
-    const uniqueAssignments = [];
-    const seen = new Set();
-
-    for (const item of normalized) {
-      const key =
-        `${item.kelasId}|${normalizeText(item.mapel)}`;
-
-      if (!seen.has(key)) {
-        seen.add(key);
-        uniqueAssignments.push(item);
-      }
-    }
-
-    const classIds = [
-      ...new Set(
-        uniqueAssignments
-          .map((item) => item.kelasId)
-          .filter(Boolean)
-      ),
-    ];
-
-    const classCounts = new Map();
-
-    await Promise.all(
-      classIds.map(async (kelasId) => {
-        try {
-          const detailResponse =
-            await getKelasById(kelasId);
-
-          const detail = unwrapObject(detailResponse);
-
-          const jumlahSiswa =
-            countStudentsInClass(detail);
-
-          classCounts.set(
-            String(kelasId),
-            jumlahSiswa
-          );
-        } catch (error) {
-          console.warn(
-            `[KELAS SAYA] Gagal mengambil detail kelas ${kelasId}:`,
-            error
-          );
-        }
-      })
-    );
-
-    const result = uniqueAssignments.map((item) => ({
-      ...item,
-      jumlahSiswa: item.kelasId
-        ? classCounts.get(String(item.kelasId)) ?? null
-        : null,
-    }));
-
-    setKelasList(result);
-
-    if (result.length === 0) {
-      setErrorMessage(
-        "Belum ditemukan kelas atau mata pelajaran yang terhubung dengan akun guru ini. Pastikan penugasan guru dan kelas-mapel sudah diatur oleh Admin Sekolah."
-      );
-    } else if (classCounts.size === 0 && classIds.length > 0) {
-      setErrorMessage(
-        "Penugasan kelas ditemukan, tetapi jumlah siswa belum berhasil diambil dari detail kelas."
-      );
-    }
-  } catch (error) {
-    console.error(
-      "[KELAS SAYA] Gagal memuat data:",
-      error
-    );
-
-    setKelasList([]);
-
-    setErrorMessage(
-      error?.message ||
-        "Terjadi kesalahan saat mengambil data kelas. Silakan coba lagi."
-    );
-  } finally {
-    setLoading(false);
-  }
-}
 
 
   useEffect(() => {
@@ -574,29 +577,29 @@ async function loadKelasSaya() {
     [kelasList]
   );
 
- const knownStudentCount = useMemo(() => {
-  const counts = new Map();
+  const knownStudentCount = useMemo(() => {
+    const counts = new Map();
 
-  for (const item of kelasList) {
-    const key = item.kelasId || item.kelasNama;
+    for (const item of kelasList) {
+      const key = item.kelasId || item.kelasNama;
 
-    if (
-      key &&
-      item.jumlahSiswa !== null &&
-      item.jumlahSiswa !== undefined &&
-      !counts.has(key)
-    ) {
-      counts.set(key, item.jumlahSiswa);
+      if (
+        key &&
+        item.jumlahSiswa !== null &&
+        item.jumlahSiswa !== undefined &&
+        !counts.has(key)
+      ) {
+        counts.set(key, item.jumlahSiswa);
+      }
     }
-  }
 
-  if (counts.size === 0) return null;
+    if (counts.size === 0) return null;
 
-  return [...counts.values()].reduce(
-    (sum, value) => sum + value,
-    0
-  );
-}, [kelasList]);
+    return [...counts.values()].reduce(
+      (sum, value) => sum + value,
+      0
+    );
+  }, [kelasList]);
 
   function resetFilters() {
     setSearchQuery("");
@@ -665,233 +668,104 @@ async function loadKelasSaya() {
           }
         `}
       >
+        
+        {/* === BANNER HERO (KONSISTEN & TIDAK TERLALU BESAR) === */}
         <section
-          className={`
-            theme-card
-            relative
-            isolate
-            overflow-hidden
-            rounded-2xl
-            border
-            ${themeNeutralBorder}
-            ${themeCardShadow}
-          `}
+          className={`relative overflow-hidden rounded-2xl p-5 sm:p-6 ${themePrimaryGradient} shadow-lg`}
         >
-          <div
-            className={`
-              absolute
-              inset-0
-              -z-20
-              ${themePrimarySoft}
-            `}
-          />
+          <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
-          <div
-            className="
-              absolute
-              -right-16
-              -top-24
-              -z-10
-              h-72
-              w-72
-              rounded-full
-              bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
-              blur-3xl
-            "
-          />
+          <div className="relative z-10">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-0">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
+                    <BookMarked size={20} />
+                  </div>
+                  <span className="rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white backdrop-blur-sm">
+                    Area Guru
+                  </span>
+                  <span className="h-1 w-1 rounded-full bg-white/50" />
+                  <span className="text-[10px] font-medium text-white/80">
+                    Pembelajaran
+                  </span>
+                </div>
 
-          <div
-            className="
-              absolute
-              bottom-[-100px]
-              right-[25%]
-              -z-10
-              h-64
-              w-64
-              rounded-full
-              bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]
-              blur-3xl
-            "
-          />
+                <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
+                  Kelas Saya
+                </h1>
 
-          <div className="relative z-10 flex flex-col gap-5 px-5 py-6 sm:px-7 sm:py-7 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-            <div className="max-w-3xl">
-              <div
-                className="
-                  mb-4
-                  inline-flex
-                  items-center
-                  gap-2
-                  rounded-full
-                  border
-                  border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                  bg-[color-mix(in_srgb,var(--color-card)_90%,transparent)]
-                  px-3
-                  py-1.5
-                  shadow-sm
-                "
-              >
-                <span
-                  className={`
-                    flex
-                    h-6
-                    w-6
-                    items-center
-                    justify-center
-                    rounded-full
-                    ${themePrimarySoft}
-                    ${themePrimaryText}
-                  `}
-                >
-                  <BookMarked size={14} />
-                </span>
-
-                <span className="text-xs font-semibold tracking-wide text-[var(--color-primary)]">
-                  AREA GURU
-                </span>
-
-                <span className="h-1 w-1 rounded-full bg-[var(--color-primary)] opacity-50" />
-
-                <span className="theme-text-secondary text-xs font-medium">
-                  Pembelajaran
-                </span>
+                <p className="mt-1 max-w-xl text-xs leading-5 text-white/90 sm:text-sm">
+                  Halo, {teacher.name}. Kelola kelas yang kamu ajar dan temukan informasi mata pelajaran serta siswa dalam satu tempat.
+                </p>
               </div>
 
-              <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
-                Kelas Saya
-              </h1>
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
+                  <GraduationCap size={14} />
+                  <span>
+                    {loadingTahunAjaran
+                      ? "Memuat tahun ajaran..."
+                      : tahunAjaranAktif
+                        ? [
+                            tahunAjaranAktif.nama ||
+                              tahunAjaranAktif.tahunAjaran ||
+                              tahunAjaranAktif.tahun ||
+                              "",
+                            tahunAjaranAktif.semester || "",
+                          ]
+                            .filter(Boolean)
+                            .join(" • ") || "Tahun ajaran aktif belum tersedia"
+                        : "Tahun ajaran aktif belum tersedia"}
+                  </span>
+                </div>
 
-              <p className="theme-text-secondary mt-2 max-w-2xl text-sm leading-6 sm:text-base">
-                Halo, {teacher.name}. Kelola kelas yang kamu ajar dan temukan
-                informasi mata pelajaran serta siswa dalam satu tempat.
-              </p>
+                <button
+                  type="button"
+                  onClick={loadKelasSaya}
+                  disabled={loading}
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-white px-3.5 text-xs font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <RefreshCw
+                    size={14}
+                    className={loading ? "animate-spin" : ""}
+                  />
+                  Muat ulang
+                </button>
+              </div>
             </div>
 
-            <div className="flex shrink-0 flex-wrap items-center gap-3">
-              <div
-                className={`
-                  inline-flex
-                  items-center
-                  gap-2
-                  rounded-lg
-                  border
-                  ${themeNeutralBorder}
-                  bg-[color-mix(in_srgb,var(--color-card)_85%,transparent)]
-                  px-3
-                  py-2.5
-                  text-sm
-                  ${themeCardShadow}
-                `}
-              >
-                <GraduationCap size={17} className={themePrimaryText} />
-               
-<span className="theme-text-secondary">
-  {loadingTahunAjaran
-    ? "Memuat tahun ajaran..."
-    : tahunAjaranAktif
-      ? [
-          tahunAjaranAktif.nama ||
-            tahunAjaranAktif.tahunAjaran ||
-            tahunAjaranAktif.tahun ||
-            "",
-          tahunAjaranAktif.semester || "",
-        ]
-          .filter(Boolean)
-          .join(" • ") || "Tahun ajaran aktif belum tersedia"
-      : "Tahun ajaran aktif belum tersedia"}
-</span>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={loadKelasSaya}
-                disabled={loading}
-                className={`
-                  inline-flex
-                  items-center
-                  justify-center
-                  gap-2
-                  rounded-lg
-                  px-4
-                  py-2.5
-                  text-sm
-                  font-semibold
-                  text-white
-                  transition
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                  ${"bg-[var(--color-primary)] hover:opacity-90"}
-                `}
-              >
-                <RefreshCw
-                  size={15}
-                  className={loading ? "animate-spin" : ""}
-                />
-                Muat ulang
-              </button>
+            {/* 3 Kartu Statistik (Tanpa Border Kaku, Padding Lebih Ramping) */}
+            <div className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              {stats.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div
+                    key={stat.title}
+                    className="rounded-xl bg-white/10 p-3.5 backdrop-blur-sm transition-colors hover:bg-white/15"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-white/70">
+                          {stat.title}
+                        </p>
+                        <p className="mt-1 text-xl font-bold text-white">
+                          {stat.value}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-white/60 truncate">
+                          {stat.description}
+                        </p>
+                      </div>
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
+                        <Icon size={15} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-
-          <div className="absolute bottom-0 left-0 h-1 w-full bg-[linear-gradient(90deg,var(--color-primary),var(--color-info))]" />
-        </section>
-
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            const accent = stat.accent;
-
-            return (
-              <article
-                key={stat.title}
-                className={`
-                  theme-card
-                  relative
-                  overflow-hidden
-                  rounded-xl
-                  border
-                  ${themeNeutralBorder}
-                  p-5
-                  ${themeCardShadow}
-                  transition-all
-                  duration-300
-                  hover:-translate-y-0.5
-                `}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="theme-text-secondary text-sm font-medium">
-                      {stat.title}
-                    </p>
-
-                    <p className="theme-text mt-2 text-3xl font-bold tracking-tight">
-                      {stat.value}
-                    </p>
-
-                    <p className="theme-text-muted mt-1 text-xs">
-                      {stat.description}
-                    </p>
-                  </div>
-
-                  <div
-                    className={`
-                      flex
-                      h-11
-                      w-11
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      ${accent.surface}
-                      ${accent.text}
-                    `}
-                  >
-                    <Icon size={20} />
-                  </div>
-                </div>
-              </article>
-            );
-          })}
         </section>
 
         <section

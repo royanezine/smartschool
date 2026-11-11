@@ -9,12 +9,14 @@ import {
   updateUser,
 } from "@/services/user.service";
 import { getRoles } from "@/services/role.service";
+import { getAllJabatan } from "@/services/jabatan.service";
 import {
   ArrowLeft,
   User,
   Mail,
   Phone,
   Shield,
+  Briefcase,
   Save,
   Lock,
   CheckCircle,
@@ -103,6 +105,7 @@ export default function EditStafPage() {
   const [loadError, setLoadError] = useState("");
   const [staf, setStaf] = useState(null);
   const [roles, setRoles] = useState([]);
+  const [jabatanList, setJabatanList] = useState([]);
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
@@ -111,6 +114,7 @@ export default function EditStafPage() {
     email: "",
     noTelepon: "",
     peranId: "",
+    jabatanId: "",
     status: "aktif",
     kataSandi: "",
   });
@@ -131,9 +135,10 @@ export default function EditStafPage() {
       setLoadError("");
 
       try {
-        const [userResponse, roleData] = await Promise.all([
+        const [userResponse, roleData, jabData] = await Promise.all([
           getUserById(String(id)),
-          getRoles(),
+          getRoles().catch(() => []),
+          getAllJabatan().catch(() => []),
         ]);
 
         if (cancelled) return;
@@ -155,11 +160,13 @@ export default function EditStafPage() {
               normalizeRoleName(role?.nama) !== "siswa"
           )
         );
+        setJabatanList(Array.isArray(jabData) ? jabData : []);
         setFormData({
           namaLengkap: data.namaLengkap || "",
           email: data.email || "",
           noTelepon: data.noTelepon || "",
-          peranId: data.peran?.id || "",
+          peranId: data.peran?.id || data.peranId || "",
+          jabatanId: data.jabatanId || data.jabatanRef?.id || "",
           status:
             String(data.status || "").toLowerCase() ===
             "nonaktif"
@@ -225,6 +232,7 @@ export default function EditStafPage() {
         email: formData.email.trim(),
         noTelepon: formData.noTelepon.trim() || null,
         peranId: formData.peranId,
+        jabatanId: formData.jabatanId ? formData.jabatanId : null,
         status: formData.status,
       };
 
@@ -497,8 +505,8 @@ export default function EditStafPage() {
                   >
                     <input
                       type="text"
-                      name="nama"
-                      value={formData.nama}
+                      name="namaLengkap"
+                      value={formData.namaLengkap}
                       onChange={handleChange}
                       required
                       className={inputClass}
@@ -530,8 +538,8 @@ export default function EditStafPage() {
                   >
                     <input
                       type="tel"
-                      name="telepon"
-                      value={formData.telepon}
+                      name="noTelepon"
+                      value={formData.noTelepon}
                       onChange={handleChange}
                       className={inputClass}
                       placeholder="Masukkan nomor telepon"
@@ -545,8 +553,8 @@ export default function EditStafPage() {
                     icon={Shield}
                   >
                     <select
-                      name="role"
-                      value={formData.role}
+                      name="peranId"
+                      value={formData.peranId}
                       onChange={handleChange}
                       required
                       className={`${inputClass} appearance-none cursor-pointer`}
@@ -554,29 +562,34 @@ export default function EditStafPage() {
                       <option value="">
                         Pilih role
                       </option>
-
-                      <option value="Super Admin">
-                        Super Admin
-                      </option>
-
-                      <option value="Admin Sekolah">
-                        Admin Sekolah
-                      </option>
-
-                      <option value="Admin Yayasan">
-                        Admin Yayasan
-                      </option>
-
-                      <option value="Guru">
-                        Guru
-                      </option>
-
-                      <option value="Staf TU">
-                        Staf TU
-                      </option>
+                      {roles.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.namaTampilan || r.nama}
+                        </option>
+                      ))}
                     </select>
                   </FormField>
 
+                  <FormField
+                    label="Jabatan (Opsional)"
+                    icon={Briefcase}
+                  >
+                    <select
+                      name="jabatanId"
+                      value={formData.jabatanId}
+                      onChange={handleChange}
+                      className={`${inputClass} appearance-none cursor-pointer`}
+                    >
+                      <option value="">
+                        -- Tanpa Jabatan --
+                      </option>
+                      {jabatanList.map((j) => (
+                        <option key={j.id} value={j.id}>
+                          {j.namaJabatan || j.nama}
+                        </option>
+                      ))}
+                    </select>
+                  </FormField>
 
                   <FormField
                     label="Status Akun"
@@ -590,17 +603,11 @@ export default function EditStafPage() {
                       required
                       className={`${inputClass} appearance-none cursor-pointer`}
                     >
-                      <option value="Aktif">
-                        Aktif
-                      </option>
-
-                      <option value="Trial">
-                        Trial
-                      </option>
-
-                      <option value="Nonaktif">
-                        Nonaktif
-                      </option>
+                      {statusOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
                     </select>
                   </FormField>
 
@@ -629,8 +636,8 @@ export default function EditStafPage() {
                       >
                         <input
                           type="password"
-                          name="password"
-                          value={formData.password}
+                          name="kataSandi"
+                          value={formData.kataSandi}
                           onChange={handleChange}
                           minLength={8}
                           className={inputClass}

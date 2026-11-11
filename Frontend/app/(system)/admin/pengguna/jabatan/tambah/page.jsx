@@ -201,7 +201,7 @@ export default function TambahJabatanPage() {
   };
 
   return (
-    <div className="theme-page min-h-screen">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="pengguna"
         collapsed={isCollapsed}
@@ -209,15 +209,11 @@ export default function TambahJabatanPage() {
         role="admin"
       />
 
-      <div
-        className={`flex min-h-screen flex-col transition-all duration-300 ${
-          isCollapsed ? "lg:pl-[72px]" : "lg:pl-64"
-        }`}
-      >
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto max-w-4xl space-y-6">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full min-w-0 space-y-6 p-4 sm:p-6 lg:p-8">
             {/* Top Bar */}
             <div className="flex items-center justify-between">
               <Link

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import CanAccess from "@/app/components/auth/CanAccess";
 
 import {
   getPelanggaranSiswa,
@@ -237,16 +238,18 @@ export default function EditPelanggaranPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push("/admin/bk/pelanggaran/tambah")
-                    }
-                    className="theme-primary inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold shadow-sm transition hover:opacity-90"
-                  >
-                    <Plus size={16} />
-                    Tambah Pelanggaran
-                  </button>
+                  <CanAccess menu="bimbingan konseling" action="create">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push("/admin/bk/pelanggaran/tambah")
+                      }
+                      className="theme-primary inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold shadow-sm transition hover:opacity-90"
+                    >
+                      <Plus size={16} />
+                      Tambah Pelanggaran
+                    </button>
+                  </CanAccess>
                 </div>
               </div>
 

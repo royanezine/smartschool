@@ -52,17 +52,39 @@ export interface KategoriAset {
   dihapusPada?: string | null;
 }
 
+
 export interface Ruangan {
   id: string;
   sekolahId?: string;
+
   nama: string;
   lokasi: string | null;
   kapasitas: number | null;
   keterangan: string | null;
+
+  gedungId?: string | null;
+  lantaiId?: string | null;
+
+  gedung?: {
+    id: string;
+    nama?: string;
+    namaGedung?: string;
+    kode?: string;
+    kodeGedung?: string;
+  } | null;
+
+  lantai?: {
+    id: string;
+    nama?: string;
+    namaLantai?: string;
+    nomorLantai?: number | string;
+  } | null;
+
   dibuatPada?: string;
   diperbaruiPada?: string;
   dihapusPada?: string | null;
 }
+
 
 // ======================================================
 // ASET INTERFACES
@@ -245,6 +267,7 @@ export interface DaftarLaporanKerusakanParams {
 export interface GudangPayload {
   nama: string;
   lokasi?: string | null;
+  keterangan?: string | null;
 }
 
 export interface KategoriAsetPayload {
@@ -252,12 +275,16 @@ export interface KategoriAsetPayload {
   keterangan?: string | null;
 }
 
+
 export interface RuanganPayload {
   nama: string;
+  gedungId?: string | null;
+  lantaiId?: string | null;
   lokasi?: string | null;
   kapasitas?: number | null;
   keterangan?: string | null;
 }
+
 
 export interface AsetPayload {
   kode: string;
@@ -376,13 +403,33 @@ function extractList<T>(response: unknown): T[] {
 // GUDANG
 // ======================================================
 
-export async function getGudang() {
+
+ // ======================================================
+ // GUDANG
+ // ======================================================
+
+export async function getGudang(): Promise<ApiResponse<Gudang[]>> {
   return apiFetch(`${API_ENDPOINT}/gudang`, {
     method: "GET",
   });
 }
 
-export async function createGudang(data: GudangPayload) {
+export async function getDetailGudang(
+  id: string
+): Promise<ApiResponse<Gudang>> {
+  validateId(id, "ID gudang");
+
+  return apiFetch(
+    `${API_ENDPOINT}/gudang/${encodeURIComponent(id)}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+export async function createGudang(
+  data: GudangPayload
+) {
   if (!data.nama?.trim()) {
     throw new Error("Nama gudang wajib diisi.");
   }
@@ -392,6 +439,7 @@ export async function createGudang(data: GudangPayload) {
     body: JSON.stringify({
       nama: data.nama.trim(),
       lokasi: normalizeText(data.lokasi),
+      keterangan: normalizeText(data.keterangan),
     }),
   });
 }
@@ -413,6 +461,7 @@ export async function updateGudang(
       body: JSON.stringify({
         nama: data.nama.trim(),
         lokasi: normalizeText(data.lokasi),
+        keterangan: normalizeText(data.keterangan),
       }),
     }
   );
@@ -428,6 +477,7 @@ export async function deleteGudang(id: string) {
     }
   );
 }
+
 
 // ======================================================
 // KATEGORI ASET
@@ -488,9 +538,10 @@ export async function deleteKategoriAset(id: string) {
   );
 }
 
-// ======================================================
-// RUANGAN
-// ======================================================
+
+ // ======================================================
+ // RUANGAN
+ // ======================================================
 
 export async function getRuangan() {
   return apiFetch(`${API_ENDPOINT}/ruangan`, {
@@ -498,7 +549,7 @@ export async function getRuangan() {
   });
 }
 
-export async function createRuangan(data: RuanganPayload) {
+function buildRuanganPayload(data: RuanganPayload) {
   if (!data.nama?.trim()) {
     throw new Error("Nama ruangan wajib diisi.");
   }
@@ -512,14 +563,23 @@ export async function createRuangan(data: RuanganPayload) {
           true
         );
 
+  return {
+    nama: data.nama.trim(),
+
+    // Relasi gedung dan lantai
+    gedungId: data.gedungId || null,
+    lantaiId: data.lantaiId || null,
+
+    lokasi: normalizeText(data.lokasi),
+    kapasitas,
+    keterangan: normalizeText(data.keterangan),
+  };
+}
+
+export async function createRuangan(data: RuanganPayload) {
   return apiFetch(`${API_ENDPOINT}/ruangan`, {
     method: "POST",
-    body: JSON.stringify({
-      nama: data.nama.trim(),
-      lokasi: normalizeText(data.lokasi),
-      kapasitas,
-      keterangan: normalizeText(data.keterangan),
-    }),
+    body: JSON.stringify(buildRuanganPayload(data)),
   });
 }
 
@@ -529,29 +589,11 @@ export async function updateRuangan(
 ) {
   validateId(id, "ID ruangan");
 
-  if (!data.nama?.trim()) {
-    throw new Error("Nama ruangan wajib diisi.");
-  }
-
-  const kapasitas =
-    data.kapasitas == null
-      ? null
-      : validatePositiveInteger(
-          data.kapasitas,
-          "Kapasitas",
-          true
-        );
-
   return apiFetch(
     `${API_ENDPOINT}/ruangan/${encodeURIComponent(id)}`,
     {
       method: "PUT",
-      body: JSON.stringify({
-        nama: data.nama.trim(),
-        lokasi: normalizeText(data.lokasi),
-        kapasitas,
-        keterangan: normalizeText(data.keterangan),
-      }),
+      body: JSON.stringify(buildRuanganPayload(data)),
     }
   );
 }
@@ -566,6 +608,7 @@ export async function deleteRuangan(id: string) {
     }
   );
 }
+
 
 // ======================================================
 // ASET
@@ -1054,15 +1097,4 @@ export async function deleteLaporanKerusakan(id: string) {
     }
   );
 }
-export async function getDetailGudang(id) {
-  if (!id) {
-    throw new Error("ID gudang tidak ditemukan.");
-  }
 
-  return apiFetch(
-    `${API_ENDPOINT}/gudang/${encodeURIComponent(id)}`,
-    {
-      method: "GET",
-    }
-  );
-}

@@ -24,9 +24,9 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
 import {
+  formatIzinErrorMessage,
   getDaftarIzin,
   verifikasiIzin,
-  verifikasiPengajuan,
 } from "@/services/izin.service";
 
 import { apiFetch } from "../../../../../lib/api";
@@ -208,6 +208,7 @@ function getAlasan(item) {
 
 function getLampiran(item) {
   return (
+    item?.urlBukti ||
     item?.lampiran ||
     item?.fileLampiran ||
     item?.file ||
@@ -304,7 +305,9 @@ function getUploadUrl(value) {
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-  const cleanBaseUrl = baseUrl.replace(/\/+$/, "");
+  const cleanBaseUrl = baseUrl
+    .replace(/\/+$/, "")
+    .replace(/\/api$/i, "");
   const cleanPath = value.replace(/^\/+/, "");
 
   return `${cleanBaseUrl}/${cleanPath}`;
@@ -423,7 +426,7 @@ export default function PermohonanIzinSiswaPage() {
 
       setError("");
 
-      const response = await getDaftarIzin();
+      const response = await getDaftarIzin({ limit: 100 });
 
       const items = getArrayResponse(response);
 
@@ -432,8 +435,10 @@ export default function PermohonanIzinSiswaPage() {
       console.error("Gagal mengambil daftar izin:", err);
 
       setError(
-        err?.message ||
+        formatIzinErrorMessage(
+          err,
           "Gagal mengambil data permohonan izin siswa."
+        )
       );
     } finally {
       setLoading(false);
@@ -442,7 +447,10 @@ export default function PermohonanIzinSiswaPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchData]);
 
 
@@ -540,19 +548,10 @@ export default function PermohonanIzinSiswaPage() {
       setProcessing(true);
       setError("");
 
-      let response;
-
-      try {
-        response = await verifikasiIzin(id, {
-          status: "disetujui",
-          catatan: catatan || undefined,
-        });
-      } catch {
-        response = await verifikasiPengajuan(id, {
-          status: "disetujui",
-          catatan: catatan || undefined,
-        });
-      }
+      const response = await verifikasiIzin(id, {
+        status: "disetujui",
+        catatan: catatan.trim() || null,
+      });
 
       const result = normalizeResponse(response);
 
@@ -576,8 +575,10 @@ export default function PermohonanIzinSiswaPage() {
       console.error("Gagal menyetujui izin:", err);
 
       setError(
-        err?.message ||
+        formatIzinErrorMessage(
+          err,
           "Gagal menyetujui permohonan izin."
+        )
       );
     } finally {
       setProcessing(false);
@@ -604,19 +605,10 @@ export default function PermohonanIzinSiswaPage() {
       setProcessing(true);
       setError("");
 
-      let response;
-
-      try {
-        response = await verifikasiIzin(id, {
-          status: "ditolak",
-          catatan: catatan.trim(),
-        });
-      } catch {
-        response = await verifikasiPengajuan(id, {
-          status: "ditolak",
-          catatan: catatan.trim(),
-        });
-      }
+      const response = await verifikasiIzin(id, {
+        status: "ditolak",
+        catatan: catatan.trim(),
+      });
 
       const result = normalizeResponse(response);
 
@@ -640,8 +632,10 @@ export default function PermohonanIzinSiswaPage() {
       console.error("Gagal menolak izin:", err);
 
       setError(
-        err?.message ||
+        formatIzinErrorMessage(
+          err,
           "Gagal menolak permohonan izin."
+        )
       );
     } finally {
       setProcessing(false);
@@ -826,10 +820,6 @@ export default function PermohonanIzinSiswaPage() {
                     Menunggu
                   </option>
 
-                  <option value="diajukan">
-                    Diajukan
-                  </option>
-
                   <option value="disetujui">
                     Disetujui
                   </option>
@@ -858,10 +848,6 @@ export default function PermohonanIzinSiswaPage() {
                   <option value="sakit">
                     Sakit
                   </option>
-
-                  <option value="cuti">
-                    Cuti
-                  </option>
                 </select>
               </div>
 
@@ -876,7 +862,7 @@ export default function PermohonanIzinSiswaPage() {
                     </span>{" "}
                     dari{" "}
                     <span className="theme-text font-semibold">
-                      {data.length}
+                      {dataSiswa.length}
                     </span>{" "}
                     data
                   </p>
@@ -1313,7 +1299,7 @@ export default function PermohonanIzinSiswaPage() {
 
               {(getStatus(selected) === "menunggu" ||
                 getStatus(selected) === "pending" ||
-                getStatus(selected) === "diajukan") && (
+                getStatus(selected) === "diajukan") ? (
                 <div className="theme-card mt-4 rounded-xl border p-4">
                   <div className="mb-3 flex items-center gap-2">
                     <UserCheck
@@ -1336,6 +1322,36 @@ export default function PermohonanIzinSiswaPage() {
                     className="theme-input w-full resize-none rounded-xl border p-3 text-sm outline-none transition focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   />
                 </div>
+              ) : (
+                (selected?.catatan || selected?.penyetuju?.namaLengkap) && (
+                  <div className="theme-card mt-4 rounded-xl border p-4">
+                    <div className="mb-3 flex items-center gap-2">
+                      <UserCheck
+                        size={17}
+                        className="theme-text-muted"
+                      />
+
+                      <p className="theme-text text-sm font-semibold">
+                        Informasi Verifikasi
+                      </p>
+                    </div>
+
+                    {selected?.penyetuju?.namaLengkap && (
+                      <p className="theme-text-muted mb-2 text-xs">
+                        Diverifikasi oleh:{" "}
+                        <span className="theme-text font-semibold">
+                          {selected.penyetuju.namaLengkap}
+                        </span>
+                      </p>
+                    )}
+
+                    {selected?.catatan && (
+                      <p className="theme-text-secondary whitespace-pre-wrap text-sm leading-6">
+                        {selected.catatan}
+                      </p>
+                    )}
+                  </div>
+                )
               )}
             </div>
 

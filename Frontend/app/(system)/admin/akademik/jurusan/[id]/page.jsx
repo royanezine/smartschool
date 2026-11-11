@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import CanAccess from "@/app/components/auth/CanAccess";
 import { getJurusan } from "@/services/jurusan.service";
 import {
   GraduationCap,
@@ -171,15 +172,17 @@ export default function DetailJurusanPage({ params }) {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() =>
-                        router.push(`/admin/akademik/jurusan/${item.id}/edit`)
-                      }
-                      className="flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-700 hover:shadow-xl md:w-auto"
-                    >
-                      <Pencil size={16} />
-                      Edit Jurusan
-                    </button>
+                    <CanAccess menu="jurusan" action="update">
+                      <button
+                        onClick={() =>
+                          router.push(`/admin/akademik/jurusan/${item.id}/edit`)
+                        }
+                        className="flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-700 hover:shadow-xl md:w-auto"
+                      >
+                        <Pencil size={16} />
+                        Edit Jurusan
+                      </button>
+                    </CanAccess>
                   </div>
                 </div>
 

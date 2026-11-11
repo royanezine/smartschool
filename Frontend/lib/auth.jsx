@@ -211,21 +211,31 @@ export function getAuthRoleId() {
 export function getPermissions() {
   const payload = getAuthPayload();
 
-  if (!Array.isArray(payload?.izin)) {
-    return [];
+  if (Array.isArray(payload?.izin) && payload.izin.length > 0) {
+    return payload.izin;
   }
 
-  return payload.izin;
+  const stored = getStoredUser();
+  if (Array.isArray(stored?.izin)) {
+    return stored.izin;
+  }
+
+  return [];
 }
 
 export function getActiveModules() {
   const payload = getAuthPayload();
 
-  if (!Array.isArray(payload?.modulAktif)) {
-    return [];
+  if (Array.isArray(payload?.modulAktif) && payload.modulAktif.length > 0) {
+    return payload.modulAktif;
   }
 
-  return payload.modulAktif;
+  const stored = getStoredUser();
+  if (Array.isArray(stored?.modulAktif)) {
+    return stored.modulAktif;
+  }
+
+  return [];
 }
 
 export function hasPermission(permission) {
@@ -281,6 +291,55 @@ export function normalizeUser(rawUser, payload = null) {
     source.peran ??
     null;
 
+  const normalizedRole = normalizeRole(roleRaw) || null;
+  const isSiswa = normalizedRole === "siswa";
+
+  const resolvedJabatanRef = isSiswa
+    ? null
+    : source.jabatanRef ?? rawUser?.jabatanRef ?? null;
+
+  const resolvedJabatanId = isSiswa
+    ? null
+    : source.jabatanId ??
+      source.jabatanRef?.id ??
+      rawUser?.jabatanId ??
+      rawUser?.jabatanRef?.id ??
+      payload?.jabatanId ??
+      null;
+
+  const resolvedJabatan = isSiswa
+    ? null
+    : source.jabatan ??
+      source.jabatanRef?.namaJabatan ??
+      source.jabatanRef?.nama ??
+      rawUser?.jabatan ??
+      rawUser?.jabatanRef?.namaJabatan ??
+      rawUser?.jabatanRef?.nama ??
+      payload?.jabatan ??
+      null;
+
+  const resolvedAksesMenu = isSiswa
+    ? []
+    : Array.isArray(source.aksesMenu)
+    ? source.aksesMenu
+    : Array.isArray(source.jabatanRef?.aksesMenu)
+    ? source.jabatanRef.aksesMenu
+    : Array.isArray(rawUser?.aksesMenu)
+    ? rawUser.aksesMenu
+    : Array.isArray(rawUser?.jabatanRef?.aksesMenu)
+    ? rawUser.jabatanRef.aksesMenu
+    : Array.isArray(payload?.aksesMenu)
+    ? payload.aksesMenu
+    : [];
+
+  const resolvedIzin = Array.isArray(payload?.izin)
+    ? payload.izin
+    : Array.isArray(source.izin)
+    ? source.izin
+    : Array.isArray(rawUser?.izin)
+    ? rawUser.izin
+    : [];
+
   return {
     ...source,
     id,
@@ -296,7 +355,7 @@ export function normalizeUser(rawUser, payload = null) {
       source.userName ??
       "",
     email: source.email ?? payload?.email ?? "",
-    role: normalizeRole(roleRaw) || null,
+    role: normalizedRole,
     roleId:
       payload?.roleId ??
       payload?.peranId ??
@@ -310,14 +369,11 @@ export function normalizeUser(rawUser, payload = null) {
       payload?.sekolahId ??
       null,
     yayasanId: source.yayasanId ?? payload?.yayasanId ?? null,
-    jabatan: source.jabatan ?? rawUser?.jabatan ?? payload?.jabatan ?? null,
-    aksesMenu: Array.isArray(source.aksesMenu)
-      ? source.aksesMenu
-      : Array.isArray(rawUser?.aksesMenu)
-      ? rawUser.aksesMenu
-      : Array.isArray(payload?.aksesMenu)
-      ? payload.aksesMenu
-      : [],
+    jabatanId: resolvedJabatanId,
+    jabatanRef: resolvedJabatanRef,
+    jabatan: resolvedJabatan,
+    aksesMenu: resolvedAksesMenu,
+    izin: resolvedIzin,
     jenjang:
       source.jenjang ??
       source.sekolah?.jenjang ??
@@ -983,16 +1039,17 @@ export function getUserJenjang() {
  * Menu lain yang tidak terdaftar di sini berlaku untuk seluruh jenjang sekolah.
  */
 export const MENU_JENJANG_RESTRICTIONS = {
-  jurusan: ["SMK"],
+  jurusan: ["SMA", "SMK"],
+  prakerin: ["SMK"],
 };
 
 /**
  * Validasi apakah menu tertentu diizinkan untuk jenjang sekolah pengguna.
- * Jika menu memiliki restriksi jenjang:
- * - Jika jenjang tidak diketahui (null/undefined/kosong) -> FAIL-CLOSED (false).
+ * Mengikuti kontrak Backend KONFIGURASI_MENU_JENJANG (getMenusByJenjang):
+ * - Jika menu tidak memiliki restriksi jenjang -> ALLOW (true).
+ * - Jika jenjang belum diketahui (null/undefined/kosong) -> ALLOW (true) sesuai getMenusByJenjang Backend.
  * - Jika jenjang cocok dengan konfigurasi -> ALLOW (true).
  * - Jika jenjang tidak cocok -> DENY (false).
- * Jika menu tidak memiliki restriksi jenjang -> ALLOW (true).
  */
 export function isMenuAllowedForJenjang(menuName, jenjang = null) {
   if (!menuName) return true;
@@ -1004,7 +1061,7 @@ export function isMenuAllowedForJenjang(menuName, jenjang = null) {
   }
 
   if (!jenjang || !String(jenjang).trim()) {
-    return false; // FAIL-CLOSED jika jenjang belum diketahui
+    return true;
   }
 
   const normJenjang = String(jenjang).trim().toUpperCase();
@@ -1049,11 +1106,12 @@ export const MENU_TO_ROLE_MODULES = {
   "LMS dan CBT": ["lms", "tugas", "ujian"],
   "lms dan cbt": ["lms", "tugas", "ujian"],
 
-  // 4. Delegated Menu Baku Jabatan (non-modul di peran backend)
+  // 4. Delegated Menu Baku Jabatan
   "keuangan dan kas": ["laporan"],
   "perpustakaan": ["manajemen_aset"],
-  "bimbingan konseling": ["akademik"],
+  "bimbingan konseling": ["bk", "akademik"],
   "monitoring absensi": ["lms", "akademik"],
+  "pengaturan absensi": ["lms", "akademik", "manajemen_pengguna"],
   "shift": ["manajemen_pengguna"],
   "absen saya": ["akademik"],
 };
@@ -1068,26 +1126,46 @@ export function hasMenuAccess(menuName, action = "view") {
   const targetAction = String(action || "view").trim().toLowerCase();
   const normMenu = normalizeMenuName(menuName);
 
-  // 1. Validasi Jenjang Sekolah Terpusat (Tier Restriction)
-  // Menolak jika menu memiliki restriksi jenjang yang tidak cocok dengan jenjang sekolah (atau fail-closed jika unknown)
+  // 1. Siswa tidak memiliki Jabatan dan tidak boleh mengakses menu administratif / monitoring guru
+  if (role === "siswa") {
+    if (
+      (normMenu === "absen saya" || normMenu === "absen_saya") &&
+      (targetAction === "view" || targetAction === "create")
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  // 2. Validasi Jenjang Sekolah Terpusat (Tier Restriction)
   const userJenjang = getUserJenjang();
   if (!isMenuAllowedForJenjang(normMenu, userJenjang)) {
     return false;
   }
 
-  // 2. Cek apakah user memiliki Jabatan (Sistem RBAC Jabatan Baru)
+  // 3. Cek apakah user memiliki Jabatan (Sistem RBAC Jabatan)
   const userJabatan = getUserJabatan();
-  const hasJabatan = Boolean(userJabatan && String(userJabatan).trim());
+  const aksesList = getUserAksesMenu();
+  const hasJabatan = Boolean(
+    (userJabatan && String(userJabatan).trim()) ||
+      user?.jabatanId ||
+      user?.jabatanRef?.id ||
+      (Array.isArray(aksesList) && aksesList.length > 0)
+  );
 
   if (hasJabatan) {
-    // Untuk user yang memiliki Jabatan: aksesMenu adalah sumber kebenaran SATU-SATUNYA
-    const aksesList = getUserAksesMenu();
+    // Untuk user yang memiliki Jabatan (admin_sekolah terbatas, guru, staf/pegawai):
+    // aksesMenu dari Jabatan adalah sumber kebenaran SATU-SATUNYA
     if (!Array.isArray(aksesList) || aksesList.length === 0) {
-      return false; // aksesMenu kosong -> menu tidak tampil
+      return false;
     }
 
     const matched = aksesList.find((item) => {
-      const itemNorm = normalizeMenuName(item.menu);
+      const rawMenu =
+        typeof item === "string"
+          ? item
+          : item?.menu || item?.namaMenu || item?.key || "";
+      const itemNorm = normalizeMenuName(rawMenu);
       if (itemNorm === normMenu) return true;
       if (
         (normMenu === "lms" || normMenu === "tugas" || normMenu === "ujian") &&
@@ -1100,25 +1178,40 @@ export function hasMenuAccess(menuName, action = "view") {
 
     if (!matched) return false;
 
-    const perms = Array.isArray(matched.permissions)
-      ? matched.permissions.map((p) => String(p).trim().toLowerCase())
+    if (typeof matched === "string") {
+      return targetAction === "view";
+    }
+
+    const rawPerms = Array.isArray(matched.permissions)
+      ? matched.permissions
+      : Array.isArray(matched.actions)
+      ? matched.actions
+      : Array.isArray(matched.aksi)
+      ? matched.aksi
       : [];
+    const perms = rawPerms.map((p) => String(p).trim().toLowerCase());
 
     return perms.includes(targetAction);
   }
 
-  // 2. Jika bukan admin_sekolah dan tidak memiliki aksesMenu (mis. siswa/guru reguler/yayasan),
-  // pertahankan akses default sesuai alur masing-masing
-  if (role !== "admin_sekolah") {
-    return true;
+  // 4. Jika bukan admin_sekolah dan tidak memiliki Jabatan (mis. guru/pegawai reguler tanpa Jabatan):
+  // Hanya memiliki akses ke "absen saya", tidak memiliki akses ke menu baku Jabatan seperti monitoring absensi / BK admin
+  if (role !== "admin_sekolah" && role !== "admin") {
+    if (
+      (normMenu === "absen saya" || normMenu === "absen_saya") &&
+      (targetAction === "view" || targetAction === "create")
+    ) {
+      return true;
+    }
+    return false;
   }
 
-  // 3. Skenario A: Admin Sekolah utama (tanpa jabatan terbatas).
-  // Sumber otoritatif adalah permission Peran (payload.izin / getPermissions())
+  // 5. Skenario A: Admin Sekolah Utama (tanpa Jabatan terbatas).
+  // Mengikuti mekanisme akses yang diberikan Backend (izin peran / bypass requireAksesMenu untuk Admin Sekolah Utama)
   const rolePermissions = getPermissions();
 
   if (!Array.isArray(rolePermissions) || rolePermissions.length === 0) {
-    return false;
+    return true;
   }
 
   // Dashboard khusus: jika role admin_sekolah memiliki izin view di sistem
@@ -1149,6 +1242,29 @@ export function hasMenuAccess(menuName, action = "view") {
     const requiredPerm = `${mod}.${targetAction}`;
     return rolePermissions.includes(requiredPerm);
   });
+}
+
+export function getRequiredActionForAdminPath(pathname = "") {
+  const path = String(pathname || "").trim().toLowerCase();
+  if (
+    path.endsWith("/tambah") ||
+    path.includes("/tambah/") ||
+    path.endsWith("/create") ||
+    path.includes("/create/") ||
+    path.endsWith("/buat") ||
+    path.includes("/buat/")
+  ) {
+    return "create";
+  }
+  if (
+    path.endsWith("/edit") ||
+    path.includes("/edit/") ||
+    path.endsWith("/kalkulasi") ||
+    path.includes("/kalkulasi/")
+  ) {
+    return "update";
+  }
+  return "view";
 }
 
 export function getMenuKeyForAdminPath(pathname = "") {
@@ -1260,6 +1376,7 @@ export function getMenuKeyForAdminPath(pathname = "") {
   if (
     path.startsWith("/admin/pengguna") ||
     path.startsWith("/admin/guru") ||
+    path.startsWith("/admin/staf") ||
     path.startsWith("/admin/siswa")
   ) {
     return "manajemen pengguna";

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import CanAccess from "@/app/components/auth/CanAccess";
 
 import {
   getKategoriPelanggaran,
@@ -135,16 +136,18 @@ export default function EditKategoriPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push("/admin/bk/kategori-point/tambah")
-                    }
-                    className="inline-flex h-10 items-center gap-2 rounded-xl theme-primary px-4 text-sm font-semibold shadow-sm transition hover:opacity-90"
-                  >
-                    <Plus size={16} />
-                    Tambah Kategori
-                  </button>
+                  <CanAccess menu="bimbingan konseling" action="create">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push("/admin/bk/kategori-point/tambah")
+                      }
+                      className="inline-flex h-10 items-center gap-2 rounded-xl theme-primary px-4 text-sm font-semibold shadow-sm transition hover:opacity-90"
+                    >
+                      <Plus size={16} />
+                      Tambah Kategori
+                    </button>
+                  </CanAccess>
                 </div>
               </div>
 
