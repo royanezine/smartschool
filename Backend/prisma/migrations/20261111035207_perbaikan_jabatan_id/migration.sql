@@ -1,20 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the column `xendit_invoice_id` on the `langganan_sekolah` table. All the data in the column will be lost.
-  - You are about to drop the column `xendit_payment_link` on the `langganan_sekolah` table. All the data in the column will be lost.
-  - You are about to drop the column `xendit_invoice_id` on the `riwayat_pembayaran` table. All the data in the column will be lost.
-  - You are about to drop the column `xendit_payment_id` on the `riwayat_pembayaran` table. All the data in the column will be lost.
-  - A unique constraint covering the columns `[pengguna_id,kelas_id,tanggal]` on the table `absensi` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[token]` on the table `asesmen` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[sekolah_id,nama]` on the table `kategori_pelanggaran` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[pengguna_id,kategori,target_url]` on the table `notifikasi` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[sekolah_id,nik]` on the table `pendaftaran_ppdb` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[sekolah_id,nisn]` on the table `pendaftaran_ppdb` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[sekolah_id,konselor_id,tanggal,waktu_mulai]` on the table `sesi_konseling` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[sekolah_id,siswa_id,kategori_tagihan_id,tahun_ajaran_id,periode_bulan,periode_tahun]` on the table `tagihan` will be added. If there are existing duplicate values, this will fail.
-
-*/
 -- AlterTable
 ALTER TABLE "absensi" ADD COLUMN     "mata_pelajaran_id" TEXT;
 
@@ -29,19 +12,11 @@ ALTER TABLE "gudang" ADD COLUMN     "keterangan" VARCHAR(255);
 ALTER TABLE "kategori_aset" ADD COLUMN     "keterangan" VARCHAR(255);
 
 -- AlterTable
-ALTER TABLE "langganan_sekolah" DROP COLUMN "xendit_invoice_id",
-DROP COLUMN "xendit_payment_link";
-
--- AlterTable
 ALTER TABLE "pengaturan_spmb" ALTER COLUMN "diperbarui_pada" DROP DEFAULT;
 
 -- AlterTable
 ALTER TABLE "pengguna" ADD COLUMN     "jabatan_id" TEXT,
 ADD COLUMN     "jurusan_id" TEXT;
-
--- AlterTable
-ALTER TABLE "riwayat_pembayaran" DROP COLUMN "xendit_invoice_id",
-DROP COLUMN "xendit_payment_id";
 
 -- CreateTable
 CREATE TABLE "jabatan" (
