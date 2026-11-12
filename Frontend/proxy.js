@@ -1,5 +1,6 @@
-
 import { NextResponse } from "next/server";
+
+const ROOT_DOMAIN = "smartschool.citrasolusi.id";
 
 const SYSTEM_ROUTES = [
   "/admin",
@@ -26,44 +27,106 @@ const EXCLUDED_PATHS = [
   "/manifest.json",
 ];
 
+const RESERVED_TENANTS = [
+  "www",
+  "api",
+  "admin",
+  "guru",
+  "siswa",
+  "yayasan",
+  "super-admin",
+  "login",
+  "register",
+  "forgot-password",
+  "onboarding",
+  "pin",
+  ".git",
+];
+
 function isExcludedPath(pathname) {
   return EXCLUDED_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
+    (path) =>
+      pathname === path ||
+      pathname.startsWith(`${path}/`)
   );
 }
 
 function matchesRoute(pathname, routes) {
   return routes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
+    (route) =>
+      pathname === route ||
+      pathname.startsWith(`${route}/`)
   );
 }
 
+function isValidTenant(value) {
+  if (typeof value !== "string") return false;
+
+  const tenant = value.trim().toLowerCase();
+
+  if (!tenant || RESERVED_TENANTS.includes(tenant)) {
+    return false;
+  }
+
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(tenant);
+}
+
 function getTenantFromHost(host) {
-  const hostname = host.split(":")[0].toLowerCase();
+  const hostname = host
+    .split(":")[0]
+    .toLowerCase()
+    .replace(/\.$/, "");
 
-  if (!hostname.endsWith(".localhost")) {
-    return null;
+  if (hostname.endsWith(".localhost")) {
+    const tenant = hostname.slice(
+      0,
+      -".localhost".length
+    );
+
+    return isValidTenant(tenant) ? tenant : null;
   }
 
-  const tenant = hostname.slice(0, -".localhost".length);
+  if (hostname.endsWith(`.${ROOT_DOMAIN}`)) {
+    const tenant = hostname.slice(
+      0,
+      -`.${ROOT_DOMAIN}`.length
+    );
 
-  if (!tenant || tenant === "www") {
-    return null;
+    return isValidTenant(tenant) ? tenant : null;
   }
 
-  if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(tenant)) {
-    return null;
-  }
+  return null;
+}
 
-  return tenant;
+function isReservedPath(pathname) {
+  return /(^|\/)\.git(?:\/|$)/i.test(pathname);
 }
 
 export function proxy(request) {
   const url = request.nextUrl;
   const pathname = url.pathname;
-  const host = request.headers.get("host") || url.host;
+
+  const host =
+    request.headers.get("host") || url.host;
 
   if (isExcludedPath(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (isReservedPath(pathname)) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Halaman tidak ditemukan",
+      },
+      { status: 404 }
+    );
+  }
+
+  if (
+    matchesRoute(pathname, SYSTEM_ROUTES) ||
+    matchesRoute(pathname, AUTH_ROUTES)
+  ) {
     return NextResponse.next();
   }
 
@@ -74,46 +137,29 @@ export function proxy(request) {
   }
 
   const requestHeaders = new Headers(request.headers);
+
   requestHeaders.set("x-school-subdomain", tenant);
-
-  if (matchesRoute(pathname, AUTH_ROUTES)) {
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-  }
-
-  // Halaman sistem tetap menggunakan route global.
-  if (matchesRoute(pathname, SYSTEM_ROUTES)) {
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-  }
 
   const tenantPrefix = `/${tenant}`;
 
-  // Jika prefix tenant ditulis manual pada subdomain tenant,
-  // arahkan ke URL tanpa prefix agar tidak terjadi duplikasi.
   if (
     pathname === tenantPrefix ||
     pathname.startsWith(`${tenantPrefix}/`)
   ) {
     const correctedUrl = url.clone();
-    correctedUrl.pathname = pathname.slice(tenantPrefix.length) || "/";
+
+    correctedUrl.pathname =
+      pathname.slice(tenantPrefix.length) || "/";
 
     return NextResponse.redirect(correctedUrl);
   }
 
-  // Contoh:
-  // smart.localhost:3000/         -> /smart
-  // smart.localhost:3000/profil   -> /smart/profil
-  // smart.localhost:3000/articles -> /smart/articles
   const rewriteUrl = url.clone();
+
   rewriteUrl.pathname =
-    pathname === "/" ? tenantPrefix : `${tenantPrefix}${pathname}`;
+    pathname === "/"
+      ? tenantPrefix
+      : `${tenantPrefix}${pathname}`;
 
   return NextResponse.rewrite(rewriteUrl, {
     request: {
