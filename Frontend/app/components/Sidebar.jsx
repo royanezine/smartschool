@@ -977,8 +977,7 @@ export default function Sidebar({
     : `relative shrink-0 h-screen ${desktopWidth} z-40 overflow-visible sticky top-0 ${transitionClass}`;
 
   const asideBase = `
-    bg-[#f4f8ff]
-    dark:bg-[#0b1220]
+    sidebar-bg
     flex
     flex-col
     border-r
@@ -1051,7 +1050,7 @@ export default function Sidebar({
           <div
             className="
               relative z-10 flex flex-col h-full min-h-0 overflow-hidden
-              bg-[#f4f8ff] dark:bg-[#0b1220]
+              sidebar-bg
             "
           >
             <div className="sidebar-header relative h-[112px] shrink-0 overflow-visible">
@@ -1098,7 +1097,7 @@ export default function Sidebar({
                     <span
                       className="
                         mt-0.5 text-[9px] font-medium tracking-[0.1em] uppercase
-                        text-white/85 dark:text-blue-200/80 truncate
+                        text-white/85 dark:text-white/80 truncate
                       "
                     >
                       {config?.brandName || "ADMIN SEKOLAH"}
@@ -1118,8 +1117,8 @@ export default function Sidebar({
                   className="
                     absolute right-3 top-4 z-20
                     rounded-lg p-1.5
-                    text-white/80 dark:text-blue-100/80
-                    hover:bg-white/15 dark:hover:bg-blue-900/40
+                    text-white/80 dark:text-white/80
+                    hover:bg-white/15 dark:hover:bg-white/15
                     hover:text-white dark:hover:text-white
                     transition
                   "
@@ -1378,9 +1377,9 @@ export default function Sidebar({
               aria-expanded={!collapsed}
               className="
                 sidebar-toggle absolute z-[100] top-8 -right-3 w-7 h-7
-                rounded-full bg-white dark:bg-slate-900
+                rounded-full bg-white dark:bg-[var(--color-card)]
                 /* Force solid background on click */
-                active:!bg-white dark:active:!bg-slate-900
+                active:!bg-white dark:active:!bg-[var(--color-card)]
                 border flex items-center justify-center
                 shadow-md shadow-black/10 dark:shadow-black/40
                 hover:scale-110 active:scale-95
@@ -1414,16 +1413,16 @@ export default function Sidebar({
               }}
               className="
                 min-w-[230px] max-w-[320px] p-2
-                bg-white dark:bg-[#111827] rounded-xl
+                bg-white dark:bg-[var(--color-card)] rounded-xl
                 shadow-xl dark:shadow-black/50
-                border border-blue-100 dark:border-slate-700
+                border border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] dark:border-[var(--color-border)]
               "
             >
               <div
                 className="
                   absolute -left-1.5 top-5 w-3 h-3
-                  bg-white dark:bg-[#111827]
-                  border-l border-b border-blue-100 dark:border-slate-700
+                  bg-white dark:bg-[var(--color-card)]
+                  border-l border-b border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] dark:border-[var(--color-border)]
                   rotate-45
                 "
               />

@@ -124,24 +124,32 @@
 
 .dark {
   /* ----------------------------------------------------------
+     PRIMARY (didefinisikan lebih dulu agar token dark di bawah
+     dapat menurunkan tint dari --school-primary / --cms-primary)
+     ---------------------------------------------------------- */
+
+  --color-primary: var(--school-primary, var(--cms-primary, #3b82f6));
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 82%, #ffffff);
+
+  /* ----------------------------------------------------------
      BASE
      ---------------------------------------------------------- */
 
-  --background: #0b1220;
+  --background: color-mix(in srgb, var(--color-primary) 5%, #0b0b0d);
   --foreground: #f8fafc;
 
   /* ----------------------------------------------------------
      PAGE
      ---------------------------------------------------------- */
 
-  --color-page: #0b1220;
+  --color-page: color-mix(in srgb, var(--color-primary) 5%, #0b0b0d);
 
   /* ----------------------------------------------------------
      CARD
      ---------------------------------------------------------- */
 
-  --color-card: #111c2e;
-  --color-card-soft: #172236;
+  --color-card: color-mix(in srgb, var(--color-primary) 7%, #111114);
+  --color-card-soft: color-mix(in srgb, var(--color-primary) 10%, #17171b);
 
   /* ----------------------------------------------------------
      TEXT
@@ -156,31 +164,31 @@
      BORDER
      ---------------------------------------------------------- */
 
-  --color-border: #243247;
-  --color-border-soft: #1e2a3d;
+  --color-border: color-mix(in srgb, var(--color-primary) 16%, #242429);
+  --color-border-soft: color-mix(in srgb, var(--color-primary) 12%, #1d1d22);
 
   /* ----------------------------------------------------------
      INPUT
      ---------------------------------------------------------- */
 
-  --color-input: #111c2e;
-  --color-input-hover: #172236;
+  --color-input: color-mix(in srgb, var(--color-primary) 7%, #111114);
+  --color-input-hover: color-mix(in srgb, var(--color-primary) 10%, #17171b);
 
   /* ----------------------------------------------------------
      SIDEBAR
      ---------------------------------------------------------- */
 
-  --color-sidebar: #0f172a;
-  --color-sidebar-hover: #172236;
-  --color-sidebar-active: #172e5a;
+  --color-sidebar: color-mix(in srgb, var(--color-primary) 5%, #0b0b0d);
+  --color-sidebar-hover: color-mix(in srgb, var(--color-primary) 12%, #141418);
+  --color-sidebar-active: color-mix(in srgb, var(--color-primary) 26%, #111114);
 
   --color-sidebar-text: #f8fafc;
   --color-sidebar-text-muted: #94a3b8;
-  --color-sidebar-text-active: #60a5fa;
+  --color-sidebar-text-active: color-mix(in srgb, var(--color-primary) 80%, #ffffff);
 
-  --color-sidebar-border: #1e2a3d;
+  --color-sidebar-border: color-mix(in srgb, var(--color-primary) 12%, #1d1d22);
   --color-sidebar-section-label: #64748b;
-  --color-sidebar-divider: #1e2a3d;
+  --color-sidebar-divider: color-mix(in srgb, var(--color-primary) 12%, #1d1d22);
 
   /* ----------------------------------------------------------
      BRAND
@@ -188,32 +196,29 @@
 
   --color-brand-logo-bg: linear-gradient(
     135deg,
-    #1e3a8a 0%,
-    #1d4ed8 100%
+    color-mix(in srgb, var(--color-primary) 70%, #09090b) 0%,
+    var(--color-primary) 100%
   );
   --color-brand-text: #f8fafc;
-  --color-brand-text-accent: #60a5fa;
+  --color-brand-text-accent: color-mix(in srgb, var(--color-primary) 80%, #ffffff);
 
   /* ----------------------------------------------------------
      HEADER
      ---------------------------------------------------------- */
 
-  --color-header: #0f172a;
-  --color-header-hover: #172236;
+  --color-header: color-mix(in srgb, var(--color-primary) 6%, #0e0e11);
+  --color-header-hover: color-mix(in srgb, var(--color-primary) 10%, #17171b);
 
   /* ----------------------------------------------------------
      TABLE
      ---------------------------------------------------------- */
 
-  --color-table-header: #111c2e;
-  --color-table-hover: #172236;
+  --color-table-header: color-mix(in srgb, var(--color-primary) 7%, #111114);
+  --color-table-hover: color-mix(in srgb, var(--color-primary) 10%, #17171b);
 
   /* ----------------------------------------------------------
      PRIMARY
      ---------------------------------------------------------- */
-
-  --color-primary: #3b82f6;
-  --color-primary-hover: #60a5fa;
 
   /* ----------------------------------------------------------
      STATUS
@@ -489,7 +494,7 @@ body {
 
 .dark {
   --color-primary: var(--cms-primary, #3b82f6);
-  --color-primary-hover: #60a5fa;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 82%, #ffffff);
 }
 
 /* Warna aksen yang dapat digunakan komponen CMS */
@@ -554,9 +559,9 @@ body {
 }
 
 .dark .sidebar-active {
-  background-color: color-mix(in srgb, var(--sidebar-primary) 75%, #0b1220);
+  background-color: color-mix(in srgb, var(--sidebar-primary) 75%, var(--color-page));
   color: #f8fafc;
-  border: 1px solid color-mix(in srgb, var(--sidebar-primary) 55%, #1e293b);
+  border: 1px solid color-mix(in srgb, var(--sidebar-primary) 55%, var(--color-border));
   box-shadow: none;
 }
 
@@ -567,7 +572,7 @@ body {
 }
 
 .dark .sidebar-hover:hover {
-  background-color: color-mix(in srgb, var(--sidebar-primary) 18%, #0b1220);
+  background-color: color-mix(in srgb, var(--sidebar-primary) 18%, var(--color-page));
   color: color-mix(in srgb, var(--sidebar-primary) 85%, #ffffff);
 }
 
@@ -577,7 +582,7 @@ body {
 }
 
 .dark .sidebar-header {
-  background-color: color-mix(in srgb, var(--sidebar-primary) 30%, #0b1220);
+  background-color: color-mix(in srgb, var(--sidebar-primary) 30%, var(--color-page));
 }
 
 /* Curve mengikuti background sidebar (bukan header) */
@@ -586,7 +591,7 @@ body {
 }
 
 .dark .sidebar-curve {
-  fill: #0b1220;
+  fill: var(--color-sidebar);
 }
 
 /* Background sidebar */
@@ -595,7 +600,7 @@ body {
 }
 
 .dark .sidebar-bg {
-  background-color: #0b1220;
+  background-color: var(--color-sidebar);
 }
 
 /* Border sidebar */
@@ -604,7 +609,7 @@ body {
 }
 
 .dark .sidebar-border {
-  border-color: color-mix(in srgb, var(--sidebar-primary) 10%, #1e2a3d);
+  border-color: color-mix(in srgb, var(--sidebar-primary) 14%, var(--color-border));
 }
 
 /* Icon color */
@@ -623,9 +628,9 @@ body {
 }
 
 .dark .sidebar-child-active-collapsed {
-  background-color: color-mix(in srgb, var(--sidebar-primary) 20%, #0b1220);
+  background-color: color-mix(in srgb, var(--sidebar-primary) 20%, var(--color-page));
   color: color-mix(in srgb, var(--sidebar-primary) 85%, #ffffff);
-  border: 1px solid color-mix(in srgb, var(--sidebar-primary) 45%, #1e293b);
+  border: 1px solid color-mix(in srgb, var(--sidebar-primary) 45%, var(--color-border));
 }
 
 /* Tombol toggle desktop */
@@ -642,13 +647,13 @@ body {
 
 .dark .sidebar-toggle {
   color: color-mix(in srgb, var(--sidebar-primary) 85%, #ffffff);
-  border-color: color-mix(in srgb, var(--sidebar-primary) 20%, #1e2a3d);
+  border-color: color-mix(in srgb, var(--sidebar-primary) 20%, var(--color-border));
 }
 
 .dark .sidebar-toggle:hover {
-  background-color: color-mix(in srgb, var(--sidebar-primary) 18%, #0b1220);
+  background-color: color-mix(in srgb, var(--sidebar-primary) 18%, var(--color-page));
   color: #ffffff;
-  border-color: color-mix(in srgb, var(--sidebar-primary) 40%, #1e2a3d);
+  border-color: color-mix(in srgb, var(--sidebar-primary) 40%, var(--color-border));
 }
 
 /* Burger button mobile */
@@ -667,7 +672,7 @@ body {
 }
 
 .dark .sidebar-submenu-border {
-  border-color: color-mix(in srgb, var(--sidebar-primary) 12%, #1e2a3d);
+  border-color: color-mix(in srgb, var(--sidebar-primary) 12%, var(--color-border));
 }
 
 /* Section header text */
@@ -685,7 +690,7 @@ body {
 }
 
 .dark .sidebar-divider {
-  background-color: color-mix(in srgb, var(--sidebar-primary) 15%, #1e2a3d);
+  background-color: color-mix(in srgb, var(--sidebar-primary) 15%, var(--color-border));
 }
 
 /* ============================================================
@@ -715,12 +720,12 @@ body {
 }
 
 .dark .header-search {
-  background-color: #1e293b;
-  border-color: #334155;
+  background-color: var(--color-input);
+  border-color: var(--color-border);
 }
 
 .dark .header-search:hover {
-  background-color: #293548;
+  background-color: var(--color-input-hover);
 }
 
 .dark .header-search:focus {
@@ -736,9 +741,9 @@ body {
 }
 
 .dark .header-kbd {
-  background-color: #334155;
-  border-color: #475569;
-  color: #94a3b8;
+  background-color: var(--color-card-soft);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
 }
 
 /* Icon button hover (bell, theme, dsb) */
@@ -756,7 +761,7 @@ body {
 }
 
 .dark .header-icon-btn:hover {
-  background-color: color-mix(in srgb, var(--header-primary) 18%, #0b1220);
+  background-color: color-mix(in srgb, var(--header-primary) 18%, var(--color-page));
   color: color-mix(in srgb, var(--header-primary) 80%, #ffffff);
 }
 
@@ -774,7 +779,7 @@ body {
 
 .dark .header-notif-unread {
   border-left-color: var(--header-primary);
-  background-color: color-mix(in srgb, var(--header-primary) 14%, #0b1220);
+  background-color: color-mix(in srgb, var(--header-primary) 14%, var(--color-card));
 }
 
 /* Notif icon wrapper unread */
@@ -784,7 +789,7 @@ body {
 }
 
 .dark .header-notif-icon-unread {
-  background-color: color-mix(in srgb, var(--header-primary) 25%, #0b1220);
+  background-color: color-mix(in srgb, var(--header-primary) 25%, var(--color-card));
   color: color-mix(in srgb, var(--header-primary) 90%, #ffffff);
 }
 
@@ -793,7 +798,7 @@ body {
   background: linear-gradient(
     135deg,
     var(--header-primary) 0%,
-    color-mix(in srgb, var(--header-primary) 70%, #4f46e5) 100%
+    color-mix(in srgb, var(--header-primary) 75%, #000000) 100%
   );
 }
 
