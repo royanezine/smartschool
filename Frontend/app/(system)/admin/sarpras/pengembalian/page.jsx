@@ -282,6 +282,39 @@ const hitungRingkasanAktif = async () => {
 };
 
 
+function Stat({ label, value, subtitle, icon: Icon }) {
+  const toneClass =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
+
+  return (
+    <div className="theme-card theme-border h-full rounded-2xl border p-5 shadow-xl transition hover:shadow-lg">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider theme-text-muted">
+            {label}
+          </p>
+          <p className="mt-2 text-3xl font-bold tracking-tight theme-text">
+            {value}
+          </p>
+        </div>
+
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ${toneClass}`}
+        >
+          <Icon size={20} />
+        </div>
+      </div>
+
+      {subtitle && (
+        <p className="mt-3 text-xs font-medium theme-text-muted">
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
+
 function PengembalianContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -581,142 +614,50 @@ function PengembalianContent() {
             )}
 
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div
-                className={`
-                  theme-card
-                  rounded-2xl
-                  border
-                  ${themeNeutralBorder}
-                  ${themeCardShadow}
-                  p-4
-                  flex
-                  items-center
-                  gap-3.5
-                `}
-              >
-                <div
-                  className={`
-                    w-11
-                    h-11
-                    rounded-xl
-                    flex
-                    items-center
-                    justify-center
-                    flex-shrink-0
-                    text-[var(--color-primary)]
-                    ${themePrimarySoft}
-                  `}
-                >
-                  <Package size={20} />
-                </div>
+            {/* Stat card seragam: warna mengikuti --color-primary */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <Stat
+                label="Peminjaman Aktif"
+                value={
+                  loading
+                    ? "..."
+                    : ringkasan.siap && !ringkasan.gagal
+                      ? ringkasan.totalAktif
+                      : totalData
+                }
+                subtitle="Sedang dipinjam"
+                icon={Package}
+              />
 
-                <div className="min-w-0">
-                  <p className="text-xl font-bold theme-text leading-none">
-                    {loading
-                      ? "..."
-                      : ringkasan.siap && !ringkasan.gagal
-                        ? ringkasan.totalAktif
-                        : totalData}
-                  </p>
+              <Stat
+                label="Terlambat"
+                value={
+                  !ringkasan.siap
+                    ? "..."
+                    : ringkasan.gagal
+                      ? "-"
+                      : ringkasan.terbatas
+                        ? `≥ ${ringkasan.terlambat}`
+                        : ringkasan.terlambat
+                }
+                subtitle="Melewati jatuh tempo"
+                icon={AlertTriangle}
+              />
 
-                  <p className="text-xs theme-text-muted mt-1 truncate">
-                    Peminjaman Aktif
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className={`
-                  theme-card
-                  rounded-2xl
-                  border
-                  ${themeNeutralBorder}
-                  ${themeCardShadow}
-                  p-4
-                  flex
-                  items-center
-                  gap-3.5
-                `}
-              >
-                <div
-                  className={`
-                    w-11
-                    h-11
-                    rounded-xl
-                    flex
-                    items-center
-                    justify-center
-                    flex-shrink-0
-                    text-[var(--color-warning)]
-                    ${themeWarningSurface}
-                  `}
-                >
-                  <AlertTriangle size={20} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-xl font-bold theme-text leading-none">
-                    {!ringkasan.siap
-                      ? "..."
-                      : ringkasan.gagal
-                        ? "-"
-                        : ringkasan.terbatas
-                          ? `≥ ${ringkasan.terlambat}`
-                          : ringkasan.terlambat}
-                  </p>
-
-                  <p className="text-xs theme-text-muted mt-1 truncate">
-                    Terlambat
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className={`
-                  theme-card
-                  rounded-2xl
-                  border
-                  ${themeNeutralBorder}
-                  ${themeCardShadow}
-                  p-4
-                  flex
-                  items-center
-                  gap-3.5
-                `}
-              >
-                <div
-                  className={`
-                    w-11
-                    h-11
-                    rounded-xl
-                    flex
-                    items-center
-                    justify-center
-                    flex-shrink-0
-                    text-[var(--color-info)]
-                    ${themeInfoSurface}
-                  `}
-                >
-                  <Clock size={20} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-xl font-bold theme-text leading-none">
-                    {!ringkasan.siap
-                      ? "..."
-                      : ringkasan.gagal
-                        ? "-"
-                        : ringkasan.terbatas
-                          ? `≥ ${ringkasan.jatuhTempoHariIni}`
-                          : ringkasan.jatuhTempoHariIni}
-                  </p>
-
-                  <p className="text-xs theme-text-muted mt-1 truncate">
-                    Jatuh Tempo Hari Ini
-                  </p>
-                </div>
-              </div>
+              <Stat
+                label="Jatuh Tempo Hari Ini"
+                value={
+                  !ringkasan.siap
+                    ? "..."
+                    : ringkasan.gagal
+                      ? "-"
+                      : ringkasan.terbatas
+                        ? `≥ ${ringkasan.jatuhTempoHariIni}`
+                        : ringkasan.jatuhTempoHariIni
+                }
+                subtitle="Harus kembali hari ini"
+                icon={Clock}
+              />
             </div>
 
 

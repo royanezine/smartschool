@@ -32,6 +32,7 @@ import {
   IdCard,
   Briefcase,
   ShieldCheck,
+  BookOpen,
 } from "lucide-react";
 
 import { getUsers, deleteUser } from "@/services/user.service";
@@ -571,7 +572,7 @@ export default function AdminGuruPage() {
       return "border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]";
     }
     if (val.includes("wakil")) {
-      return "border border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]";
+      return "border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
     }
     if (val.includes("guru") || val.includes("pendidik")) {
       return "border border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]";
@@ -591,7 +592,7 @@ export default function AdminGuruPage() {
       return "border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]";
     }
     if (val.includes("guru")) {
-      return "border border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]";
+      return "border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
     }
     return "border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-secondary";
   };
@@ -625,7 +626,7 @@ export default function AdminGuruPage() {
         peran: getPeranGuru(item),
         kategoriJabatan: getKategoriJabatan(item),
         jabatan: item.jabatan || "",
-        
+
         golongan: item.golongan || "",
         jenisKelamin: item.jenisKelamin || "",
         shift: getShiftName(shift),
@@ -898,6 +899,37 @@ export default function AdminGuruPage() {
     printWindow.print();
   };
 
+  const statCards = [
+    {
+      key: "total",
+      label: "Total Guru",
+      value: loading ? "—" : totalGuru,
+      note: "Seluruh data guru",
+      icon: Users,
+    },
+    {
+      key: "aktif",
+      label: "Aktif di Halaman",
+      value: loading ? "—" : totalAktif,
+      note: "Guru berstatus aktif",
+      icon: CheckCircle,
+    },
+    {
+      key: "nonaktif",
+      label: "Nonaktif di Halaman",
+      value: loading ? "—" : totalNonaktif,
+      note: "Guru berstatus nonaktif",
+      icon: XCircle,
+    },
+    {
+      key: "mapel",
+      label: "Mata Pelajaran",
+      value: loadingMapel ? "—" : totalMapel,
+      note: "Mata pelajaran tersedia",
+      icon: BookOpen,
+    },
+  ];
+
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
@@ -955,7 +987,7 @@ export default function AdminGuruPage() {
                         <button
                           type="button"
                           onClick={exportPDF}
-                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm theme-text-secondary hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)] rounded-t-xl"
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] rounded-t-xl"
                         >
                           <Printer size={16} />
                           PDF / Print
@@ -964,7 +996,7 @@ export default function AdminGuruPage() {
                         <button
                           type="button"
                           onClick={exportExcel}
-                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm theme-text-secondary hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)]"
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                         >
                           <FileSpreadsheet size={16} />
                           Excel
@@ -973,7 +1005,7 @@ export default function AdminGuruPage() {
                         <button
                           type="button"
                           onClick={exportCSV}
-                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm theme-text-secondary hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)] rounded-b-xl"
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] rounded-b-xl"
                         >
                           <FileText size={16} />
                           CSV
@@ -985,7 +1017,7 @@ export default function AdminGuruPage() {
                       type="button"
                       onClick={handleRefresh}
                       disabled={loading || loadingShift}
-                      className="p-2.5 rounded-xl border theme-border theme-card theme-text-secondary hover:text-[var(--color-primary)] hover:bg-[var(--color-info-background)] disabled:opacity-50 transition-all"
+                      className="p-2.5 rounded-xl border theme-border theme-card theme-text-secondary hover:text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] disabled:opacity-50 transition-all"
                       title="Refresh data"
                     >
                       <RefreshCw
@@ -1009,7 +1041,7 @@ export default function AdminGuruPage() {
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg theme-info">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <Clock3 size={18} />
                         </div>
 
@@ -1090,74 +1122,38 @@ export default function AdminGuruPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 2xl:grid-cols-6">
-                  <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg theme-info">
-                        <Users size={16} />
+                {/* Kartu statistik: 4 kolom penuh, simetris, tinggi seragam */}
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+                  {statCards.map((card) => {
+                    const Icon = card.icon;
+
+                    return (
+                      <div
+                        key={card.key}
+                        className="theme-card flex h-full min-h-[120px] flex-col justify-between rounded-xl border theme-border p-4 shadow-sm"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                            <Icon size={16} />
+                          </div>
+
+                          <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
+                            {card.label}
+                          </p>
+                        </div>
+
+                        <div className="mt-2">
+                          <p className="text-2xl font-bold theme-text">
+                            {card.value}
+                          </p>
+
+                          <p className="text-[10px] theme-text-muted mt-1">
+                            {card.note}
+                          </p>
+                        </div>
                       </div>
-
-                      <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
-                        Total Guru
-                      </p>
-                    </div>
-
-                    <p className="text-2xl font-bold theme-text mt-1">
-                      {loading ? "—" : totalGuru}
-                    </p>
-                  </div>
-
-                  <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg theme-success">
-                        <CheckCircle size={16} />
-                      </div>
-
-                      <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
-                        Aktif di Halaman
-                      </p>
-                    </div>
-
-                    <p className="text-2xl font-bold theme-text mt-1">
-                      {loading ? "—" : totalAktif}
-                    </p>
-                  </div>
-
-                  <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg theme-danger">
-                        <XCircle size={16} />
-                      </div>
-
-                      <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
-                        Nonaktif di Halaman
-                      </p>
-                    </div>
-
-                    <p className="text-2xl font-bold theme-text mt-1">
-                      {loading ? "—" : totalNonaktif}
-                    </p>
-                  </div>
-
-                  <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg theme-info">
-                        <Users size={16} />
-                      </div>
-
-                      <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
-                        Mata Pelajaran
-                      </p>
-                    </div>
-
-                    <p className="text-2xl font-bold text-[var(--color-info)] mt-1">
-                      {loadingMapel ? "—" : totalMapel}
-                    </p>
-
-                    <p className="text-[10px] theme-text-muted mt-1">
-                      Mata pelajaran tersedia
-                    </p>
-                  </div>
+                    );
+                  })}
                 </div>
 
                 <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
@@ -1212,18 +1208,18 @@ export default function AdminGuruPage() {
 
                 <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[1650px]">
+                    <table className="w-full min-w-[1500px] table-fixed">
                       <colgroup>
                         <col className="w-[4%]" />
                         <col className="w-[16%]" />
+                        <col className="w-[9%]" />
+                        <col className="w-[14%]" />
+                        <col className="w-[12%]" />
+                        <col className="w-[9%]" />
+                        <col className="w-[9%]" />
+                        <col className="w-[9%]" />
                         <col className="w-[8%]" />
-                        <col className="w-[12%]" />
-                        <col className="w-[12%]" />
                         <col className="w-[10%]" />
-                        <col className="w-[9%]" />
-                        <col className="w-[9%]" />
-                        <col className="w-[7%]" />
-                        <col className="w-[7%]" />
                       </colgroup>
 
                       <thead>
@@ -1357,7 +1353,7 @@ export default function AdminGuruPage() {
                                 <td className="px-4 py-4 align-middle">
                                   {shift ? (
                                     <div className="flex flex-col gap-1">
-                                      <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-md border border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)] text-xs font-semibold whitespace-nowrap">
+                                      <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-md border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text text-xs font-semibold whitespace-nowrap">
                                         <Clock3 size={12} />
                                         {getShiftName(shift)}
                                       </span>
@@ -1401,7 +1397,7 @@ export default function AdminGuruPage() {
                                     <button
                                       type="button"
                                       onClick={() => router.push(`/admin/guru/${item.id}`)}
-                                      className="p-2 rounded-lg theme-text-muted hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)] transition-all"
+                                      className="p-2 rounded-lg theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] transition-all"
                                       title="Lihat Profil"
                                     >
                                       <Eye size={17} />
@@ -1412,7 +1408,7 @@ export default function AdminGuruPage() {
                                       onClick={() =>
                                         router.push(`/admin/guru/kartu-identitas/card?id=${item.id}`)
                                       }
-                                      className="p-2 rounded-lg theme-text-muted hover:bg-[var(--color-primary-background)] hover:text-[var(--color-primary)] transition-all"
+                                      className="p-2 rounded-lg theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] transition-all"
                                       title="Cetak Kartu Identitas"
                                     >
                                       <IdCard size={17} />
@@ -1421,7 +1417,7 @@ export default function AdminGuruPage() {
                                     <button
                                       type="button"
                                       onClick={() => router.push(`/admin/guru/edit/${item.id}`)}
-                                      className="p-2 rounded-lg theme-text-muted hover:bg-[var(--color-warning-background)] hover:text-[var(--color-warning)] transition-all"
+                                      className="p-2 rounded-lg theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] transition-all"
                                       title="Edit Guru"
                                     >
                                       <Edit size={17} />
@@ -1451,7 +1447,7 @@ export default function AdminGuruPage() {
 
                   {!loading && guru.length === 0 && (
                     <div className="p-12 text-center">
-                      <div className="w-12 h-12 rounded-full theme-info flex items-center justify-center mx-auto mb-3">
+                      <div className="w-12 h-12 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center mx-auto mb-3">
                         <Users size={24} />
                       </div>
 

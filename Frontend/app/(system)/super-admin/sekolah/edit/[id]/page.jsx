@@ -27,7 +27,7 @@ const themeFocus =
     "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 const themePrimaryButton =
-    "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-[var(--color-card)]";
+  "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-white";
 
 const themePrimarySoft =
     "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";

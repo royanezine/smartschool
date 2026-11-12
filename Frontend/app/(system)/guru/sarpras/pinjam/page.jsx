@@ -30,7 +30,7 @@ import { getKetersediaanAset } from "@/services/sarpras.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -120,16 +120,16 @@ const getKategoriTheme = (kategori = "") => {
   if (nama.includes("elektronik")) {
     return {
       tone: "info",
-      iconSurface: themeInfoSurface,
-      iconBorder: themeInfoBorder,
-      iconText: "text-[var(--color-info)]",
+      iconSurface: themePrimarySoft,
+      iconBorder: themePrimarySoftBorder,
+      iconText: themePrimaryText,
       accent:
         "before:bg-[linear-gradient(to_bottom,var(--color-info),color-mix(in_srgb,var(--color-info)_72%,var(--color-primary)))]",
       active:
-        `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`,
+        `${themePrimaryGradient} text-white ${themePrimaryShadow}`,
       inactive:
-        `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder} hover:border-[color-mix(in_srgb,var(--color-info)_38%,transparent)]`,
-      dot: "bg-[var(--color-info)]",
+        `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`,
+      dot: "bg-[var(--color-primary)]",
     };
   }
 
@@ -142,7 +142,7 @@ const getKategoriTheme = (kategori = "") => {
       accent:
         "before:bg-[linear-gradient(to_bottom,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]",
       active:
-        `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`,
+        `${themePrimaryGradient} text-white ${themePrimaryShadow}`,
       inactive:
         `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`,
       dot: "bg-[var(--color-primary)]",
@@ -349,7 +349,7 @@ export default function GuruSarprasPinjamPage() {
               className="absolute -left-40 top-1/3 h-[280px] w-[280px] rounded-full blur-3xl"
               style={{
                 background:
-                  "color-mix(in srgb, var(--color-info) 6%, transparent)",
+                  "color-mix(in srgb, var(--color-primary) 6%, transparent)",
               }}
             />
           </div>
@@ -371,7 +371,7 @@ export default function GuruSarprasPinjamPage() {
               <div className="flex min-w-0 items-start gap-4">
 
                 <div
-                  className={`${themePrimaryGradient} ${themePrimaryShadow} flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-[var(--color-card)]`}
+                  className={`${themePrimaryGradient} ${themePrimaryShadow} flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white`}
                 >
                   <Package size={22} />
                 </div>
@@ -457,7 +457,7 @@ export default function GuruSarprasPinjamPage() {
                   const categoryTheme =
                     item === "Semua"
                       ? {
-                          active: `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`,
+                          active: `${themePrimaryGradient} text-white ${themePrimaryShadow}`,
                           inactive: `theme-card ${themePrimaryText} ${themePrimarySoftBorder} hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)]`,
                           dot: "bg-[var(--color-primary)]",
                         }
@@ -480,7 +480,7 @@ export default function GuruSarprasPinjamPage() {
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${
                             aktif
-                              ? "bg-[color-mix(in_srgb,var(--color-card)_80%,transparent)]"
+                              ? "bg-white"
                               : categoryTheme.dot
                           }`}
                         />
@@ -656,7 +656,7 @@ export default function GuruSarprasPinjamPage() {
                             className={`flex-shrink-0 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
                               !tersedia
                                 ? "theme-text-muted cursor-not-allowed bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
-                                : `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:-translate-y-0.5`
+                                : `${themePrimaryGradient} text-white ${themePrimaryShadow} hover:-translate-y-0.5`
                             }`}
                           >
                             Ajukan

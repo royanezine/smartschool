@@ -9,7 +9,6 @@ import {
   MapPin,
   Calendar,
   Shield,
-  Key,
   Lock,
   Edit,
   Save,
@@ -32,9 +31,8 @@ import {
 import { getProfile, updateProfile } from "@/services/user.service";
 import { changePassword } from "@/services/auth.services";
 
-
-const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+// Warna solid primary (tanpa #000 hardcoded) supaya ikut perubahan tema dari CMS.
+const themePrimaryGradient = "bg-[var(--color-primary)]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -49,9 +47,6 @@ const themePrimaryShadow =
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeSmallShadow =
-  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
@@ -91,7 +86,6 @@ const themeDangerBorder =
 
 const themeFocus =
   "focus:outline-none focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
-
 
 const emptyProfile = {
   id: "",
@@ -177,11 +171,7 @@ function normalizeProfile(user) {
 }
 
 function getRoleName(profile) {
-  return (
-    profile?.peran?.namaTampilan ||
-    profile?.peran?.nama ||
-    "Pengguna"
-  );
+  return profile?.peran?.namaTampilan || profile?.peran?.nama || "Pengguna";
 }
 
 function getStatusName(status) {
@@ -207,6 +197,28 @@ function getAvatarUrl(avatar) {
   return `${baseUrl}/${avatar.replace(/^\/+/, "")}`;
 }
 
+// Semua StatCard memakai warna primary yang sama, sama seperti halaman Log Aktivitas.
+function StatCard({ icon: Icon, label, value }) {
+  return (
+    <div
+      className={`min-w-0 rounded-2xl border theme-border theme-card p-4 ${themeCardShadow}`}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+        >
+          <Icon size={17} />
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+            {label}
+          </p>
+          <p className="truncate text-lg font-semibold theme-text">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -217,7 +229,7 @@ export default function ProfilePage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [, setSaveSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -293,9 +305,7 @@ export default function ProfilePage() {
       const response = await updateProfile(payload);
 
       if (!response?.success || !response?.data) {
-        throw new Error(
-          response?.message || "Profil gagal diperbarui."
-        );
+        throw new Error(response?.message || "Profil gagal diperbarui.");
       }
 
       const updatedProfile = normalizeProfile({
@@ -307,9 +317,7 @@ export default function ProfilePage() {
       setForm(updatedProfile);
       setIsEditing(false);
       setSaveSuccess(true);
-      setSuccessMessage(
-        response.message || "Profil berhasil diperbarui."
-      );
+      setSuccessMessage(response.message || "Profil berhasil diperbarui.");
     } catch (error) {
       console.error("Gagal menyimpan profil:", error);
       setErrorMessage(
@@ -336,39 +344,33 @@ export default function ProfilePage() {
       label: "Status Akun",
       value: getStatusName(profile.status),
       icon: Shield,
-      type: isActive ? "success" : "warning",
     },
     {
       label: "Bergabung",
       value: formatTanggalShort(profile.dibuatPada),
       icon: Calendar,
-      type: "primary",
     },
     {
       label: "Terakhir Login",
-      value: profile.terakhirLogin
-        ? timeAgo(profile.terakhirLogin)
-        : "-",
+      value: profile.terakhirLogin ? timeAgo(profile.terakhirLogin) : "-",
       icon: Clock,
-      type: "info",
     },
     {
       label: "Peran",
       value: roleName,
       icon: Crown,
-      type: "warning",
     },
   ];
 
   return (
-    <div className="theme-page theme-text min-h-full w-full">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
       {/* Tanpa max-w & mx-auto agar konten selalu menempel ke sidebar saat zoom out */}
-      <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+      <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
               <div
-                className={`shrink-0 p-2.5 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                className={`shrink-0 p-2.5 rounded-xl ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
               >
                 <UserCircle size={19} />
               </div>
@@ -404,7 +406,7 @@ export default function ProfilePage() {
                     setSaveSuccess(false);
                   }}
                   disabled={isLoading || !profile.id}
-                  className={`flex items-center gap-2 px-5 py-2 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg transition-all ${themePrimaryShadow} hover:opacity-90 disabled:opacity-50`}
+                  className={`flex items-center gap-2 px-5 py-2 text-sm font-medium text-white ${themePrimaryGradient} rounded-lg transition-all ${themePrimaryShadow} hover:opacity-90 disabled:opacity-50`}
                 >
                   <Edit size={16} />
                   Edit Profil
@@ -427,7 +429,7 @@ export default function ProfilePage() {
                     type="button"
                     onClick={handleSaveProfile}
                     disabled={isSaving || isLoading}
-                    className={`flex items-center gap-2 px-5 py-2 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg ${themePrimaryShadow} hover:opacity-90 disabled:opacity-70`}
+                    className={`flex items-center gap-2 px-5 py-2 text-sm font-medium text-white ${themePrimaryGradient} rounded-lg ${themePrimaryShadow} hover:opacity-90 disabled:opacity-70`}
                   >
                     {isSaving ? (
                       <>
@@ -503,43 +505,15 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {stats.map((stat) => {
-              const Icon = stat.icon;
-
-              const iconClass =
-                stat.type === "primary"
-                  ? `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`
-                  : stat.type === "success"
-                    ? `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`
-                    : stat.type === "info"
-                      ? `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`
-                      : `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`;
-
-              return (
-                <div
-                  key={stat.label}
-                  className={`theme-card rounded-lg border theme-border p-3.5 ${themeSmallShadow}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`p-2 rounded-lg border ${iconClass} shrink-0`}
-                    >
-                      <Icon size={16} />
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider truncate">
-                        {stat.label}
-                      </p>
-                      <p className="text-sm sm:text-base font-semibold theme-text truncate">
-                        {isLoading ? "..." : stat.value}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {stats.map((stat) => (
+              <StatCard
+                key={stat.label}
+                icon={stat.icon}
+                label={stat.label}
+                value={isLoading ? "..." : stat.value}
+              />
+            ))}
           </div>
 
           <div
@@ -547,18 +521,26 @@ export default function ProfilePage() {
           >
             {isLoading ? (
               <div className="flex items-center gap-4 py-4">
-                <div className="w-20 h-20 rounded-full theme-neutral animate-pulse" />
+                <div
+                  className={`w-20 h-20 rounded-full ${themeNeutralSurface} animate-pulse`}
+                />
                 <div className="flex-1 space-y-3">
-                  <div className="h-5 w-48 max-w-full rounded theme-neutral animate-pulse" />
-                  <div className="h-4 w-64 max-w-full rounded theme-neutral animate-pulse" />
-                  <div className="h-4 w-40 max-w-full rounded theme-neutral animate-pulse" />
+                  <div
+                    className={`h-5 w-48 max-w-full rounded ${themeNeutralSurface} animate-pulse`}
+                  />
+                  <div
+                    className={`h-4 w-64 max-w-full rounded ${themeNeutralSurface} animate-pulse`}
+                  />
+                  <div
+                    className={`h-4 w-40 max-w-full rounded ${themeNeutralSurface} animate-pulse`}
+                  />
                 </div>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <div className="relative flex-shrink-0">
                   <div
-                    className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full ${themePrimaryGradient} flex items-center justify-center text-[var(--color-card)] text-2xl sm:text-3xl font-bold ${themePrimaryShadow} overflow-hidden`}
+                    className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full ${themePrimaryGradient} flex items-center justify-center text-white text-2xl sm:text-3xl font-bold ${themePrimaryShadow} overflow-hidden`}
                   >
                     {avatarUrl ? (
                       <img
@@ -627,7 +609,7 @@ export default function ProfilePage() {
                       </span>
 
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${themeWarningSurface} text-[var(--color-warning)] border ${themeWarningBorder} flex items-center gap-1.5`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder} flex items-center gap-1.5`}
                       >
                         <Crown size={12} />
                         {roleName}
@@ -684,9 +666,7 @@ export default function ProfilePage() {
                     <Icon
                       size={16}
                       className={
-                        isActiveTab
-                          ? themePrimaryText
-                          : "theme-text-muted"
+                        isActiveTab ? themePrimaryText : "theme-text-muted"
                       }
                     />
                     {tab.label}
@@ -726,18 +706,12 @@ export default function ProfilePage() {
   );
 }
 
-
-function ProfileTab({
-  profile,
-  isEditing,
-  isLoading,
-  handleChange,
-}) {
+function ProfileTab({ profile, isEditing, isLoading, handleChange }) {
   const inputClass = (editing) =>
-    `w-full px-3 py-2 text-sm rounded-lg border transition ${
+    `w-full px-3 py-2 text-sm rounded-lg border transition theme-text ${
       editing
-        ? `theme-input ${themeFocus}`
-        : `theme-card ${themeNeutralBorder} theme-text cursor-default`
+        ? `${themeNeutralBorder} ${themeNeutralSurface} ${themeFocus}`
+        : `theme-card ${themeNeutralBorder} cursor-default`
     } disabled:opacity-80`;
 
   return (
@@ -747,16 +721,14 @@ function ProfileTab({
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="h-10 rounded-lg theme-neutral animate-pulse"
+              className={`h-10 rounded-lg ${themeNeutralSurface} animate-pulse`}
             />
           ))}
         </div>
       ) : (
         <>
           <div>
-            <h3 className="text-sm font-semibold theme-text">
-              Informasi Akun
-            </h3>
+            <h3 className="text-sm font-semibold theme-text">Informasi Akun</h3>
             <p className="text-xs theme-text-secondary mt-1">
               Informasi yang diambil dari akun SmartSchool Anda.
             </p>
@@ -901,9 +873,9 @@ function ProfileTab({
                 className="text-[var(--color-info)] shrink-0 mt-0.5"
               />
               <p>
-                Tekan <strong>Edit Profil</strong> untuk mengubah nama,
-                nomor telepon, informasi kelahiran, dan alamat. Email dan
-                username ditampilkan dari data akun BE.
+                Tekan <strong>Edit Profil</strong> untuk mengubah nama, nomor
+                telepon, informasi kelahiran, dan alamat. Email dan username
+                ditampilkan dari data akun BE.
               </p>
             </div>
           )}
@@ -913,6 +885,21 @@ function ProfileTab({
   );
 }
 
+function SectionHeader({ icon: Icon, title, description }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div
+        className={`p-1.5 rounded-lg border ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`}
+      >
+        <Icon size={16} />
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold theme-text">{title}</h4>
+        <p className="text-xs theme-text-secondary mt-0.5">{description}</p>
+      </div>
+    </div>
+  );
+}
 
 function SecurityTab() {
   const [form, setForm] = useState({
@@ -926,6 +913,8 @@ function SecurityTab() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const passwordInputClass = `w-full rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 pr-10 text-sm theme-text ${themeFocus}`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -979,32 +968,28 @@ function SecurityTab() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-2.5">
-        <div
-          className={`p-1.5 rounded-lg ${themeWarningSurface} text-[var(--color-warning)] border ${themeWarningBorder}`}
-        >
-          <Lock size={16} />
-        </div>
-        <div>
-          <h4 className="text-sm font-semibold theme-text">
-            Keamanan Akun
-          </h4>
-          <p className="text-xs theme-text-secondary mt-0.5">
-            Perbarui kata sandi akun Super Admin Anda.
-          </p>
-        </div>
-      </div>
+      <SectionHeader
+        icon={Lock}
+        title="Keamanan Akun"
+        description="Perbarui kata sandi akun Super Admin Anda."
+      />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="flex items-start gap-3 p-4 rounded-lg border border-red-500/20 bg-red-500/10 text-red-600 text-sm">
+          <div
+            role="alert"
+            className={`flex items-start gap-3 p-4 rounded-lg border ${themeDangerSurface} ${themeDangerBorder} text-[var(--color-danger)] text-sm`}
+          >
             <AlertCircle size={18} className="shrink-0 mt-0.5" />
             <p>{error}</p>
           </div>
         )}
 
         {success && (
-          <div className="flex items-start gap-3 p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 text-sm">
+          <div
+            role="status"
+            className={`flex items-start gap-3 p-4 rounded-lg border ${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)] text-sm`}
+          >
             <CheckCircle size={18} className="shrink-0 mt-0.5" />
             <p>{success}</p>
           </div>
@@ -1026,7 +1011,7 @@ function SecurityTab() {
                   }))
                 }
                 placeholder="Masukkan kata sandi saat ini"
-                className={`w-full rounded-lg border ${themeNeutralBorder} px-3.5 py-2.5 pr-10 text-sm theme-text theme-card outline-none focus:border-[var(--color-primary)]`}
+                className={passwordInputClass}
               />
               <button
                 type="button"
@@ -1053,7 +1038,7 @@ function SecurityTab() {
                   }))
                 }
                 placeholder="Minimal 8 karakter"
-                className={`w-full rounded-lg border ${themeNeutralBorder} px-3.5 py-2.5 pr-10 text-sm theme-text theme-card outline-none focus:border-[var(--color-primary)]`}
+                className={passwordInputClass}
               />
               <button
                 type="button"
@@ -1080,7 +1065,7 @@ function SecurityTab() {
                   }))
                 }
                 placeholder="Ulangi kata sandi baru"
-                className={`w-full rounded-lg border ${themeNeutralBorder} px-3.5 py-2.5 pr-10 text-sm theme-text theme-card outline-none focus:border-[var(--color-primary)]`}
+                className={passwordInputClass}
               />
               <button
                 type="button"
@@ -1155,8 +1140,8 @@ function SecurityTab() {
                   Notifikasi Keamanan
                 </p>
                 <p className="text-xs theme-text-secondary mt-1">
-                  Pengaturan notifikasi belum tersedia dari endpoint
-                  yang diberikan.
+                  Pengaturan notifikasi belum tersedia dari endpoint yang
+                  diberikan.
                 </p>
               </div>
             </div>
@@ -1172,26 +1157,14 @@ function SecurityTab() {
   );
 }
 
-
 function ActivityTab() {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2.5">
-        <div
-          className={`p-1.5 rounded-lg ${themeInfoSurface} text-[var(--color-info)] border ${themeInfoBorder}`}
-        >
-          <Activity size={16} />
-        </div>
-        <div>
-          <h4 className="text-sm font-semibold theme-text">
-            Riwayat Aktivitas
-          </h4>
-          <p className="text-xs theme-text-secondary mt-0.5">
-            Riwayat aktivitas belum diambil karena endpoint log aktivitas
-            belum tersedia dalam kode BE yang diberikan.
-          </p>
-        </div>
-      </div>
+      <SectionHeader
+        icon={Activity}
+        title="Riwayat Aktivitas"
+        description="Riwayat aktivitas belum diambil karena endpoint log aktivitas belum tersedia dalam kode BE yang diberikan."
+      />
 
       <div
         className={`flex flex-col items-center text-center py-10 px-4 rounded-lg border border-dashed ${themeNeutralBorder}`}
@@ -1201,34 +1174,22 @@ function ActivityTab() {
           Data aktivitas belum tersedia
         </p>
         <p className="text-xs theme-text-secondary mt-1 max-w-md">
-          Agar riwayat login dan perubahan data dapat ditampilkan,
-          diperlukan endpoint BE yang mengembalikan log aktivitas akun.
+          Agar riwayat login dan perubahan data dapat ditampilkan, diperlukan
+          endpoint BE yang mengembalikan log aktivitas akun.
         </p>
       </div>
     </div>
   );
 }
 
-
 function SessionsTab() {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2.5">
-        <div
-          className={`p-1.5 rounded-lg ${themeSuccessSurface} text-[var(--color-success)] border ${themeSuccessBorder}`}
-        >
-          <Smartphone size={16} />
-        </div>
-        <div>
-          <h4 className="text-sm font-semibold theme-text">
-            Perangkat yang Terhubung
-          </h4>
-          <p className="text-xs theme-text-secondary mt-0.5">
-            Daftar sesi login belum tersedia dari endpoint BE yang
-            diberikan.
-          </p>
-        </div>
-      </div>
+      <SectionHeader
+        icon={Smartphone}
+        title="Perangkat yang Terhubung"
+        description="Daftar sesi login belum tersedia dari endpoint BE yang diberikan."
+      />
 
       <div
         className={`flex flex-col items-center text-center py-10 px-4 rounded-lg border border-dashed ${themeNeutralBorder}`}
@@ -1239,8 +1200,7 @@ function SessionsTab() {
         </p>
         <p className="text-xs theme-text-secondary mt-1 max-w-md">
           Backend perlu menyediakan daftar sesi aktif beserta mekanisme
-          pencabutan sesi sebelum fitur pengelolaan perangkat dapat
-          digunakan.
+          pencabutan sesi sebelum fitur pengelolaan perangkat dapat digunakan.
         </p>
       </div>
     </div>

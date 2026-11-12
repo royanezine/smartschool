@@ -651,7 +651,7 @@ export default function DetailAbsenSiswaPage() {
                             href={`https://www.google.com/maps?q=${absensi.latitude},${absensi.longitude}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="h-32 rounded-lg theme-info flex items-center justify-center relative overflow-hidden hover:opacity-80 transition-opacity"
+                            className="h-32 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center relative overflow-hidden hover:opacity-80 transition-opacity"
                             title="Buka lokasi di Google Maps"
                           >
                             <div className="absolute inset-0 opacity-10">
@@ -686,7 +686,7 @@ export default function DetailAbsenSiswaPage() {
                             </div>
 
                             {Number.isFinite(absensi.akurasi) && (
-                              <div className="flex items-center gap-2 text-[11px] theme-success">
+                              <div className="flex items-center gap-2 text-[11px] theme-primary-text">
                                 <Navigation size={12} />
                                 Akurasi GPS ±{absensi.akurasi} meter
                               </div>

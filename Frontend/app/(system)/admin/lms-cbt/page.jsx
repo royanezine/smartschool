@@ -66,39 +66,39 @@ const LMS_MENU = [
 const toneMap = {
   primary: {
     iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-    iconText: "text-[var(--color-primary)]",
+    iconText: "theme-primary-text",
     soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
     border: "border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]",
   },
   secondary: {
-    iconBg: "bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]",
-    iconText: "theme-text-secondary",
-    soft: "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]",
-    border: "theme-border-soft",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
+    soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]",
   },
   info: {
-    iconBg: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-    iconText: "text-[var(--color-info)]",
-    soft: "bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)]",
-    border: "border-[color-mix(in_srgb,var(--color-info)_18%,transparent)]",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
+    soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]",
   },
   success: {
-    iconBg: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-    iconText: "text-[var(--color-success)]",
-    soft: "bg-[color-mix(in_srgb,var(--color-success)_6%,transparent)]",
-    border: "border-[color-mix(in_srgb,var(--color-success)_18%,transparent)]",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
+    soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]",
   },
   warning: {
-    iconBg: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-    iconText: "text-[var(--color-warning)]",
-    soft: "bg-[color-mix(in_srgb,var(--color-warning)_6%,transparent)]",
-    border: "border-[color-mix(in_srgb,var(--color-warning)_18%,transparent)]",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
+    soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]",
   },
   danger: {
-    iconBg: "bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]",
-    iconText: "theme-danger",
-    soft: "bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)]",
-    border: "border-[color-mix(in_srgb,var(--color-danger)_18%,transparent)]",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
+    soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]",
   },
 };
 
@@ -146,7 +146,7 @@ function StatCard({
   const content = (
     <div
       className="
-        group relative overflow-hidden rounded-2xl
+        group relative h-full min-w-0 overflow-hidden rounded-2xl
         theme-card theme-border
         p-5
         shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]
@@ -167,7 +167,7 @@ function StatCard({
       />
 
       <div className="relative flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <p className="theme-text-secondary text-sm font-medium">
             {label}
           </p>
@@ -214,7 +214,13 @@ function StatCard({
     </div>
   );
 
-  return href ? <Link href={href}>{content}</Link> : content;
+  return href ? (
+    <Link href={href} className="block h-full min-w-0">
+      {content}
+    </Link>
+  ) : (
+    content
+  );
 }
 
 function SectionHeader({
@@ -622,7 +628,8 @@ export default function LMSCBTDashboardPage() {
                 description="Akses cepat untuk pengelolaan seluruh komponen pembelajaran digital sekolah."
               />
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+              {/* 4 kartu: 1 kolom -> 2 kolom (sm) -> 4 kolom (xl ke atas, penuh) */}
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {LMS_MENU.map((item) => {
                   const Icon = item.icon;
                   const theme = toneMap[item.tone] || toneMap.primary;
@@ -632,7 +639,7 @@ export default function LMSCBTDashboardPage() {
                       key={item.title}
                       href={item.href}
                       className="
-                        group relative overflow-hidden
+                        group relative h-full min-w-0 overflow-hidden
                         rounded-2xl theme-card theme-border
                         p-5
                         shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]
@@ -693,7 +700,8 @@ export default function LMSCBTDashboardPage() {
             </section>
 
             <section className="mb-7">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
+              {/* 4 kartu: 1 kolom -> 2 kolom (sm) -> 4 kolom (xl ke atas, penuh) */}
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                   label="Materi & Modul Ajar"
                   value={totalMateri}
@@ -783,7 +791,7 @@ export default function LMSCBTDashboardPage() {
                       <span className="theme-text-secondary text-xs font-medium">
                         Pengumpulan Tugas
                       </span>
-                      <BookOpenCheck size={16} className="text-emerald-600" />
+                      <BookOpenCheck size={16} className="theme-primary-text" />
                     </div>
                     <p className="theme-text mt-3 text-2xl font-bold">
                       {loading ? "..." : totalPengumpulanTugas}
@@ -798,7 +806,7 @@ export default function LMSCBTDashboardPage() {
                       <span className="theme-text-secondary text-xs font-medium">
                         Percobaan Ujian CBT
                       </span>
-                      <Target size={16} className="text-[var(--color-info)]" />
+                      <Target size={16} className="theme-primary-text" />
                     </div>
                     <p className="theme-text mt-3 text-2xl font-bold">
                       {loading ? "..." : totalPercobaanUjian}

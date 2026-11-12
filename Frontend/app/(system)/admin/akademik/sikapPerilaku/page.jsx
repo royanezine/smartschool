@@ -369,13 +369,7 @@ export default function SikapPerilakuPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-sm">
                   <thead>
-                    <tr
-                      className="
-                        bg-gradient-to-r
-                        from-blue-600 to-indigo-600
-                        text-white
-                      "
-                    >
+                    <tr className="theme-primary text-white">
                       <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
                         No.
                       </th>

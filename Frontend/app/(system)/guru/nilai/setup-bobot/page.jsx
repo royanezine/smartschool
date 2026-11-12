@@ -21,7 +21,75 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import { getKomponenNilai, getNilaiKelasSaya } from "@/services/nilai.service";
 
+// Semua warna memakai token tema (--color-*) supaya ikut perubahan dari CMS.
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText = "text-[var(--color-primary)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeTrack = "bg-[color-mix(in_srgb,var(--color-text)_9%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// Pengganti class `theme-input`: input mengikuti token tema, sama seperti Log Aktivitas.
+const themeInput = `border ${themeNeutralBorder} ${themeNeutralSurface} theme-text outline-none ${themeFocus}`;
+
 const formatPercent = (value) => `${Number(value) || 0}%`;
+
+// Semua StatCard memakai warna primary yang sama, sama seperti halaman Log Aktivitas.
+function StatCard({ label, value, description, icon: Icon, children }) {
+  return (
+    <article
+      className={`min-w-0 rounded-2xl border theme-border theme-card p-4 ${themeCardShadow}`}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+        >
+          <Icon size={17} />
+        </div>
+
+        <div className="min-w-0">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+            {label}
+          </p>
+          <p className="truncate text-lg font-semibold theme-text">{value}</p>
+        </div>
+      </div>
+
+      {children}
+
+      <p className="mt-3 break-words text-[11px] leading-4 theme-text-muted">
+        {description}
+      </p>
+    </article>
+  );
+}
 
 export default function SetupBobotPage() {
   const router = useRouter();
@@ -132,8 +200,7 @@ export default function SetupBobotPage() {
   const isFinalized =
     komponenData.status === "final" || selectedClass?.status === "final";
 
-  const isValid =
-    components.length > 0 && totalWeight === 100 && !isFinalized;
+  const isValid = components.length > 0 && totalWeight === 100 && !isFinalized;
 
   const simulasiNilai = useMemo(
     () =>
@@ -160,25 +227,31 @@ export default function SetupBobotPage() {
         <Header user={{ name: "Guru" }} />
 
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="w-full px-4 py-6 sm:px-6 lg:px-9 lg:py-8">
-            <div className="mb-8 flex flex-col gap-5 border-b border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] pb-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="w-full min-w-0 px-4 py-6 sm:px-6 lg:px-9 lg:py-8">
+            <div
+              className={`mb-8 flex flex-col gap-5 border-b ${themeNeutralBorder} pb-6 lg:flex-row lg:items-end lg:justify-between`}
+            >
               <div>
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--color-text-secondary)] transition hover:text-[var(--color-primary)]"
+                  className="theme-text-secondary mb-5 inline-flex items-center gap-2 text-sm font-medium transition hover:text-[var(--color-primary)]"
                 >
                   <ArrowLeft size={16} />
                   Kembali
                 </button>
 
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                  >
                     <SlidersHorizontal size={20} />
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
+                    <p
+                      className={`text-xs font-semibold uppercase tracking-[0.16em] ${themePrimaryText}`}
+                    >
                       PENILAIAN / KONFIGURASI
                     </p>
                     <h1 className="theme-text mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
@@ -197,10 +270,8 @@ export default function SetupBobotPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push("/guru/nilai/finalisasi")
-                  }
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-text)_14%,transparent)] px-4 py-2.5 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                  onClick={() => router.push("/guru/nilai/finalisasi")}
+                  className={`theme-text inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition ${themeNeutralBorder} ${themeNeutralHover}`}
                 >
                   <ClipboardList size={15} />
                   Halaman finalisasi
@@ -219,7 +290,10 @@ export default function SetupBobotPage() {
             </div>
 
             {error && (
-              <div className="mb-6 flex flex-col gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                role="alert"
+                className={`mb-6 flex flex-col gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-4 sm:flex-row sm:items-center sm:justify-between`}
+              >
                 <div className="flex items-start gap-3">
                   <AlertTriangle
                     size={18}
@@ -233,7 +307,7 @@ export default function SetupBobotPage() {
                 <button
                   type="button"
                   onClick={loadClasses}
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] px-3 py-2 text-xs font-semibold text-[var(--color-danger)] transition hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]"
+                  className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border ${themeDangerBorder} px-3 py-2 text-xs font-semibold text-[var(--color-danger)] transition hover:opacity-80`}
                 >
                   <RefreshCw size={14} />
                   Muat ulang
@@ -241,146 +315,99 @@ export default function SetupBobotPage() {
               </div>
             )}
 
-            <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <article className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="theme-text-secondary text-sm">
-                      Total komponen
-                    </p>
-                    <p className="theme-text mt-2 text-3xl font-bold">
-                      {showLoading ? "—" : components.length}
-                    </p>
-                  </div>
-                  <ClipboardList
-                    size={19}
-                    className="text-[var(--color-primary)]"
-                  />
-                </div>
-                <p className="theme-text-secondary mt-3 text-xs">
-                  Komponen aktif di database
-                </p>
-              </article>
+            <section className="mb-7 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard
+                label="Total komponen"
+                value={showLoading ? "—" : components.length}
+                description="Komponen aktif di database"
+                icon={ClipboardList}
+              />
 
-              <article className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="theme-text-secondary text-sm">
-                      Total bobot
-                    </p>
-                    <p className="theme-text mt-2 text-3xl font-bold">
-                      {showLoading ? "—" : totalWeight}
-                      <span className="ml-1 text-base font-medium">%</span>
-                    </p>
-                  </div>
-                  <Calculator
-                    size={19}
-                    className="text-[var(--color-primary)]"
-                  />
-                </div>
-
-                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-text)_9%,transparent)]">
+              <StatCard
+                label="Total bobot"
+                value={showLoading ? "—" : `${totalWeight}%`}
+                description={
+                  totalWeight === 100
+                    ? "Total bobot sudah tepat 100%"
+                    : "Total bobot belum mencapai 100%"
+                }
+                icon={Calculator}
+              >
+                <div
+                  className={`mt-4 h-1.5 overflow-hidden rounded-full ${themeTrack}`}
+                >
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${Math.min(Math.max(totalWeight, 0), 100)}%`,
-                      backgroundColor: totalWeight === 100 ? "#0D9488" : "#2563EB",
+                      backgroundColor:
+                        totalWeight === 100
+                          ? "var(--color-success)"
+                          : "var(--color-primary)",
                     }}
                   />
                 </div>
-              </article>
+              </StatCard>
 
-              <article className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="theme-text-secondary text-sm">
-                      Sisa kuota bobot
-                    </p>
-                    <p className="theme-text mt-2 text-3xl font-bold">
-                      {showLoading ? "—" : sisaBobot}
-                      <span className="ml-1 text-base font-medium">%</span>
-                    </p>
-                  </div>
-                  <SlidersHorizontal
-                    size={19}
-                    className="text-[var(--color-primary)]"
-                  />
-                </div>
-                <p className="theme-text-secondary mt-3 text-xs">
-                  {sisaBobot === 0
+              <StatCard
+                label="Sisa kuota bobot"
+                value={showLoading ? "—" : `${sisaBobot}%`}
+                description={
+                  sisaBobot === 0
                     ? "Seluruh kuota bobot 100% sudah terpakai"
-                    : `Sisa ${sisaBobot}% belum dialokasikan pada komponen`}
-                </p>
-              </article>
+                    : `Sisa ${sisaBobot}% belum dialokasikan pada komponen`
+                }
+                icon={SlidersHorizontal}
+              />
 
-              <article className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="theme-text-secondary text-sm">
-                      Status konfigurasi
-                    </p>
-                    <p className="theme-text mt-2 text-lg font-bold">
-                      {showLoading
-                        ? "Memuat..."
-                        : isFinalized
-                          ? "Sudah difinalisasi"
-                          : isValid
-                            ? "Siap difinalisasi"
-                            : "Perlu penyesuaian"}
-                    </p>
-                  </div>
-
-                  <span
-                    className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                      isFinalized
-                        ? "bg-teal-500/10 text-teal-600"
-                        : isValid
-                          ? "bg-teal-500/10 text-teal-600"
-                          : "bg-amber-500/10 text-amber-600"
-                    }`}
-                  >
-                    {isFinalized ? (
-                      <LockKeyhole size={16} />
-                    ) : isValid ? (
-                      <Check size={17} />
-                    ) : (
-                      <Info size={17} />
-                    )}
-                  </span>
-                </div>
-
-                <p className="theme-text-secondary mt-3 text-xs">
-                  {showLoading
+              <StatCard
+                label="Status konfigurasi"
+                value={
+                  showLoading
+                    ? "Memuat..."
+                    : isFinalized
+                      ? "Sudah difinalisasi"
+                      : isValid
+                        ? "Siap difinalisasi"
+                        : "Perlu penyesuaian"
+                }
+                description={
+                  showLoading
                     ? "Mengambil komponen dari backend..."
                     : isFinalized
                       ? "Nilai sudah difinalisasi dan konfigurasi terkunci."
                       : isValid
                         ? "Total bobot tepat 100%, siap difinalisasi."
-                        : "Total bobot belum mencapai 100%."}
-                </p>
-              </article>
+                        : "Total bobot belum mencapai 100%."
+                }
+                icon={isFinalized ? LockKeyhole : isValid ? Check : Info}
+              />
             </section>
 
             <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-              <section className="theme-card min-w-0 overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]">
-                <div className="flex flex-col gap-4 border-b border-[color-mix(in_srgb,var(--color-text)_9%,transparent)] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <section
+                className={`theme-card min-w-0 overflow-hidden rounded-2xl border theme-border ${themeCardShadow}`}
+              >
+                <div
+                  className={`flex flex-col gap-4 border-b ${themeDivider} p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6`}
+                >
                   <div>
-                    <h2 className="theme-text font-bold">
-                      Komposisi penilaian
-                    </h2>
+                    <h2 className="theme-text font-bold">Komposisi penilaian</h2>
                     <p className="theme-text-secondary mt-1 text-sm">
                       Komponen yang tersimpan pada backend untuk kelas-mapel
                       ini.
                     </p>
                   </div>
 
-                  <span className="inline-flex w-fit items-center gap-1.5 rounded-md border border-[color-mix(in_srgb,var(--color-text)_12%,transparent)] px-2.5 py-1.5 text-xs font-medium text-[var(--color-text-secondary)]">
+                  <span
+                    className={`theme-text-secondary inline-flex w-fit items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium ${themeNeutralBorder}`}
+                  >
                     <LockKeyhole size={13} />
                     {subjectLabel}
                   </span>
                 </div>
 
-                <div className="border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:px-6">
+                <div className={`border-b ${themeDivider} p-5 sm:px-6`}>
                   <label
                     htmlFor="subject"
                     className="theme-text mb-2 block text-sm font-semibold"
@@ -391,7 +418,7 @@ export default function SetupBobotPage() {
                   <div className="relative max-w-lg">
                     <BookOpen
                       size={17}
-                      className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
+                      className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                     />
 
                     <select
@@ -401,7 +428,7 @@ export default function SetupBobotPage() {
                         setSelectedClassId(event.target.value);
                       }}
                       disabled={loadingClasses || classes.length === 0}
-                      className="theme-input w-full appearance-none rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] py-3 pl-10 pr-10 text-sm outline-none transition focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+                      className={`${themeInput} w-full appearance-none rounded-lg py-3 pl-10 pr-10 text-sm transition disabled:cursor-not-allowed disabled:opacity-60`}
                     >
                       {classes.length === 0 && (
                         <option value="">
@@ -424,7 +451,7 @@ export default function SetupBobotPage() {
 
                     <ChevronDown
                       size={16}
-                      className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
+                      className="theme-text-muted pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
                     />
                   </div>
 
@@ -441,7 +468,7 @@ export default function SetupBobotPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[570px] text-left text-sm">
                     <thead>
-                      <tr className="border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+                      <tr className={`border-b ${themeDivider}`}>
                         <th className="theme-text-secondary px-5 py-3.5 font-semibold sm:px-6">
                           Komponen
                         </th>
@@ -460,7 +487,7 @@ export default function SetupBobotPage() {
                           <td colSpan={3} className="px-5 py-12 text-center">
                             <Loader2
                               size={24}
-                              className="theme-text-secondary mx-auto animate-spin"
+                              className={`mx-auto animate-spin ${themePrimaryText}`}
                             />
                             <p className="theme-text-secondary mt-3 text-sm">
                               Memuat komponen nilai...
@@ -473,14 +500,11 @@ export default function SetupBobotPage() {
                         components.map((component) => (
                           <tr
                             key={component.id}
-                            className="border-b border-[color-mix(in_srgb,var(--color-text)_7%,transparent)] last:border-b-0"
+                            className={`border-b ${themeDivider} transition last:border-b-0 hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]`}
                           >
                             <td className="px-5 py-4 sm:px-6">
                               <div className="flex items-center gap-3">
-                                <span
-                                  className="h-9 w-1 shrink-0 rounded-full"
-                                  style={{ backgroundColor: "#2563EB" }}
-                                />
+                                <span className="h-9 w-1 shrink-0 rounded-full bg-[var(--color-primary)]" />
                                 <div>
                                   <p className="theme-text font-semibold">
                                     {component.nama}
@@ -495,10 +519,12 @@ export default function SetupBobotPage() {
                             </td>
 
                             <td className="px-4 py-4">
-                              <span className="theme-text inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-text)_12%,transparent)] px-3 py-2 text-sm font-semibold tabular-nums">
+                              <span
+                                className={`theme-text inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold tabular-nums ${themeNeutralBorder}`}
+                              >
                                 <LockKeyhole
                                   size={13}
-                                  className="theme-text-secondary"
+                                  className="theme-text-muted"
                                 />
                                 {formatPercent(component.bobot)}
                               </span>
@@ -506,7 +532,9 @@ export default function SetupBobotPage() {
 
                             <td className="px-4 py-4">
                               <div className="flex items-center gap-2">
-                                <div className="h-1.5 w-14 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-text)_9%,transparent)]">
+                                <div
+                                  className={`h-1.5 w-14 overflow-hidden rounded-full ${themeTrack}`}
+                                >
                                   <div
                                     className="h-full rounded-full bg-[var(--color-primary)]"
                                     style={{
@@ -525,40 +553,38 @@ export default function SetupBobotPage() {
                           </tr>
                         ))}
 
-                      {!showLoading &&
-                        !error &&
-                        components.length === 0 && (
-                          <tr>
-                            <td colSpan={3} className="px-5 py-12 text-center">
-                              <Info
-                                size={24}
-                                className="theme-text-secondary mx-auto"
-                              />
-                              <p className="theme-text mt-3 text-sm font-semibold">
-                                {classes.length === 0
-                                  ? "Belum ada kelas yang diampu"
-                                  : "Belum ada komponen nilai"}
-                              </p>
-                              <p className="theme-text-secondary mt-1 text-xs">
-                                {classes.length === 0
-                                  ? "Akun guru ini belum ditugaskan pada kelas-mapel mana pun."
-                                  : "Backend belum menyimpan komponen penilaian untuk kelas-mapel ini."}
-                              </p>
-                            </td>
-                          </tr>
-                        )}
+                      {!showLoading && !error && components.length === 0 && (
+                        <tr>
+                          <td colSpan={3} className="px-5 py-12 text-center">
+                            <Info
+                              size={24}
+                              className="theme-text-muted mx-auto"
+                            />
+                            <p className="theme-text mt-3 text-sm font-semibold">
+                              {classes.length === 0
+                                ? "Belum ada kelas yang diampu"
+                                : "Belum ada komponen nilai"}
+                            </p>
+                            <p className="theme-text-secondary mt-1 text-xs">
+                              {classes.length === 0
+                                ? "Akun guru ini belum ditugaskan pada kelas-mapel mana pun."
+                                : "Backend belum menyimpan komponen penilaian untuk kelas-mapel ini."}
+                            </p>
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
 
                     <tfoot>
-                      <tr className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                      <tr className={themeNeutralSurface}>
                         <td className="theme-text px-5 py-4 font-bold sm:px-6">
                           Total bobot
                         </td>
                         <td
                           className={`px-4 py-4 font-bold tabular-nums ${
                             totalWeight === 100
-                              ? "text-teal-600"
-                              : "text-amber-600"
+                              ? "text-[var(--color-success)]"
+                              : "text-[var(--color-warning)]"
                           }`}
                         >
                           {totalWeight}%
@@ -567,8 +593,8 @@ export default function SetupBobotPage() {
                           <span
                             className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
                               totalWeight === 100
-                                ? "text-teal-600"
-                                : "text-amber-600"
+                                ? "text-[var(--color-success)]"
+                                : "text-[var(--color-warning)]"
                             }`}
                           >
                             {totalWeight === 100 ? (
@@ -588,7 +614,9 @@ export default function SetupBobotPage() {
                   </table>
                 </div>
 
-                <div className="flex flex-col gap-3 border-t border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div
+                  className={`flex flex-col gap-3 border-t ${themeDivider} p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6`}
+                >
                   <p className="theme-text-secondary flex items-start gap-2 text-xs leading-5">
                     <CircleHelp size={15} className="mt-0.5 shrink-0" />
                     {isFinalized
@@ -611,15 +639,12 @@ export default function SetupBobotPage() {
               </section>
 
               <aside className="min-w-0 space-y-5">
-                <section className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
+                <section
+                  className={`theme-card rounded-2xl border theme-border p-5 ${themeCardShadow}`}
+                >
                   <div className="flex items-center gap-2">
-                    <Calculator
-                      size={17}
-                      className="text-[var(--color-primary)]"
-                    />
-                    <h2 className="theme-text font-bold">
-                      Simulasi nilai akhir
-                    </h2>
+                    <Calculator size={17} className={themePrimaryText} />
+                    <h2 className="theme-text font-bold">Simulasi nilai akhir</h2>
                   </div>
 
                   <p className="theme-text-secondary mt-2 text-xs leading-5">
@@ -640,13 +665,12 @@ export default function SetupBobotPage() {
                             {component.nama}
                           </span>
                           <span className="theme-text text-xs font-semibold tabular-nums">
-                            {(
-                              (80 * Number(component.bobot)) /
-                              100
-                            ).toFixed(2)}
+                            {((80 * Number(component.bobot)) / 100).toFixed(2)}
                           </span>
                         </div>
-                        <div className="h-1.5 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+                        <div
+                          className={`h-1.5 overflow-hidden rounded-full ${themeTrack}`}
+                        >
                           <div
                             className="h-full rounded-full bg-[var(--color-primary)]"
                             style={{
@@ -661,7 +685,7 @@ export default function SetupBobotPage() {
                     ))}
                   </div>
 
-                  <div className="mt-5 border-t border-[color-mix(in_srgb,var(--color-text)_9%,transparent)] pt-4">
+                  <div className={`mt-5 border-t ${themeDivider} pt-4`}>
                     <div className="flex items-center justify-between">
                       <span className="theme-text-secondary text-sm">
                         Nilai akhir simulasi
@@ -676,12 +700,11 @@ export default function SetupBobotPage() {
                   </div>
                 </section>
 
-                <section className="rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-background))] p-5">
+                <section
+                  className={`rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-5`}
+                >
                   <div className="flex items-center gap-2">
-                    <Info
-                      size={17}
-                      className="text-[var(--color-primary)]"
-                    />
+                    <Info size={17} className={themePrimaryText} />
                     <h2 className="theme-text text-sm font-bold">
                       Catatan komponen
                     </h2>
@@ -691,7 +714,7 @@ export default function SetupBobotPage() {
                     <li className="flex gap-2">
                       <Check
                         size={14}
-                        className="mt-0.5 shrink-0 text-[var(--color-primary)]"
+                        className={`mt-0.5 shrink-0 ${themePrimaryText}`}
                       />
                       Seluruh bobot pada halaman ini dibaca langsung dari
                       backend sesuai kelas-mapel yang dipilih.
@@ -699,7 +722,7 @@ export default function SetupBobotPage() {
                     <li className="flex gap-2">
                       <Info
                         size={14}
-                        className="mt-0.5 shrink-0 text-[var(--color-primary)]"
+                        className={`mt-0.5 shrink-0 ${themePrimaryText}`}
                       />
                       Halaman ini bersifat baca saja: komponen dan bobot yang
                       sudah tersimpan tidak dapat diubah dari sini.
@@ -707,14 +730,14 @@ export default function SetupBobotPage() {
                     <li className="flex gap-2">
                       <Check
                         size={14}
-                        className="mt-0.5 shrink-0 text-[var(--color-primary)]"
+                        className={`mt-0.5 shrink-0 ${themePrimaryText}`}
                       />
                       Total bobot harus tepat 100% sebelum finalisasi.
                     </li>
                     <li className="flex gap-2">
                       <LockKeyhole
                         size={14}
-                        className="mt-0.5 shrink-0 text-[var(--color-primary)]"
+                        className={`mt-0.5 shrink-0 ${themePrimaryText}`}
                       />
                       Nilai yang sudah difinalisasi tidak dapat diubah.
                     </li>

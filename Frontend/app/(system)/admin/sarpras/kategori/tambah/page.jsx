@@ -664,7 +664,7 @@ export default function TambahKategoriPage() {
                         <div className="flex items-start gap-2.5">
                           <Info
                             size={15}
-                            className="theme-info mt-0.5 shrink-0"
+                            className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text mt-0.5 shrink-0"
                           />
 
                           <p className="theme-text-secondary text-[11px] leading-5">

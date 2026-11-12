@@ -617,7 +617,7 @@ export default function KategoriJabatanPage() {
                                       onClick={() => openDetail(item)}
                                       title="Detail dan riwayat tarif"
                                       aria-label={`Detail ${item.nama}`}
-                                      className="rounded-lg p-2 theme-text-muted transition hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
+                                      className="rounded-lg p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                                     >
                                       <Eye size={17} />
                                     </button>
@@ -627,7 +627,7 @@ export default function KategoriJabatanPage() {
                                       onClick={() => openEdit(item)}
                                       title="Edit kategori"
                                       aria-label={`Edit ${item.nama}`}
-                                      className="rounded-lg p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] hover:theme-text"
+                                      className="rounded-lg p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                                     >
                                       <Pencil size={17} />
                                     </button>
@@ -637,7 +637,7 @@ export default function KategoriJabatanPage() {
                                       onClick={() => openTarif(item)}
                                       title="Atur tarif baru"
                                       aria-label={`Atur tarif ${item.nama}`}
-                                      className="rounded-lg p-2 theme-text-muted transition hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+                                      className="rounded-lg p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                                     >
                                       <Wallet size={17} />
                                     </button>
@@ -716,13 +716,10 @@ export default function KategoriJabatanPage() {
 
 function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const toneClasses = {
-    blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
-    emerald:
-      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
-    indigo:
-      "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300",
-    slate:
-      "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-muted",
+    blue: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    emerald: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    indigo: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    slate: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   return (

@@ -519,7 +519,7 @@ export default function TambahStafPage() {
 
 
                     <div
-                      className={`flex items-start gap-3 p-3.5 rounded-lg border ${themeInfoBorder} ${themeInfoSurface} min-w-0`}
+                      className="flex items-start gap-3 p-3.5 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] min-w-0"
                     >
 
                       <div
@@ -527,7 +527,7 @@ export default function TambahStafPage() {
                       >
                         <KeyRound
                           size={15}
-                          className="text-[var(--color-info)]"
+                          className="theme-primary-text"
                         />
                       </div>
 

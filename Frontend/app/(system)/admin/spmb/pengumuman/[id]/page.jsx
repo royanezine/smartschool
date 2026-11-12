@@ -268,7 +268,7 @@ export default function DetailPengumumanPage() {
 
                 <div className="grid grid-cols-1 gap-4 rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4 sm:grid-cols-3">
                   <div className="flex items-start gap-2.5">
-                    <Calendar size={16} className="text-blue-500 mt-0.5 shrink-0" />
+                    <Calendar size={16} className="theme-primary-text mt-0.5 shrink-0" />
                     <div>
                       <p className="text-[11px] font-medium theme-text-muted">
                         Tanggal Publikasi
@@ -280,7 +280,7 @@ export default function DetailPengumumanPage() {
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <Clock size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                    <Clock size={16} className="theme-primary-text mt-0.5 shrink-0" />
                     <div>
                       <p className="text-[11px] font-medium theme-text-muted">
                         Dibuat Pada
@@ -292,7 +292,7 @@ export default function DetailPengumumanPage() {
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <Clock size={16} className="text-amber-500 mt-0.5 shrink-0" />
+                    <Clock size={16} className="theme-primary-text mt-0.5 shrink-0" />
                     <div>
                       <p className="text-[11px] font-medium theme-text-muted">
                         Terakhir Diperbarui

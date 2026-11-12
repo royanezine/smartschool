@@ -1115,13 +1115,8 @@ function Stat({
   icon,
   tone = "blue",
 }) {
-  const tones = {
-    blue: "theme-info",
-    sky: "theme-info",
-    emerald: "theme-success",
-    amber: "theme-warning",
-    red: "theme-danger",
-  };
+  const toneClass =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
 
   const icons = {
     chat: (
@@ -1181,9 +1176,7 @@ function Stat({
         </div>
 
         <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
-            tones[tone] || tones.blue
-          } ring-1 ring-current/10`}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${toneClass}`}
         >
           <svg
             className="h-5 w-5"

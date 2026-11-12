@@ -29,7 +29,7 @@ import {
 import { useRouter } from "next/navigation";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -102,7 +102,7 @@ function Toggle({ checked, onChange }) {
       }`}
     >
       <span
-        className={`inline-block h-[18px] w-[18px] transform rounded-full bg-[var(--color-card)] shadow-[0_1px_4px_color-mix(in_srgb,var(--color-text)_15%,transparent)] transition-transform ${
+        className={`inline-block h-[18px] w-[18px] transform rounded-full bg-white shadow-[0_1px_4px_color-mix(in_srgb,var(--color-text)_15%,transparent)] transition-transform ${
           checked ? "translate-x-[22px]" : "translate-x-1"
         }`}
       />
@@ -296,7 +296,7 @@ export default function PengaturanPage() {
 
             <div className="flex items-center gap-2.5">
               <div
-                className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
               >
                 <Settings size={18} />
               </div>
@@ -320,7 +320,7 @@ export default function PengaturanPage() {
             type="button"
             onClick={handleSimpan}
             disabled={saving || loading}
-            className={`flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] transition-colors hover:opacity-90 ${themePrimaryShadow} disabled:cursor-not-allowed disabled:opacity-50`}
+            className={`theme-primary flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-colors hover:opacity-90 ${themePrimaryShadow} disabled:cursor-not-allowed disabled:opacity-50`}
           >
             {saving ? (
               <Loader2 size={16} className="animate-spin" />
@@ -391,7 +391,7 @@ export default function PengaturanPage() {
                 <div className="mb-6 flex items-center gap-4">
                   <div className="relative shrink-0">
                     <div
-                      className={`flex h-16 w-16 items-center justify-center rounded-full ${themePrimaryGradient} text-xl font-semibold text-[var(--color-card)] ${themePrimaryShadow}`}
+                      className={`flex h-16 w-16 items-center justify-center rounded-full ${themePrimaryGradient} text-xl font-semibold text-white ${themePrimaryShadow}`}
                     >
                       Y
                     </div>
@@ -412,7 +412,7 @@ export default function PengaturanPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div>
                     <FieldLabel>Nama Lengkap</FieldLabel>
                     <input
@@ -493,8 +493,8 @@ export default function PengaturanPage() {
                   Informasi Lembaga Yayasan
                 </h3>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
-                  <div className="sm:col-span-2 2xl:col-span-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div className="sm:col-span-3">
                     <FieldLabel>Nama Yayasan *</FieldLabel>
                     <input
                       type="text"
@@ -549,7 +549,7 @@ export default function PengaturanPage() {
                     />
                   </div>
 
-                  <div className="sm:col-span-2 2xl:col-span-4">
+                  <div className="sm:col-span-3">
                     <FieldLabel>Alamat Kantor Yayasan</FieldLabel>
                     <input
                       type="text"
@@ -684,9 +684,9 @@ export default function PengaturanPage() {
                 <SectionCard>
                   <div className="flex items-start gap-3">
                     <div
-                      className={`shrink-0 rounded-lg border p-2 ${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`}
+                      className={`shrink-0 rounded-lg border p-2 ${themePrimarySoft} ${themePrimarySoftBorder}`}
                     >
-                      <Shield size={16} />
+                      <Shield size={16} className="theme-primary-text" />
                     </div>
 
                     <div className="min-w-0 flex-1">

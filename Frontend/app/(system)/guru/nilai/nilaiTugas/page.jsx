@@ -34,7 +34,7 @@ const KKM = 75;
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -656,7 +656,7 @@ export default function GuruNilaiTugasPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2.5">
                   <div
-                    className={`rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                    className={`rounded-lg p-2 ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                   >
                     <GraduationCap
                       size={18}
@@ -1078,7 +1078,7 @@ export default function GuruNilaiTugasPage() {
                           simpanSemuaNilai
                         }
                         disabled={saving}
-                        className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90`}
+                        className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryGradient} text-white ${themePrimaryShadow} hover:opacity-90`}
                       >
                         {saving ? (
                           <RefreshCw
@@ -1325,7 +1325,7 @@ export default function GuruNilaiTugasPage() {
                         simpanSemuaNilai
                       }
                       disabled={saving}
-                      className={`flex w-full items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90`}
+                      className={`flex w-full items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto ${themePrimaryGradient} text-white ${themePrimaryShadow} hover:opacity-90`}
                     >
                       {saving ? (
                         <RefreshCw
@@ -1514,7 +1514,7 @@ export default function GuruNilaiTugasPage() {
                                 <div
                                   className={`flex-shrink-0 rounded-lg p-2 ${
                                     aktif
-                                      ? `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`
+                                      ? `${themePrimaryGradient} text-white ${themePrimaryShadow}`
                                       : `${themeNeutralSurface} theme-text-secondary`
                                   }`}
                                 >

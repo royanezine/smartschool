@@ -416,7 +416,7 @@ export default function PengaturanPinPage() {
   if (!siapPeriksaRole) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <LoaderCircle className="h-7 w-7 animate-spin text-blue-600" />
+        <LoaderCircle className="h-7 w-7 animate-spin theme-primary-text" />
       </div>
     );
   }
@@ -425,7 +425,7 @@ export default function PengaturanPinPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-5">
         <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <ShieldCheck className="mx-auto mb-4 h-10 w-10 text-amber-500" />
+          <ShieldCheck className="mx-auto mb-4 h-10 w-10 theme-primary-text" />
 
           <h1 className="text-xl font-semibold text-slate-900">
             Akses tidak tersedia
@@ -455,7 +455,7 @@ export default function PengaturanPinPage() {
           <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-blue-700">
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium theme-primary-text">
                   <ShieldCheck className="h-4 w-4" />
                   Pengaturan keamanan
                 </div>
@@ -491,7 +491,9 @@ export default function PengaturanPinPage() {
                   <p className="text-sm text-slate-500">
                     Total siswa
                   </p>
-                  <Users className="h-5 w-5 text-blue-600" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <Users className="h-5 w-5" />
+                  </div>
                 </div>
 
                 <p className="mt-3 text-3xl font-bold text-slate-900">
@@ -508,7 +510,9 @@ export default function PengaturanPinPage() {
                   <p className="text-sm text-slate-500">
                     PIN sudah diatur
                   </p>
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <CheckCircle2 className="h-5 w-5" />
+                  </div>
                 </div>
 
                 <p className="mt-3 text-3xl font-bold text-slate-900">
@@ -525,7 +529,9 @@ export default function PengaturanPinPage() {
                   <p className="text-sm text-slate-500">
                     PIN belum diatur
                   </p>
-                  <KeyRound className="h-5 w-5 text-amber-600" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <KeyRound className="h-5 w-5" />
+                  </div>
                 </div>
 
                 <p className="mt-3 text-3xl font-bold text-slate-900">
@@ -651,7 +657,7 @@ export default function PengaturanPinPage() {
                     {loading ? (
                       <tr>
                         <td colSpan={5} className="px-5 py-14 text-center">
-                          <LoaderCircle className="mx-auto h-6 w-6 animate-spin text-blue-600" />
+                          <LoaderCircle className="mx-auto h-6 w-6 animate-spin theme-primary-text" />
 
                           <p className="mt-3 text-sm text-slate-500">
                             Memuat data siswa...
@@ -733,7 +739,7 @@ export default function PengaturanPinPage() {
                                   !idSiswa ||
                                   sedangReset === idSiswa
                                 }
-                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] disabled:opacity-50"
                               >
                                 <RotateCcw className="h-3.5 w-3.5" />
                                 Reset PIN
@@ -756,15 +762,15 @@ export default function PengaturanPinPage() {
               </div>
             </section>
 
-            <div className="mb-6 mt-5 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4">
-              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
+            <div className="mb-6 mt-5 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 theme-primary-text" />
 
               <div>
-                <p className="text-sm font-medium text-blue-900">
+                <p className="text-sm font-medium theme-primary-text">
                   Informasi keamanan
                 </p>
 
-                <p className="mt-1 text-xs leading-5 text-blue-800">
+                <p className="mt-1 text-xs leading-5 theme-text-muted">
                   Reset PIN akan menghapus PIN lama siswa. Saat login
                   berikutnya, siswa perlu membuat PIN baru. Halaman ini
                   tidak menampilkan PIN maupun hash PIN.
@@ -793,7 +799,7 @@ export default function PengaturanPinPage() {
             aria-labelledby="reset-pin-title"
             className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl"
           >
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
               <KeyRound className="h-5 w-5" />
             </div>
 
@@ -827,7 +833,7 @@ export default function PengaturanPinPage() {
                 type="button"
                 disabled={Boolean(sedangReset)}
                 onClick={handleResetPin}
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg theme-primary px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {sedangReset ? (
                   <>

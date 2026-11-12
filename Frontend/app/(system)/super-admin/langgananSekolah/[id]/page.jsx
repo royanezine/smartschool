@@ -22,7 +22,7 @@ import { Loader2 } from "lucide-react";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -177,7 +177,7 @@ export default function DetailLanggananPage() {
               onClick={() =>
                 router.push("/super-admin/langgananSekolah")
               }
-              className={`mt-4 inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90`}
+              className={`mt-4 inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold ${themePrimaryGradient} text-white ${themePrimaryShadow} transition hover:opacity-90`}
             >
               Kembali ke Daftar Langganan
             </button>
@@ -425,7 +425,6 @@ export default function DetailLanggananPage() {
             <SectionTitle
               icon={Building2}
               title="Informasi Sekolah"
-              tone="primary"
             />
 
             <div className="mt-4 space-y-3 text-sm">
@@ -469,13 +468,12 @@ export default function DetailLanggananPage() {
             <SectionTitle
               icon={Package}
               title="Paket Langganan"
-              tone="info"
             />
 
             <div className="mt-4 space-y-4">
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} text-[var(--color-info)]`}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
                 >
                   <PaketIcon size={20} />
                 </div>
@@ -574,7 +572,6 @@ export default function DetailLanggananPage() {
           <SectionTitle
             icon={Layers}
             title="Fitur Aktif"
-            tone="success"
           />
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -607,7 +604,6 @@ export default function DetailLanggananPage() {
           <SectionTitle
             icon={CreditCard}
             title="Riwayat Pembayaran"
-            tone="warning"
           />
 
           {langganan.riwayatPembayaran &&
@@ -728,7 +724,7 @@ export default function DetailLanggananPage() {
                 `/super-admin/langgananSekolah/edit/${langganan.id}`
               )
             }
-            className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90 sm:w-auto`}
+            className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold ${themePrimaryGradient} text-white ${themePrimaryShadow} transition hover:opacity-90 sm:w-auto`}
           >
             <Edit size={16} />
             Edit Langganan
@@ -741,7 +737,7 @@ export default function DetailLanggananPage() {
                 `/super-admin/langgananSekolah/edit/${langganan.id}`
               )
             }
-            className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border px-6 py-2.5 text-sm font-semibold ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder} transition hover:opacity-85 sm:w-auto`}
+            className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border ${themeBorder} ${themeCard} px-6 py-2.5 text-sm font-semibold ${themeTextSecondary} transition hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] hover:text-[var(--color-primary)] ${themeNeutralHover} sm:w-auto`}
           >
             <RefreshCw size={16} />
             Perpanjang
@@ -756,50 +752,15 @@ export default function DetailLanggananPage() {
 function SectionTitle({
   icon: Icon,
   title,
-  tone = "primary",
 }) {
-  const toneMap = {
-    primary: {
-      wrapper: `${themePrimarySoft} ${themePrimarySoftBorder}`,
-      icon: `bg-[var(--color-primary)] text-[var(--color-card)]`,
-    },
-
-    info: {
-      wrapper: `${themeInfoSurface} ${themeInfoBorder}`,
-      icon: `bg-[var(--color-info)] text-[var(--color-card)]`,
-    },
-
-    success: {
-      wrapper: `${themeSuccessSurface} ${themeSuccessBorder}`,
-      icon: `bg-[var(--color-success)] text-[var(--color-card)]`,
-    },
-
-    warning: {
-      wrapper: `${themeWarningSurface} ${themeWarningBorder}`,
-      icon: `bg-[var(--color-warning)] text-[var(--color-card)]`,
-    },
-
-    neutral: {
-      wrapper: `${themeNeutralSurface} ${themeNeutralBorder}`,
-      icon: `${themeCard} ${themeText}`,
-    },
-  };
-
-  const selected =
-    toneMap[tone] || toneMap.primary;
-
   return (
     <h3
       className={`flex items-center gap-2.5 text-sm font-semibold ${themeText}`}
     >
       <span
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${selected.wrapper}`}
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
       >
-        <span
-          className={`flex h-6 w-6 items-center justify-center rounded-md ${selected.icon}`}
-        >
-          <Icon size={15} />
-        </span>
+        <Icon size={16} />
       </span>
 
       {title}

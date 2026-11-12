@@ -471,7 +471,7 @@ export default function DetailSiswaPage() {
             <button
               type="button"
               onClick={() => router.push("/admin/siswa")}
-              className={`theme-primary ${themePrimaryShadow} mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90`}
+              className={`theme-primary ${themePrimaryShadow} mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90`}
             >
               <ArrowLeft size={16} />
               Kembali ke Daftar Siswa

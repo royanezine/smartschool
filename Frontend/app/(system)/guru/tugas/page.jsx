@@ -33,7 +33,7 @@ import { getTugasGuru } from "@/services/tugas.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -552,6 +552,7 @@ export default function GuruTugasPage() {
               <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
+
               <div className="relative z-10">
                 <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
@@ -561,6 +562,7 @@ export default function GuruTugasPage() {
                       </div>
                       <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
                         Guru
+
                       </span>
                     </div>
 
@@ -569,6 +571,7 @@ export default function GuruTugasPage() {
                     </h1>
 
                     <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90 sm:text-base">
+
                       Buat tugas, pantau deadline, dan lihat progres pengumpulan
                       siswa dalam satu halaman.
                     </p>
@@ -579,6 +582,7 @@ export default function GuruTugasPage() {
                         {summary.total} tugas
                       </div>
                       <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
+
                         <BarChart3 size={14} />
                         {summary.progress}% progres
                       </div>
@@ -591,6 +595,7 @@ export default function GuruTugasPage() {
                       onClick={() => loadTugas(true)}
                       disabled={refreshing}
                       className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+
                     >
                       <RefreshCw
                         size={16}
@@ -603,6 +608,7 @@ export default function GuruTugasPage() {
                       type="button"
                       onClick={() => router.push("/guru/tugas/tambah")}
                       className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 active:scale-[0.98]"
+
                     >
                       <Plus size={17} />
                       Buat Tugas
@@ -614,6 +620,7 @@ export default function GuruTugasPage() {
                 <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
                   <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
                     <div className="flex items-center gap-2 text-white/70">
+
                       <ClipboardList size={15} />
                       <span className="text-xs font-medium">Total Tugas</span>
                     </div>
@@ -624,6 +631,7 @@ export default function GuruTugasPage() {
 
                   <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
                     <div className="flex items-center gap-2 text-white/70">
+
                       <Clock size={15} />
                       <span className="text-xs font-medium">
                         Sedang Berjalan
@@ -636,6 +644,7 @@ export default function GuruTugasPage() {
 
                   <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
                     <div className="flex items-center gap-2 text-white/70">
+
                       <CalendarDays size={15} />
                       <span className="text-xs font-medium">Berakhir</span>
                     </div>
@@ -646,6 +655,7 @@ export default function GuruTugasPage() {
 
                   <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
                     <div className="flex items-center gap-2 text-white/70">
+
                       <CheckCircle2 size={15} />
                       <span className="text-xs font-medium">Pengumpulan</span>
                     </div>
@@ -879,7 +889,7 @@ export default function GuruTugasPage() {
                     <button
                       type="button"
                       onClick={() => router.push("/guru/tugas/tambah")}
-                      className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow}`}
+                      className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-white transition ${themePrimaryGradient} ${themePrimaryShadow}`}
                     >
                       <Plus size={16} />
                       Buat Tugas

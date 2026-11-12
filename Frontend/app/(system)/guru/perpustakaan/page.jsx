@@ -451,7 +451,7 @@ export default function PerpustakaanGuruPage() {
                     type="button"
                     onClick={() => { setActiveTab("buku"); setSearch(""); setError(""); }}
                     className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition ${
-                      activeTab === "buku" ? "theme-primary text-[var(--color-card)] shadow-sm" : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                      activeTab === "buku" ? "theme-primary text-white shadow-sm" : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
                     }`}
                   >
                     <BookOpen size={16} /> Katalog
@@ -460,7 +460,7 @@ export default function PerpustakaanGuruPage() {
                     type="button"
                     onClick={() => { setActiveTab("peminjaman"); setSearch(""); setError(""); }}
                     className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition ${
-                      activeTab === "peminjaman" ? "theme-primary text-[var(--color-card)] shadow-sm" : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                      activeTab === "peminjaman" ? "theme-primary text-white shadow-sm" : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
                     }`}
                   >
                     <CalendarDays size={16} /> Peminjaman
@@ -585,7 +585,7 @@ export default function PerpustakaanGuruPage() {
                                       type="button"
                                       onClick={() => router.push(`/guru/perpustakaan/pinjam/${item.id}`)}
                                       disabled={!canBorrow || submitting}
-                                      className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg theme-primary px-4 text-xs font-bold text-[var(--color-card)] transition hover:brightness-110 disabled:bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)] disabled:text-[var(--color-text-muted)]"
+                                      className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg theme-primary px-4 text-xs font-bold text-white transition hover:brightness-110 disabled:bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)] disabled:text-[var(--color-text-muted)]"
                                     >
                                       <BookMarked size={15} /> {canBorrow ? "Pinjam" : !isActive ? "Nonaktif" : "Habis"}
                                     </button>
@@ -759,7 +759,7 @@ export default function PerpustakaanGuruPage() {
             <p className="mt-2 text-sm theme-text-muted">Apakah Anda yakin ingin mengembalikan buku:</p>
             <p className="mt-2 font-semibold theme-text">&quot;{getBorrowingBookTitle(selectedReturn)}&quot;?</p>
             <div className="mt-6 flex flex-col gap-2">
-              <button type="button" onClick={handleReturn} disabled={submitting} className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg theme-primary text-sm font-semibold text-[var(--color-card)] disabled:opacity-50">
+              <button type="button" onClick={handleReturn} disabled={submitting} className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg theme-primary text-sm font-semibold text-white disabled:opacity-50">
                 {submitting ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />} Ya, Kembalikan
               </button>
               <button type="button" onClick={() => setSelectedReturn(null)} disabled={submitting} className={`h-10 w-full rounded-lg text-sm font-semibold theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50`}>Batal</button>

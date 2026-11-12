@@ -165,7 +165,7 @@ function SearchableKelasMapelSelect({
         "
       >
         <span className="flex min-w-0 items-center gap-3">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-info">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
             <School size={16} />
           </span>
 
@@ -368,7 +368,7 @@ function SearchableRuanganSelect({
         "
       >
         <span className="flex min-w-0 items-center gap-3">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-info">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
             <MapPin size={16} />
           </span>
 
@@ -868,7 +868,7 @@ export default function EditJadwalMengajarPage() {
                   <div className="theme-card min-w-0 rounded-2xl border theme-border shadow-sm">
                     <div className="border-b theme-border-soft px-6 py-5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <CalendarDays
                             size={19}
                             className="text-[var(--color-primary)]"
@@ -1125,7 +1125,7 @@ export default function EditJadwalMengajarPage() {
 
                         {selectedRuangan && (
                           <div className="mt-3 flex items-start gap-3 rounded-xl border theme-border theme-card-soft p-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                               <MapPin
                                 size={17}
                                 className="text-[var(--color-primary)]"
@@ -1207,7 +1207,7 @@ export default function EditJadwalMengajarPage() {
                   </div>
 
                   <div className="min-w-0 space-y-5">
-                    <div className="rounded-2xl border theme-border theme-info p-5">
+                    <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-5">
                       <div className="mb-3 flex items-center gap-3">
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-primary">
                           <CalendarDays size={18} />
@@ -1302,7 +1302,7 @@ export default function EditJadwalMengajarPage() {
 
                     <div className="rounded-2xl border theme-border theme-card p-5 shadow-sm">
                       <div className="mb-4 flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-warning">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <AlertCircle size={18} />
                         </div>
 

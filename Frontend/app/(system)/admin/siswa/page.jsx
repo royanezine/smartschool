@@ -31,7 +31,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 const themePrimarySoftBorder =
@@ -860,16 +860,8 @@ const response = await getSemuaSiswa({
     return String(nama).substring(0, 2).toUpperCase();
   };
 
-  const getAvatarClass = (nama) => {
-    const variants = [
-      "bg-[var(--color-primary)]",
-      "bg-[var(--color-info)]",
-      "bg-[var(--color-success)]",
-      "bg-[var(--color-warning)]",
-      "bg-[color-mix(in_srgb,var(--color-primary)_72%,var(--color-info))]",
-    ];
-
-    return variants[String(nama || "").length % variants.length];
+  const getAvatarClass = () => {
+    return "bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
   };
 
 
@@ -900,7 +892,7 @@ const response = await getSemuaSiswa({
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3">
                   <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} ${themePrimaryShadow} text-[var(--color-card)]`}
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} ${themePrimaryShadow} text-white`}
                   >
                     <Users size={21} />
                   </div>
@@ -969,7 +961,7 @@ const response = await getSemuaSiswa({
                   <button
                     type="button"
                     onClick={() => router.push("/admin/siswa/tambah")}
-                    className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 text-sm font-medium text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 sm:flex-none`}
+                    className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 text-sm font-medium text-white ${themePrimaryShadow} transition hover:brightness-95 sm:flex-none`}
                   >
                     <Plus size={18} />
                     Tambah Siswa
@@ -1019,23 +1011,23 @@ const response = await getSemuaSiswa({
                   <p className="theme-text mt-1 text-2xl font-bold">{totalSiswa}</p>
                 </div>
 
-                <div className={`theme-card rounded-xl border ${themeSuccessBorder} p-4 ${themeCardShadow}`}>
+                <div className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}>
                   <div className="flex items-center gap-2">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${themeSuccessSurface} text-[var(--color-success)]`}>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                       <CheckCircle size={16} />
                     </div>
                     <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                       Aktif
                     </p>
                   </div>
-                  <p className="mt-1 text-2xl font-bold text-[var(--color-success)]">
+                  <p className="theme-text mt-1 text-2xl font-bold">
                     {totalAktif}
                   </p>
                 </div>
 
                 <div className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}>
                   <div className="flex items-center gap-2">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${themeDangerSurface} theme-text-secondary`}>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                       <XCircle size={16} />
                     </div>
                     <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
@@ -1045,16 +1037,16 @@ const response = await getSemuaSiswa({
                   <p className="theme-text mt-1 text-2xl font-bold">{totalNonaktif}</p>
                 </div>
 
-                <div className={`theme-card rounded-xl border ${themeInfoBorder} p-4 ${themeCardShadow}`}>
+                <div className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}>
                   <div className="flex items-center gap-2">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${themeInfoSurface} text-[var(--color-info)]`}>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                       <Users size={16} />
                     </div>
                     <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                       Kelas
                     </p>
                   </div>
-                  <p className="mt-1 text-2xl font-bold text-[var(--color-info)]">
+                  <p className="theme-text mt-1 text-2xl font-bold">
                     {loadingKelas ? "…" : totalKelas}
                   </p>
                 </div>
@@ -1191,28 +1183,28 @@ const response = await getSemuaSiswa({
                   <table className="w-full min-w-[900px]">
                     <thead>
                       <tr className={themePrimaryGradient}>
-                        <th className="w-[5%] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
+                        <th className="w-[5%] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-white">
                           No
                         </th>
-                        <th className="w-[25%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
+                        <th className="w-[25%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                           Profil
                         </th>
-                        <th className="w-[11%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
+                        <th className="w-[11%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                           NIS
                         </th>
-                        <th className="w-[13%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
+                        <th className="w-[13%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                           NISN
                         </th>
-                        <th className="w-[13%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
+                        <th className="w-[13%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                           Kelas
                         </th>
-                        <th className="hidden w-[18%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)] md:table-cell">
+                        <th className="hidden w-[18%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white md:table-cell">
                           Email
                         </th>
-                        <th className="w-[10%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
+                        <th className="w-[10%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                           Status
                         </th>
-                        <th className="w-[13%] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
+                        <th className="w-[13%] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white">
                           Aksi
                         </th>
                       </tr>
@@ -1248,7 +1240,7 @@ const response = await getSemuaSiswa({
                             <td className="px-3 py-4">
                               <div className="flex min-w-0 items-center gap-3">
                                 <div
-                                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarClass(item.nama)} text-sm font-bold text-[var(--color-card)] ${themeSmallShadow}`}
+                                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarClass(item.nama)} text-sm font-bold ${themeSmallShadow}`}
                                 >
                                   {getInitials(item.nama)}
                                 </div>
@@ -1273,7 +1265,7 @@ const response = await getSemuaSiswa({
 
                             <td className="px-3 py-4">
                               {item.kelas !== "-" ? (
-                                <span className={`inline-flex whitespace-nowrap rounded-lg ${themeInfoSurface} px-2.5 py-1 text-xs font-medium text-[var(--color-info)]`}>
+                                <span className="inline-flex whitespace-nowrap rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2.5 py-1 text-xs font-medium theme-primary-text">
                                   {item.kelas}
                                 </span>
                               ) : (
@@ -1325,7 +1317,7 @@ const response = await getSemuaSiswa({
                                 <button
                                   type="button"
                                   onClick={() => router.push(`/admin/siswa/edit/${item.id}`)}
-                                  className="theme-text-muted rounded-lg p-2 transition hover:bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] hover:text-[var(--color-warning)]"
+                                  className="theme-text-muted rounded-lg p-2 transition hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                                   title="Edit siswa"
                                 >
                                   <Edit size={17} />
@@ -1369,7 +1361,7 @@ const response = await getSemuaSiswa({
                         <button
                           type="button"
                           onClick={() => router.push("/admin/siswa/tambah")}
-                          className={`mt-4 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryShadow}`}
+                          className={`mt-4 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-sm font-medium text-white ${themePrimaryShadow}`}
                         >
                           <Plus size={17} />
                           Tambah Siswa
@@ -1444,7 +1436,7 @@ const response = await getSemuaSiswa({
                                 onClick={() => goToPage(pageNumber)}
                                 className={`h-8 w-8 rounded-lg text-sm font-medium transition ${
                                   currentPage === pageNumber
-                                    ? `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`
+                                    ? `${themePrimaryGradient} text-white ${themePrimaryShadow}`
                                     : `theme-text-secondary ${themeNeutralHover}`
                                 }`}
                               >
@@ -1530,7 +1522,7 @@ const response = await getSemuaSiswa({
                 type="button"
                 onClick={confirmDelete}
                 disabled={deleting}
-                className="flex-1 rounded-xl bg-[var(--color-text)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] transition hover:opacity-90 disabled:opacity-60"
+                className="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-60"
               >
                 <span className="flex items-center justify-center gap-2">
                   {deleting ? (

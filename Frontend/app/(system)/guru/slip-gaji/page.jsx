@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -25,6 +24,59 @@ import Header from "@/app/components/Header";
 
 import { getSlipGajiSaya } from "@/services/penggajian.service";
 
+// Semua warna memakai token tema (--color-*) supaya ikut perubahan dari CMS.
+const themePrimarySolid = "bg-[var(--color-primary)] text-white";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText = "text-[var(--color-primary)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-danger)_22%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// Pengganti class `theme-input`: input mengikuti token tema, sama seperti Log Aktivitas.
+const themeInput = `border ${themeNeutralBorder} ${themeNeutralSurface} theme-text outline-none ${themeFocus}`;
+
 const BULAN = [
   "Januari",
   "Februari",
@@ -43,15 +95,15 @@ const BULAN = [
 const STATUS_CONFIG = {
   dibekukan: {
     label: "Dibekukan",
-    className: "theme-warning",
+    className: `${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)]`,
   },
   disetujui: {
     label: "Disetujui",
-    className: "theme-success",
+    className: `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`,
   },
   dibayar: {
     label: "Dibayar",
-    className: "theme-info",
+    className: `${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)]`,
   },
 };
 
@@ -105,12 +157,12 @@ function StatusBadge({ status }) {
 
   const config = STATUS_CONFIG[key] || {
     label: status || "Belum tersedia",
-    className: "theme-card-soft theme-text-secondary",
+    className: `${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary`,
   };
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border theme-border px-2.5 py-1 text-[11px] font-semibold ${config.className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${config.className}`}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {config.label}
@@ -118,28 +170,37 @@ function StatusBadge({ status }) {
   );
 }
 
+// Semua StatCard memakai warna primary yang sama, sama seperti halaman Log Aktivitas.
 function StatCard({ title, value, description, icon: Icon, loading }) {
   return (
-    <div className="theme-card rounded-2xl border p-4 shadow-sm transition hover:shadow-md sm:p-5">
-      <div className="flex items-start justify-between gap-3">
+    <div
+      className={`min-w-0 rounded-2xl border theme-border theme-card p-4 ${themeCardShadow}`}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+        >
+          <Icon size={17} />
+        </div>
+
         <div className="min-w-0">
-          <p className="theme-text-muted text-xs font-medium">{title}</p>
+          <p className="truncate text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+            {title}
+          </p>
 
           {loading ? (
-            <div className="theme-card-soft mt-3 h-7 w-24 animate-pulse rounded-lg" />
+            <div
+              className={`mt-1 h-6 w-24 animate-pulse rounded-lg ${themeNeutralSurface}`}
+            />
           ) : (
-            <p className="theme-text mt-2 break-words text-xl font-bold sm:text-2xl">
+            <p className="break-words text-lg font-semibold theme-text">
               {value}
             </p>
           )}
 
-          <p className="theme-text-placeholder mt-1 text-[11px]">
+          <p className="truncate text-[11px] theme-text-muted">
             {description}
           </p>
-        </div>
-
-        <div className="theme-card-soft theme-border flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
-          <Icon size={18} className="theme-text-secondary" />
         </div>
       </div>
     </div>
@@ -148,14 +209,16 @@ function StatCard({ title, value, description, icon: Icon, loading }) {
 
 function DetailItem({ icon: Icon, label, value }) {
   return (
-    <div className="theme-card-soft theme-border rounded-xl border p-3">
+    <div
+      className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-3`}
+    >
       <div className="flex items-start gap-2.5">
         <div className="theme-card theme-border flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
           <Icon size={14} className="theme-text-muted" />
         </div>
 
         <div className="min-w-0">
-          <p className="theme-text-placeholder text-[10px] font-semibold uppercase tracking-wide">
+          <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
             {label}
           </p>
 
@@ -274,15 +337,12 @@ export default function SlipGajiPage() {
     setSelected(null);
   };
 
-  const namaPegawai =
-    selectedSlip?.pengguna?.namaLengkap || "Pegawai";
+  const namaPegawai = selectedSlip?.pengguna?.namaLengkap || "Pegawai";
 
-  const namaSekolah =
-    selectedSlip?.sekolah?.nama || "Sekolah";
+  const namaSekolah = selectedSlip?.sekolah?.nama || "Sekolah";
 
   const nomorBulanTerpilih = Number(bulan);
-  const periodeTerpilih =
-    `${BULAN[nomorBulanTerpilih - 1] || "-"} ${tahun}`;
+  const periodeTerpilih = `${BULAN[nomorBulanTerpilih - 1] || "-"} ${tahun}`;
 
   const periode = selectedSlip
     ? `${BULAN[Number(selectedSlip.bulan || 1) - 1] || "-"} ${selectedSlip.tahun || "-"}`
@@ -308,10 +368,12 @@ export default function SlipGajiPage() {
         </div>
 
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden print:overflow-visible">
-          <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8 print:p-0">
+          <div className="w-full min-w-0 space-y-5 p-4 sm:p-6 lg:p-8 print:p-0">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
               <div className="flex items-center gap-3">
-                <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySolid}`}
+                >
                   <WalletCards size={20} />
                 </div>
 
@@ -330,7 +392,7 @@ export default function SlipGajiPage() {
                 type="button"
                 onClick={handlePrint}
                 disabled={!selectedSlip || loading}
-                className="theme-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90 disabled:opacity-50 sm:w-auto"
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90 disabled:opacity-50 sm:w-auto ${themePrimarySolid}`}
               >
                 <Printer size={16} />
                 Cetak Slip
@@ -340,7 +402,9 @@ export default function SlipGajiPage() {
             {(error || notice) && (
               <div
                 className={`print:hidden flex items-start gap-3 rounded-xl border p-4 ${
-                  error ? "theme-danger" : "theme-success"
+                  error
+                    ? `${themeDangerBorder} ${themeDangerSurface} text-[var(--color-danger)]`
+                    : `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`
                 }`}
               >
                 {error ? (
@@ -365,10 +429,12 @@ export default function SlipGajiPage() {
               </div>
             )}
 
-            <section className="theme-card rounded-2xl border p-4 shadow-sm sm:p-5 print:hidden">
+            <section
+              className={`theme-card rounded-2xl border theme-border p-4 sm:p-5 print:hidden ${themeCardShadow}`}
+            >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <p className="theme-text-placeholder text-[10px] font-semibold uppercase tracking-wide">
+                  <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
                     Periode Slip Gaji
                   </p>
 
@@ -381,7 +447,7 @@ export default function SlipGajiPage() {
                   <select
                     value={bulan}
                     onChange={(event) => setBulan(event.target.value)}
-                    className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 sm:min-w-[150px]"
+                    className={`${themeInput} h-11 w-full rounded-xl px-3 text-sm sm:min-w-[150px]`}
                   >
                     {BULAN.map((nama, index) => (
                       <option key={nama} value={String(index + 1)}>
@@ -393,7 +459,7 @@ export default function SlipGajiPage() {
                   <select
                     value={tahun}
                     onChange={(event) => setTahun(event.target.value)}
-                    className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 sm:min-w-[100px]"
+                    className={`${themeInput} h-11 w-full rounded-xl px-3 text-sm sm:min-w-[100px]`}
                   >
                     {Array.from(
                       { length: 6 },
@@ -409,7 +475,7 @@ export default function SlipGajiPage() {
                     type="button"
                     onClick={loadSlips}
                     disabled={loading}
-                    className="theme-card-soft theme-text-secondary theme-border inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-3 text-sm font-semibold transition hover:opacity-80 disabled:opacity-50"
+                    className={`theme-text-secondary inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-3 text-sm font-semibold transition disabled:opacity-50 ${themeNeutralBorder} ${themeNeutralSurface} ${themeNeutralHover}`}
                   >
                     <RefreshCw
                       size={15}
@@ -421,7 +487,7 @@ export default function SlipGajiPage() {
               </div>
             </section>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 print:hidden">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 print:hidden">
               <StatCard
                 title="Total Gaji Periode"
                 value={rupiah(totalGaji)}
@@ -447,7 +513,9 @@ export default function SlipGajiPage() {
               />
             </div>
 
-            <section className="theme-card overflow-hidden rounded-2xl border shadow-sm print:hidden">
+            <section
+              className={`theme-card overflow-hidden rounded-2xl border theme-border print:hidden ${themeCardShadow}`}
+            >
               <div className="theme-border flex flex-col gap-2 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                 <div>
                   <h2 className="theme-text text-sm font-bold">
@@ -471,14 +539,14 @@ export default function SlipGajiPage() {
                 <div className="relative">
                   <Search
                     size={16}
-                    className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
+                    className="theme-text-muted absolute left-3 top-1/2 -translate-y-1/2"
                   />
 
                   <input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                     placeholder="Cari periode atau status..."
-                    className="theme-input h-11 w-full rounded-xl border pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    className={`${themeInput} h-11 w-full rounded-xl pl-9 pr-3 text-sm`}
                   />
                 </div>
               </div>
@@ -486,7 +554,7 @@ export default function SlipGajiPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[650px] border-collapse text-sm">
                   <thead>
-                    <tr className="theme-primary">
+                    <tr className={themePrimarySolid}>
                       <th className="px-4 py-3 text-left text-xs font-semibold">
                         Periode
                       </th>
@@ -512,13 +580,12 @@ export default function SlipGajiPage() {
                   <tbody>
                     {loading ? (
                       Array.from({ length: 3 }).map((_, index) => (
-                        <tr
-                          key={index}
-                          className="theme-border border-b"
-                        >
+                        <tr key={index} className="theme-border border-b">
                           {Array.from({ length: 5 }).map((__, cell) => (
                             <td key={cell} className="px-4 py-4">
-                              <div className="theme-card-soft h-4 w-24 animate-pulse rounded" />
+                              <div
+                                className={`h-4 w-24 animate-pulse rounded ${themeNeutralSurface}`}
+                              />
                             </td>
                           ))}
                         </tr>
@@ -527,10 +594,9 @@ export default function SlipGajiPage() {
                       filteredSlips.map((item, index) => (
                         <tr
                           key={
-                            item.id ||
-                            `${item.bulan}-${item.tahun}-${index}`
+                            item.id || `${item.bulan}-${item.tahun}-${index}`
                           }
-                          className="theme-border theme-table-hover border-b transition-colors"
+                          className="theme-border border-b transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]"
                         >
                           <td className="px-4 py-4">
                             <p className="theme-text font-semibold">
@@ -555,7 +621,7 @@ export default function SlipGajiPage() {
                             <button
                               type="button"
                               onClick={() => handleSelectSlip(item)}
-                              className="theme-card-soft theme-text-secondary theme-border inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition hover:opacity-80"
+                              className={`theme-text-secondary inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition ${themeNeutralBorder} ${themeNeutralSurface} ${themeNeutralHover}`}
                             >
                               <Eye size={14} />
                               Lihat
@@ -566,11 +632,10 @@ export default function SlipGajiPage() {
                     ) : (
                       <tr>
                         <td colSpan={5} className="px-4 py-14 text-center">
-                          <div className="theme-card-soft mx-auto flex h-12 w-12 items-center justify-center rounded-full">
-                            <FileText
-                              size={21}
-                              className="theme-text-muted"
-                            />
+                          <div
+                            className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${themeNeutralSurface}`}
+                          >
+                            <FileText size={21} className="theme-text-muted" />
                           </div>
 
                           <p className="theme-text mt-3 text-sm font-bold">
@@ -590,7 +655,7 @@ export default function SlipGajiPage() {
                               type="button"
                               onClick={loadSlips}
                               disabled={loading}
-                              className="theme-primary mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold disabled:opacity-50"
+                              className={`mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold disabled:opacity-50 ${themePrimarySolid}`}
                             >
                               <RefreshCw size={14} />
                               Coba Lagi
@@ -605,15 +670,19 @@ export default function SlipGajiPage() {
             </section>
 
             {selectedSlip && (
-              <section className="theme-card overflow-hidden rounded-2xl border shadow-sm print:overflow-visible print:rounded-none print:border-0 print:shadow-none">
+              <section
+                className={`theme-card overflow-hidden rounded-2xl border theme-border print:overflow-visible print:rounded-none print:border-0 print:shadow-none ${themeCardShadow}`}
+              >
                 <div className="theme-border flex flex-col gap-3 border-b p-5 sm:flex-row sm:items-start sm:justify-between sm:p-7">
                   <div className="flex items-start gap-3">
-                    <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl print:hidden">
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl print:hidden ${themePrimarySolid}`}
+                    >
                       <FileText size={20} />
                     </div>
 
                     <div>
-                      <p className="theme-text-placeholder text-[10px] font-semibold uppercase tracking-wider">
+                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
                         Slip Penggajian
                       </p>
 
@@ -652,9 +721,7 @@ export default function SlipGajiPage() {
                     <DetailItem
                       icon={BriefcaseBusiness}
                       label="Kategori Jabatan"
-                      value={
-                        selectedSlip.pengguna?.kategoriJabatan?.nama
-                      }
+                      value={selectedSlip.pengguna?.kategoriJabatan?.nama}
                     />
 
                     <DetailItem
@@ -672,10 +739,7 @@ export default function SlipGajiPage() {
 
                   <div className="theme-border rounded-xl border p-4 sm:p-5">
                     <div className="mb-4 flex items-center gap-2">
-                      <WalletCards
-                        size={17}
-                        className="theme-text-secondary"
-                      />
+                      <WalletCards size={17} className={themePrimaryText} />
 
                       <h3 className="theme-text text-sm font-bold">
                         Rincian Penghasilan
@@ -702,13 +766,15 @@ export default function SlipGajiPage() {
                       </span>
                     </div>
 
-                    <div className="theme-info mt-4 flex flex-col gap-2 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div
+                      className={`mt-4 flex flex-col gap-2 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between ${themePrimarySoftBorder} ${themePrimarySoft}`}
+                    >
                       <div>
                         <p className="theme-text-secondary text-xs font-semibold">
                           Total Gaji
                         </p>
 
-                        <p className="theme-text-placeholder mt-1 text-[10px]">
+                        <p className="theme-text-muted mt-1 text-[10px]">
                           Berdasarkan nominal yang dikembalikan backend
                         </p>
                       </div>
@@ -719,7 +785,9 @@ export default function SlipGajiPage() {
                     </div>
                   </div>
 
-                  <div className="theme-card-soft theme-border rounded-xl border p-4">
+                  <div
+                    className={`rounded-xl border p-4 ${themeNeutralBorder} ${themeNeutralSurface}`}
+                  >
                     <div className="flex items-start gap-3">
                       <Building2
                         size={17}
@@ -746,9 +814,9 @@ export default function SlipGajiPage() {
                   </div>
 
                   <div className="theme-text-muted text-[10px] leading-relaxed">
-                    Dokumen ini menampilkan data penggajian yang tersedia
-                    dari sistem. Jika terdapat perbedaan nominal atau
-                    informasi, hubungi administrator sekolah.
+                    Dokumen ini menampilkan data penggajian yang tersedia dari
+                    sistem. Jika terdapat perbedaan nominal atau informasi,
+                    hubungi administrator sekolah.
                   </div>
 
                   <div className="flex justify-end print:hidden">
@@ -756,7 +824,7 @@ export default function SlipGajiPage() {
                       type="button"
                       onClick={handlePrint}
                       disabled={loading}
-                      className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:opacity-90 disabled:opacity-50"
+                      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:opacity-90 disabled:opacity-50 ${themePrimarySolid}`}
                     >
                       <Printer size={15} />
                       Cetak Slip Ini
@@ -802,9 +870,7 @@ export default function SlipGajiPage() {
             height: auto !important;
           }
 
-          .theme-card,
-          .theme-card-soft,
-          .theme-info {
+          .theme-card {
             background: white !important;
             color: #111827 !important;
             box-shadow: none !important;

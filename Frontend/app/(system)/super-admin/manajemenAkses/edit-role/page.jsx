@@ -39,7 +39,7 @@ import {
 } from "@/services/role.service";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -444,7 +444,7 @@ function EditRolePageContent() {
     return (
       <div className="theme-page theme-text flex min-h-screen items-center justify-center p-6">
         <div className={`theme-card theme-border w-full max-w-sm rounded-3xl border p-8 text-center ${themeCardShadow}`}>
-          <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeInfoSurface} text-[var(--color-info)]`}>
+          <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimarySoft} ${themePrimaryText}`}>
             <RefreshCw size={24} className="animate-spin" />
           </div>
           <p className="theme-text mt-5 text-sm font-semibold">Memuat data role</p>
@@ -477,7 +477,7 @@ function EditRolePageContent() {
             </button>
             <button
               onClick={loadData}
-              className={`${themePrimaryGradient} ${themePrimaryShadow} inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-105`}
+              className={`${themePrimaryGradient} ${themePrimaryShadow} inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-white transition hover:brightness-105`}
             >
               <RefreshCw size={16} />
               Coba Lagi
@@ -534,32 +534,32 @@ function EditRolePageContent() {
                 className="h-full w-full"
                 style={{
                   backgroundImage:
-                    "linear-gradient(color-mix(in srgb,var(--color-card) 50%,transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb,var(--color-card) 50%,transparent) 1px, transparent 1px)",
+                    "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
                   backgroundSize: "34px 34px",
                 }}
               />
             </div>
-            <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full blur-3xl" style={{ background: "color-mix(in srgb,var(--color-card) 14%,transparent)" }} />
-            <div className="absolute -bottom-32 left-1/3 h-64 w-64 rounded-full blur-3xl" style={{ background: "color-mix(in srgb,var(--color-info) 18%,transparent)" }} />
+            <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full blur-3xl bg-white/10" />
+            <div className="absolute -bottom-32 left-1/3 h-64 w-64 rounded-full blur-3xl bg-white/8" />
 
             <div className="relative p-5 sm:p-6 lg:p-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] text-[var(--color-card)] backdrop-blur-sm sm:h-14 sm:w-14">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white backdrop-blur-sm sm:h-14 sm:w-14">
                     <Shield size={25} strokeWidth={1.8} />
                   </div>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--color-card)]">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
                         <Settings size={11} />
                         Manajemen Akses
                       </span>
-                      <span className="rounded-full border border-[color-mix(in_srgb,var(--color-card)_14%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_6%,transparent)] px-2.5 py-1 font-mono text-[10px] text-[color-mix(in_srgb,var(--color-card)_75%,transparent)]">
+                      <span className="rounded-full border border-white/15 bg-white/6 px-2.5 py-1 font-mono text-[10px] text-white/80">
                         {role.id}
                       </span>
                     </div>
-                    <h1 className="mt-3 text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl">Edit Role</h1>
-                    <p className="mt-1.5 max-w-2xl text-xs leading-5 text-[color-mix(in_srgb,var(--color-card)_68%,transparent)] sm:text-sm">
+                    <h1 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl">Edit Role</h1>
+                    <p className="mt-1.5 max-w-2xl text-xs leading-5 text-white/80 sm:text-sm">
                       Perbarui informasi peran dan atur hak akses modul untuk pengguna SmartSchool.
                     </p>
                   </div>
@@ -568,7 +568,7 @@ function EditRolePageContent() {
                   <button
                     onClick={handleSimpan}
                     disabled={saving}
-                    className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-card)] px-5 text-sm font-semibold text-[var(--color-primary)] shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_18%,transparent)] transition-all hover:brightness-[0.97] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
+                    className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-[var(--color-primary)] shadow-lg transition-all hover:bg-white/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto"
                   >
                     {saving ? <RefreshCw size={17} className="animate-spin" /> : <Save size={17} strokeWidth={2.2} />}
                     {saving ? "Menyimpan..." : "Simpan Perubahan"}
@@ -576,32 +576,32 @@ function EditRolePageContent() {
                 </div>
               </div>
 
-              <div className="mt-7 grid grid-cols-2 gap-3 border-t border-[color-mix(in_srgb,var(--color-card)_14%,transparent)] pt-5 sm:grid-cols-4">
+              <div className="mt-7 grid grid-cols-2 gap-3 border-t border-white/15 pt-5 sm:grid-cols-4">
                 <div>
-                  <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[color-mix(in_srgb,var(--color-card)_48%,transparent)]">Pengguna</p>
-                  <p className="mt-1 text-lg font-semibold text-[var(--color-card)]">{jumlahPengguna.toLocaleString("id-ID")}</p>
+                  <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-white/70">Pengguna</p>
+                  <p className="mt-1 text-lg font-semibold text-white">{jumlahPengguna.toLocaleString("id-ID")}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[color-mix(in_srgb,var(--color-card)_48%,transparent)]">Hak Aktif</p>
-                  <p className="mt-1 text-lg font-semibold text-[var(--color-card)]">{totalDipilih}</p>
+                  <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-white/70">Hak Aktif</p>
+                  <p className="mt-1 text-lg font-semibold text-white">{totalDipilih}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[color-mix(in_srgb,var(--color-card)_48%,transparent)]">Modul Aktif</p>
-                  <p className="mt-1 text-lg font-semibold text-[var(--color-card)]">{modulAktif}</p>
+                  <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-white/70">Modul Aktif</p>
+                  <p className="mt-1 text-lg font-semibold text-white">{modulAktif}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[color-mix(in_srgb,var(--color-card)_48%,transparent)]">Cakupan Akses</p>
-                  <p className="mt-1 text-lg font-semibold text-[var(--color-card)]">{persentaseAkses}%</p>
+                  <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-white/70">Cakupan Akses</p>
+                  <p className="mt-1 text-lg font-semibold text-white">{persentaseAkses}%</p>
                 </div>
               </div>
             </div>
           </section>
 
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatCard icon={Users} label="Pengguna" value={jumlahPengguna.toLocaleString("id-ID")} description="Menggunakan role ini" iconClass={`${themeInfoSurface} text-[var(--color-info)]`} />
+            <StatCard icon={Users} label="Pengguna" value={jumlahPengguna.toLocaleString("id-ID")} description="Menggunakan role ini" iconClass={`${themePrimarySoft} ${themePrimaryText}`} />
             <StatCard icon={Key} label="Hak Akses" value={`${totalDipilih}/${totalPermissionTersedia}`} description={`${persentaseAkses}% cakupan`} iconClass={`${themePrimarySoft} ${themePrimaryText}`} />
-            <StatCard icon={Layers3} label="Modul Aktif" value={`${modulAktif}/${totalModul}`} description="Modul memiliki akses" iconClass={`${themeSuccessSurface} text-[var(--color-success)]`} />
-            <StatCard icon={Building2} label="Scope" value={role.sekolahId ? "Sekolah" : "Global"} description={role.sekolahId ? "Terbatas pada sekolah" : "Akses sistem global"} iconClass={`${themeNeutralSurface} theme-text-secondary`} />
+            <StatCard icon={Layers3} label="Modul Aktif" value={`${modulAktif}/${totalModul}`} description="Modul memiliki akses" iconClass={`${themePrimarySoft} ${themePrimaryText}`} />
+            <StatCard icon={Building2} label="Scope" value={role.sekolahId ? "Sekolah" : "Global"} description={role.sekolahId ? "Terbatas pada sekolah" : "Akses sistem global"} iconClass={`${themePrimarySoft} ${themePrimaryText}`} />
           </div>
 
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.5fr)]">
@@ -809,7 +809,7 @@ function EditRolePageContent() {
                                 <button type="button" onClick={() => toggleModulPenuh(aksiMap)} className="flex items-center gap-3 text-left">
                                   <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all ${
                                     semuaTerpilih
-                                      ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-card)]"
+                                      ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
                                       : sebagianTerpilih
                                       ? `${themePrimarySoftBorder} ${themePrimarySoft}`
                                       : `${themeNeutralBorder} theme-card`
@@ -883,7 +883,7 @@ function EditRolePageContent() {
                             <button type="button" onClick={() => toggleModulPenuh(aksiMap)} className="flex min-w-0 items-center gap-3 text-left">
                               <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
                                 semuaTerpilih
-                                  ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-card)]"
+                                  ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
                                   : sebagianTerpilih
                                   ? `${themePrimarySoftBorder} ${themePrimarySoft}`
                                   : `${themeNeutralBorder} theme-card`
@@ -969,7 +969,7 @@ function EditRolePageContent() {
               <button
                 onClick={handleSimpan}
                 disabled={saving}
-                className={`${themePrimaryGradient} ${themePrimaryShadow} inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-[var(--color-card)] transition-all hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:px-6`}
+                className={`${themePrimaryGradient} ${themePrimaryShadow} inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-white transition-all hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:px-6`}
               >
                 {saving ? <RefreshCw size={17} className="animate-spin" /> : <Save size={17} />}
                 {saving ? "Menyimpan..." : "Simpan Perubahan"}

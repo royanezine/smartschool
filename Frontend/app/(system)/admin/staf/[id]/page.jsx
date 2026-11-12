@@ -403,7 +403,7 @@ export default function DetailStafPage() {
                           `/admin/staf/edit/${staf.id}`
                         )
                       }
-                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border ${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)] text-sm font-medium hover:opacity-80 transition`}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text text-sm font-medium hover:opacity-80 transition"
                     >
                       <Edit size={16} />
                       Edit

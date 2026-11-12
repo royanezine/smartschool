@@ -279,7 +279,7 @@ export default function DetailPegawaiPage() {
                 <button
                   type="button"
                   onClick={handleEdit}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl theme-warning theme-sidebar-hover transition-colors text-sm font-medium"
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text transition-colors text-sm font-medium hover:opacity-80"
                 >
                   <Pencil size={15} />
                   Edit

@@ -193,7 +193,7 @@ export default function RaporPage() {
                           className="text-left theme-card rounded-xl border theme-border p-5 shadow-sm theme-header-hover transition-all"
                         >
                           <div className="flex items-start justify-between">
-                            <div className="p-2.5 rounded-lg theme-info">
+                            <div className="p-2.5 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                               <GraduationCap size={20} />
                             </div>
 
@@ -251,7 +251,7 @@ export default function RaporPage() {
 
                 <div className="theme-card rounded-xl border theme-border p-4 shadow-sm flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-lg theme-info">
+                    <div className="p-2.5 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                       <GraduationCap size={20} />
                     </div>
 
@@ -279,7 +279,7 @@ export default function RaporPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[750px] text-sm">
                       <thead>
-                        <tr className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                        <tr className="theme-primary text-white">
                           <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
                             No.
                           </th>

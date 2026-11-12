@@ -397,16 +397,16 @@ export default function PelanggaranPage() {
                     rounded-xl border theme-border
                     theme-card
                     px-4 py-2.5
-                    text-sm font-bold text-emerald-600 dark:text-emerald-400
+                    text-sm font-bold theme-text-secondary
                     shadow-sm transition
-                    theme-sidebar-hover
+                    hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:text-[var(--color-primary)]
                     disabled:cursor-not-allowed
                     disabled:opacity-60
                   "
                 >
                   {exportingExcel ? (
                     <svg
-                      className="h-4 w-4 animate-spin text-emerald-600 dark:text-emerald-400"
+                      className="h-4 w-4 animate-spin theme-primary-text"
                       fill="none"
                       viewBox="0 0 24 24"
                     >
@@ -426,7 +426,7 @@ export default function PelanggaranPage() {
                     </svg>
                   ) : (
                     <svg
-                      className="h-4 w-4 text-emerald-600 dark:text-emerald-400"
+                      className="h-4 w-4 theme-primary-text"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -453,16 +453,16 @@ export default function PelanggaranPage() {
                     rounded-xl border theme-border
                     theme-card
                     px-4 py-2.5
-                    text-sm font-bold text-rose-600 dark:text-rose-400
+                    text-sm font-bold theme-text-secondary
                     shadow-sm transition
-                    theme-sidebar-hover
+                    hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:text-[var(--color-primary)]
                     disabled:cursor-not-allowed
                     disabled:opacity-60
                   "
                 >
                   {exportingPdf ? (
                     <svg
-                      className="h-4 w-4 animate-spin text-rose-600 dark:text-rose-400"
+                      className="h-4 w-4 animate-spin theme-primary-text"
                       fill="none"
                       viewBox="0 0 24 24"
                     >
@@ -482,7 +482,7 @@ export default function PelanggaranPage() {
                     </svg>
                   ) : (
                     <svg
-                      className="h-4 w-4 text-rose-600 dark:text-rose-400"
+                      className="h-4 w-4 theme-primary-text"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -573,7 +573,8 @@ export default function PelanggaranPage() {
               </div>
             )}
 
-            <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+            {/* FIX: grid hanya sampai 4 kolom agar 4 card memenuhi lebar penuh */}
+            <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Stat
                 label="Total Pelanggaran"
                 value={stats.total}
@@ -1069,22 +1070,10 @@ function Stat({
   icon,
   tone = "blue",
 }) {
-  const tones = {
-    blue: {
-      className: "theme-info",
-    },
-    emerald: {
-      className: "theme-success",
-    },
-    amber: {
-      className: "theme-warning",
-    },
-    slate: {
-      className: "theme-card-soft theme-text-secondary",
-    },
+  const t = {
+    className:
+      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
-
-  const t = tones[tone] || tones.blue;
 
   const icons = {
     alert: (
@@ -1118,7 +1107,7 @@ function Stat({
   };
 
   return (
-    <div className="theme-card rounded-2xl border theme-border p-5 shadow-xl transition hover:shadow-lg">
+    <div className="theme-card h-full rounded-2xl border theme-border p-5 shadow-xl transition hover:shadow-lg">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider theme-text-muted">

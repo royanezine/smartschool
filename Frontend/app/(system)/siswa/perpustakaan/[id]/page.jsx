@@ -293,7 +293,7 @@ export default function DetailBukuPage() {
                     href={book.urlEbook}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-white transition hover:brightness-110"
                   >
                     <MonitorPlay size={17} /> Baca E-Book
                   </a>
@@ -302,7 +302,7 @@ export default function DetailBukuPage() {
                     type="button"
                     disabled={!userId || book.status !== "aktif" || Number(book.jumlahTersedia || 0) <= 0 || saving}
                     onClick={handleBorrow}
-                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {saving ? <Loader2 size={17} className="animate-spin" /> : <BookOpenCheck size={17} />}
                     {saving ? "Memproses..." : Number(book.jumlahTersedia || 0) > 0 ? "Pinjam Buku" : "Stok Habis"}

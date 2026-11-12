@@ -20,7 +20,7 @@ import {
 import { getLaporanAkademik } from "@/services/yayasan.service";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -50,12 +50,6 @@ const themeNeutralBorder =
 
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
-
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
 
 const themeSuccessSurface =
   "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
@@ -232,7 +226,7 @@ export default function LaporanAkademikPage() {
 
               <div className="flex items-center gap-2.5">
                 <div
-                  className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow}`}
+                  className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-white ${themeSmallShadow}`}
                 >
                   <BookOpen size={18} />
                 </div>
@@ -256,7 +250,7 @@ export default function LaporanAkademikPage() {
               type="button"
               onClick={handleDownload}
               disabled={loading || filteredUnits.length === 0}
-              className={`flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] transition-colors ${themePrimaryHover} ${themeSmallShadow} disabled:opacity-50`}
+              className={`theme-primary flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${themeSmallShadow} disabled:opacity-50`}
             >
               <Download size={16} /> Unduh Laporan
             </button>
@@ -302,14 +296,12 @@ export default function LaporanAkademikPage() {
           </div>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div
               className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeSmallShadow}`}
             >
-              <div
-                className={`shrink-0 rounded-lg border p-2 ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`}
-              >
-                <BarChart3 size={16} />
+              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2">
+                <BarChart3 size={16} className="theme-primary-text" />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-[11px] font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
@@ -324,10 +316,8 @@ export default function LaporanAkademikPage() {
             <div
               className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeSmallShadow}`}
             >
-              <div
-                className={`shrink-0 rounded-lg border p-2 ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
-              >
-                <TrendingUp size={16} />
+              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2">
+                <TrendingUp size={16} className="theme-primary-text" />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-[11px] font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
@@ -346,10 +336,8 @@ export default function LaporanAkademikPage() {
             <div
               className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeSmallShadow}`}
             >
-              <div
-                className={`shrink-0 rounded-lg border p-2 ${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`}
-              >
-                <Users size={16} />
+              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2">
+                <Users size={16} className="theme-primary-text" />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-[11px] font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
@@ -364,10 +352,8 @@ export default function LaporanAkademikPage() {
             <div
               className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeSmallShadow}`}
             >
-              <div
-                className={`shrink-0 rounded-lg border p-2 ${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`}
-              >
-                <CheckCircle2 size={16} />
+              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2">
+                <CheckCircle2 size={16} className="theme-primary-text" />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-[11px] font-medium uppercase tracking-wider text-[var(--color-text-muted)]">

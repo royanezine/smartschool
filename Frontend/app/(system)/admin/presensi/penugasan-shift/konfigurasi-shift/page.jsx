@@ -136,11 +136,9 @@ function buildFallbackShiftSiswa() {
 
 function StatCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const tones = {
-    blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
-    emerald:
-      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
-    amber:
-      "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+    blue: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    emerald: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    amber: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   return (

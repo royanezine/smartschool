@@ -819,7 +819,7 @@ export default function EditWaliKelasPage() {
                       </div>
                     </div>
 
-                    <div className="theme-info rounded-xl border theme-border p-5">
+                    <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-5">
                       <div className="flex items-center gap-2 mb-2.5">
                         <Info size={16} />
 

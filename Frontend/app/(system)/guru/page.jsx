@@ -46,14 +46,22 @@ import {
   LogIn,
   LogOut,
   Sparkles,
+  Sunrise,
+  Sun,
+  Sunset,
+  Moon,
 } from "lucide-react";
+
+/* ------------------------------------------------------------------ */
+/* Token tema — semua warna mengikuti --color-* (bisa diubah dari CMS) */
+/* ------------------------------------------------------------------ */
 
 const TONES = {
   primary: "var(--color-primary)",
   success: "var(--color-success, #16a34a)",
   warning: "var(--color-warning, #d97706)",
-  info: "var(--color-info, #2563eb)",
-  violet: "#8b5cf6",
+  info: "var(--color-primary)",
+  violet: "var(--color-primary)",
   danger: "var(--color-danger, #dc2626)",
   muted: "var(--color-text-muted, #94a3b8)",
 };
@@ -61,45 +69,14 @@ const TONES = {
 const tint = (color, pct = 12) =>
   `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
-const quickMenu = [
-  {
-    id: "presensi",
-    title: "Presensi Saya",
-    desc: "Check-in & check-out kehadiran",
-    icon: ClipboardCheck,
-    path: "/guru/absensi",
-    tone: "success",
-  },
-  {
-    id: "jadwal",
-    title: "Jadwal",
-    desc: "Jadwal dan agenda mengajar",
-    icon: CalendarDays,
-    path: "/guru/jadwal",
-    tone: "primary",
-  },
-  {
-    id: "materi",
-    title: "Materi",
-    desc: "Kelola bahan ajar kelas",
-    icon: BookOpen,
-    path: "/guru/materi",
-    tone: "info",
-  },
-  {
-    id: "tugas",
-    title: "Tugas",
-    desc: "Buat tugas & pantau pengumpulan",
-    icon: ClipboardList,
-    path: "/guru/tugas",
-    tone: "warning",
-  },
-];
-
 const themeCard =
   "rounded-2xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] theme-card shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 const themePrimary = "text-[var(--color-primary)]";
 const themeSoft = "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 const themeMuted = "theme-text-muted";
 const divider = "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
@@ -107,6 +84,72 @@ const ACCENT = "var(--color-primary)";
 const ACCENT_SOFT = "color-mix(in srgb, var(--color-primary) 32%, transparent)";
 const TRACK = "color-mix(in srgb, var(--color-text) 8%, transparent)";
 const GRID_LINE = "color-mix(in srgb, var(--color-text) 8%, transparent)";
+
+/* ------------------------------------------------------------------ */
+/* Data statis                                                         */
+/* ------------------------------------------------------------------ */
+
+const quickMenu = [
+  {
+    id: "presensi",
+    title: "Presensi Saya",
+    desc: "Check-in & check-out kehadiran Anda",
+    icon: ClipboardCheck,
+    path: "/guru/absensi",
+    color: "var(--color-primary)",
+  },
+  {
+    id: "jadwal",
+    title: "Jadwal",
+    desc: "Jadwal dan agenda mengajar",
+    icon: CalendarDays,
+    path: "/guru/jadwal",
+    color: "var(--color-info, var(--color-primary))",
+  },
+  {
+    id: "materi",
+    title: "Materi",
+    desc: "Kelola bahan ajar untuk kelas",
+    icon: BookOpen,
+    path: "/guru/materi",
+    color: "var(--color-success, #16a34a)",
+  },
+  {
+    id: "tugas",
+    title: "Tugas",
+    desc: "Buat tugas & pantau pengumpulan",
+    icon: ClipboardList,
+    path: "/guru/tugas",
+    color: "var(--color-warning, #d97706)",
+  },
+];
+
+const HOURLY_MESSAGES = [
+  "Larut malam, jangan lupa istirahat yang cukup.",
+  "Waktunya beristirahat, esok masih ada kelas.",
+  "Malam yang tenang, sisakan tenaga untuk besok.",
+  "Dini hari yang hening, semoga lelap menyertai.",
+  "Fajar hampir tiba, bersiap untuk hari mengajar.",
+  "Mulai hari dengan niat baik dan semangat mengajar.",
+  "Pagi yang segar, jangan lupa check-in kehadiran.",
+  "Siswa mulai berdatangan, siapkan materi hari ini.",
+  "Semangat pagi, jam pelajaran sedang berjalan.",
+  "Periksa jadwal dan absensi kelas sebelum istirahat.",
+  "Tetap semangat, separuh hari mengajar sudah terlewati.",
+  "Menjelang siang, pastikan absensi kelas sudah terisi.",
+  "Waktunya jeda sejenak, isi tenaga untuk sesi berikutnya.",
+  "Siang yang produktif, lanjutkan sesi mengajar Anda.",
+  "Kegiatan belajar hampir usai, cek tugas yang masuk.",
+  "Sore hari, saatnya menilai tugas siswa.",
+  "Tinjau kembali capaian kelas hari ini.",
+  "Menjelang petang, jangan lupa check-out kehadiran.",
+  "Terima kasih atas pengabdian hari ini, selamat beristirahat.",
+  "Malam yang tenang, rencanakan materi untuk besok.",
+  "Hari hampir usai, semoga semua berjalan lancar.",
+  "Waktunya memulihkan tenaga untuk esok hari.",
+  "Sudah malam, sisakan pekerjaan untuk besok.",
+  "Selamat malam, sampai jumpa di hari yang baru.",
+];
 
 const STATUS_META = {
   hadir: { label: "Hadir", color: TONES.success },
@@ -137,6 +180,10 @@ const SCHEDULE_TONE = {
   Selesai: "muted",
   Jadwal: "muted",
 };
+
+/* ------------------------------------------------------------------ */
+/* Helpers                                                             */
+/* ------------------------------------------------------------------ */
 
 function getPayload(response) {
   if (response?.data?.data !== undefined) return response.data.data;
@@ -177,29 +224,52 @@ function getJakartaDateString(value = new Date()) {
   return year && month && day ? `${year}-${month}-${day}` : "";
 }
 
-function getGreeting() {
-  const hour =
+function getJakartaHour(date = new Date()) {
+  return (
     Number(
       new Intl.DateTimeFormat("en-GB", {
         timeZone: "Asia/Jakarta",
         hour: "2-digit",
         hour12: false,
-      }).format(new Date())
-    ) % 24;
+      }).format(date)
+    ) % 24
+  );
+}
 
-  if (hour < 11) return "Selamat pagi";
-  if (hour < 15) return "Selamat siang";
-  if (hour < 18) return "Selamat sore";
-  return "Selamat malam";
+function getGreeting(date = new Date()) {
+  const hour = getJakartaHour(date);
+
+  if (hour >= 5 && hour < 11) {
+    return { text: "Selamat pagi", icon: Sunrise, hour };
+  }
+  if (hour >= 11 && hour < 15) {
+    return { text: "Selamat siang", icon: Sun, hour };
+  }
+  if (hour >= 15 && hour < 18) {
+    return { text: "Selamat sore", icon: Sunset, hour };
+  }
+  return { text: "Selamat malam", icon: Moon, hour };
 }
 
 function formatDate(date = new Date()) {
   return new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   }).format(date);
+}
+
+function formatClock(date) {
+  return new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .format(date)
+    .replace(".", ":");
 }
 
 function formatTime(value) {
@@ -494,6 +564,10 @@ function pickLatestTodayRecord(records) {
   return todayRecords[0] || null;
 }
 
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
+
 export default function GuruDashboardPage() {
   const router = useRouter();
 
@@ -502,6 +576,7 @@ export default function GuruDashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [animate, setAnimate] = useState(false);
   const [error, setError] = useState("");
+  const [now, setNow] = useState(null);
 
   const [user, setUser] = useState({ name: "", email: "" });
   const [kelasMapel, setKelasMapel] = useState([]);
@@ -519,8 +594,17 @@ export default function GuruDashboardPage() {
   const [studentsByClass, setStudentsByClass] = useState([]);
   const [studentCountAvailable, setStudentCountAvailable] = useState(false);
 
-  const today = useMemo(() => new Date(), []);
   const todayJakarta = useMemo(() => getJakartaDateString(new Date()), []);
+
+  // Jam berjalan: sapaan, pesan, dan status jadwal ikut diperbarui.
+  useEffect(() => {
+    const first = setTimeout(() => setNow(new Date()), 0);
+    const interval = setInterval(() => setNow(new Date()), 30000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(interval);
+    };
+  }, []);
 
   const loadDashboard = useCallback(
     async (isRefresh = false) => {
@@ -1051,9 +1135,12 @@ export default function GuruDashboardPage() {
     [notifikasi]
   );
 
+  // `now` ikut jadi dependensi supaya status (Berlangsung/Berikutnya/Selesai)
+  // ikut diperbarui seiring jam berjalan.
   const scheduleWithStatus = useMemo(
     () => jadwal.map((item) => ({ item, status: getScheduleStatus(item) })),
-    [jadwal]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [jadwal, now]
   );
 
   const focusSchedule = useMemo(
@@ -1097,6 +1184,11 @@ export default function GuruDashboardPage() {
   }
 
   const displayName = user.name || user.email?.split("@")[0] || "Guru";
+
+  const greeting = now ? getGreeting(now) : null;
+  const GreetingIcon = greeting?.icon ?? Sparkles;
+  const currentTime = now ? formatClock(now) : "--:--";
+  const todayLabel = now ? formatDate(now) : "";
 
   const checkInValue = getAttendanceTime(attendanceToday, "masuk");
   const checkOutValue = getAttendanceTime(attendanceToday, "keluar");
@@ -1165,6 +1257,8 @@ export default function GuruDashboardPage() {
           : ""
       }.`;
 
+  const heroMessage = greeting ? HOURLY_MESSAGES[greeting.hour] : heroSummary;
+
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
@@ -1191,9 +1285,12 @@ export default function GuruDashboardPage() {
 
         <main className="theme-page min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
-            <div className="w-full space-y-6 lg:space-y-7">
+            <div className="w-full space-y-6">
               {error && (
-                <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+                <div
+                  role="alert"
+                  className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4"
+                >
                   <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold theme-text">
@@ -1211,169 +1308,207 @@ export default function GuruDashboardPage() {
                 </div>
               )}
 
+              {/* ================= BANNER SAPAAN ================= */}
               <section
-                className="relative overflow-hidden rounded-3xl p-5 text-white sm:p-7 lg:p-8 shadow-xl"
-                style={{
-                  background:
-                    "linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 60%, #05101f) 100%)",
-                }}
+                className={`relative overflow-hidden rounded-3xl border ${themePrimarySoftBorder} ${themeCardShadow} bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))]`}
               >
-                <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-24 left-1/4 h-56 w-56 rounded-full bg-white/8 blur-3xl" />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] blur-2xl"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 opacity-[0.05]"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                    backgroundSize: "32px 32px",
+                  }}
+                />
 
-                <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
-                  <div className="min-w-0 lg:col-span-7 xl:col-span-8">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-medium ring-1 ring-white/25 backdrop-blur-sm">
-                      <CalendarDays size={13} />
-                      {formatDate(today)}
-                    </span>
+                <div className="relative grid grid-cols-1 gap-6 p-6 sm:p-8 lg:grid-cols-12 lg:items-center">
+                  <div className="min-w-0 lg:col-span-7">
+                    <div
+                      className={`inline-flex flex-wrap items-center gap-2 rounded-full border ${themePrimarySoftBorder} bg-[var(--color-card)] px-3 py-1.5 text-xs font-semibold ${themePrimary}`}
+                    >
+                      <GreetingIcon className="h-3.5 w-3.5" />
+                      <span className="tabular-nums">{currentTime} WIB</span>
+                      <span className="theme-text-muted">·</span>
+                      <span className="theme-text-secondary">
+                        {todayLabel || "Memuat tanggal..."}
+                      </span>
+                    </div>
 
-                    <h1 className="mt-4 break-words text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                      {getGreeting()}, {displayName}
+                    <h1 className="mt-4 break-words text-2xl font-bold tracking-tight theme-text sm:text-3xl lg:text-4xl">
+                      {greeting ? greeting.text : "Selamat datang"},{" "}
+                      <span className={themePrimary}>{displayName}</span>
                     </h1>
-                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">
+
+                    <p className="mt-2 max-w-xl text-sm leading-6 theme-text-secondary sm:text-base">
+                      {heroMessage}
+                    </p>
+                    <p className="mt-1 max-w-xl text-xs leading-5 theme-text-muted sm:text-sm">
                       {heroSummary}
                     </p>
 
-                    <div className="mt-5 flex flex-wrap items-center gap-2.5 sm:gap-3">
+                    <div className="mt-5 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => loadDashboard(true)}
+                        disabled={refreshing}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <RefreshCw
+                          className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+                        />
+                        {refreshing ? "Memuat..." : "Refresh Data"}
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => router.push("/guru/jadwal")}
-                        className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-white/90 shadow-md"
+                        className="theme-card theme-border theme-text inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:shadow-sm"
                       >
-                        <CalendarDays size={15} />
+                        <CalendarDays className="h-4 w-4" />
                         Lihat jadwal
                       </button>
+
                       <button
                         type="button"
                         onClick={() => router.push("/guru/absensi")}
-                        className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold ring-1 ring-white/25 backdrop-blur-sm transition hover:bg-white/25"
+                        className="theme-card theme-border theme-text inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:shadow-sm"
                       >
-                        <ClipboardCheck size={15} />
+                        <ClipboardCheck className="h-4 w-4" />
                         Presensi saya
-                      </button>
-                      <button
-                        type="button"
-                        title="Muat ulang data"
-                        onClick={() => loadDashboard(true)}
-                        disabled={refreshing}
-                        className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3.5 py-2.5 text-sm font-medium text-white/90 ring-1 ring-white/20 backdrop-blur-sm transition hover:bg-white/20 disabled:opacity-50"
-                      >
-                        <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
-                        Refresh
                       </button>
                     </div>
                   </div>
 
-                  <div className="min-w-0 lg:col-span-5 xl:col-span-4">
-                    <div className="relative overflow-hidden rounded-2xl bg-white/15 p-5 ring-1 ring-white/25 backdrop-blur-md">
-                      <div className="pointer-events-none absolute -right-8 -top-10 opacity-90 scale-125 sm:scale-100 sm:-right-6 sm:-top-8">
-                        <StackedBooks />
+                  {/* Kartu fokus: sesi berjalan / berikutnya + presensi */}
+                  <div className="min-w-0 lg:col-span-5">
+                    <div
+                      className={`rounded-2xl border ${themePrimarySoftBorder} bg-[var(--color-card)] p-5 ${themeCardShadow}`}
+                    >
+                      <div
+                        className={`flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider ${themePrimary}`}
+                      >
+                        <Sparkles size={13} />
+                        {focusSchedule
+                          ? focusSchedule.status === "Berlangsung"
+                            ? "Sedang berlangsung"
+                            : "Kelas berikutnya"
+                          : "Jadwal hari ini"}
                       </div>
 
-                      <div className="relative pr-28 sm:pr-32">
-                        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-white/80">
-                          <Sparkles size={13} />
-                          {focusSchedule
-                            ? focusSchedule.status === "Berlangsung"
-                              ? "Sedang berlangsung"
-                              : "Kelas berikutnya"
-                            : "Jadwal hari ini"}
-                        </div>
-
-                        {loading ? (
-                          <p className="mt-3 text-sm text-white/80">Memuat jadwal…</p>
-                        ) : focusSchedule ? (
-                          <>
-                            <p className="mt-3 truncate text-xl font-bold">
-                              {focusSchedule.item.kelasMapel?.mataPelajaran?.nama ||
-                                focusSchedule.item.kelasMapel?.mataPelajaran?.namaMapel ||
-                                "Mata pelajaran"}
-                            </p>
-                            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/85">
-                              <span className="inline-flex items-center gap-1.5">
-                                <GraduationCap size={14} />
-                                {focusSchedule.item.kelasMapel?.kelas?.nama ||
-                                  focusSchedule.item.kelasMapel?.kelas?.namaKelas ||
-                                  "Kelas"}
-                              </span>
-                              {focusSchedule.item.ruangan && (
-                                <span className="inline-flex items-center gap-1.5">
-                                  <MapPin size={14} />
-                                  {focusSchedule.item.ruangan}
-                                </span>
-                              )}
-                            </p>
-                            <p className="mt-3 inline-flex items-center gap-2 rounded-lg bg-white/15 px-3 py-1.5 text-sm font-semibold tabular-nums">
-                              <Clock3 size={14} />
-                              {formatTime(focusSchedule.item.jamMulai)} –{" "}
-                              {formatTime(focusSchedule.item.jamSelesai)}
-                            </p>
-                          </>
-                        ) : (
-                          <p className="mt-3 text-sm leading-relaxed text-white/85">
-                            {jadwal.length === 0
-                              ? "Tidak ada sesi mengajar hari ini."
-                              : "Semua sesi mengajar hari ini sudah selesai."}
+                      {loading ? (
+                        <p className="mt-3 text-sm theme-text-secondary">
+                          Memuat jadwal…
+                        </p>
+                      ) : focusSchedule ? (
+                        <>
+                          <p className="mt-3 truncate text-xl font-bold theme-text">
+                            {focusSchedule.item.kelasMapel?.mataPelajaran?.nama ||
+                              focusSchedule.item.kelasMapel?.mataPelajaran
+                                ?.namaMapel ||
+                              "Mata pelajaran"}
                           </p>
-                        )}
+                          <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm theme-text-secondary">
+                            <span className="inline-flex items-center gap-1.5">
+                              <GraduationCap size={14} />
+                              {focusSchedule.item.kelasMapel?.kelas?.nama ||
+                                focusSchedule.item.kelasMapel?.kelas?.namaKelas ||
+                                "Kelas"}
+                            </span>
+                            {focusSchedule.item.ruangan && (
+                              <span className="inline-flex items-center gap-1.5">
+                                <MapPin size={14} />
+                                {focusSchedule.item.ruangan}
+                              </span>
+                            )}
+                          </p>
+                          <p
+                            className={`mt-3 inline-flex items-center gap-2 rounded-lg ${themeSoft} px-3 py-1.5 text-sm font-semibold tabular-nums ${themePrimary}`}
+                          >
+                            <Clock3 size={14} />
+                            {formatTime(focusSchedule.item.jamMulai)} –{" "}
+                            {formatTime(focusSchedule.item.jamSelesai)}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="mt-3 text-sm leading-relaxed theme-text-secondary">
+                          {jadwal.length === 0
+                            ? "Tidak ada sesi mengajar hari ini."
+                            : "Semua sesi mengajar hari ini sudah selesai."}
+                        </p>
+                      )}
 
-                        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/20 pt-3 text-xs text-white/85">
-                          <span className="inline-flex items-center gap-1.5">
-                            <LogIn size={13} />
-                            Masuk{" "}
-                            <b className="tabular-nums">
-                              {checkInValue ? formatTime(checkInValue) : "-"}
-                            </b>
-                          </span>
-                          <span className="inline-flex items-center gap-1.5">
-                            <LogOut size={13} />
-                            Pulang{" "}
-                            <b className="tabular-nums">
-                              {checkOutValue ? formatTime(checkOutValue) : "-"}
-                            </b>
-                          </span>
-                        </div>
+                      <div
+                        className={`mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t ${divider} pt-3 text-xs theme-text-secondary`}
+                      >
+                        <span className="inline-flex items-center gap-1.5">
+                          <LogIn size={13} />
+                          Masuk{" "}
+                          <b className="tabular-nums theme-text">
+                            {checkInValue ? formatTime(checkInValue) : "-"}
+                          </b>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <LogOut size={13} />
+                          Pulang{" "}
+                          <b className="tabular-nums theme-text">
+                            {checkOutValue ? formatTime(checkOutValue) : "-"}
+                          </b>
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
               </section>
 
-              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 sm:gap-5">
+              {/* ================= RINGKASAN ================= */}
+              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <KpiCard
                   label="Kelas Diampu"
                   value={loading ? "…" : formatNumber(uniqueClassCount)}
                   description="Jumlah kelas yang Anda ajar"
                   Icon={GraduationCap}
-                  tone="primary"
                   onClick={() => router.push("/guru/jadwal")}
                 />
                 <KpiCard
                   label="Siswa Diampu"
-                  value={loading ? "…" : studentCountAvailable ? formatNumber(studentCount) : "—"}
+                  value={
+                    loading
+                      ? "…"
+                      : studentCountAvailable
+                        ? formatNumber(studentCount)
+                        : "—"
+                  }
                   description={
                     studentCountAvailable
                       ? "Total siswa di semua kelas Anda"
                       : "Data siswa belum berhasil dimuat"
                   }
                   Icon={Users}
-                  tone="info"
                 />
                 <KpiCard
                   label="Belum Dinilai"
-                  value={loading ? "…" : taskCountAvailable ? formatNumber(pendingSubmissions) : "—"}
+                  value={
+                    loading
+                      ? "…"
+                      : taskCountAvailable
+                        ? formatNumber(pendingSubmissions)
+                        : "—"
+                  }
                   description={
                     taskCountAvailable
                       ? "Pengumpulan menunggu nilai Anda"
                       : "Data penilaian belum berhasil dimuat"
                   }
                   Icon={ClipboardList}
-                  tone="warning"
                   onClick={() => router.push("/guru/nilai")}
                 />
                 <KpiCard
-                  label="Kehadiran Siswa Hari Ini"
+                  label="Kehadiran Siswa"
                   value={
                     loading
                       ? "…"
@@ -1387,50 +1522,39 @@ export default function GuruDashboardPage() {
                       : `${formatNumber(attendanceSummary.totalPresent)} dari ${formatNumber(attendanceSummary.totalRecorded)} siswa hadir`
                   }
                   Icon={CalendarCheck2}
-                  tone="success"
                   progress={attendanceSummary.percentage}
                   animate={animate}
                   onClick={() => router.push("/guru/absensi")}
                 />
               </section>
 
-              <section className="space-y-4">
-                <SectionHeader
-                  title="Akses Cepat"
-                  subtitle="Langsung ke menu yang paling sering dipakai."
-                />
+              {/* ================= KALENDER & AKSI CEPAT ================= */}
+              <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <ChartCard title="Kalender" subtitle="Bulan berjalan">
+                  <MiniCalendar now={now} />
+                </ChartCard>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  {quickMenu.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => router.push(item.path)}
-                      className={`${themeCard} group relative overflow-hidden flex min-w-0 items-center gap-3.5 p-4 text-left transition duration-200 hover:-translate-y-0.5`}
-                    >
-                      <span
-                        className="absolute inset-x-0 top-0 h-1 opacity-80"
-                        style={{ background: TONES[item.tone] || TONES.primary }}
-                      />
-                      <IconChip Icon={item.icon} tone={item.tone} size={44} />
-                      <div className="min-w-0 flex-1">
-                        <h3 className="truncate text-sm font-semibold theme-text">
-                          {item.title}
-                        </h3>
-                        <p className="mt-0.5 line-clamp-1 text-xs theme-text-secondary">
-                          {item.desc}
-                        </p>
-                      </div>
-                      <ChevronRight
-                        size={15}
-                        className={`shrink-0 transition group-hover:translate-x-0.5 ${themeMuted}`}
-                      />
-                    </button>
-                  ))}
+                <div className="lg:col-span-2">
+                  <ChartCard
+                    title="Aksi Cepat"
+                    subtitle="Langsung ke menu yang paling sering dipakai"
+                    bodyClassName="flex"
+                  >
+                    <div className="grid w-full flex-1 auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2">
+                      {quickMenu.map((item) => (
+                        <QuickActionCard
+                          key={item.id}
+                          action={item}
+                          onClick={() => router.push(item.path)}
+                        />
+                      ))}
+                    </div>
+                  </ChartCard>
                 </div>
               </section>
 
-              <section className="grid min-w-0 grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3 2xl:grid-cols-3">
+              {/* ================= JADWAL & PERHATIAN ================= */}
+              <section className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-3">
                 <div className={`${themeCard} min-w-0 overflow-hidden lg:col-span-2`}>
                   <CardHeader
                     Icon={Clock3}
@@ -1598,7 +1722,7 @@ export default function GuruDashboardPage() {
                                 {item.cta}
                                 <ArrowUpRight
                                   size={12}
-                                  className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                  className="transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                                 />
                               </span>
                             </div>
@@ -1610,6 +1734,7 @@ export default function GuruDashboardPage() {
                 </div>
               </section>
 
+              {/* ================= KEHADIRAN SISWA ================= */}
               <section className="space-y-4">
                 <SectionHeader
                   title="Kehadiran Siswa Hari Ini"
@@ -1618,16 +1743,19 @@ export default function GuruDashboardPage() {
                     <button
                       type="button"
                       onClick={() => router.push("/guru/absensi")}
-                      className={`inline-flex items-center gap-1 text-xs font-semibold ${themePrimary}`}
+                      className={`inline-flex items-center gap-1 text-sm font-semibold ${themePrimary} transition hover:opacity-75`}
                     >
-                      Lihat absensi <ChevronRight size={13} />
+                      Lihat absensi <ChevronRight size={14} />
                     </button>
                   }
                 />
 
-                <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3 2xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                   <div className="min-w-0 lg:col-span-1">
-                    <ChartCard title="Ringkasan Semua Kelas" subtitle="Status kehadiran seluruh siswa">
+                    <ChartCard
+                      title="Ringkasan Semua Kelas"
+                      subtitle="Status kehadiran seluruh siswa"
+                    >
                       {loading ? (
                         <ChartLoading />
                       ) : attendanceSummary.totalRecorded === 0 ? (
@@ -1713,15 +1841,19 @@ export default function GuruDashboardPage() {
                 </div>
               </section>
 
+              {/* ================= KELAS & PENILAIAN ================= */}
               <section className="space-y-4">
                 <SectionHeader
                   title="Kelas dan Penilaian"
                   subtitle="Sebaran siswa, status penilaian tugas, dan beban mengajar."
                 />
 
-                <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3 2xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                   <div className="min-w-0 lg:col-span-2">
-                    <ChartCard title="Jumlah Siswa per Kelas" subtitle="Kelas yang Anda ampu">
+                    <ChartCard
+                      title="Jumlah Siswa per Kelas"
+                      subtitle="Kelas yang Anda ampu"
+                    >
                       {loading ? (
                         <ChartLoading />
                       ) : studentColumns.length === 0 ? (
@@ -1733,7 +1865,10 @@ export default function GuruDashboardPage() {
                   </div>
 
                   <div className="min-w-0 lg:col-span-1">
-                    <ChartCard title="Status Penilaian Tugas" subtitle="Dari seluruh pengumpulan siswa">
+                    <ChartCard
+                      title="Status Penilaian Tugas"
+                      subtitle="Dari seluruh pengumpulan siswa"
+                    >
                       {loading ? (
                         <ChartLoading />
                       ) : !taskCountAvailable ? (
@@ -1774,7 +1909,10 @@ export default function GuruDashboardPage() {
                   </div>
 
                   <div className="min-w-0 lg:col-span-1">
-                    <ChartCard title="Kehadiran Saya Hari Ini" subtitle="Dicatat oleh sistem absensi">
+                    <ChartCard
+                      title="Kehadiran Saya Hari Ini"
+                      subtitle="Dicatat oleh sistem absensi"
+                    >
                       <div className="grid grid-cols-2 gap-3">
                         <TimeBox
                           label="Jam masuk"
@@ -1782,7 +1920,7 @@ export default function GuruDashboardPage() {
                           doneText="Check-in tercatat"
                           emptyText="Belum check-in"
                           Icon={LogIn}
-                          tone="success"
+                          tone="primary"
                         />
                         <TimeBox
                           label="Jam pulang"
@@ -1790,7 +1928,7 @@ export default function GuruDashboardPage() {
                           doneText="Check-out tercatat"
                           emptyText="Belum check-out"
                           Icon={LogOut}
-                          tone="info"
+                          tone="primary"
                         />
                       </div>
 
@@ -1818,6 +1956,7 @@ export default function GuruDashboardPage() {
                 </div>
               </section>
 
+              {/* ================= NOTIFIKASI ================= */}
               <section className={`${themeCard} min-w-0 overflow-hidden`}>
                 <CardHeader
                   Icon={Bell}
@@ -1896,115 +2035,9 @@ export default function GuruDashboardPage() {
   );
 }
 
-function StackedBooks() {
-  return (
-    <div className="relative w-[150px] sm:w-[180px] animate-[float_5s_ease-in-out_infinite]">
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
-        }
-        @keyframes sway {
-          0%, 100% { transform: rotate(0deg); }
-          50% { transform: rotate(5deg); }
-        }
-        @keyframes sway-reverse {
-          0%, 100% { transform: rotate(0deg); }
-          50% { transform: rotate(-5deg); }
-        }
-        .plant-leaf { animation: sway 4s ease-in-out infinite; transform-origin: bottom center; }
-        .plant-leaf-2 { animation: sway-reverse 5s ease-in-out infinite; transform-origin: bottom center; }
-      `}</style>
-      
-      <svg
-        viewBox="0 0 120 120"
-        className="h-auto w-full overflow-visible drop-shadow-2xl"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <defs>
-          <linearGradient id="bookTheme1" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="var(--color-primary)" />
-          </linearGradient>
-          <linearGradient id="bookTheme2" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0.8" />
-          </linearGradient>
-          <linearGradient id="bookTheme3" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0.5" />
-          </linearGradient>
-          
-          <linearGradient id="potGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#FFFFFF" />
-            <stop offset="100%" stopColor="#E2E8F0" />
-          </linearGradient>
-          
-          <linearGradient id="leafGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#4ADE80" />
-            <stop offset="100%" stopColor="#16A34A" />
-          </linearGradient>
-
-          <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="8" stdDeviation="6" floodColor="#000000" floodOpacity="0.25" />
-          </filter>
-        </defs>
-
-        <g filter="url(#dropShadow)">
-          <g transform="translate(15, 85)">
-            <rect x="0" y="8" width="80" height="14" rx="3" fill="url(#bookTheme3)" />
-            <rect x="0" y="8" width="80" height="3" rx="1.5" fill="#FFFFFF" opacity="0.5" />
-            <path d="M78 8 L85 11 L85 22 L78 19 Z" fill="#F8FAFC" />
-            <path d="M78 8 L85 11 L85 22 L78 19 Z" fill="url(#bookTheme3)" opacity="0.2" />
-          </g>
-
-          <g transform="translate(10, 68)">
-            <rect x="0" y="8" width="90" height="16" rx="3" fill="url(#bookTheme2)" />
-            <rect x="0" y="8" width="90" height="4" rx="2" fill="#FFFFFF" opacity="0.6" />
-            <path d="M88 8 L96 12 L96 25 L88 21 Z" fill="#F8FAFC" />
-            <path d="M88 8 L96 12 L96 25 L88 21 Z" fill="url(#bookTheme2)" opacity="0.2" />
-            <path d="M92 13 L92 23" stroke="#CBD5E1" strokeWidth="1.5" />
-          </g>
-
-          <g transform="translate(18, 48)">
-            <rect x="0" y="8" width="75" height="18" rx="3" fill="url(#bookTheme1)" />
-            <rect x="0" y="8" width="75" height="5" rx="2" fill="#FFFFFF" opacity="0.7" />
-            <rect x="8" y="15" width="35" height="2" rx="1" fill="#FFFFFF" opacity="0.3" />
-            <path d="M73 8 L80 12 L80 27 L73 23 Z" fill="#F8FAFC" />
-            <path d="M73 8 L80 12 L80 27 L73 23 Z" fill="url(#bookTheme1)" opacity="0.2" />
-            <path d="M77 13 L77 25" stroke="#CBD5E1" strokeWidth="1.5" />
-            <path d="M60 8 L65 8 L62.5 18 Z" fill="#FCD34D" />
-          </g>
-        </g>
-
-        <g transform="translate(30, 25)">
-          <g className="plant-leaf">
-            <path d="M18 20 C5 10 2 0 10 -5 C18 -10 22 5 18 20 Z" fill="url(#leafGradient)" />
-            <path d="M18 20 C8 12 5 2 10 -5" stroke="#166534" strokeWidth="1" opacity="0.3" />
-          </g>
-          <g className="plant-leaf-2">
-            <path d="M20 20 C30 8 38 2 42 8 C46 14 34 22 20 20 Z" fill="#22C55E" />
-            <path d="M20 20 C30 12 38 8 42 8" stroke="#166534" strokeWidth="1" opacity="0.3" />
-          </g>
-          <g className="plant-leaf" style={{ animationDelay: '0.5s' }}>
-            <path d="M19 20 C15 5 20 -8 27 -8 C34 -8 30 8 19 20 Z" fill="#16A34A" />
-            <path d="M19 20 C17 8 22 -5 27 -8" stroke="#166534" strokeWidth="1" opacity="0.3" />
-          </g>
-          
-          <path d="M10 20 L30 20 L27 38 C26 43 14 43 13 38 Z" fill="url(#potGradient)" />
-          <ellipse cx="20" cy="20" rx="10" ry="3" fill="#F1F5F9" />
-          <ellipse cx="20" cy="20" rx="9" ry="2" fill="#94A3B8" opacity="0.3" />
-        </g>
-
-        <circle cx="105" cy="30" r="2" fill="#FFFFFF" opacity="0.4" />
-        <circle cx="95" cy="20" r="1" fill="#FFFFFF" opacity="0.5" />
-        <circle cx="15" cy="40" r="1.5" fill="#FFFFFF" opacity="0.4" />
-      </svg>
-    </div>
-  );
-}
+/* ------------------------------------------------------------------ */
+/* Komponen umum                                                       */
+/* ------------------------------------------------------------------ */
 
 function IconChip({ Icon, tone = "primary", size = 40 }) {
   const color = TONES[tone] || TONES.primary;
@@ -2065,9 +2098,9 @@ function SectionHeader({ title, subtitle, action }) {
   );
 }
 
-function ChartCard({ title, subtitle, children }) {
+function ChartCard({ title, subtitle, children, bodyClassName = "" }) {
   return (
-    <div className={`${themeCard} h-full min-w-0 p-5 sm:p-6`}>
+    <div className={`${themeCard} flex h-full min-w-0 flex-col p-5 sm:p-6`}>
       <div className="mb-5">
         <h3 className="text-sm font-semibold theme-text">{title}</h3>
         {subtitle && (
@@ -2075,7 +2108,7 @@ function ChartCard({ title, subtitle, children }) {
         )}
       </div>
 
-      {children}
+      <div className={`min-h-0 flex-1 ${bodyClassName}`}>{children}</div>
     </div>
   );
 }
@@ -2085,56 +2118,182 @@ function KpiCard({
   value,
   description,
   Icon,
-  tone = "primary",
   progress,
   animate = true,
   onClick,
 }) {
-  const color = TONES[tone] || TONES.primary;
   const Wrapper = onClick ? "button" : "div";
 
   return (
     <Wrapper
       {...(onClick ? { type: "button", onClick } : {})}
-      className={`${themeCard} relative min-w-0 overflow-hidden p-5 text-left ${
-        onClick ? "transition duration-200 hover:-translate-y-0.5" : ""
+      className={`${themeCard} min-w-0 p-5 text-left ${
+        onClick
+          ? "transition duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]"
+          : ""
       }`}
     >
-      <span
-        className="absolute inset-x-0 top-0 h-1"
-        style={{ background: color }}
-      />
+      <div className="flex items-center gap-4">
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${themeSoft} ${themePrimary}`}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
 
-      <div className="flex items-start justify-between gap-3">
-        <p className={`text-xs font-medium ${themeMuted}`}>{label}</p>
-        <IconChip Icon={Icon} tone={tone} size={36} />
+        <div className="min-w-0">
+          <p className="truncate text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
+            {label}
+          </p>
+          <p className="mt-0.5 break-words text-2xl font-bold tabular-nums tracking-tight theme-text">
+            {value}
+          </p>
+        </div>
       </div>
-
-      <p className="mt-2 break-words text-3xl font-bold tabular-nums tracking-tight theme-text">
-        {value}
-      </p>
 
       {typeof progress === "number" && (
         <div
-          className="mt-3 h-1.5 w-full overflow-hidden rounded-full"
+          className="mt-4 h-1.5 w-full overflow-hidden rounded-full"
           style={{ backgroundColor: TRACK }}
         >
           <div
             className="h-full rounded-full transition-all duration-700 ease-out"
             style={{
               width: animate ? `${Math.min(100, Math.max(0, progress))}%` : "0%",
-              backgroundColor: color,
+              backgroundColor: ACCENT,
             }}
           />
         </div>
       )}
 
       {description && (
-        <p className="mt-2.5 text-xs theme-text-secondary">{description}</p>
+        <p
+          className={`${
+            typeof progress === "number" ? "mt-2" : "mt-4"
+          } text-xs font-medium ${themePrimary}`}
+        >
+          {description}
+        </p>
       )}
     </Wrapper>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Aksi Cepat: kartu aksi                                              */
+/* ------------------------------------------------------------------ */
+
+function QuickActionCard({ action, onClick }) {
+  const Icon = action.icon;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{ "--qa": action.color }}
+      className={`group relative flex min-h-[132px] w-full flex-col justify-between overflow-hidden rounded-2xl border ${divider} bg-[color-mix(in_srgb,var(--qa)_5%,var(--color-card))] p-5 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--qa)_45%,transparent)] hover:shadow-[0_10px_24px_color-mix(in_srgb,var(--qa)_16%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--qa)]`}
+    >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--qa)_10%,transparent)] transition duration-300 group-hover:scale-125"
+      />
+
+      <div className="relative flex items-start justify-between">
+        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--qa)_14%,transparent)] text-[var(--qa)] transition duration-200 group-hover:bg-[var(--qa)] group-hover:text-white group-hover:shadow-[0_6px_14px_color-mix(in_srgb,var(--qa)_35%,transparent)]">
+          <Icon className="h-5 w-5" />
+        </span>
+
+        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] bg-[var(--color-card)] theme-text-muted transition duration-200 group-hover:border-transparent group-hover:bg-[var(--qa)] group-hover:text-white">
+          <ArrowUpRight className="h-4 w-4 transition duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </span>
+      </div>
+
+      <div className="relative mt-5 min-w-0">
+        <span className="block text-base font-semibold theme-text">
+          {action.title}
+        </span>
+        <span className="mt-1 block text-xs leading-5 theme-text-secondary">
+          {action.desc}
+        </span>
+      </div>
+    </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Kalender mini (mengikuti zona waktu Asia/Jakarta)                   */
+/* ------------------------------------------------------------------ */
+
+const HARI_SINGKAT = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+
+function MiniCalendar({ now }) {
+  const current = now ?? new Date();
+  const [yearStr, monthStr, dayStr] = getJakartaDateString(current).split("-");
+  const year = Number(yearStr);
+  const month = Number(monthStr) - 1;
+  const today = Number(dayStr);
+
+  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const cells = [
+    ...Array.from({ length: firstWeekday }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
+  ];
+
+  const monthLabel = new Intl.DateTimeFormat("id-ID", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date(year, month, 1));
+
+  return (
+    <div>
+      <p className="mb-3 text-center text-sm font-semibold capitalize theme-text">
+        {monthLabel}
+      </p>
+
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {HARI_SINGKAT.map((hari, index) => (
+          <span
+            key={hari}
+            className={`py-1 text-[10px] font-semibold uppercase tracking-wide ${
+              index === 6 ? "text-[var(--color-danger)]" : "theme-text-muted"
+            }`}
+          >
+            {hari}
+          </span>
+        ))}
+
+        {cells.map((day, index) => {
+          if (day === null) {
+            return <span key={`blank-${index}`} />;
+          }
+
+          const isToday = day === today;
+          const isSunday = index % 7 === 6;
+
+          return (
+            <span
+              key={day}
+              className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-xs tabular-nums ${
+                isToday
+                  ? "bg-[var(--color-primary)] font-bold text-white"
+                  : isSunday
+                    ? "text-[var(--color-danger)]"
+                    : "theme-text-secondary"
+              }`}
+            >
+              {day}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Komponen kecil lainnya                                              */
+/* ------------------------------------------------------------------ */
 
 function TimeBox({ label, value, doneText, emptyText, Icon, tone }) {
   const color = TONES[tone] || TONES.primary;

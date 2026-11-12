@@ -37,7 +37,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySurface =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -109,7 +109,7 @@ const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 const themeCardText =
-  "text-[var(--color-card)]";
+  "text-white";
 
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]";
@@ -844,7 +844,7 @@ function TugasSiswaPageContent() {
                   {loadingList ? "—" : stats.belum}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeWarningSurface} ${themeWarningText}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySurface} ${themePrimaryText}`}>
                 <ClipboardList size={17} />
               </div>
             </div>
@@ -858,7 +858,7 @@ function TugasSiswaPageContent() {
                   {loadingList ? "—" : stats.dikumpulkan}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeInfoSurface} ${themeInfoText}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySurface} ${themePrimaryText}`}>
                 <CheckCheck size={17} />
               </div>
             </div>
@@ -872,7 +872,7 @@ function TugasSiswaPageContent() {
                   {loadingList ? "—" : stats.dinilai}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSurface} ${themeSuccessText}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySurface} ${themePrimaryText}`}>
                 <GraduationCap size={17} />
               </div>
             </div>
@@ -886,7 +886,7 @@ function TugasSiswaPageContent() {
                   {loadingList ? "—" : stats.terlambat}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeDangerSurface} theme-text`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySurface} ${themePrimaryText}`}>
                 <Timer size={17} />
               </div>
             </div>

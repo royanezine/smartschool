@@ -25,7 +25,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -701,7 +701,7 @@ function TambahAbsensiPageContent() {
                       justify-center gap-2
                       rounded-xl px-5 py-3
                       text-sm font-semibold
-                      text-[var(--color-card)]
+                      text-white
                       transition sm:w-auto
                       hover:brightness-95
                       disabled:cursor-not-allowed

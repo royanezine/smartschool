@@ -407,7 +407,7 @@ export default function JadwalGuruPage() {
                     </p>
                   </div>
 
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                     <BookOpen size={23} />
                   </div>
                 </div>
@@ -427,7 +427,7 @@ export default function JadwalGuruPage() {
                     </p>
                   </div>
 
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                     <GraduationCap size={23} />
                   </div>
                 </div>

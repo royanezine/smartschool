@@ -776,7 +776,7 @@ export default function AdminKelasEditPage() {
               >
                 <div className="theme-card-soft theme-border-soft border-b px-4 py-4 sm:px-6 md:px-7">
                   <div className="flex items-start gap-3">
-                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                       <School size={19} />
                     </div>
 

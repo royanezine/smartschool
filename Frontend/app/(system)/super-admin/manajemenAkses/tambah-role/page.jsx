@@ -27,7 +27,7 @@ import { getPermissions, createRole } from "@/services/role.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -83,13 +83,13 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 const themeHeroSecondary =
-  "text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]";
+  "text-white/80";
 
 const themeHeroSoft =
-  "bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]";
+  "bg-white/12";
 
 const themeHeroSoftBorder =
-  "border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]";
+  "border-white/20";
 
 
 const AKSI_LIST = [
@@ -391,7 +391,7 @@ export default function TambahRolePage() {
               <div className="flex min-w-0 items-start gap-3 sm:gap-4">
 
                 <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} sm:h-14 sm:w-14`}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-white ${themePrimaryShadow} sm:h-14 sm:w-14`}
                 >
                   <Shield
                     size={22}
@@ -437,7 +437,7 @@ export default function TambahRolePage() {
                 <button
                   onClick={handleSimpan}
                   disabled={isSaving}
-                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:opacity-95 active:scale-[0.98] disabled:opacity-60 sm:h-11 sm:px-5`}
+                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 text-sm font-semibold text-white ${themePrimaryShadow} transition-all hover:opacity-95 active:scale-[0.98] disabled:opacity-60 sm:h-11 sm:px-5`}
                 >
                   <Save
                     size={16}
@@ -1035,7 +1035,7 @@ export default function TambahRolePage() {
             <button
               onClick={handleSimpan}
               disabled={isSaving}
-              className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:opacity-95 active:scale-[0.98] disabled:opacity-60 sm:h-11 sm:px-6`}
+              className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 text-sm font-semibold text-white ${themePrimaryShadow} transition-all hover:opacity-95 active:scale-[0.98] disabled:opacity-60 sm:h-11 sm:px-6`}
             >
               <Save
                 size={16}

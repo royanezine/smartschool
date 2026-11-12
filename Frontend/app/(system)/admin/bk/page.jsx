@@ -119,10 +119,8 @@ function StatCard({
           </p>
         </div>
 
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconBg}`}
-        >
-          <Icon size={19} className={iconColor} />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+          <Icon size={19} className="theme-primary-text" />
         </div>
       </div>
     </div>
@@ -166,7 +164,7 @@ function SectionCard({
     <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
       <div className="theme-border-soft flex items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex min-w-0 items-center gap-2.5">
-          <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+          <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
             <Icon size={17} />
           </div>
 
@@ -408,7 +406,7 @@ export default function BKPage() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
+                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
                   <HeartHandshake size={21} />
                 </div>
 
@@ -443,7 +441,7 @@ export default function BKPage() {
                 value={loading ? "..." : konselingData.length}
                 description="Total sesi tercatat"
                 icon={MessageSquare}
-                iconBg="theme-info"
+                iconBg="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
               />
 
               <StatCard
@@ -451,7 +449,7 @@ export default function BKPage() {
                 value={loading ? "..." : pelanggaranData.length}
                 description="Total kasus tercatat"
                 icon={AlertTriangle}
-                iconBg="theme-warning"
+                iconBg="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
               />
 
               <StatCard
@@ -459,7 +457,7 @@ export default function BKPage() {
                 value={loading ? "..." : rawKategori.length}
                 description="Kategori terdaftar"
                 icon={Target}
-                iconBg="theme-info"
+                iconBg="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
               />
 
               <StatCard
@@ -467,7 +465,7 @@ export default function BKPage() {
                 value={loading ? "..." : totalPoinPelanggaran}
                 description="Akumulasi seluruh poin"
                 icon={Award}
-                iconBg="theme-success"
+                iconBg="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
               />
             </div>
 

@@ -36,7 +36,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -45,7 +45,7 @@ const themePrimarySoftBorder =
   "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
 const themePrimaryText =
-  "text-[var(--color-primary)]";
+  "theme-primary-text";
 
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
@@ -378,7 +378,7 @@ const colorClasses = {
   },
 
   blue: {
-    badge: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+    badge: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
   },
 
   amber: {
@@ -1614,7 +1614,7 @@ export default function GuruRaporPage() {
                 onClick={() =>
                   window.location.reload()
                 }
-                className={`mt-6 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} transition-opacity hover:opacity-90`}
+                className={`mt-6 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white ${themePrimaryGradient} ${themePrimaryShadow} transition-opacity hover:opacity-90`}
               >
                 <RefreshCw size={15} />
                 Muat Ulang
@@ -1663,7 +1663,7 @@ export default function GuruRaporPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2.5">
                   <div
-                    className={`flex shrink-0 items-center justify-center rounded-lg p-2 text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow}`}
+                    className={`flex shrink-0 items-center justify-center rounded-lg p-2 text-white ${themePrimaryGradient} ${themePrimaryShadow}`}
                   >
                     <FileCheck2 size={18} />
                   </div>
@@ -1692,7 +1692,7 @@ export default function GuruRaporPage() {
               <button
                 type="button"
                 onClick={handlePrint}
-                className={`flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} transition-opacity hover:opacity-90`}
+                className={`flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${themePrimaryGradient} ${themePrimaryShadow} transition-opacity hover:opacity-90`}
               >
                 <Printer size={15} />
                 Cetak Rapor
@@ -1889,7 +1889,7 @@ export default function GuruRaporPage() {
 
             {loadingNilai && (
               <div
-                className={`flex items-center gap-3 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-4 py-3`}
+                className={`flex items-center gap-3 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} px-4 py-3`}
               >
                 <Loader2
                   className={`h-4 w-4 animate-spin ${themePrimaryText}`}
@@ -1907,12 +1907,12 @@ export default function GuruRaporPage() {
 
 
               <div
-                className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
+                className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] p-3.5 ${themeCardShadow}`}
               >
                 <div
-                  className={`flex shrink-0 items-center justify-center rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} p-2 theme-text-secondary`}
+                  className={`flex shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2 ${themePrimaryText}`}
                 >
-                  <Users size={16} />
+                  <Users size={16} className="theme-primary-text shrink-0" />
                 </div>
 
                 <div className="min-w-0">
@@ -1928,12 +1928,12 @@ export default function GuruRaporPage() {
 
 
               <div
-                className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
+                className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] p-3.5 ${themeCardShadow}`}
               >
                 <div
-                  className={`flex shrink-0 items-center justify-center rounded-lg border ${themeInfoBorder} ${themeInfoSurface} p-2 ${themePrimaryText}`}
+                  className={`flex shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2 ${themePrimaryText}`}
                 >
-                  <BarChart3 size={16} />
+                  <BarChart3 size={16} className="theme-primary-text shrink-0" />
                 </div>
 
                 <div className="min-w-0">
@@ -1951,12 +1951,12 @@ export default function GuruRaporPage() {
 
 
               <div
-                className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
+                className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] p-3.5 ${themeCardShadow}`}
               >
                 <div
-                  className={`flex shrink-0 items-center justify-center rounded-lg border ${themeSuccessBorder} ${themeSuccessSurface} p-2 text-[var(--color-success)]`}
+                  className={`flex shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2 ${themePrimaryText}`}
                 >
-                  <FileCheck2 size={16} />
+                  <FileCheck2 size={16} className="theme-primary-text shrink-0" />
                 </div>
 
                 <div className="min-w-0">
@@ -1972,12 +1972,12 @@ export default function GuruRaporPage() {
 
 
               <div
-                className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
+                className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] p-3.5 ${themeCardShadow}`}
               >
                 <div
-                  className={`flex shrink-0 items-center justify-center rounded-lg border ${themeWarningBorder} ${themeWarningSurface} p-2 text-[var(--color-warning)]`}
+                  className={`flex shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2 ${themePrimaryText}`}
                 >
-                  <AlertTriangle size={16} />
+                  <AlertTriangle size={16} className="theme-primary-text shrink-0" />
                 </div>
 
                 <div className="min-w-0">
@@ -2204,7 +2204,7 @@ export default function GuruRaporPage() {
                                 ) : student.statusUjian ===
                                   "berlangsung" ? (
                                   <span
-                                    className={`inline-flex items-center rounded-full border ${themeInfoBorder} ${themeInfoSurface} px-2.5 py-1 text-[10px] font-semibold ${themePrimaryText}`}
+                                    className={`inline-flex items-center rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-1 text-[10px] font-semibold ${themePrimaryText}`}
                                   >
                                     Berlangsung
                                   </span>
@@ -2249,13 +2249,13 @@ export default function GuruRaporPage() {
 
 
             <div
-              className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+              className={`rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4`}
             >
               <div className="flex items-start gap-3">
                 <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeCardShadow} theme-card ${themePrimaryText}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] ${themePrimaryText}`}
                 >
-                  <Info size={16} />
+                  <Info size={16} className="theme-primary-text shrink-0" />
                 </div>
 
                 <div>

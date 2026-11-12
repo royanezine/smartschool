@@ -42,7 +42,7 @@ const namaHari = [
 ];
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -106,32 +106,18 @@ const accentPalette = [
     ring: "ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]",
   },
   {
-    bg: themeInfoSurface,
-    border: themeInfoBorder,
-    text: themeInfoText,
-    dot: "bg-[var(--color-info)]",
-    ring: "ring-[color-mix(in_srgb,var(--color-info)_18%,transparent)]",
+    bg: themePrimarySoft,
+    border: themePrimarySoftBorder,
+    text: themePrimaryText,
+    dot: "bg-[var(--color-primary)]",
+    ring: "ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]",
   },
   {
-    bg: themeSuccessSurface,
-    border: "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]",
-    text: themeSuccessText,
-    dot: "bg-[var(--color-success)]",
-    ring: "ring-[color-mix(in_srgb,var(--color-success)_18%,transparent)]",
-  },
-  {
-    bg: themeWarningSurface,
-    border: "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]",
-    text: themeWarningText,
-    dot: "bg-[var(--color-warning)]",
-    ring: "ring-[color-mix(in_srgb,var(--color-warning)_18%,transparent)]",
-  },
-  {
-    bg: themeNeutralSurface,
-    border: themeNeutralBorder,
-    text: "theme-text-secondary",
-    dot: "bg-[var(--color-text-muted)]",
-    ring: "ring-[color-mix(in_srgb,var(--color-text)_12%,transparent)]",
+    bg: themePrimarySoft,
+    border: themePrimarySoftBorder,
+    text: themePrimaryText,
+    dot: "bg-[var(--color-primary)]",
+    ring: "ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]",
   },
 ];
 
@@ -487,7 +473,7 @@ export default function JadwalSiswaPage() {
             className="absolute -right-20 -top-24 h-64 w-64 rounded-full blur-2xl"
             style={{
               background:
-                "color-mix(in srgb, var(--color-card) 10%, transparent)",
+                "rgba(255, 255, 255, 0.10)",
             }}
           />
 
@@ -495,7 +481,7 @@ export default function JadwalSiswaPage() {
             className="absolute -bottom-24 -left-16 h-56 w-56 rounded-full blur-2xl"
             style={{
               background:
-                "color-mix(in srgb, var(--color-info) 18%, transparent)",
+                "color-mix(in srgb, var(--color-primary) 18%, transparent)",
             }}
           />
 
@@ -505,12 +491,12 @@ export default function JadwalSiswaPage() {
                 className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
                 style={{
                   background:
-                    "color-mix(in srgb, var(--color-card) 14%, transparent)",
+                    "rgba(255, 255, 255, 0.14)",
                   boxShadow:
-                    "inset 0 0 0 1px color-mix(in srgb, var(--color-card) 20%, transparent)",
+                    "inset 0 0 0 1px rgba(255, 255, 255, 0.20)",
                 }}
               >
-                <CalendarDays className="h-6 w-6 text-[var(--color-card)]" />
+                <CalendarDays className="h-6 w-6 text-white" />
               </div>
 
               <div>
@@ -518,13 +504,13 @@ export default function JadwalSiswaPage() {
                   className="mb-1 text-xs font-semibold uppercase tracking-[0.14em]"
                   style={{
                     color:
-                      "color-mix(in srgb, var(--color-card) 76%, transparent)",
+                      "rgba(255, 255, 255, 0.76)",
                   }}
                 >
                   Akademik
                 </p>
 
-                <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl">
+                <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
                   Jadwal Pelajaran
                 </h1>
 
@@ -532,7 +518,7 @@ export default function JadwalSiswaPage() {
                   className="mt-1.5 max-w-2xl text-sm"
                   style={{
                     color:
-                      "color-mix(in srgb, var(--color-card) 78%, transparent)",
+                      "rgba(255, 255, 255, 0.78)",
                   }}
                 >
                   Lihat jadwal pelajaran, guru, dan ruangan setiap hari.
@@ -544,23 +530,23 @@ export default function JadwalSiswaPage() {
               className="flex items-center gap-3 rounded-xl px-4 py-3"
               style={{
                 background:
-                  "color-mix(in srgb, var(--color-card) 10%, transparent)",
+                  "rgba(255, 255, 255, 0.10)",
                 boxShadow:
-                  "inset 0 0 0 1px color-mix(in srgb, var(--color-card) 16%, transparent)",
+                  "inset 0 0 0 1px rgba(255, 255, 255, 0.16)",
               }}
             >
-              <BookOpen className="h-5 w-5 text-[var(--color-card)]" />
+              <BookOpen className="h-5 w-5 text-white" />
               <div>
                 <p
                   className="text-[11px]"
                   style={{
                     color:
-                      "color-mix(in srgb, var(--color-card) 68%, transparent)",
+                      "rgba(255, 255, 255, 0.68)",
                   }}
                 >
                   Mata Pelajaran
                 </p>
-                <p className="text-lg font-bold text-[var(--color-card)]">
+                <p className="text-lg font-bold text-white">
                   {loading ? "—" : statistik.totalMapel}
                 </p>
               </div>
@@ -582,7 +568,7 @@ export default function JadwalSiswaPage() {
             label={`Jadwal ${hariAktif}`}
             value={statistik.totalHariIni}
             icon={CalendarRange}
-            iconClass={`${themeInfoSurface} ${themeInfoText}`}
+            iconClass={`${themePrimarySoft} ${themePrimaryText}`}
             loading={loading}
           />
 
@@ -590,7 +576,7 @@ export default function JadwalSiswaPage() {
             label="Mata pelajaran"
             value={statistik.totalMapel}
             icon={BookOpen}
-            iconClass={`${themeSuccessSurface} ${themeSuccessText}`}
+            iconClass={`${themePrimarySoft} ${themePrimaryText}`}
             loading={loading}
           />
 
@@ -598,7 +584,7 @@ export default function JadwalSiswaPage() {
             label="Guru pengajar"
             value={statistik.totalGuru}
             icon={GraduationCap}
-            iconClass={`${themeWarningSurface} ${themeWarningText}`}
+            iconClass={`${themePrimarySoft} ${themePrimaryText}`}
             loading={loading}
           />
 
@@ -606,7 +592,7 @@ export default function JadwalSiswaPage() {
             label="Ruangan"
             value={statistik.totalRuangan}
             icon={Building2}
-            iconClass={`${themeNeutralSurface} theme-text-secondary`}
+            iconClass={`${themePrimarySoft} ${themePrimaryText}`}
             loading={loading}
           />
 
@@ -694,7 +680,7 @@ export default function JadwalSiswaPage() {
                     aria-pressed={active}
                     className={
                       active
-                        ? `rounded-xl ${themePrimaryGradient} px-3 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow}`
+                        ? `rounded-xl ${themePrimaryGradient} px-3 py-3 text-sm font-semibold text-white ${themePrimaryShadow}`
                         : `rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3 py-3 text-sm font-semibold theme-text-secondary transition-all ${themeNeutralHover} hover:text-[var(--color-primary)]`
                     }
                   >
@@ -906,7 +892,7 @@ export default function JadwalSiswaPage() {
               type="button"
               onClick={loadJadwal}
               disabled={loading}
-              className={`mt-5 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themePrimaryShadow} disabled:cursor-not-allowed disabled:opacity-60`}
+              className={`mt-5 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-xs font-semibold text-white ${themePrimaryShadow} disabled:cursor-not-allowed disabled:opacity-60`}
             >
               <RefreshCw
                 className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}

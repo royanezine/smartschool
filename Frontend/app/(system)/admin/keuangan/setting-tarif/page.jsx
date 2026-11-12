@@ -1176,12 +1176,11 @@ function StatusBadge({ aktif }) {
 
 function StatCard({ icon, label, value, color, subtext }) {
   const colors = {
-    primary:
-      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]",
-    info: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]",
-    success: "theme-success",
-    warning: "theme-warning",
-    danger: "theme-danger",
+    primary: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    info: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    success: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    warning: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    danger: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   // Ukuran font menyesuaikan panjang angka agar nominal besar tetap satu baris.

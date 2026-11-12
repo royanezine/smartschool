@@ -29,7 +29,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySurface =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -1168,7 +1168,7 @@ export default function MataPelajaranPage() {
                           px-3 py-2
                           rounded-lg
                           ${themePrimaryGradient}
-                          text-[var(--color-card)]
+                          text-white
                           text-xs font-semibold
                           hover:opacity-90
                           transition
@@ -1245,7 +1245,7 @@ export default function MataPelajaranPage() {
                           w-16 h-16
                           rounded-2xl
                           ${themePrimaryGradient}
-                          text-[var(--color-card)]
+                          text-white
                           flex items-center justify-center
                           ${themePrimaryShadow}
                           flex-shrink-0
@@ -1369,7 +1369,7 @@ export default function MataPelajaranPage() {
                       description="Lihat dan kerjakan tugas"
                       count={selected.tugas}
                       countLabel="tugas"
-                      variant="info"
+                      variant="primary"
                       onClick={() =>
                         goTo("tugas")
                       }
@@ -1381,7 +1381,7 @@ export default function MataPelajaranPage() {
                       description="Jadwal dan hasil ujian"
                       count={selected.ujian}
                       countLabel="ujian"
-                      variant="neutral"
+                      variant="primary"
                       onClick={() =>
                         goTo("ujian")
                       }
@@ -1394,8 +1394,8 @@ export default function MataPelajaranPage() {
                   className={`
                     rounded-2xl
                     border
-                    ${themeInfoBorder}
-                    ${themeInfoSurface}
+                    ${themePrimaryBorder}
+                    ${themePrimarySurface}
                     p-4
                   `}
                 >
@@ -1406,26 +1406,26 @@ export default function MataPelajaranPage() {
                         rounded-xl
                         ${themeCardSurface}
                         border
-                        ${themeInfoBorder}
+                        ${themePrimaryBorder}
                         flex items-center justify-center
                         flex-shrink-0
                       `}
                     >
                       <BookOpen
                         size={17}
-                        className={themeInfoText}
+                        className={themePrimaryText}
                       />
                     </div>
 
                     <div className="min-w-0">
                       <p
-                        className={`text-sm font-semibold ${themeInfoText}`}
+                        className={`text-sm font-semibold ${themePrimaryText}`}
                       >
                         Informasi pembelajaran
                       </p>
 
                       <p
-                        className={`text-xs ${themeInfoText} mt-1`}
+                        className={`text-xs ${themePrimaryText} mt-1`}
                       >
                         {selected.kelas}
                         {" · "}
@@ -1624,7 +1624,7 @@ export default function MataPelajaranPage() {
                                         w-11 h-11
                                         rounded-xl
                                         ${themePrimaryGradient}
-                                        text-[var(--color-card)]
+                                        text-white
                                         flex items-center justify-center
                                         ${themeSmallShadow}
                                       `}
@@ -1836,7 +1836,7 @@ export default function MataPelajaranPage() {
                         rounded-2xl
                         ${themePrimaryGradient}
                         p-5
-                        text-[var(--color-card)]
+                        text-white
                         ${themePrimaryShadow}
                       `}
                     >
@@ -2232,7 +2232,7 @@ function OverviewCard({
         ${themeCardShadow}
         ${
           primary
-            ? `${themePrimaryGradient} border-[color-mix(in_srgb,var(--color-primary)_40%,transparent)] text-[var(--color-card)]`
+            ? `${themePrimaryGradient} border-[color-mix(in_srgb,var(--color-primary)_40%,transparent)] text-white`
             : `${themeCardSurface} ${themeNeutralBorder}`
         }
       `}
@@ -2267,7 +2267,7 @@ function OverviewCard({
             <span
               className={`text-2xl font-bold ${
                 primary
-                  ? "text-[var(--color-card)]"
+                  ? "text-white"
                   : themeText
               }`}
             >
@@ -2294,7 +2294,7 @@ function OverviewCard({
             flex-shrink-0
             ${
               primary
-                ? "bg-white/10 text-[var(--color-card)]"
+                ? "bg-white/10 text-white"
                 : `${themePrimarySurface} ${themePrimaryText}`
             }
           `}
@@ -2591,7 +2591,7 @@ function EmptySubjects({
           px-4 py-2.5
           rounded-xl
           ${themePrimaryGradient}
-          text-[var(--color-card)]
+          text-white
           text-xs font-semibold
           hover:opacity-90
           transition

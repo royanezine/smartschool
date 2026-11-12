@@ -34,7 +34,7 @@ const themeSmallShadow =
     "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themePrimaryButton =
-    "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-[var(--color-card)]";
+    "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-white";
 
 const themePrimarySoft =
     "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -684,7 +684,7 @@ export default function DetailSekolahPage() {
                     >
                         <h3 className="text-xs sm:text-sm font-semibold theme-text-secondary mb-2 sm:mb-3 md:mb-4 flex items-center gap-2 sm:gap-2.5">
                             <span
-                                className={`p-1 sm:p-1.5 rounded-lg ${themeInfoSurface} text-[var(--color-info)]`}
+                                className="p-1 sm:p-1.5 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                             >
                                 <MailIcon
                                     size={
@@ -735,7 +735,7 @@ export default function DetailSekolahPage() {
                     >
                         <h3 className="text-xs sm:text-sm font-semibold theme-text-secondary mb-2 sm:mb-3 md:mb-4 flex items-center gap-2 sm:gap-2.5">
                             <span
-                                className={`p-1 sm:p-1.5 rounded-lg ${themeSuccessSurface} text-[var(--color-success)]`}
+                                className="p-1 sm:p-1.5 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                             >
                                 <MapPin
                                     size={
@@ -788,7 +788,7 @@ export default function DetailSekolahPage() {
                     >
                         <h3 className="text-xs sm:text-sm font-semibold theme-text-secondary mb-2 sm:mb-3 md:mb-4 flex items-center gap-2 sm:gap-2.5">
                             <span
-                                className={`p-1 sm:p-1.5 rounded-lg ${themeWarningSurface} text-[var(--color-warning)]`}
+                                className="p-1 sm:p-1.5 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                             >
                                 <Calendar
                                     size={
@@ -1056,36 +1056,10 @@ function InfoCard({
     color,
     isMobile,
 }) {
-    const colorMap = {
-        primary: {
-            bg: "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
-            text: "text-[var(--color-primary)]",
-        },
-
-        info: {
-            bg: "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]",
-            text: "text-[var(--color-info)]",
-        },
-
-        success: {
-            bg: "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
-            text: "text-[var(--color-success)]",
-        },
-
-        warning: {
-            bg: "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]",
-            text: "text-[var(--color-warning)]",
-        },
-
-        danger: {
-            bg: "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]",
-            text: "theme-text-secondary",
-        },
+    const iconStyle = {
+        bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+        text: "text-[var(--color-primary)]",
     };
-
-    const iconStyle =
-        colorMap[color] ||
-        colorMap.primary;
 
     const iconSize = isMobile ? 12 : 14;
 
@@ -1164,36 +1138,10 @@ function StatCard({
     color,
     isMobile,
 }) {
-    const colorMap = {
-        primary: {
-            bg: "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
-            text: "text-[var(--color-primary)]",
-        },
-
-        success: {
-            bg: "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
-            text: "text-[var(--color-success)]",
-        },
-
-        info: {
-            bg: "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]",
-            text: "text-[var(--color-info)]",
-        },
-
-        warning: {
-            bg: "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]",
-            text: "text-[var(--color-warning)]",
-        },
-
-        danger: {
-            bg: "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]",
-            text: "theme-text-secondary",
-        },
+    const iconStyle = {
+        bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+        text: "text-[var(--color-primary)]",
     };
-
-    const iconStyle =
-        colorMap[color] ||
-        colorMap.primary;
 
     const iconSize = isMobile ? 14 : 16;
 

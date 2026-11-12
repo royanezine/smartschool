@@ -378,42 +378,38 @@ function initials(name) {
 const toneMap = {
   blue: {
     iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-    iconText: "text-[var(--color-primary)]",
+    iconText: "theme-primary-text",
     border: "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]",
     soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
     bar: "var(--color-primary)",
   },
-
   violet: {
-    iconBg: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-    iconText: "text-[var(--color-info)]",
-    border: "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]",
-    soft: "bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)]",
-    bar: "var(--color-info)",
-  },
-
-  indigo: {
-    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]",
-    iconText: "text-[var(--color-primary)]",
-    border: "border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]",
-    soft: "bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]",
+    soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
     bar: "var(--color-primary)",
   },
-
-  emerald: {
-    iconBg: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-    iconText: "text-[var(--color-success)]",
-    border: "border-[color-mix(in_srgb,var(--color-success)_22%,transparent)]",
-    soft: "bg-[color-mix(in_srgb,var(--color-success)_6%,transparent)]",
-    bar: "var(--color-success)",
+  indigo: {
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]",
+    soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
+    bar: "var(--color-primary)",
   },
-
+  emerald: {
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]",
+    soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
+    bar: "var(--color-primary)",
+  },
   amber: {
-    iconBg: "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
-    iconText: "text-[var(--color-warning)]",
-    border: "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]",
-    soft: "bg-[color-mix(in_srgb,var(--color-warning)_7%,transparent)]",
-    bar: "var(--color-warning)",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]",
+    soft: "bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]",
+    bar: "var(--color-primary)",
   },
 };
 

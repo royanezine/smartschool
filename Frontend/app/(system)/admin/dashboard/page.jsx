@@ -20,15 +20,98 @@ import {
   CalendarDays,
   AlertCircle,
   Loader2,
+  Sunrise,
+  Sun,
+  Sunset,
+  Moon,
+  CheckCircle2,
+  FileText,
+  Thermometer,
+  XCircle,
+  ClipboardList,
+  Info,
+  ArrowUpRight,
 } from "lucide-react";
 
 import { getDashboardSekolah } from "@/services/dashboard.service";
 
-const ADMIN_BRAND_NAME =
-  adminSidebarConfig?.brandName || "Admin Sekolah";
+const ADMIN_BRAND_NAME = adminSidebarConfig?.brandName || "Admin Sekolah";
 
-const ACCENT = "var(--color-info)";
-const TRACK = "var(--color-info-background)";
+/* ------------------------------------------------------------------ */
+/* Token tema — semua warna mengikuti --color-* (bisa diubah dari CMS) */
+/* ------------------------------------------------------------------ */
+
+const ACCENT = "var(--color-primary)";
+const TRACK = "color-mix(in srgb, var(--color-text) 9%, transparent)";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText = "text-[var(--color-primary)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)]";
+
+/* ------------------------------------------------------------------ */
+/* Sapaan berdasarkan jam                                              */
+/* ------------------------------------------------------------------ */
+
+const HOURLY_MESSAGES = [
+  "Larut malam, jangan lupa istirahat yang cukup.",
+  "Sistem tetap berjalan, Anda boleh beristirahat.",
+  "Waktunya tenang, data sekolah aman terkelola.",
+  "Dini hari yang hening, semoga lelap menyertai.",
+  "Fajar hampir tiba, hari baru segera dimulai.",
+  "Mulai hari dengan niat baik dan kepala dingin.",
+  "Pagi yang segar, saatnya memantau kehadiran hari ini.",
+  "Siswa mulai berdatangan, pantau absensi pagi ini.",
+  "Semangat pagi, jam pelajaran sedang berjalan.",
+  "Periksa ringkasan sekolah sebelum jam istirahat.",
+  "Tetap fokus, separuh hari kerja sudah terlewati.",
+  "Menjelang siang, tinjau rekap kehadiran terbaru.",
+  "Waktunya jeda sejenak, isi tenaga untuk siang ini.",
+  "Siang yang produktif, lanjutkan pengelolaan data sekolah.",
+  "Kegiatan belajar hampir usai, cek data hari ini.",
+  "Sore hari, saatnya merapikan laporan harian.",
+  "Tinjau kembali capaian hari ini sebelum pulang.",
+  "Menjelang petang, pastikan semua data sudah tercatat.",
+  "Terima kasih atas kerja hari ini, selamat beristirahat.",
+  "Malam yang tenang, tinjau ringkasan hari ini.",
+  "Hari hampir usai, semoga semua berjalan lancar.",
+  "Waktunya memulihkan tenaga untuk esok hari.",
+  "Sudah malam, sisakan pekerjaan untuk besok.",
+  "Selamat malam, sampai jumpa di hari yang baru.",
+];
+
+function getGreeting(date) {
+  const hour = date.getHours();
+
+  if (hour >= 5 && hour < 11) {
+    return { text: "Selamat pagi", icon: Sunrise, hour };
+  }
+  if (hour >= 11 && hour < 15) {
+    return { text: "Selamat siang", icon: Sun, hour };
+  }
+  if (hour >= 15 && hour < 18) {
+    return { text: "Selamat sore", icon: Sunset, hour };
+  }
+  return { text: "Selamat malam", icon: Moon, hour };
+}
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
@@ -44,12 +127,9 @@ const formatNumber = (value) =>
   new Intl.NumberFormat("id-ID").format(toNumber(value));
 
 const formatDecimal = (value) =>
-  new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 }).format(
-    value
-  );
+  new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 }).format(value);
 
-const percentOf = (value, total) =>
-  total > 0 ? (value / total) * 100 : 0;
+const percentOf = (value, total) => (total > 0 ? (value / total) * 100 : 0);
 
 // Membulatkan nilai maksimum sumbu Y ke angka yang "enak" dibaca
 const niceMax = (max) => {
@@ -60,6 +140,8 @@ const niceMax = (max) => {
   const step = steps.find((s) => fraction <= s) ?? 10;
   return step * exp;
 };
+
+const RATIO_REFERENCE = 40;
 
 /* ------------------------------------------------------------------ */
 /* Page                                                                */
@@ -72,6 +154,17 @@ export default function AdminDashboardPage() {
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState("");
   const [animate, setAnimate] = useState(false);
+  const [now, setNow] = useState(null);
+
+  // Jam berjalan: diperbarui tiap 30 detik, sapaan & pesan ikut berganti per jam.
+  useEffect(() => {
+    const first = setTimeout(() => setNow(new Date()), 0);
+    const interval = setInterval(() => setNow(new Date()), 30000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(interval);
+    };
+  }, []);
 
   const fetchDashboard = useCallback(async () => {
     try {
@@ -81,24 +174,18 @@ export default function AdminDashboardPage() {
       const response = await getDashboardSekolah();
 
       if (response?.success !== true) {
-        throw new Error(
-          response?.message || "Gagal mengambil data dashboard."
-        );
+        throw new Error(response?.message || "Gagal mengambil data dashboard.");
       }
 
       if (!response.data || !response.data.cabang) {
-        throw new Error(
-          "Data cabang tidak tersedia pada response backend."
-        );
+        throw new Error("Data cabang tidak tersedia pada response backend.");
       }
 
       setDashboardData(response.data);
     } catch (error) {
       console.error("Error fetch dashboard:", error);
 
-      setDashboardError(
-        error?.message || "Gagal mengambil data dashboard."
-      );
+      setDashboardError(error?.message || "Gagal mengambil data dashboard.");
 
       setDashboardData(null);
     } finally {
@@ -125,18 +212,27 @@ export default function AdminDashboardPage() {
   const cabang = dashboardData?.cabang ?? null;
   const yayasan = dashboardData?.yayasan ?? null;
 
-  const today = new Intl.DateTimeFormat("id-ID", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  }).format(new Date());
+  const greeting = now ? getGreeting(now) : null;
+  const GreetingIcon = greeting?.icon ?? Sparkles;
 
-  const currentTime = new Intl.DateTimeFormat("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date());
+  const today = now
+    ? new Intl.DateTimeFormat("id-ID", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }).format(now)
+    : "";
+
+  const currentTime = now
+    ? new Intl.DateTimeFormat("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+        .format(now)
+        .replace(".", ":")
+    : "--:--";
 
   /* ---------------- Data diagram ---------------- */
 
@@ -149,21 +245,25 @@ export default function AdminDashboardPage() {
         label: "Hadir",
         value: toNumber(rekap.hadir),
         color: "var(--color-success)",
+        icon: CheckCircle2,
       },
       {
         label: "Izin",
         value: toNumber(rekap.izin),
         color: "var(--color-info)",
+        icon: FileText,
       },
       {
         label: "Sakit",
         value: toNumber(rekap.sakit),
         color: "var(--color-warning)",
+        icon: Thermometer,
       },
       {
         label: "Alpha",
         value: toNumber(rekap.alpha),
         color: "var(--color-danger)",
+        icon: XCircle,
       },
     ];
   }, [cabang]);
@@ -186,24 +286,13 @@ export default function AdminDashboardPage() {
       : `${formatDecimal(attendancePercent)}%`;
   }, [cabang, attendancePercent]);
 
-  const schoolBars = useMemo(() => {
-    if (!cabang) return [];
-    return [
-      { label: "Siswa", value: toNumber(cabang.totalSiswa) },
-      { label: "Guru", value: toNumber(cabang.totalGuru) },
-      { label: "Kelas", value: toNumber(cabang.totalKelas) },
-    ];
-  }, [cabang]);
+  const totalSiswa = toNumber(cabang?.totalSiswa);
+  const totalGuru = toNumber(cabang?.totalGuru);
+  const totalKelas = toNumber(cabang?.totalKelas);
 
-  const rasioSiswaGuru =
-    toNumber(cabang?.totalGuru) > 0
-      ? toNumber(cabang?.totalSiswa) / toNumber(cabang?.totalGuru)
-      : 0;
-
-  const rasioSiswaKelas =
-    toNumber(cabang?.totalKelas) > 0
-      ? toNumber(cabang?.totalSiswa) / toNumber(cabang?.totalKelas)
-      : 0;
+  const rasioSiswaGuru = totalGuru > 0 ? totalSiswa / totalGuru : 0;
+  const rasioSiswaKelas = totalKelas > 0 ? totalSiswa / totalKelas : 0;
+  const rasioGuruKelas = totalKelas > 0 ? totalGuru / totalKelas : 0;
 
   const yayasanColumns = useMemo(() => {
     if (!yayasan) return [];
@@ -239,27 +328,31 @@ export default function AdminDashboardPage() {
   const quickActions = [
     {
       title: "Tambah Siswa",
-      description: "Tambahkan data siswa baru",
+      description: "Daftarkan data siswa baru ke sekolah",
       icon: Users,
       href: "/admin/siswa/tambah",
+      color: "var(--color-primary)",
     },
     {
       title: "Tambah Guru",
-      description: "Tambahkan data guru baru",
+      description: "Tambahkan data guru atau tenaga pengajar",
       icon: UserCheck,
       href: "/admin/guru/tambah",
+      color: "var(--color-info)",
     },
     {
       title: "Kelola Kelas",
-      description: "Kelola data kelas sekolah",
+      description: "Atur daftar dan rombongan kelas",
       icon: School,
-      href: "/admin/kelas",
+      href: "/admin/akademik/kelas",
+      color: "var(--color-success)",
     },
     {
       title: "Tahun Ajaran",
-      description: "Kelola tahun ajaran",
+      description: "Kelola periode dan semester aktif",
       icon: CalendarDays,
-      href: "/admin/tahun-ajaran",
+      href: "/admin/akademik/tahun-ajaran",
+      color: "var(--color-warning)",
     },
   ];
 
@@ -281,54 +374,88 @@ export default function AdminDashboardPage() {
         </div>
 
         <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto theme-page transition-colors duration-300">
-          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-            <div className="w-full space-y-8">
-              {/* ================= HEADER ================= */}
-              <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-xs font-medium uppercase tracking-[0.14em] theme-text-muted">
-                    SmartSchool · Dashboard
-                  </p>
+          <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+            <div className="w-full min-w-0 space-y-6">
+              {/* ================= BANNER SAPAAN ================= */}
+              <section
+                className={`relative overflow-hidden rounded-3xl border ${themePrimarySoftBorder} ${themeCardShadow} bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))]`}
+              >
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] blur-2xl"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 opacity-[0.05]"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                    backgroundSize: "32px 32px",
+                  }}
+                />
 
-                  <h1 className="mt-1.5 break-words text-2xl font-semibold tracking-tight theme-text sm:text-[28px]">
-                    Selamat datang, {ADMIN_BRAND_NAME}
-                  </h1>
+                <div className="relative flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="min-w-0 max-w-2xl">
+                    <div
+                      className={`inline-flex items-center gap-2 rounded-full border ${themePrimarySoftBorder} bg-[var(--color-card)] px-3 py-1.5 text-xs font-semibold ${themePrimaryText}`}
+                    >
+                      <GreetingIcon className="h-3.5 w-3.5" />
+                      <span className="tabular-nums">{currentTime} WIB</span>
+                      <span className="theme-text-muted">·</span>
+                      <span className="theme-text-secondary">
+                        {today || "Memuat tanggal..."}
+                      </span>
+                    </div>
 
-                  <p className="mt-1.5 max-w-2xl text-sm theme-text-secondary">
-                    Ringkasan statistik sekolah dan rekap kehadiran
-                    berdasarkan data dari backend.
-                  </p>
+                    <h1 className="mt-4 break-words text-2xl font-bold tracking-tight theme-text sm:text-3xl lg:text-4xl">
+                      {greeting ? greeting.text : "Selamat datang"},{" "}
+                      <span className={themePrimaryText}>
+                        {ADMIN_BRAND_NAME}
+                      </span>
+                    </h1>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs theme-text-muted">
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays className="h-3.5 w-3.5" />
-                      {today}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5" />
-                      {currentTime} WIB
-                    </span>
+                    <p className="mt-2 max-w-xl text-sm leading-6 theme-text-secondary sm:text-base">
+                      {greeting
+                        ? HOURLY_MESSAGES[greeting.hour]
+                        : "Ringkasan statistik sekolah dan rekap kehadiran."}
+                    </p>
+
+                    <div className="mt-5 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={fetchDashboard}
+                        disabled={dashboardLoading}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {dashboardLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4" />
+                        )}
+                        {dashboardLoading ? "Memuat..." : "Refresh Data"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => router.push("/admin/manajemenKehadiran")}
+                        className="theme-card theme-border theme-text inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:shadow-sm"
+                      >
+                        <Clock className="h-4 w-4" />
+                        Lihat kehadiran
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <button
-                  type="button"
-                  onClick={fetchDashboard}
-                  disabled={dashboardLoading}
-                  className="theme-card theme-border theme-text inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {dashboardLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4" />
-                  )}
-                  {dashboardLoading ? "Memuat..." : "Refresh Data"}
-                </button>
+                  <BannerArt />
+                </div>
               </section>
 
               {/* ================= ERROR ================= */}
               {dashboardError && (
-                <section className="theme-danger rounded-xl border theme-border px-4 py-4 text-sm">
+                <section
+                  role="alert"
+                  className={`rounded-xl border ${themeDangerBorder} ${themeDangerSurface} px-4 py-4 text-sm text-[var(--color-danger)]`}
+                >
                   <div className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
                     <div>
@@ -347,48 +474,66 @@ export default function AdminDashboardPage() {
               )}
 
               {/* ================= RINGKASAN ================= */}
-              <section className="space-y-4">
-                <SectionHeader
-                  title="Ringkasan Sekolah"
-                  subtitle="Statistik utama yang dikirim oleh backend."
-                />
+              {dashboardLoading && !dashboardData ? (
+                <KpiSkeleton />
+              ) : cabang ? (
+                <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <KpiCard
+                    label="Total Siswa"
+                    value={formatNumber(cabang.totalSiswa)}
+                    description="Siswa aktif"
+                    icon={GraduationCap}
+                  />
+                  <KpiCard
+                    label="Total Guru"
+                    value={formatNumber(cabang.totalGuru)}
+                    description="Guru aktif"
+                    icon={UserCheck}
+                  />
+                  <KpiCard
+                    label="Total Kelas"
+                    value={formatNumber(cabang.totalKelas)}
+                    description="Jumlah kelas"
+                    icon={School}
+                  />
+                  <KpiCard
+                    label="Kehadiran"
+                    value={attendanceLabel}
+                    description="Persentase kehadiran hari ini"
+                    icon={BarChart3}
+                    progress={attendancePercent}
+                    animate={animate}
+                  />
+                </section>
+              ) : !dashboardError ? (
+                <p className="text-sm theme-text-secondary">
+                  Data dashboard belum tersedia.
+                </p>
+              ) : null}
 
-                {dashboardLoading && !dashboardData ? (
-                  <KpiSkeleton />
-                ) : cabang ? (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <KpiCard
-                      label="Total Siswa"
-                      value={formatNumber(cabang.totalSiswa)}
-                      description="Siswa aktif"
-                      icon={GraduationCap}
-                    />
-                    <KpiCard
-                      label="Total Guru"
-                      value={formatNumber(cabang.totalGuru)}
-                      description="Guru aktif"
-                      icon={UserCheck}
-                    />
-                    <KpiCard
-                      label="Total Kelas"
-                      value={formatNumber(cabang.totalKelas)}
-                      description="Jumlah kelas"
-                      icon={School}
-                    />
-                    <KpiCard
-                      label="Kehadiran"
-                      value={attendanceLabel}
-                      description="Persentase kehadiran hari ini"
-                      icon={BarChart3}
-                      progress={attendancePercent}
-                      animate={animate}
-                    />
-                  </div>
-                ) : !dashboardError ? (
-                  <p className="text-sm theme-text-secondary">
-                    Data dashboard belum tersedia.
-                  </p>
-                ) : null}
+              {/* ================= KALENDER & AKSI CEPAT ================= */}
+              <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <Card title="Kalender" subtitle="Bulan berjalan">
+                  <MiniCalendar now={now} />
+                </Card>
+
+                <div className="lg:col-span-2">
+                  <Card
+                    title="Aksi Cepat"
+                    subtitle="Akses menu pengelolaan sekolah"
+                    bodyClassName="flex"
+                  >
+                    <div className="grid w-full flex-1 auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2">
+                      {quickActions.map((action) => (
+                        <QuickActionCard
+                          key={action.title}
+                          action={action}
+                          onClick={() => router.push(action.href)}
+                        />
+                      ))}
+                    </div>
+                  </Card>
+                </div>
               </section>
 
               {/* ================= KEHADIRAN ================= */}
@@ -401,10 +546,8 @@ export default function AdminDashboardPage() {
                       cabang.rekapKehadiran && (
                         <button
                           type="button"
-                          onClick={() =>
-                            router.push("/admin/manajemenKehadiran")
-                          }
-                          className="inline-flex items-center gap-1 text-sm font-medium theme-primary-outline"
+                          onClick={() => router.push("/admin/manajemenKehadiran")}
+                          className={`inline-flex items-center gap-1 text-sm font-semibold ${themePrimaryText} transition hover:opacity-75`}
                         >
                           Lihat detail
                           <ChevronRight className="h-4 w-4" />
@@ -417,11 +560,11 @@ export default function AdminDashboardPage() {
                     <div className="lg:col-span-2">
                       <Card
                         title="Rekap Kehadiran"
-                        subtitle="Komposisi status absensi"
+                        subtitle="Komposisi status absensi hari ini"
                       >
                         {cabang.rekapKehadiran ? (
-                          <div className="space-y-6">
-                            <div className="flex flex-col items-center gap-8 sm:flex-row">
+                          <div className="space-y-5">
+                            <div className="flex flex-col items-center gap-6 xl:flex-row xl:items-center xl:gap-8">
                               <DonutChart
                                 data={attendanceData}
                                 total={attendanceTotal}
@@ -430,68 +573,64 @@ export default function AdminDashboardPage() {
                                 centerLabel="Total absensi"
                               />
 
-                              <div className="w-full flex-1">
-                                <div className="grid grid-cols-[1fr_auto_auto] gap-x-6 border-b theme-border-soft pb-2 text-[11px] font-medium uppercase tracking-wider theme-text-muted">
-                                  <span>Status</span>
-                                  <span className="text-right">Jumlah</span>
-                                  <span className="w-14 text-right">
-                                    Persen
-                                  </span>
-                                </div>
-
+                              <div className="grid w-full flex-1 grid-cols-2 gap-3">
                                 {attendanceData.map((item) => (
-                                  <div
+                                  <AttendanceTile
                                     key={item.label}
-                                    className="grid grid-cols-[1fr_auto_auto] items-center gap-x-6 border-b theme-border-soft py-3 text-sm last:border-b-0"
-                                  >
-                                    <span className="flex items-center gap-2.5 font-medium theme-text">
-                                      <span
-                                        className="h-2.5 w-2.5 rounded-full"
-                                        style={{ backgroundColor: item.color }}
-                                      />
-                                      {item.label}
-                                    </span>
-
-                                    <span className="text-right font-semibold tabular-nums theme-text">
-                                      {formatNumber(item.value)}
-                                    </span>
-
-                                    <span className="w-14 text-right tabular-nums theme-text-secondary">
-                                      {formatDecimal(
-                                        percentOf(item.value, attendanceTotal)
-                                      )}
-                                      %
-                                    </span>
-                                  </div>
+                                    item={item}
+                                    total={attendanceTotal}
+                                    animate={animate}
+                                  />
                                 ))}
                               </div>
                             </div>
 
-                            {/* Stacked bar tipis */}
-                            <div className="flex h-2 w-full overflow-hidden rounded-full">
-                              {attendanceData.map((item) => (
-                                <div
-                                  key={item.label}
-                                  className="h-full transition-all duration-700 ease-out"
-                                  style={{
-                                    width: animate
-                                      ? `${percentOf(
-                                          item.value,
-                                          attendanceTotal
-                                        )}%`
-                                      : "0%",
-                                    backgroundColor: item.color,
-                                  }}
-                                  title={`${item.label}: ${item.value}`}
-                                />
-                              ))}
-                              {attendanceTotal === 0 && (
-                                <div
-                                  className="h-full w-full"
-                                  style={{ backgroundColor: TRACK }}
-                                />
-                              )}
-                            </div>
+                            {attendanceTotal > 0 ? (
+                              <div
+                                className="flex h-2 w-full overflow-hidden rounded-full"
+                                style={{ backgroundColor: TRACK }}
+                              >
+                                {attendanceData.map((item) => (
+                                  <div
+                                    key={item.label}
+                                    className="h-full transition-all duration-700 ease-out"
+                                    style={{
+                                      width: animate
+                                        ? `${percentOf(item.value, attendanceTotal)}%`
+                                        : "0%",
+                                      backgroundColor: item.color,
+                                    }}
+                                    title={`${item.label}: ${item.value}`}
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <div
+                                className={`flex flex-col gap-3 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4 sm:flex-row sm:items-center sm:justify-between`}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <Info
+                                    className={`mt-0.5 h-4 w-4 shrink-0 ${themePrimaryText}`}
+                                  />
+                                  <p className="text-sm leading-5 theme-text-secondary">
+                                    Belum ada absensi yang tercatat hari ini.
+                                    Rekap akan terisi otomatis setelah
+                                    kehadiran dicatat.
+                                  </p>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    router.push("/admin/manajemenKehadiran")
+                                  }
+                                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3.5 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                                >
+                                  <ClipboardList className="h-3.5 w-3.5" />
+                                  Buka kehadiran
+                                </button>
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <EmptyChart message="Rekap kehadiran belum tersedia." />
@@ -503,71 +642,110 @@ export default function AdminDashboardPage() {
                       title="Tingkat Kehadiran"
                       subtitle="Persentase dari backend"
                     >
-                      <div className="flex flex-col items-center">
-                        <RingGauge
+                      <div className="flex h-full flex-col items-center justify-center gap-5 pb-2">
+                        <HalfGauge
                           percent={attendancePercent}
                           animate={animate}
-                          label={attendanceLabel}
+                          value={attendanceLabel}
+                          caption="Kehadiran hari ini"
+                          minLabel="0%"
+                          maxLabel="100%"
                         />
 
-                        {cabang.rekapKehadiran && (
-                          <p className="mt-5 text-center text-sm theme-text-secondary">
-                            <span className="font-semibold tabular-nums theme-text">
-                              {formatNumber(
-                                attendanceData[0]?.value ?? 0
-                              )}
-                            </span>{" "}
-                            hadir dari{" "}
-                            <span className="font-semibold tabular-nums theme-text">
-                              {formatNumber(attendanceTotal)}
-                            </span>{" "}
-                            absensi
-                          </p>
-                        )}
+                        <div
+                          className={`w-full rounded-xl border ${themeDivider} ${themeNeutralSurface} px-4 py-3 text-center text-sm theme-text-secondary`}
+                        >
+                          {cabang.rekapKehadiran && attendanceTotal > 0 ? (
+                            <>
+                              <span className="font-semibold tabular-nums theme-text">
+                                {formatNumber(attendanceData[0]?.value ?? 0)}
+                              </span>{" "}
+                              hadir dari{" "}
+                              <span className="font-semibold tabular-nums theme-text">
+                                {formatNumber(attendanceTotal)}
+                              </span>{" "}
+                              absensi
+                            </>
+                          ) : (
+                            "Menunggu data absensi hari ini"
+                          )}
+                        </div>
                       </div>
                     </Card>
                   </div>
                 </section>
               )}
 
-              {/* ================= DATA SEKOLAH ================= */}
+              {/* ================= RASIO & KAPASITAS ================= */}
               {cabang && (
                 <section className="space-y-4">
                   <SectionHeader
-                    title="Data Sekolah"
-                    subtitle="Perbandingan dan rasio rata-rata."
+                    title="Rasio & Kapasitas"
+                    subtitle={`Perbandingan siswa, guru, dan kelas. Acuan skala maksimal ${RATIO_REFERENCE}.`}
                   />
 
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                    <div className="lg:col-span-2">
-                      <Card
-                        title="Perbandingan Data"
-                        subtitle="Total siswa, guru, dan kelas"
-                      >
-                        <HorizontalBarChart
-                          items={schoolBars}
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <Card title="Siswa per Guru" subtitle="Rata-rata beban pengajar">
+                      <div className="flex flex-col items-center gap-4">
+                        <HalfGauge
+                          percent={Math.min(
+                            100,
+                            (rasioSiswaGuru / RATIO_REFERENCE) * 100
+                          )}
                           animate={animate}
-                        />
-                      </Card>
-                    </div>
-
-                    <Card
-                      title="Rasio Rata-rata"
-                      subtitle="Acuan skala maksimal 40"
-                    >
-                      <div className="space-y-6">
-                        <RatioRow
-                          label="Siswa per guru"
                           value={formatDecimal(rasioSiswaGuru)}
-                          percent={Math.min(100, (rasioSiswaGuru / 40) * 100)}
-                          animate={animate}
+                          caption="siswa / guru"
+                          minLabel="0"
+                          maxLabel={String(RATIO_REFERENCE)}
                         />
-                        <RatioRow
-                          label="Siswa per kelas"
+                        <p className="text-center text-xs tabular-nums theme-text-muted">
+                          {formatNumber(totalSiswa)} siswa ·{" "}
+                          {formatNumber(totalGuru)} guru
+                        </p>
+                      </div>
+                    </Card>
+
+                    <Card title="Siswa per Kelas" subtitle="Rata-rata isi kelas">
+                      <div className="flex flex-col items-center gap-4">
+                        <HalfGauge
+                          percent={Math.min(
+                            100,
+                            (rasioSiswaKelas / RATIO_REFERENCE) * 100
+                          )}
+                          animate={animate}
                           value={formatDecimal(rasioSiswaKelas)}
-                          percent={Math.min(100, (rasioSiswaKelas / 40) * 100)}
-                          animate={animate}
+                          caption="siswa / kelas"
+                          minLabel="0"
+                          maxLabel={String(RATIO_REFERENCE)}
                         />
+                        <p className="text-center text-xs tabular-nums theme-text-muted">
+                          {formatNumber(totalSiswa)} siswa ·{" "}
+                          {formatNumber(totalKelas)} kelas
+                        </p>
+                      </div>
+                    </Card>
+
+                    <Card title="Guru per Kelas" subtitle="Ketersediaan pengajar">
+                      <div className="flex h-full flex-col items-center justify-center gap-4 pb-2">
+                        <span
+                          className={`flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimarySoft} ${themePrimaryText}`}
+                        >
+                          <UserCheck className="h-6 w-6" />
+                        </span>
+
+                        <div className="text-center">
+                          <p className="text-4xl font-bold tabular-nums tracking-tight theme-text">
+                            {formatDecimal(rasioGuruKelas)}
+                          </p>
+                          <p className="mt-1 text-xs theme-text-secondary">
+                            guru / kelas
+                          </p>
+                        </div>
+
+                        <p className="text-center text-xs tabular-nums theme-text-muted">
+                          {formatNumber(totalGuru)} guru ·{" "}
+                          {formatNumber(totalKelas)} kelas
+                        </p>
                       </div>
                     </Card>
                   </div>
@@ -588,10 +766,7 @@ export default function AdminDashboardPage() {
                         title="Total Data Yayasan"
                         subtitle="Sekolah, siswa, guru, dan kelas"
                       >
-                        <ColumnChart
-                          items={yayasanColumns}
-                          animate={animate}
-                        />
+                        <ColumnChart items={yayasanColumns} animate={animate} />
                       </Card>
                     </div>
 
@@ -629,50 +804,11 @@ export default function AdminDashboardPage() {
                 </section>
               )}
 
-              {/* ================= AKSI CEPAT ================= */}
-              <section className="space-y-4">
-                <SectionHeader
-                  title="Aksi Cepat"
-                  subtitle="Akses menu pengelolaan sekolah."
-                />
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                  {quickActions.map((action) => {
-                    const Icon = action.icon;
-
-                    return (
-                      <button
-                        key={action.title}
-                        type="button"
-                        onClick={() => router.push(action.href)}
-                        className="group theme-card theme-border flex w-full items-center gap-4 rounded-xl border p-4 text-left transition hover:shadow-md"
-                      >
-                        <span className="theme-border theme-text-secondary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border">
-                          <Icon className="h-[18px] w-[18px]" />
-                        </span>
-
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-sm font-semibold theme-text">
-                            {action.title}
-                          </span>
-                          <span className="mt-0.5 block truncate text-xs theme-text-secondary">
-                            {action.description}
-                          </span>
-                        </span>
-
-                        <ChevronRight className="h-4 w-4 shrink-0 theme-text-muted transition group-hover:translate-x-0.5" />
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-
               {/* ================= FOOTER ================= */}
-              <footer className="border-t theme-border-soft pt-6">
+              <footer className={`border-t ${themeDivider} pt-6`}>
                 <div className="flex flex-col items-center justify-between gap-3 text-center text-xs theme-text-muted sm:flex-row sm:text-left">
                   <p>
-                    © {new Date().getFullYear()} SmartSchool —{" "}
-                    {ADMIN_BRAND_NAME}
+                    © {new Date().getFullYear()} SmartSchool — {ADMIN_BRAND_NAME}
                   </p>
 
                   <p className="flex items-center gap-1">
@@ -707,9 +843,11 @@ function SectionHeader({ title, subtitle, action }) {
   );
 }
 
-function Card({ title, subtitle, children }) {
+function Card({ title, subtitle, children, bodyClassName = "" }) {
   return (
-    <div className="theme-card theme-border h-full rounded-xl border p-5 sm:p-6">
+    <div
+      className={`theme-card theme-border flex h-full min-w-0 flex-col rounded-2xl border p-5 sm:p-6 ${themeCardShadow}`}
+    >
       <div className="mb-5">
         <h3 className="text-sm font-semibold theme-text">{title}</h3>
         {subtitle && (
@@ -717,8 +855,50 @@ function Card({ title, subtitle, children }) {
         )}
       </div>
 
-      {children}
+      <div className={`min-h-0 flex-1 ${bodyClassName}`}>{children}</div>
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Aksi Cepat: kartu aksi                                              */
+/* ------------------------------------------------------------------ */
+
+function QuickActionCard({ action, onClick }) {
+  const Icon = action.icon;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{ "--qa": action.color }}
+      className={`group relative flex min-h-[132px] w-full flex-col justify-between overflow-hidden rounded-2xl border ${themeDivider} bg-[color-mix(in_srgb,var(--qa)_5%,var(--color-card))] p-5 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--qa)_45%,transparent)] hover:shadow-[0_10px_24px_color-mix(in_srgb,var(--qa)_16%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--qa)]`}
+    >
+      {/* Dekorasi lingkaran lembut di sudut */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--qa)_10%,transparent)] transition duration-300 group-hover:scale-125"
+      />
+
+      <div className="relative flex items-start justify-between">
+        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--qa)_14%,transparent)] text-[var(--qa)] transition duration-200 group-hover:bg-[var(--qa)] group-hover:text-white group-hover:shadow-[0_6px_14px_color-mix(in_srgb,var(--qa)_35%,transparent)]">
+          <Icon className="h-5 w-5" />
+        </span>
+
+        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] bg-[var(--color-card)] theme-text-muted transition duration-200 group-hover:border-transparent group-hover:bg-[var(--qa)] group-hover:text-white">
+          <ArrowUpRight className="h-4 w-4 transition duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </span>
+      </div>
+
+      <div className="relative mt-5 min-w-0">
+        <span className="block text-base font-semibold theme-text">
+          {action.title}
+        </span>
+        <span className="mt-1 block text-xs leading-5 theme-text-secondary">
+          {action.description}
+        </span>
+      </div>
+    </button>
   );
 }
 
@@ -731,24 +911,38 @@ function KpiCard({
   animate = true,
 }) {
   return (
-    <div className="theme-card theme-border rounded-xl border p-5">
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-wider theme-text-muted">
-          {label}
-        </p>
-        <Icon className="h-4 w-4 theme-text-muted" />
+    <div
+      className={`theme-card theme-border min-w-0 rounded-2xl border p-5 ${themeCardShadow}`}
+    >
+      <div className="flex items-center gap-4">
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+
+        <div className="min-w-0">
+          <p className="truncate text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
+            {label}
+          </p>
+          <p className="mt-0.5 break-words text-2xl font-bold tabular-nums tracking-tight theme-text">
+            {value}
+          </p>
+        </div>
       </div>
 
-      <p className="mt-3 break-words text-3xl font-semibold tabular-nums tracking-tight theme-text">
-        {value}
-      </p>
-
       {typeof progress === "number" && (
-        <ThinBar percent={progress} animate={animate} className="mt-3" />
+        <ThinBar percent={progress} animate={animate} className="mt-4" />
       )}
 
       {description && (
-        <p className="mt-2.5 text-xs theme-text-secondary">{description}</p>
+        <p
+          className={`${
+            typeof progress === "number" ? "mt-2" : "mt-4"
+          } text-xs font-medium ${themePrimaryText}`}
+        >
+          {description}
+        </p>
       )}
     </div>
   );
@@ -760,13 +954,21 @@ function KpiSkeleton() {
       {[1, 2, 3, 4].map((item) => (
         <div
           key={item}
-          className="theme-card theme-border animate-pulse rounded-xl border p-5"
+          className={`theme-card theme-border animate-pulse rounded-2xl border p-5 ${themeCardShadow}`}
         >
-          <div className="h-3 w-24 rounded" style={{ background: TRACK }} />
-          <div
-            className="mt-4 h-8 w-20 rounded"
-            style={{ background: TRACK }}
-          />
+          <div className="flex items-center gap-4">
+            <div
+              className="h-12 w-12 rounded-xl"
+              style={{ background: TRACK }}
+            />
+            <div className="flex-1">
+              <div className="h-3 w-24 rounded" style={{ background: TRACK }} />
+              <div
+                className="mt-2 h-6 w-16 rounded"
+                style={{ background: TRACK }}
+              />
+            </div>
+          </div>
           <div
             className="mt-4 h-3 w-32 rounded"
             style={{ background: TRACK }}
@@ -802,76 +1004,228 @@ function ThinBar({ percent = 0, animate = true, className = "mt-2" }) {
   );
 }
 
-function RatioRow({ label, value, percent, animate }) {
+/* ------------------------------------------------------------------ */
+/* Ilustrasi banner (bentuk abstrak buatan sendiri, mengikuti tema)    */
+/* ------------------------------------------------------------------ */
+
+function BannerArt() {
   return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <span className="text-sm font-medium theme-text">{label}</span>
-        <span className="text-xl font-semibold tabular-nums theme-text">
-          {value}
-        </span>
-      </div>
-      <ThinBar percent={percent} animate={animate} />
+    <div
+      aria-hidden="true"
+      className="relative hidden h-40 w-72 shrink-0 lg:block"
+      style={{ color: "var(--color-primary)" }}
+    >
+      <svg viewBox="0 0 288 160" className="h-full w-full">
+        <circle cx="236" cy="38" r="22" fill="currentColor" opacity="0.18" />
+        <circle cx="236" cy="38" r="10" fill="currentColor" opacity="0.35" />
+
+        <rect x="40" y="112" width="200" height="22" rx="6" fill="currentColor" opacity="0.9" />
+        <rect x="52" y="88" width="176" height="22" rx="6" fill="currentColor" opacity="0.6" />
+        <rect x="64" y="64" width="152" height="22" rx="6" fill="currentColor" opacity="0.35" />
+
+        <rect x="40" y="134" width="200" height="4" rx="2" fill="currentColor" opacity="0.25" />
+
+        <path
+          d="M58 64 C58 40, 80 28, 98 34 C92 46, 86 54, 78 64 Z"
+          fill="currentColor"
+          opacity="0.45"
+        />
+        <path
+          d="M70 64 C74 44, 96 36, 112 44 C104 54, 94 60, 86 64 Z"
+          fill="currentColor"
+          opacity="0.28"
+        />
+      </svg>
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Diagram: Ring gauge                                                 */
+/* Kalender mini                                                       */
 /* ------------------------------------------------------------------ */
 
-function RingGauge({
-  percent = 0,
-  animate = true,
-  label,
-  size = 168,
-  stroke = 10,
-}) {
-  const center = size / 2;
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const progress = animate ? (percent / 100) * circumference : 0;
+const HARI_SINGKAT = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+
+function MiniCalendar({ now }) {
+  const current = now ?? new Date();
+  const year = current.getFullYear();
+  const month = current.getMonth();
+  const today = current.getDate();
+
+  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const cells = [
+    ...Array.from({ length: firstWeekday }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
+  ];
+
+  const monthLabel = new Intl.DateTimeFormat("id-ID", {
+    month: "long",
+    year: "numeric",
+  }).format(current);
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        role="img"
-        aria-label={`Tingkat kehadiran ${label}`}
+    <div>
+      <p className="mb-3 text-center text-sm font-semibold capitalize theme-text">
+        {monthLabel}
+      </p>
+
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {HARI_SINGKAT.map((hari, index) => (
+          <span
+            key={hari}
+            className={`py-1 text-[10px] font-semibold uppercase tracking-wide ${
+              index === 6 ? "text-[var(--color-danger)]" : "theme-text-muted"
+            }`}
+          >
+            {hari}
+          </span>
+        ))}
+
+        {cells.map((day, index) => {
+          if (day === null) {
+            return <span key={`blank-${index}`} />;
+          }
+
+          const isToday = day === today;
+          const isSunday = index % 7 === 6;
+
+          return (
+            <span
+              key={day}
+              className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-xs tabular-nums ${
+                isToday
+                  ? "bg-[var(--color-primary)] font-bold text-white"
+                  : isSunday
+                    ? "text-[var(--color-danger)]"
+                    : "theme-text-secondary"
+              }`}
+            >
+              {day}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Kehadiran: tile status                                              */
+/* ------------------------------------------------------------------ */
+
+function AttendanceTile({ item, total, animate }) {
+  const Icon = item.icon;
+  const pct = percentOf(item.value, total);
+
+  return (
+    <div
+      className={`min-w-0 rounded-xl border ${themeDivider} ${themeNeutralSurface} p-4`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+          style={{
+            backgroundColor: `color-mix(in srgb, ${item.color} 14%, transparent)`,
+            color: item.color,
+          }}
+        >
+          <Icon className="h-[18px] w-[18px]" />
+        </span>
+
+        <span className="text-xs font-semibold tabular-nums theme-text-secondary">
+          {total > 0 ? `${formatDecimal(pct)}%` : "—"}
+        </span>
+      </div>
+
+      <p className="mt-3 text-2xl font-bold tabular-nums tracking-tight theme-text">
+        {formatNumber(item.value)}
+      </p>
+      <p className="text-xs font-medium theme-text-secondary">{item.label}</p>
+
+      <div
+        className="mt-3 h-1 w-full overflow-hidden rounded-full"
+        style={{ backgroundColor: TRACK }}
       >
-        <g transform={`rotate(-90 ${center} ${center})`}>
-          <circle
-            cx={center}
-            cy={center}
-            r={radius}
+        <div
+          className="h-full rounded-full transition-all duration-700 ease-out"
+          style={{
+            width: animate ? `${pct}%` : "0%",
+            backgroundColor: item.color,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Diagram: Gauge setengah lingkaran                                   */
+/* ------------------------------------------------------------------ */
+
+function HalfGauge({
+  percent = 0,
+  animate = true,
+  value,
+  caption,
+  minLabel,
+  maxLabel,
+}) {
+  const progress = animate ? Math.min(100, Math.max(0, percent)) : 0;
+
+  return (
+    <div className="relative mx-auto w-full max-w-[260px]">
+      <svg
+        viewBox="0 0 200 108"
+        className="block w-full"
+        role="img"
+        aria-label={`${caption}: ${value}`}
+      >
+        <path
+          d="M 14 100 A 86 86 0 0 1 186 100"
+          fill="none"
+          strokeWidth="16"
+          strokeLinecap="round"
+          style={{ stroke: TRACK }}
+          pathLength="100"
+        />
+
+        {progress > 0 && (
+          <path
+            d="M 14 100 A 86 86 0 0 1 186 100"
             fill="none"
-            strokeWidth={stroke}
-            style={{ stroke: TRACK }}
-          />
-          <circle
-            cx={center}
-            cy={center}
-            r={radius}
-            fill="none"
-            strokeWidth={stroke}
+            strokeWidth="16"
             strokeLinecap="round"
-            strokeDasharray={`${progress} ${circumference}`}
+            pathLength="100"
+            strokeDasharray={`${progress} 100`}
             style={{
               stroke: ACCENT,
               transition: "stroke-dasharray 0.9s ease-out",
             }}
           />
-        </g>
+        )}
       </svg>
 
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-semibold tabular-nums theme-text">
-          {label}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center">
+        <span className="text-3xl font-bold tabular-nums tracking-tight theme-text">
+          {value}
         </span>
-        <span className="mt-0.5 text-xs theme-text-muted">Kehadiran</span>
+        <span className="text-[11px] theme-text-muted">{caption}</span>
       </div>
+
+      {minLabel && (
+        <span className="absolute -bottom-5 left-0 w-8 text-center text-[10px] tabular-nums theme-text-muted">
+          {minLabel}
+        </span>
+      )}
+      {maxLabel && (
+        <span className="absolute -bottom-5 right-0 w-8 text-center text-[10px] tabular-nums theme-text-muted">
+          {maxLabel}
+        </span>
+      )}
+
+      <div className="h-5" />
     </div>
   );
 }
@@ -887,7 +1241,7 @@ function DonutChart({
   centerValue,
   centerLabel,
   size = 176,
-  stroke = 16,
+  stroke = 18,
 }) {
   const center = size / 2;
   const radius = (size - stroke) / 2;
@@ -910,7 +1264,9 @@ function DonutChart({
             cy={center}
             r={radius}
             fill="none"
-            strokeWidth={stroke}
+            strokeWidth={total > 0 ? stroke : 3}
+            strokeLinecap="round"
+            strokeDasharray={total > 0 ? undefined : "2 9"}
             style={{ stroke: TRACK }}
           />
 
@@ -949,57 +1305,13 @@ function DonutChart({
       </svg>
 
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-semibold tabular-nums theme-text">
+        <span className="text-3xl font-bold tabular-nums tracking-tight theme-text">
           {centerValue}
         </span>
         <span className="mt-0.5 text-[11px] theme-text-muted">
           {centerLabel}
         </span>
       </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Diagram: Bar horizontal                                             */
-/* ------------------------------------------------------------------ */
-
-function HorizontalBarChart({ items = [], animate = true }) {
-  const max = Math.max(...items.map((item) => item.value), 1);
-
-  return (
-    <div className="space-y-5">
-      {items.map((item) => {
-        const pct = (item.value / max) * 100;
-
-        return (
-          <div
-            key={item.label}
-            className="grid grid-cols-[64px_1fr_auto] items-center gap-4"
-          >
-            <span className="text-sm font-medium theme-text">
-              {item.label}
-            </span>
-
-            <div
-              className="h-2.5 w-full overflow-hidden rounded-full"
-              style={{ backgroundColor: TRACK }}
-            >
-              <div
-                className="h-full rounded-full transition-all duration-700 ease-out"
-                style={{
-                  width: animate ? `${Math.max(pct, 1.5)}%` : "0%",
-                  backgroundColor: ACCENT,
-                }}
-              />
-            </div>
-
-            <span className="min-w-[56px] text-right text-sm font-semibold tabular-nums theme-text">
-              {formatNumber(item.value)}
-            </span>
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -1018,10 +1330,7 @@ function ColumnChart({ items = [], animate = true, height = 220 }) {
     <div>
       <div className="flex">
         {/* Sumbu Y */}
-        <div
-          className="relative shrink-0"
-          style={{ width: AXIS_WIDTH, height }}
-        >
+        <div className="relative shrink-0" style={{ width: AXIS_WIDTH, height }}>
           {ticks.map((tick) => (
             <span
               key={tick}
@@ -1041,7 +1350,7 @@ function ColumnChart({ items = [], animate = true, height = 220 }) {
           {ticks.map((tick) => (
             <div
               key={tick}
-              className="absolute inset-x-0 border-t theme-border-soft"
+              className={`absolute inset-x-0 border-t ${themeDivider}`}
               style={{ bottom: `${tick * 100}%` }}
             />
           ))}

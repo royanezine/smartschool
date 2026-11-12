@@ -108,19 +108,19 @@ export default function TambahJurusanPage() {
                   <ArrowLeft size={18} />
                 </button>
 
-                <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/25 sm:h-14 sm:w-14">
+                <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] shadow-lg sm:h-14 sm:w-14">
                   <GraduationCap size={24} strokeWidth={2} />
-                  <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-[var(--color-bg)]">
+                  <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full theme-primary ring-2 ring-[var(--color-bg)]">
                     <Sparkles size={10} className="text-white" />
                   </span>
                 </div>
 
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="truncate text-xl font-extrabold tracking-tight theme-text sm:text-2xl xl:text-3xl">
+                    <h1 className="truncate text-xl font-bold tracking-tight theme-text sm:text-2xl">
                       Tambah Jurusan
                     </h1>
-                    <span className="hidden rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 sm:inline-block">
+                    <span className="hidden rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider theme-primary-text sm:inline-block">
                       Program Baru
                     </span>
                   </div>
@@ -165,11 +165,11 @@ export default function TambahJurusanPage() {
                 <div className="space-y-4 xl:col-span-2">
                   <div className="theme-card theme-border rounded-2xl border p-4 shadow-sm sm:p-5">
                     <div className="mb-4 flex items-center gap-2.5">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <Tag size={16} strokeWidth={2.2} />
                       </div>
                       <div>
-                        <h2 className="text-sm font-bold theme-text">
+                        <h2 className="text-sm font-semibold theme-text">
                           Informasi Jurusan
                         </h2>
                         <p className="text-[11px] theme-text-muted">
@@ -180,7 +180,7 @@ export default function TambahJurusanPage() {
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
-                        <label className="mb-2 block text-xs font-bold uppercase tracking-wider theme-text-secondary">
+                        <label className="mb-2 block text-xs font-semibold uppercase tracking-wider theme-text-secondary">
                           Kode Jurusan{" "}
                           <span className="text-red-500">*</span>
                         </label>
@@ -190,7 +190,7 @@ export default function TambahJurusanPage() {
                           value={form.kode}
                           onChange={update("kode")}
                           placeholder="Contoh: RPL, TKJ, IPA"
-                          className="theme-input h-11 w-full rounded-xl px-3.5 text-sm uppercase outline-none transition focus:ring-2 focus:ring-blue-500/30"
+                          className="theme-input h-11 w-full rounded-xl px-3.5 text-sm uppercase outline-none transition focus:ring-2 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
                         />
                         <p className="mt-1.5 flex items-center gap-1 text-[11px] theme-text-muted">
                           <Info size={11} /> Maksimal 20 karakter, unik per
@@ -199,18 +199,18 @@ export default function TambahJurusanPage() {
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-xs font-bold uppercase tracking-wider theme-text-secondary">
+                        <label className="mb-2 block text-xs font-semibold uppercase tracking-wider theme-text-secondary">
                           Status
                         </label>
                         <div className="relative">
                           <ToggleLeft
                             size={15}
-                            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-blue-500"
+                            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 theme-primary-text"
                           />
                           <select
                             value={form.status}
                             onChange={update("status")}
-                            className="theme-input h-11 w-full appearance-none rounded-xl pl-9 pr-10 text-sm outline-none focus:ring-2 focus:ring-blue-500/30"
+                            className="theme-input h-11 w-full appearance-none rounded-xl pl-9 pr-10 text-sm outline-none focus:ring-2 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
                           >
                             <option value="Aktif">Aktif</option>
                             <option value="Nonaktif">Nonaktif</option>
@@ -224,7 +224,7 @@ export default function TambahJurusanPage() {
                     </div>
 
                     <div className="mt-4">
-                      <label className="mb-2 block text-xs font-bold uppercase tracking-wider theme-text-secondary">
+                      <label className="mb-2 block text-xs font-semibold uppercase tracking-wider theme-text-secondary">
                         Nama Jurusan / Program Keahlian{" "}
                         <span className="text-red-500">*</span>
                       </label>
@@ -234,7 +234,7 @@ export default function TambahJurusanPage() {
                         value={form.nama}
                         onChange={update("nama")}
                         placeholder="Contoh: Rekayasa Perangkat Lunak"
-                        className="theme-input h-11 w-full rounded-xl px-3.5 text-sm outline-none transition focus:ring-2 focus:ring-blue-500/30"
+                        className="theme-input h-11 w-full rounded-xl px-3.5 text-sm outline-none transition focus:ring-2 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
                       />
                       <p className="mt-1.5 flex items-center gap-1 text-[11px] theme-text-muted">
                         <Info size={11} /> Maksimal 100 karakter
@@ -242,8 +242,8 @@ export default function TambahJurusanPage() {
                     </div>
 
                     <div className="mt-4">
-                      <label className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider theme-text-secondary">
-                        <FileText size={13} className="text-emerald-500" />
+                      <label className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider theme-text-secondary">
+                        <FileText size={13} className="theme-primary-text" />
                         Deskripsi (Opsional)
                       </label>
                       <textarea
@@ -251,7 +251,7 @@ export default function TambahJurusanPage() {
                         value={form.deskripsi}
                         onChange={update("deskripsi")}
                         placeholder="Ringkasan kompetensi keahlian atau keterangan jurusan..."
-                        className="theme-input w-full resize-none rounded-xl p-3.5 text-sm outline-none transition focus:ring-2 focus:ring-blue-500/30"
+                        className="theme-input w-full resize-none rounded-xl p-3.5 text-sm outline-none transition focus:ring-2 focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
                       />
                       <p className="mt-1.5 text-[11px] theme-text-muted">
                         {form.deskripsi.length} karakter
@@ -261,11 +261,11 @@ export default function TambahJurusanPage() {
 
                   <div className="theme-card theme-border rounded-2xl border p-4 shadow-sm sm:p-5">
                     <div className="mb-4 flex items-center gap-2.5">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/15 text-violet-600 dark:text-violet-400">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <Shapes size={16} strokeWidth={2.2} />
                       </div>
                       <div>
-                        <h2 className="text-sm font-bold theme-text">
+                        <h2 className="text-sm font-semibold theme-text">
                           Ikon Jurusan
                         </h2>
                         <p className="text-[11px] theme-text-muted">
@@ -286,8 +286,8 @@ export default function TambahJurusanPage() {
                             }
                             className={`flex aspect-square items-center justify-center rounded-xl border-2 transition ${
                               selected
-                                ? "border-blue-500 bg-blue-500 text-white shadow-lg shadow-blue-500/25"
-                                : "theme-border theme-card theme-text-muted hover:border-blue-400 hover:text-blue-500"
+                                ? "theme-primary shadow-lg"
+                                : "theme-border theme-card theme-text-muted hover:border-[var(--color-primary)] hover:theme-primary-text"
                             }`}
                             title={name}
                           >
@@ -301,7 +301,7 @@ export default function TambahJurusanPage() {
 
                 <div className="space-y-4">
                   <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
-                    <div className="relative flex h-28 items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+                    <div className="relative flex h-28 items-center justify-center theme-primary shadow-md">
                       <div className="absolute inset-0 opacity-20">
                         <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white blur-2xl" />
                         <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white blur-2xl" />
@@ -316,14 +316,14 @@ export default function TambahJurusanPage() {
                       </div>
                     </div>
                     <div className="p-4">
-                      <p className="text-[11px] font-bold uppercase tracking-widest theme-text-muted">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
                         Preview Jurusan
                       </p>
-                      <h3 className="mt-1.5 truncate text-lg font-extrabold theme-text">
+                      <h3 className="mt-1.5 truncate text-base font-bold theme-text">
                         {form.nama || "Nama Jurusan Baru"}
                       </h3>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <span className="inline-block rounded bg-blue-500/10 px-2 py-0.5 font-mono text-[11px] font-bold text-blue-600 dark:text-blue-400">
+                        <span className="inline-block rounded bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2 py-0.5 font-mono text-[11px] font-bold theme-primary-text">
                           {form.kode || "KODE"}
                         </span>
                         <span
@@ -342,9 +342,9 @@ export default function TambahJurusanPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-indigo-500/5 p-4">
+                  <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4">
                     <div className="flex items-start gap-2.5">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] theme-primary-text">
                         <Lightbulb size={15} />
                       </div>
                       <div>
@@ -365,7 +365,7 @@ export default function TambahJurusanPage() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition hover:shadow-xl disabled:opacity-50"
+                      className="theme-primary flex h-11 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold shadow-md transition hover:opacity-90 disabled:opacity-50"
                     >
                       {saving ? (
                         <Loader2 className="animate-spin" size={16} />

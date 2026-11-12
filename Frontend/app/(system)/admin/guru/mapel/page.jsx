@@ -65,10 +65,12 @@ function StatCard({
   label,
   value,
   description,
-  iconWrapper,
+  className = "",
 }) {
   return (
-    <div className="relative overflow-hidden theme-card border rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-200">
+    <div
+      className={`relative overflow-hidden theme-card border rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-200 min-w-0 ${className}`}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs font-medium theme-text-muted">
@@ -84,9 +86,7 @@ function StatCard({
           </p>
         </div>
 
-        <div
-          className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 ${iconWrapper}`}
-        >
+        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
           <Icon size={18} />
         </div>
       </div>
@@ -98,7 +98,7 @@ function StatCard({
 function EmptyState({ search, onReset }) {
   return (
     <div className="py-16 px-5 flex flex-col items-center justify-center text-center">
-      <div className="w-14 h-14 rounded-2xl theme-info flex items-center justify-center">
+      <div className="w-14 h-14 rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
         <BookOpen size={25} />
       </div>
 
@@ -118,7 +118,7 @@ function EmptyState({ search, onReset }) {
         <button
           type="button"
           onClick={onReset}
-          className="mt-4 px-4 py-2 rounded-lg theme-info hover:opacity-80 text-xs font-semibold transition-colors"
+          className="mt-4 px-4 py-2 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text hover:opacity-80 text-xs font-semibold transition-colors"
         >
           Reset pencarian
         </button>
@@ -159,7 +159,7 @@ function GuruList({ assignments = [] }) {
           key={guru.id}
           className="flex items-center gap-2.5 min-w-0"
         >
-          <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center shrink-0">
             <UserRound size={14} />
           </div>
 
@@ -559,7 +559,7 @@ export default function MapelPage() {
                         Kelola Mata Pelajaran
                       </h1>
 
-                      <span className="hidden sm:inline-flex items-center px-2 py-1 rounded-md theme-info text-[9px] font-bold tracking-wide">
+                      <span className="hidden sm:inline-flex items-center px-2 py-1 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text text-[9px] font-bold tracking-wide">
                         AKADEMIK
                       </span>
                     </div>
@@ -633,13 +633,19 @@ export default function MapelPage() {
             )}
 
 
-            <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6 gap-3.5 mb-6">
+            {/*
+              Grid statistik:
+              - mobile  : 2 kolom (kartu ke-5 melebar penuh)
+              - tablet  : 6 kolom virtual -> baris 1 = 3 kartu, baris 2 = 2 kartu (sama lebar, penuh)
+              - desktop : 5 kolom sama rata, memenuhi seluruh lebar
+            */}
+            <section className="grid grid-cols-2 sm:grid-cols-6 lg:grid-cols-5 gap-3.5 mb-6">
               <StatCard
                 icon={Layers}
                 label="Total Mapel"
                 value={loading ? "—" : totalMapel}
                 description="Seluruh data"
-                iconWrapper="theme-info"
+                className="sm:col-span-2 lg:col-span-1"
               />
 
               <StatCard
@@ -647,7 +653,7 @@ export default function MapelPage() {
                 label="Aktif"
                 value={loading ? "—" : totalAktif}
                 description="Digunakan sekolah"
-                iconWrapper="theme-success"
+                className="sm:col-span-2 lg:col-span-1"
               />
 
               <StatCard
@@ -655,7 +661,7 @@ export default function MapelPage() {
                 label="Nonaktif"
                 value={loading ? "—" : totalNonaktif}
                 description="Tidak digunakan"
-                iconWrapper="theme-card-soft theme-text-muted"
+                className="sm:col-span-2 lg:col-span-1"
               />
 
               <StatCard
@@ -663,7 +669,7 @@ export default function MapelPage() {
                 label="Guru Pengajar"
                 value={loading ? "—" : totalGuru}
                 description="Penempatan guru"
-                iconWrapper="theme-info"
+                className="sm:col-span-3 lg:col-span-1"
               />
 
               <StatCard
@@ -671,7 +677,7 @@ export default function MapelPage() {
                 label="Penempatan"
                 value={loading ? "—" : totalAssignment}
                 description="Relasi mapel"
-                iconWrapper="theme-info"
+                className="col-span-2 sm:col-span-3 lg:col-span-1"
               />
             </section>
 
@@ -681,7 +687,7 @@ export default function MapelPage() {
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                         <BookOpen size={15} />
                       </div>
 
@@ -730,7 +736,7 @@ export default function MapelPage() {
                             e.target.value
                           )
                         }
-                        className="appearance-none w-full sm:w-[145px] h-10 pl-8 pr-8 rounded-xl theme-input border text-xs sm:text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 cursor-pointer"
+                        className="appearance-none w-full sm:w-[160px] h-10 pl-8 pr-8 rounded-xl theme-input border text-xs sm:text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 cursor-pointer"
                       >
                         <option value="semua">
                           Semua Status
@@ -777,7 +783,7 @@ export default function MapelPage() {
 
               {loading ? (
                 <div className="py-20 flex flex-col items-center justify-center">
-                  <div className="w-12 h-12 rounded-2xl theme-info flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                     <Loader2
                       size={22}
                       className="animate-spin"
@@ -842,14 +848,14 @@ export default function MapelPage() {
                               className="group border-b last:border-0 theme-table-hover transition-colors"
                             >
                               <td className="px-5 lg:px-6 py-5 align-top">
-                                <span className="inline-flex items-center px-2.5 py-1.5 rounded-lg theme-info border font-mono text-[11px] font-bold">
+                                <span className="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] font-mono text-[11px] font-bold">
                                   {m.kode || "-"}
                                 </span>
                               </td>
 
                               <td className="px-5 lg:px-6 py-5 align-top">
                                 <div className="flex items-start gap-3">
-                                  <div className="w-9 h-9 rounded-xl theme-info flex items-center justify-center shrink-0 group-hover:theme-primary transition-all">
+                                  <div className="w-9 h-9 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center shrink-0 transition-all">
                                     <BookMarked
                                       size={16}
                                     />
@@ -934,7 +940,7 @@ export default function MapelPage() {
                                       )
                                     }
                                     title="Ubah mata pelajaran"
-                                    className="w-8 h-8 rounded-lg theme-card border theme-text-muted hover:text-[var(--color-primary)] hover:theme-info flex items-center justify-center transition-all"
+                                    className="w-8 h-8 rounded-lg theme-card border theme-text-muted hover:text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] flex items-center justify-center transition-all"
                                   >
                                     <Pencil
                                       size={14}
@@ -1016,7 +1022,7 @@ export default function MapelPage() {
                             >
                               <td className="px-5 py-4 align-top">
                                 <div className="flex items-start gap-3">
-                                  <div className="w-9 h-9 rounded-xl theme-info flex items-center justify-center shrink-0">
+                                  <div className="w-9 h-9 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center shrink-0">
                                     <BookMarked
                                       size={16}
                                     />
@@ -1027,7 +1033,7 @@ export default function MapelPage() {
                                       {m.nama}
                                     </p>
 
-                                    <span className="inline-flex mt-1.5 px-2 py-1 rounded-md theme-info font-mono text-[10px] font-bold">
+                                    <span className="inline-flex mt-1.5 px-2 py-1 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text font-mono text-[10px] font-bold">
                                       {m.kode ||
                                         "-"}
                                     </span>
@@ -1088,7 +1094,7 @@ export default function MapelPage() {
                                         m
                                       )
                                     }
-                                    className="w-8 h-8 rounded-lg theme-card border theme-text-muted hover:text-[var(--color-primary)] hover:theme-info flex items-center justify-center"
+                                    className="w-8 h-8 rounded-lg theme-card border theme-text-muted hover:text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] flex items-center justify-center"
                                   >
                                     <Pencil
                                       size={14}
@@ -1142,7 +1148,7 @@ export default function MapelPage() {
                           className="p-4"
                         >
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-xl theme-info flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center shrink-0">
                               <BookMarked
                                 size={17}
                               />
@@ -1268,7 +1274,7 @@ export default function MapelPage() {
                                       m
                                     )
                                   }
-                                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg theme-card border text-[11px] font-semibold theme-text-secondary hover:text-[var(--color-primary)] hover:theme-info transition-all"
+                                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg theme-card border text-[11px] font-semibold theme-text-secondary hover:text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] transition-all"
                                 >
                                   <Pencil
                                     size={13}
@@ -1323,7 +1329,7 @@ export default function MapelPage() {
                   0 && (
                   <div className="px-4 sm:px-5 lg:px-6 py-3.5 border-t theme-card-soft flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-md theme-info flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                         <Layers size={12} />
                       </div>
 

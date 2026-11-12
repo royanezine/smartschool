@@ -122,23 +122,24 @@ function Rating({ value }) {
   );
 }
 
-function StatCard({ title, value, description, icon: Icon, color }) {
+function StatCard({ title, value, description, icon: Icon, statusDot }) {
   return (
-    <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+    <div className="theme-card theme-border flex flex-col justify-between rounded-xl border p-5 shadow-sm transition hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+          <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+            {statusDot && <span className={`inline-block h-2 w-2 rounded-full ${statusDot}`} />}
             {title}
           </p>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+          <p className="mt-2 text-3xl font-bold tracking-tight theme-text">
             {value}
           </p>
         </div>
-        <div className={`rounded-lg p-2.5 ${color}`}>
+        <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2.5 theme-primary-text">
           <Icon size={20} />
         </div>
       </div>
-      <p className="mt-3 text-xs text-slate-500">{description}</p>
+      <p className="mt-3 text-xs theme-text-muted">{description}</p>
     </div>
   );
 }
@@ -313,21 +314,21 @@ export default function ModerasiReviewPage() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="theme-page theme-text min-h-full w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
       {/* Tanpa max-w & mx-auto agar konten selalu menempel ke sidebar saat zoom out */}
       <div className="w-full space-y-6">
         
         {/* HEADER */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-700">
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider theme-primary-text">
               <ShieldCheck size={16} />
               Panel Super Admin
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
               Moderasi Review
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm theme-text-muted">
               Kelola dan pantau ulasan dari pengguna sebelum dipublikasikan.
             </p>
           </div>
@@ -335,7 +336,7 @@ export default function ModerasiReviewPage() {
           <button
             onClick={loadReviews}
             disabled={loading}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100 disabled:opacity-60"
+            className="theme-border theme-card theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold shadow-sm transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-60"
           >
             <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
             Refresh
@@ -344,7 +345,7 @@ export default function ModerasiReviewPage() {
 
         {/* FEEDBACK ALERTS */}
         {error && (
-          <div role="alert" className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div role="alert" className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-300">
             <AlertCircle size={18} className="mt-0.5 shrink-0" />
             <div className="flex-1">
               <p className="font-semibold">Terjadi Kesalahan</p>
@@ -354,10 +355,10 @@ export default function ModerasiReviewPage() {
         )}
 
         {notice && (
-          <div role="status" className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+          <div role="status" className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/30 p-4 text-sm text-emerald-800 dark:text-emerald-300">
             <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
             <p className="flex-1 font-medium">{notice}</p>
-            <button onClick={() => setNotice("")} className="font-bold hover:text-emerald-900" aria-label="Tutup">×</button>
+            <button onClick={() => setNotice("")} className="font-bold hover:opacity-75" aria-label="Tutup">×</button>
           </div>
         )}
 
@@ -368,33 +369,33 @@ export default function ModerasiReviewPage() {
             value={stats.menunggu}
             description="Review yang perlu diperiksa"
             icon={Clock3}
-            color="bg-amber-50 text-amber-700"
+            statusDot="bg-[var(--color-warning)]"
           />
           <StatCard
             title="Ditampilkan"
             value={stats.tampil}
             description="Review disetujui dan tayang"
             icon={Eye}
-            color="bg-emerald-50 text-emerald-700"
+            statusDot="bg-[var(--color-success)]"
           />
           <StatCard
             title="Disembunyikan"
             value={stats.disembunyikan}
             description="Review yang tidak dipublikasikan"
             icon={EyeOff}
-            color="bg-slate-100 text-slate-600"
+            statusDot="bg-[var(--color-text-muted)]"
           />
         </section>
 
         {/* LIST CONTAINER */}
-        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <section className="theme-border theme-card overflow-hidden rounded-xl border shadow-sm">
           
           {/* TOOLBAR (Pencarian, Filter, dan Sort) */}
-          <div className="flex flex-col gap-4 border-b border-slate-200 p-4 sm:p-5">
+          <div className="theme-border flex flex-col gap-4 border-b p-4 sm:p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Daftar Review</h2>
-                <p className="mt-0.5 text-sm text-slate-500">
+                <h2 className="text-lg font-bold theme-text">Daftar Review</h2>
+                <p className="mt-0.5 text-sm theme-text-muted">
                   {filteredAndSortedReviews.length} review ditemukan
                 </p>
               </div>
@@ -402,19 +403,19 @@ export default function ModerasiReviewPage() {
               {/* Global Search & Status Select */}
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="relative">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Search size={16} className="theme-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="search"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Cari nama atau komentar..."
-                    className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 sm:w-64"
+                    className="theme-border theme-surface theme-text w-full rounded-lg border py-2 pl-9 pr-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_16%,transparent)] sm:w-64"
                   />
                 </div>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="theme-border theme-card theme-text rounded-lg border px-3 py-2 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_16%,transparent)]"
                 >
                   {STATUS_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -424,8 +425,8 @@ export default function ModerasiReviewPage() {
             </div>
 
             {/* Filter Tanggal & Sort */}
-            <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
+            <div className="theme-border flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="theme-text-secondary flex items-center gap-2 text-sm">
                 <Filter size={16} />
                 <span className="font-medium">Filter Tanggal:</span>
               </div>
@@ -436,20 +437,20 @@ export default function ModerasiReviewPage() {
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500"
+                    className="theme-border theme-surface theme-text rounded-lg border px-2 py-1.5 text-sm outline-none focus:border-[var(--color-primary)]"
                   />
-                  <span className="text-slate-400">-</span>
+                  <span className="theme-text-muted">-</span>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500"
+                    className="theme-border theme-surface theme-text rounded-lg border px-2 py-1.5 text-sm outline-none focus:border-[var(--color-primary)]"
                   />
                 </div>
 
                 <button
                   onClick={toggleSortOrder}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  className="theme-border theme-card theme-text-secondary inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
                   title="Ubah urutan tanggal"
                 >
                   {sortOrder === "desc" ? <ArrowDown size={14} /> : <ArrowUp size={14} />}
@@ -462,41 +463,41 @@ export default function ModerasiReviewPage() {
           {/* CONTENT */}
           {loading ? (
             <div className="flex min-h-[300px] flex-col items-center justify-center gap-3">
-              <span className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-              <p className="text-sm font-medium text-slate-500">Memuat data review...</p>
+              <span className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
+              <p className="theme-text-muted text-sm font-medium">Memuat data review...</p>
             </div>
           ) : filteredAndSortedReviews.length === 0 ? (
             <div className="flex min-h-[300px] flex-col items-center justify-center px-6 py-12 text-center">
-              <div className="mb-4 rounded-full bg-slate-100 p-4">
-                <MessageSquareQuote size={28} className="text-slate-400" />
+              <div className="mb-4 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-4">
+                <MessageSquareQuote size={28} className="theme-primary-text" />
               </div>
-              <h3 className="font-semibold text-slate-800">Tidak Ada Review</h3>
-              <p className="mt-2 max-w-md text-sm text-slate-500">
+              <h3 className="font-semibold theme-text">Tidak Ada Review</h3>
+              <p className="mt-2 max-w-md text-sm theme-text-muted">
                 Tidak ada review yang cocok dengan filter saat ini. Coba ubah filter tanggal, status, atau kata kunci pencarian.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-[var(--color-border)]">
               {filteredAndSortedReviews.map((review) => {
                 const isProcessing = processingId === review.id;
 
                 return (
-                  <article key={review.id} className="p-4 transition-colors hover:bg-slate-50/50 sm:p-6">
+                  <article key={review.id} className="p-4 transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] sm:p-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       
                       {/* KIRI: Info User & Komentar */}
                       <div className="flex-1 space-y-4">
                         <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                             <UserRound size={20} />
                           </div>
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="font-semibold text-slate-900">{getUserName(review)}</h3>
+                              <h3 className="font-semibold theme-text">{getUserName(review)}</h3>
                               <StatusBadge status={review.status} />
                             </div>
-                            <p className="text-xs font-medium text-slate-500">{getUserRole(review)}</p>
-                            <div className="mt-1.5 flex items-center gap-3 text-[11px] text-slate-400">
+                            <p className="text-xs font-medium theme-text-muted">{getUserRole(review)}</p>
+                            <div className="mt-1.5 flex items-center gap-3 text-[11px] theme-text-muted">
                               <span className="inline-flex items-center gap-1">
                                 <CalendarDays size={12} /> {formatDate(review.dibuatPada)}
                               </span>
@@ -506,14 +507,14 @@ export default function ModerasiReviewPage() {
 
                         <div className="pl-0 sm:pl-13">
                           <Rating value={review.rating} />
-                          <div className="mt-3 rounded-lg border border-slate-100 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700">
-                            {review.komentar || <span className="italic text-slate-400">Tidak ada komentar.</span>}
+                          <div className="theme-border theme-surface theme-text-secondary mt-3 rounded-lg border p-4 text-sm leading-relaxed">
+                            {review.komentar || <span className="italic theme-text-muted">Tidak ada komentar.</span>}
                           </div>
                         </div>
                       </div>
 
                       {/* KANAN: Tombol Aksi */}
-                      <div className="flex shrink-0 flex-col gap-2 border-t border-slate-100 pt-4 lg:w-48 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+                      <div className="theme-border flex shrink-0 flex-col gap-2 border-t pt-4 lg:w-48 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
                         {review.status !== "tampil" && (
                           <button
                             type="button"
@@ -529,7 +530,7 @@ export default function ModerasiReviewPage() {
                             type="button"
                             onClick={() => requestStatusChange(review, "disembunyikan")}
                             disabled={isProcessing}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                            className="theme-border theme-card theme-text-secondary inline-flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
                           >
                             <EyeOff size={14} /> Sembunyikan
                           </button>
@@ -539,7 +540,7 @@ export default function ModerasiReviewPage() {
                             type="button"
                             onClick={() => requestStatusChange(review, "menunggu")}
                             disabled={isProcessing}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30 px-3 py-2 text-xs font-semibold text-amber-800 dark:text-amber-300 transition hover:bg-amber-100 disabled:opacity-50"
                           >
                             <Clock3 size={14} /> Kembalikan Antrean
                           </button>
@@ -548,13 +549,13 @@ export default function ModerasiReviewPage() {
                           type="button"
                           onClick={() => requestDelete(review)}
                           disabled={isProcessing}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 dark:border-red-900/50 theme-card px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 transition hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-50"
                         >
                           <Trash2 size={14} /> Hapus Permanen
                         </button>
                         {isProcessing && (
-                          <p className="mt-1 flex items-center justify-center gap-1.5 text-[10px] text-slate-500">
-                            <span className="h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                          <p className="mt-1 flex items-center justify-center gap-1.5 text-[10px] theme-text-muted">
+                            <span className="h-3 w-3 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
                             Memproses...
                           </p>
                         )}
@@ -567,26 +568,26 @@ export default function ModerasiReviewPage() {
           )}
         </section>
 
-        <p className="text-center text-[11px] leading-5 text-slate-400">
+        <p className="text-center text-[11px] leading-5 theme-text-muted">
           Hak akses moderasi dilindungi oleh middleware Super Admin.
         </p>
       </div>
 
       {confirmDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
+          <div className="theme-card theme-border w-full max-w-md rounded-2xl p-6 shadow-2xl border">
             <div className="flex items-center gap-3 mb-4">
-              <div className={`p-2.5 rounded-xl ${confirmDialog.isDanger ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+              <div className={`p-2.5 rounded-xl ${confirmDialog.isDanger ? 'bg-red-500/10 text-red-600 dark:text-red-400' : 'bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text'}`}>
                 {confirmDialog.isDanger ? <AlertCircle size={22} /> : <ShieldCheck size={22} />}
               </div>
-              <h3 className="text-lg font-bold text-slate-900">{confirmDialog.title}</h3>
+              <h3 className="text-lg font-bold theme-text">{confirmDialog.title}</h3>
             </div>
-            <p className="text-sm text-slate-600 mb-6 leading-relaxed">{confirmDialog.message}</p>
+            <p className="text-sm theme-text-secondary mb-6 leading-relaxed">{confirmDialog.message}</p>
             <div className="flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setConfirmDialog(null)}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition"
+                className="theme-text-secondary hover:theme-text px-4 py-2 text-sm font-semibold rounded-xl hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] transition"
               >
                 Batal
               </button>
@@ -597,10 +598,10 @@ export default function ModerasiReviewPage() {
                   setConfirmDialog(null);
                   if (action) await action();
                 }}
-                className={`px-4 py-2 text-sm font-semibold rounded-xl text-white shadow-sm transition ${
+                className={`px-4 py-2 text-sm font-semibold rounded-xl shadow-sm transition ${
                   confirmDialog.isDanger
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-blue-600 hover:bg-blue-700"
+                    ? "bg-red-600 hover:bg-red-700 text-white"
+                    : "theme-primary"
                 }`}
               >
                 {confirmDialog.confirmLabel}

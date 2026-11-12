@@ -468,18 +468,18 @@ export default function TambahGedungPage() {
                 </div>
 
                 <div
-                  className={`flex items-start gap-3 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-4 py-3`}
+                  className={`flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] px-4 py-3`}
                 >
                   <Info
                     size={17}
-                    className="mt-0.5 shrink-0 text-[var(--color-info)]"
+                    className="mt-0.5 shrink-0 theme-primary-text"
                   />
 
                   <div>
-                    <p className="text-xs font-semibold text-[var(--color-info)]">
+                    <p className="text-xs font-semibold theme-primary-text">
                       Informasi
                     </p>
-                    <p className="mt-0.5 text-xs leading-5 text-[var(--color-info)]">
+                    <p className="mt-0.5 text-xs leading-5 theme-primary-text">
                       Nama gedung wajib diisi. Kode dan foto
                       bersifat opsional. Data foto menggunakan
                       field fotoGedung sesuai model database.

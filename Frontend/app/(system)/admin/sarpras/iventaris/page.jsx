@@ -74,13 +74,10 @@ const themeFocus =
 
 function StatCard({ title, value, description, icon: Icon, tone }) {
   const tones = {
-    primary: `${themePrimarySoft} ${themePrimaryText}`,
-    success:
-      "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-[var(--color-success)]",
-    warning:
-      "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] text-[var(--color-warning)]",
-    info:
-      "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)] text-[var(--color-info)]",
+    primary: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    success: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    warning: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    info: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   return (

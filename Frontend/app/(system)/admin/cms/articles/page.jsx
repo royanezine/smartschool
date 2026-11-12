@@ -465,7 +465,7 @@ export default function ArtikelPage() {
                   </p>
                 </div>
 
-                <div className="theme-info flex h-11 w-11 items-center justify-center rounded-xl">
+                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-11 w-11 items-center justify-center rounded-xl">
                   <FileText size={21} />
                 </div>
 
@@ -495,7 +495,7 @@ export default function ArtikelPage() {
                   </p>
                 </div>
 
-                <div className="theme-success flex h-11 w-11 items-center justify-center rounded-xl">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                   <CheckCircle2 size={21} />
                 </div>
 
@@ -525,7 +525,7 @@ export default function ArtikelPage() {
                   </p>
                 </div>
 
-                <div className="theme-warning flex h-11 w-11 items-center justify-center rounded-xl">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                   <Clock3 size={21} />
                 </div>
 
@@ -862,7 +862,7 @@ export default function ArtikelPage() {
 
                                 <div className="flex items-center gap-3">
 
-                                  <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                                  <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                                     <FileText size={18} />
                                   </div>
 
@@ -1072,7 +1072,7 @@ export default function ArtikelPage() {
 
                           <div className="flex gap-3">
 
-                            <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                            <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                               <FileText size={18} />
                             </div>
 

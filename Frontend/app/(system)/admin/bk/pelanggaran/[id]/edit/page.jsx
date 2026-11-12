@@ -274,7 +274,7 @@ export default function EditPelanggaranPage() {
                     className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-xl"
                   >
                     <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-4 sm:px-6 sm:py-5">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-[var(--color-info)]/20">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]">
                         <FileText size={16} />
                       </div>
 
@@ -480,7 +480,7 @@ export default function EditPelanggaranPage() {
 
                       <div className="relative">
                         <div className="mb-4 flex items-center gap-2">
-                          <div className="theme-info flex h-7 w-7 items-center justify-center rounded-lg">
+                          <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-7 w-7 items-center justify-center rounded-lg">
                             <Eye size={14} />
                           </div>
 
@@ -591,7 +591,7 @@ function PreviewRow({ label, value, badge = false }) {
       <span className="theme-text-muted font-medium">{label}</span>
 
       {badge ? (
-        <span className="theme-info inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ring-[var(--color-info)]/20">
+        <span className="theme-info inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]">
           {value}
         </span>
       ) : (

@@ -15,7 +15,7 @@ import {
 import { getMonitoringKehadiran } from "@/services/yayasan.service";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -111,20 +111,20 @@ export default function MonitoringKehadiranPage() {
         <section
           className={`relative mb-6 overflow-hidden rounded-2xl border ${themePrimarySoftBorder} ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
-          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
           <div className="relative p-5 sm:p-6 md:p-8">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--color-card)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] text-[var(--color-card)] shadow-[0_4px_16px_color-mix(in_srgb,var(--color-text)_12%,transparent)] backdrop-blur-md sm:h-14 sm:w-14">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--color-text)_12%,transparent)] backdrop-blur-md sm:h-14 sm:w-14">
                 <ClipboardCheck className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
               <div className="min-w-0">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] sm:text-xs">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 sm:text-xs">
                   Monitoring Akademik
                 </p>
-                <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl lg:text-4xl">
+                <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
                   Monitoring Kehadiran
                 </h1>
-                <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] sm:text-sm">
+                <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-white/80 sm:text-sm">
                   Pantau ringkasan kehadiran siswa dan guru di seluruh sekolah naungan.
                 </p>
               </div>
@@ -191,9 +191,9 @@ export default function MonitoringKehadiranPage() {
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
                 >
-                  <CheckCircle size={22} />
+                  <CheckCircle size={22} className="theme-primary-text" />
                 </div>
                 <div>
                   <p className="theme-text-secondary text-sm">

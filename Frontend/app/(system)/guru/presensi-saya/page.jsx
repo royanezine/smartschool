@@ -38,7 +38,7 @@ import {
 
 // === THEME CONSTANTS ===
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -1284,6 +1284,7 @@ export default function AbsensiGuruPage() {
               <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
+
               <div className="relative z-10">
                 <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
@@ -1337,6 +1338,7 @@ export default function AbsensiGuruPage() {
                       <span className="hidden sm:inline">Perbarui Data</span>
                     </button>
                   </div>
+
                 </div>
               </div>
             </section>
@@ -1372,14 +1374,14 @@ export default function AbsensiGuruPage() {
             {/* ================= B. RINGKASAN STATISTIK ================= */}
             <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 2xl:grid-cols-6 gap-3 sm:gap-4">
               <div
-                className={`theme-card border ${themeNeutralBorder} rounded-xl p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5`}
+                className="theme-card border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] rounded-xl p-4 shadow-sm transition duration-200 hover:-translate-y-0.5"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium theme-text-secondary">
                     Total Presensi
                   </span>
-                  <div className="p-2 rounded-lg theme-info">
-                    <History size={16} />
+                  <div className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <History size={16} className="theme-primary-text shrink-0" />
                   </div>
                 </div>
                 <p className="text-2xl font-bold theme-text mt-3 tabular-nums">
@@ -1391,14 +1393,14 @@ export default function AbsensiGuruPage() {
               </div>
 
               <div
-                className={`theme-card border ${themeNeutralBorder} rounded-xl p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5`}
+                className="theme-card border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] rounded-xl p-4 shadow-sm transition duration-200 hover:-translate-y-0.5"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium theme-text-secondary">
                     Hadir
                   </span>
-                  <div className="p-2 rounded-lg theme-success">
-                    <CheckCircle2 size={16} />
+                  <div className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <CheckCircle2 size={16} className="theme-primary-text shrink-0" />
                   </div>
                 </div>
                 <p className="text-2xl font-bold theme-text mt-3 tabular-nums">
@@ -1410,14 +1412,14 @@ export default function AbsensiGuruPage() {
               </div>
 
               <div
-                className={`theme-card border ${themeNeutralBorder} rounded-xl p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5`}
+                className="theme-card border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] rounded-xl p-4 shadow-sm transition duration-200 hover:-translate-y-0.5"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium theme-text-secondary">
                     Terlambat
                   </span>
-                  <div className="p-2 rounded-lg theme-warning">
-                    <Timer size={16} />
+                  <div className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <Timer size={16} className="theme-primary-text shrink-0" />
                   </div>
                 </div>
                 <p className="text-2xl font-bold theme-text mt-3 tabular-nums">
@@ -1429,14 +1431,14 @@ export default function AbsensiGuruPage() {
               </div>
 
               <div
-                className={`theme-card border ${themeNeutralBorder} rounded-xl p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5`}
+                className="theme-card border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] rounded-xl p-4 shadow-sm transition duration-200 hover:-translate-y-0.5"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium theme-text-secondary">
                     Izin
                   </span>
-                  <div className="p-2 rounded-lg theme-info">
-                    <CalendarDays size={16} />
+                  <div className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <CalendarDays size={16} className="theme-primary-text shrink-0" />
                   </div>
                 </div>
                 <p className="text-2xl font-bold theme-text mt-3 tabular-nums">
@@ -1448,14 +1450,14 @@ export default function AbsensiGuruPage() {
               </div>
 
               <div
-                className={`theme-card border ${themeNeutralBorder} rounded-xl p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5`}
+                className="theme-card border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] rounded-xl p-4 shadow-sm transition duration-200 hover:-translate-y-0.5"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium theme-text-secondary">
                     Sakit
                   </span>
-                  <div className="p-2 rounded-lg theme-warning">
-                    <Clock3 size={16} />
+                  <div className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <Clock3 size={16} className="theme-primary-text shrink-0" />
                   </div>
                 </div>
                 <p className="text-2xl font-bold theme-text mt-3 tabular-nums">
@@ -1467,14 +1469,14 @@ export default function AbsensiGuruPage() {
               </div>
 
               <div
-                className={`theme-card border ${themeNeutralBorder} rounded-xl p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5`}
+                className="theme-card border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] rounded-xl p-4 shadow-sm transition duration-200 hover:-translate-y-0.5"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium theme-text-secondary">
                     Tidak Hadir
                   </span>
-                  <div className="p-2 rounded-lg theme-danger">
-                    <CircleAlert size={16} />
+                  <div className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <CircleAlert size={16} className="theme-primary-text shrink-0" />
                   </div>
                 </div>
                 <p className="text-2xl font-bold theme-text mt-3 tabular-nums">
@@ -1621,7 +1623,7 @@ export default function AbsensiGuruPage() {
                   {metodeTerpilih === "face" && (
                     <div className="mt-4 p-4 rounded-xl border theme-border theme-card-soft space-y-3">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg theme-info shrink-0">
+                        <div className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text shrink-0">
                           <Camera size={19} />
                         </div>
 

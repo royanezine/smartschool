@@ -281,7 +281,7 @@ export default function PinjamBukuGuruPage() {
                       <button 
                         type="submit" 
                         disabled={submitting || !tanggalJatuhTempo} 
-                        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {submitting ? <Loader2 size={17} className="animate-spin" /> : <BookOpenCheck size={17} />}
                         {submitting ? "Memproses..." : "Konfirmasi Pinjam"}

@@ -305,7 +305,7 @@ export default function TambahKategoriJabatanPage() {
 
                     <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                       <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <Wallet size={19} />
                         </div>
 
@@ -407,8 +407,8 @@ export default function TambahKategoriJabatanPage() {
                   </div>
 
                   <aside className="flex min-w-0 flex-col gap-6">
-                    <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
-                      <Info size={17} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text theme-border flex items-start gap-3 rounded-2xl border p-4">
+                      <Info size={17} className="mt-0.5 shrink-0 theme-primary-text" />
                       <div>
                         <p className="text-sm font-semibold theme-text">
                           Informasi Tarif
@@ -421,7 +421,7 @@ export default function TambahKategoriJabatanPage() {
 
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                        <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <Lightbulb size={17} />
                         </div>
                         <h2 className="theme-text text-sm font-bold">
@@ -463,7 +463,7 @@ export default function TambahKategoriJabatanPage() {
 
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                        <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                           <Wallet size={17} />
                         </div>
                         <h2 className="theme-text text-sm font-bold">

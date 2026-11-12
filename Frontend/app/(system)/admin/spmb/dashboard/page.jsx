@@ -674,30 +674,14 @@ function Stat({
   icon: Icon,
   tone = "primary",
 }) {
-  const toneConfig = {
-    primary: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
-      text: "text-[var(--color-primary)]",
-    },
-    success: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
-      text: "text-[var(--color-success)]",
-    },
-    warning: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]",
-      text: "text-[var(--color-warning)]",
-    },
-    danger: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)]",
-      text: "text-[var(--color-danger)]",
-    },
-  };
-
-  const current = toneConfig[tone] || toneConfig.primary;
+  const dotColor =
+    tone === "success"
+      ? "bg-[var(--color-success)]"
+      : tone === "warning"
+        ? "bg-[var(--color-warning)]"
+        : tone === "danger"
+          ? "bg-[var(--color-danger)]"
+          : null;
 
   return (
     <div
@@ -705,17 +689,20 @@ function Stat({
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="theme-text-muted text-xs">{title}</p>
+          <p className="theme-text-muted flex items-center gap-1.5 text-xs font-medium">
+            {dotColor && <span className={`h-2 w-2 rounded-full ${dotColor}`} />}
+            {title}
+          </p>
 
-          <p className="theme-text mt-1 text-2xl font-bold">
+          <p className="theme-text mt-1 text-2xl font-bold tracking-tight tabular-nums">
             {formatAngka(value)}
           </p>
         </div>
 
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-lg ${current.surface}`}
+          className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
         >
-          <Icon size={18} className={current.text} />
+          <Icon size={18} />
         </div>
       </div>
     </div>

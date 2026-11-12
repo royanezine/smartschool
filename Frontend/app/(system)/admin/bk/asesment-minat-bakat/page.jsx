@@ -1034,15 +1034,8 @@ function Stat({
   icon,
   tone = "blue",
 }) {
-  const tones = {
-    blue: "theme-info",
-    sky: "theme-info",
-    emerald: "theme-success",
-    amber: "theme-warning",
-  };
-
   const toneClass =
-    tones[tone] || tones.blue;
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
 
   const icons = {
     note: (

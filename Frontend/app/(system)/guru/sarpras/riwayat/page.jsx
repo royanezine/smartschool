@@ -25,7 +25,7 @@ import { getDaftarPeminjaman } from "@/services/sarpras.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -508,7 +508,7 @@ export default function GuruSarprasRiwayatPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-start gap-4">
                 <div
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow}`}
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white ${themePrimaryGradient} ${themePrimaryShadow}`}
                 >
                   <FileText size={22} />
                 </div>
@@ -665,7 +665,7 @@ export default function GuruSarprasRiwayatPage() {
                         }
                         className={`inline-flex h-10 items-center whitespace-nowrap rounded-lg border px-3.5 text-xs font-semibold transition-colors ${
                           aktif
-                            ? `${themePrimaryGradient} border-[var(--color-primary)] text-[var(--color-card)]`
+                            ? `${themePrimaryGradient} border-[var(--color-primary)] text-white`
                             : `theme-card ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} hover:text-[var(--color-primary)]`
                         }`}
                       >
@@ -863,33 +863,24 @@ function RingkasanCard({
   value,
   tone = "blue",
 }) {
+  const defaultTone = {
+    icon: `${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`,
+    value: "theme-text",
+  };
+
   const tones = {
-    blue: {
-      icon: `${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`,
-      value: "theme-text",
-    },
-
-    emerald: {
-      icon: `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`,
-      value: "text-[var(--color-success)]",
-    },
-
-    amber: {
-      icon: `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`,
-      value: "text-[var(--color-warning)]",
-    },
-
-    red: {
-      icon: `${themeDangerSurface} ${themeDangerBorder} theme-danger`,
-      value: "theme-danger",
-    },
+    blue: defaultTone,
+    emerald: defaultTone,
+    amber: defaultTone,
+    rose: defaultTone,
+    red: defaultTone,
   };
 
   const t = tones[tone] || tones.blue;
 
   return (
     <div
-      className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl border p-4`}
+      className={`theme-card border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] ${themeSmallShadow} rounded-xl p-4`}
     >
       <div className="flex items-center gap-3">
         <div

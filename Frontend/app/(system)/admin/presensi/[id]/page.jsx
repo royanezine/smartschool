@@ -232,7 +232,7 @@ export default function DetailPresensiPage() {
 
                   <div className="theme-card rounded-xl border p-4 shadow-sm">
                     <div className="flex items-center gap-3 mb-1">
-                      <Clock3 size={18} className="text-emerald-500" />
+                      <Clock3 size={18} className="theme-primary-text" />
                       <p className="text-sm font-medium theme-text-muted">Jam Masuk</p>
                     </div>
                     <p className="text-base font-semibold theme-text">{data.jamMasuk}</p>
@@ -240,7 +240,7 @@ export default function DetailPresensiPage() {
 
                   <div className="theme-card rounded-xl border p-4 shadow-sm">
                     <div className="flex items-center gap-3 mb-1">
-                      <Clock3 size={18} className="text-blue-500" />
+                      <Clock3 size={18} className="theme-primary-text" />
                       <p className="text-sm font-medium theme-text-muted">Jam Pulang</p>
                     </div>
                     <p className="text-base font-semibold theme-text">{data.jamPulang}</p>

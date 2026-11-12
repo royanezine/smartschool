@@ -262,8 +262,10 @@ export default function DetailGedungPage() {
                           <span className={`${themePrimarySoft} theme-primary inline-flex items-center gap-1.5 rounded-lg border ${themePrimaryBorder} px-2.5 py-1.5 text-[11px] font-semibold`}>
                             <Layers size={12} /> {lantai.length} Lantai
                           </span>
-                          <span className="theme-info inline-flex items-center gap-1.5 rounded-lg border theme-border px-2.5 py-1.5 text-[11px] font-semibold">
-                            <GraduationCap size={12} /> {totalKelas} Kelas
+<span className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text inline-flex items-center gap-1.5 rounded-lg border theme-border px-2.5 py-1.5 text-[11px] font-semibold">
+                            <GraduationCap size={12} />
+                            {totalKelas} Kelas
+
                           </span>
                         </div>
                       </div>
@@ -310,7 +312,7 @@ export default function DetailGedungPage() {
 
                 <div className={`theme-card ${themeSmallShadow} rounded-2xl border ${themePrimaryBorder} p-4`}>
                   <div className="flex items-center justify-between">
-                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-xl">
                       <GraduationCap size={17} />
                     </div>
                   </div>
@@ -555,7 +557,7 @@ export default function DetailGedungPage() {
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="theme-info flex h-8 w-8 items-center justify-center rounded-lg">
+                          <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 items-center justify-center rounded-lg">
                             <GraduationCap size={14} />
                           </div>
                           <span className="theme-text-secondary text-xs font-medium">Kelas</span>

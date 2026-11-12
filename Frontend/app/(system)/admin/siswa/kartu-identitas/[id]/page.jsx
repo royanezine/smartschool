@@ -25,7 +25,7 @@ import { getUserById } from "@/services/user.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -289,7 +289,7 @@ export default function DetailSiswaPage() {
                     "/admin/siswa/kartu-identitas"
                   )
                 }
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Daftar Siswa
@@ -374,7 +374,7 @@ export default function DetailSiswaPage() {
                       `/admin/siswa/edit/${siswa.id}`
                     )
                   }
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
                 >
                   <Edit size={16} />
                   Edit Siswa
@@ -390,7 +390,7 @@ export default function DetailSiswaPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-5">
 
                   <div
-                    className={`w-24 h-24 rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] flex items-center justify-center text-3xl font-bold ${themePrimaryShadow} flex-shrink-0`}
+                    className={`w-24 h-24 rounded-2xl ${themePrimaryGradient} text-white flex items-center justify-center text-3xl font-bold ${themePrimaryShadow} flex-shrink-0`}
                   >
                     {getInitials(siswa.nama)}
                   </div>
@@ -647,7 +647,7 @@ export default function DetailSiswaPage() {
                       `/admin/siswa/edit/${siswa.id}`
                     )
                   }
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
+                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
                 >
                   <Edit size={16} />
                   Edit Siswa

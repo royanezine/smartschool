@@ -351,7 +351,7 @@ export default function EditKategoriTagihanPage() {
                             </div>
                           </div>
                           <div className="flex items-start gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                               <CalendarClock size={15} />
                             </div>
                             <div>
@@ -375,7 +375,7 @@ export default function EditKategoriTagihanPage() {
                         </div>
                       </section>
 
-                      <div className="rounded-2xl border border-blue-200 bg-blue-50/70 p-5 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
+                      <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-5 text-sm theme-text-secondary">
                         <div className="flex items-start gap-3">
                           <Sparkles size={18} className="mt-0.5 shrink-0" />
                           <div>

@@ -356,7 +356,7 @@ export default function MasterShiftPage() {
 
                   <button
                     type="submit"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800 dark:bg-blue-700 dark:hover:bg-blue-600"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg theme-primary px-4 text-sm font-medium transition hover:opacity-90"
                   >
                     <Search size={16} />
                     Cari

@@ -358,12 +358,12 @@ export default function GuruRaporPage() {
             <div className="theme-card theme-border mb-6 overflow-hidden rounded-2xl border p-6 shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_8%,transparent)] sm:p-8">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                    <Award size={28} />
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] theme-primary-text">
+                    <Award size={28} className="theme-primary-text shrink-0" />
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-primary)]">
+                    <p className="text-xs font-semibold uppercase tracking-wider theme-primary-text">
                       Wali Kelas
                     </p>
                     <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
@@ -506,28 +506,28 @@ export default function GuruRaporPage() {
 
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
-                icon={<FileText size={22} />}
+                icon={<FileText size={22} className="theme-primary-text shrink-0" />}
                 label="Total Rapot"
                 value={stats.total}
                 color="primary"
               />
               <StatCard
-                icon={<CheckCircle2 size={22} />}
+                icon={<CheckCircle2 size={22} className="theme-primary-text shrink-0" />}
                 label="Dipublish"
                 value={stats.published}
-                color="success"
+                color="primary"
               />
               <StatCard
-                icon={<Clock size={22} />}
+                icon={<Clock size={22} className="theme-primary-text shrink-0" />}
                 label="Draft"
                 value={stats.draft}
-                color="warning"
+                color="primary"
               />
               <StatCard
-                icon={<Award size={22} />}
+                icon={<Award size={22} className="theme-primary-text shrink-0" />}
                 label="Rata-rata"
                 value={formatNumber(stats.rataRata)}
-                color="info"
+                color="primary"
               />
             </div>
 
@@ -570,7 +570,7 @@ export default function GuruRaporPage() {
                           <div className="flex items-center justify-center gap-2">
                             <Loader2
                               size={18}
-                              className="animate-spin text-[var(--color-primary)]"
+                              className="animate-spin theme-primary-text"
                             />
                             Memuat data rapot...
                           </div>
@@ -869,13 +869,15 @@ export default function GuruRaporPage() {
 
 
 function StatCard({ icon, label, value, color }) {
+  const primaryClass =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
+
   const colors = {
-    primary:
-      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]",
-    info: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]",
-    success: "theme-success",
-    warning: "theme-warning",
-    danger: "theme-danger",
+    primary: primaryClass,
+    info: primaryClass,
+    success: primaryClass,
+    warning: primaryClass,
+    danger: primaryClass,
   };
 
   return (
@@ -929,7 +931,7 @@ function Modal({
       <div className="theme-card theme-border max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_20%,transparent)]">
         <div className="flex items-center justify-between border-b theme-border px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
               {icon}
             </div>
             <h2 className="theme-text text-lg font-bold">{title}</h2>

@@ -58,7 +58,7 @@ function StatCard({ label, value, description, icon, iconClassName }) {
           <p className="theme-text-muted text-[10px] font-bold uppercase tracking-[0.14em]">{label}</p>
           <p className="theme-text mt-2 truncate text-2xl font-bold tracking-tight">{value}</p>
         </div>
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconClassName}`}>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
           {icon}
         </div>
       </div>
@@ -187,21 +187,21 @@ export default function ArticleCategoriesPage() {
                 value={totalCategories}
                 description="Semua kategori artikel"
                 icon={<Tags size={18} />}
-                iconClassName="theme-info"
+                iconClassName="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
               />
               <StatCard
                 label="Kategori Aktif"
                 value={activeCategories}
                 description="Dapat digunakan"
                 icon={<Check size={18} />}
-                iconClassName="theme-success"
+                iconClassName="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
               />
               <StatCard
                 label="Nonaktif"
                 value={inactiveCategories}
                 description="Tidak digunakan"
                 icon={<FolderOpen size={18} />}
-                iconClassName="theme-card theme-text-muted"
+                iconClassName="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
               />
             </div>
 
@@ -271,7 +271,7 @@ export default function ArticleCategoriesPage() {
                           <td className="theme-text-muted px-5 py-4 text-sm font-medium">{index + 1}</td>
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
+                              <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
                                 <Tags size={16} />
                               </div>
                               <div className="min-w-0">

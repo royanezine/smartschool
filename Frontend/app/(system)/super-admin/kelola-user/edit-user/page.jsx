@@ -27,7 +27,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -307,8 +307,8 @@ function EditUserContent() {
           className={`relative mb-6 w-full overflow-hidden rounded-3xl ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -right-20 -top-28 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-2xl" />
-            <div className="absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] blur-3xl" />
+            <div className="absolute -right-20 -top-28 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/8 blur-3xl" />
           </div>
 
           <div className="relative p-6 md:p-8">
@@ -317,17 +317,17 @@ function EditUserContent() {
               onClick={() =>
                 router.push("/super-admin/kelola-user")
               }
-              className="mb-4 inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-card)] backdrop-blur-sm transition hover:bg-[color-mix(in_srgb,var(--color-card)_18%,transparent)]"
+              className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Kembali ke Kelola User
             </button>
 
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] md:text-3xl">
+            <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
               Edit Pengguna
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/80">
               Perbarui informasi akun pengguna SmartSchool.
             </p>
           </div>
@@ -587,7 +587,7 @@ function EditUserContent() {
             <button
               type="submit"
               disabled={saving}
-              className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-6 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
+              className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-6 text-sm font-bold text-white ${themePrimaryShadow} transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
             >
               {saving ? (
                 <>

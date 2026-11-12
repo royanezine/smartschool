@@ -256,7 +256,7 @@ export default function TambahMateriPage() {
                 </Link>
 
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="theme-info flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+                  <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
                     <BookOpen className="h-6 w-6" />
                   </div>
 
@@ -526,7 +526,7 @@ export default function TambahMateriPage() {
                     {/* Preview */}
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                        <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                           <Eye className="h-4 w-4" />
                         </div>
 
@@ -613,7 +613,7 @@ export default function TambahMateriPage() {
                     {/* Panduan */}
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                        <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <Lightbulb className="h-4 w-4" />
                         </div>
 
@@ -658,10 +658,10 @@ export default function TambahMateriPage() {
                     </div>
 
                     {/* Info */}
-                    <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text theme-border flex items-start gap-3 rounded-2xl border p-4">
                       <Info
                         size={16}
-                        className="mt-0.5 shrink-0 text-[var(--color-info)]"
+                        className="mt-0.5 shrink-0 theme-primary-text"
                       />
 
                       <p className="text-[11px] leading-5">

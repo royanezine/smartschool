@@ -259,7 +259,7 @@ export default function DetailModulClassPage() {
 
                 <div className="theme-card border theme-border rounded-2xl p-5 shadow-sm space-y-4">
                   <div className="flex items-center gap-2.5 theme-text border-b theme-border-soft pb-3 font-semibold text-sm">
-                    <UserCheck size={18} className="text-emerald-600" />
+                    <UserCheck size={18} className="theme-primary-text" />
                     <span>Guru Pengampu LMS</span>
                   </div>
                   <div className="space-y-3 text-xs">
@@ -286,7 +286,7 @@ export default function DetailModulClassPage() {
 
                 <div className="theme-card border theme-border rounded-2xl p-5 shadow-sm space-y-4">
                   <div className="flex items-center gap-2.5 theme-text border-b theme-border-soft pb-3 font-semibold text-sm">
-                    <Calendar size={18} className="text-blue-500" />
+                    <Calendar size={18} className="theme-primary-text" />
                     <span>Jadwal Mengajar</span>
                   </div>
                   {jadwalList.length > 0 ? (

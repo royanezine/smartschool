@@ -280,7 +280,8 @@ export default function KategoriPelanggaranPage() {
               </div>
             )}
 
-            <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+            {/* FIX: grid hanya sampai 4 kolom agar 4 card memenuhi lebar penuh */}
+            <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Stat
                 label="Total Kategori"
                 value={stats.total}
@@ -755,14 +756,8 @@ function Stat({
   icon,
   tone = "blue",
 }) {
-  const tones = {
-    blue: "theme-info",
-    emerald: "theme-success",
-    amber: "theme-warning",
-    slate: "theme-card-soft theme-text-muted",
-  };
-
-  const toneClass = tones[tone] || tones.blue;
+  const toneClass =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
 
   const icons = {
     tag: (
@@ -796,7 +791,7 @@ function Stat({
   };
 
   return (
-    <div className="theme-card theme-border rounded-2xl border p-5 shadow-xl transition">
+    <div className="theme-card theme-border h-full rounded-2xl border p-5 shadow-xl transition">
       <div className="flex items-start justify-between">
         <div>
           <p className="theme-text-muted text-xs font-bold uppercase tracking-wider">

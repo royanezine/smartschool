@@ -113,7 +113,7 @@ export default function IdentitasPage() {
 
             {/* HEADER PAGE */}
             <div className="flex items-start gap-4">
-              <div className="shrink-0 p-3 rounded-xl theme-info border">
+              <div className="shrink-0 p-3 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border">
                 <Globe className="w-6 h-6" />
               </div>
               <div>

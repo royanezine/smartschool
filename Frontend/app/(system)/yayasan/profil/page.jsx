@@ -109,11 +109,11 @@ function getReviewStatusLabel(status) {
 function getReviewStatusClass(status) {
   switch (status) {
     case "tampil":
-      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
+      return "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400";
     case "disembunyikan":
-      return "border-red-500/20 bg-red-500/10 text-red-400";
+      return "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400";
     case "menunggu":
-      return "border-amber-500/20 bg-amber-500/10 text-amber-400";
+      return "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400";
     default:
       return "border-[var(--color-border)] bg-[var(--color-card)] theme-text-muted";
   }
@@ -134,7 +134,7 @@ function FormField({
   helper,
 }) {
   const inputClass =
-    "w-full rounded-lg border theme-border bg-[var(--color-card)] px-3 py-2.5 text-sm theme-text outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-70";
+    "w-full rounded-lg border theme-border bg-[var(--color-card)] px-3 py-2.5 text-sm theme-text outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] disabled:cursor-not-allowed disabled:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-70";
 
   return (
     <div className="min-w-0">
@@ -193,8 +193,8 @@ function SectionHeader({ icon: Icon, title, description, right }) {
   return (
     <div className="flex flex-col gap-3 border-b theme-border pb-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex min-w-0 items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
-          <Icon size={20} />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+          <Icon size={20} className="theme-primary-text" />
         </div>
 
         <div className="min-w-0">
@@ -250,10 +250,10 @@ function ReviewCard({ review }) {
     "Pengguna";
 
   return (
-    <article className="theme-border theme-card flex h-full flex-col rounded-xl border p-4 transition hover:border-blue-500/40 sm:p-5">
+    <article className="theme-border theme-card flex h-full flex-col rounded-xl border p-4 transition hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10 font-bold text-blue-500">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] font-bold theme-primary-text">
             {nama.charAt(0).toUpperCase()}
           </div>
 
@@ -263,7 +263,7 @@ function ReviewCard({ review }) {
           </div>
         </div>
 
-        <MessageSquareQuote size={20} className="shrink-0 text-blue-500/60" />
+        <MessageSquareQuote size={20} className="theme-primary-text shrink-0 opacity-60" />
       </div>
 
       <div className="mt-4">
@@ -526,12 +526,12 @@ export default function ProfilYayasanPage() {
   };
 
   return (
-    <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
       {/* PAGE HEADER */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-            <Building2 size={25} />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+            <Building2 size={25} className="theme-primary-text" />
           </div>
 
           <div>
@@ -552,7 +552,7 @@ export default function ProfilYayasanPage() {
               setError("");
               setSuccess("");
             }}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            className="theme-primary inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90"
           >
             <Edit size={16} />
             Edit Profil
@@ -564,7 +564,7 @@ export default function ProfilYayasanPage() {
       {error && (
         <div
           role="alert"
-          className="mb-5 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400"
+          className="mb-5 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-400"
         >
           <AlertCircle size={19} className="mt-0.5 shrink-0" />
           <div className="min-w-0 flex-1">
@@ -585,7 +585,7 @@ export default function ProfilYayasanPage() {
       {success && (
         <div
           role="status"
-          className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-400"
+          className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-700 dark:text-emerald-400"
         >
           <CheckCircle2 size={19} className="mt-0.5 shrink-0" />
           <p className="flex-1 font-medium">{success}</p>
@@ -603,7 +603,7 @@ export default function ProfilYayasanPage() {
       {/* PROFILE FORM */}
       {loading ? (
         <div className="theme-border theme-card flex min-h-[320px] flex-col items-center justify-center rounded-xl border">
-          <LoaderCircle size={32} className="animate-spin text-blue-500" />
+          <LoaderCircle size={32} className="theme-primary-text animate-spin" />
           <p className="theme-text-muted mt-3 text-sm font-medium">
             Memuat profil yayasan...
           </p>
@@ -743,8 +743,8 @@ export default function ProfilYayasanPage() {
             <div className="space-y-6">
               <section className="theme-border theme-card overflow-hidden rounded-xl border shadow-sm">
                 <div className="theme-border border-b bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] px-5 py-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-                    <Building2 size={24} />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                    <Building2 size={24} className="theme-primary-text" />
                   </div>
 
                   <h2 className="theme-text mt-4 break-words text-lg font-bold">
@@ -819,17 +819,17 @@ export default function ProfilYayasanPage() {
                 </div>
               </section>
 
-              <section className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-5">
+              <section className="rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-5">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-card)] text-blue-500">
-                    <ShieldCheck size={19} />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]">
+                    <ShieldCheck size={19} className="theme-primary-text" />
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-semibold text-blue-400">
+                    <h3 className="theme-text text-sm font-semibold">
                       Pengelolaan Profil
                     </h3>
-                    <p className="mt-1 text-sm leading-relaxed text-blue-300/90">
+                    <p className="theme-text-secondary mt-1 text-sm leading-relaxed">
                       Simpan perubahan profil agar informasi yayasan tetap
                       akurat di sistem SmartSchool.
                     </p>
@@ -873,7 +873,7 @@ export default function ProfilYayasanPage() {
                   <button
                     type="submit"
                     disabled={saving || !isDirty}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+                    className="theme-primary inline-flex items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold transition hover:opacity-90 disabled:opacity-50"
                   >
                     {saving ? (
                       <>
@@ -953,14 +953,14 @@ export default function ProfilYayasanPage() {
           </div>
 
           {reviewError && (
-            <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+            <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">
               <AlertCircle size={17} className="mt-0.5 shrink-0" />
               <p className="break-words">{reviewError}</p>
             </div>
           )}
 
           {reviewSuccess && (
-            <div className="mt-4 flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+            <div className="mt-4 flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-400">
               <CheckCircle2 size={17} className="mt-0.5 shrink-0" />
               <p>{reviewSuccess}</p>
             </div>
@@ -968,7 +968,7 @@ export default function ProfilYayasanPage() {
 
           {reviewLoading ? (
             <div className="theme-text-muted flex min-h-32 items-center justify-center gap-2">
-              <LoaderCircle size={20} className="animate-spin text-blue-500" />
+              <LoaderCircle size={20} className="theme-primary-text animate-spin" />
               <span className="text-sm">Memuat review Anda...</span>
             </div>
           ) : (
@@ -990,7 +990,7 @@ export default function ProfilYayasanPage() {
                     size={25}
                   />
 
-                  <span className="text-sm font-semibold text-amber-400">
+                  <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
                     {reviewForm.rating}/5
                   </span>
                 </div>
@@ -1020,7 +1020,7 @@ export default function ProfilYayasanPage() {
                   rows={4}
                   maxLength={5000}
                   disabled={reviewSaving}
-                  className="theme-border theme-text w-full resize-y rounded-lg border bg-[var(--color-card)] px-3 py-3 text-sm outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
+                  className="theme-border theme-text w-full resize-y rounded-lg border bg-[var(--color-card)] px-3 py-3 text-sm outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] disabled:opacity-60"
                 />
 
                 <p className="theme-text-muted mt-1 text-right text-xs">
@@ -1037,7 +1037,7 @@ export default function ProfilYayasanPage() {
                 <button
                   type="submit"
                   disabled={reviewSaving}
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="theme-primary inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {reviewSaving ? (
                     <>
@@ -1076,7 +1076,7 @@ export default function ProfilYayasanPage() {
           </div>
 
           {publicReviewError && (
-            <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-400">
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-400">
               <AlertCircle size={17} className="mt-0.5 shrink-0" />
               <p className="break-words">{publicReviewError}</p>
             </div>
@@ -1084,19 +1084,19 @@ export default function ProfilYayasanPage() {
 
           {publicReviewLoading ? (
             <div className="theme-text-muted flex min-h-36 items-center justify-center gap-2">
-              <LoaderCircle size={22} className="animate-spin text-blue-500" />
+              <LoaderCircle size={22} className="theme-primary-text animate-spin" />
               <span className="text-sm">Memuat testimoni...</span>
             </div>
           ) : publicReviews.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {publicReviews.map((item) => (
                 <ReviewCard key={item.id} review={item} />
               ))}
             </div>
           ) : (
             <div className="theme-border rounded-xl border border-dashed px-5 py-10 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10 text-blue-500">
-                <MessageSquareQuote size={23} />
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                <MessageSquareQuote size={23} className="theme-primary-text" />
               </div>
 
               <h4 className="theme-text mt-3 text-sm font-semibold">

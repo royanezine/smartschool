@@ -709,11 +709,10 @@ export default function SPPPage() {
 
 function StatCard({ icon, label, value, color, subtext }) {
   const colors = {
-    primary:
-      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]",
-    success: "theme-success",
-    warning: "theme-warning",
-    danger: "theme-danger",
+    primary: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    success: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    warning: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    danger: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   return (

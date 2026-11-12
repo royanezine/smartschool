@@ -153,7 +153,9 @@ function StatCard({
         </div>
 
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconClass}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+            iconClass || "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
+          }`}
         >
           <Icon size={19} />
         </div>
@@ -824,7 +826,7 @@ export default function AdminKelasPage() {
                   label="Total Kelas"
                   value={totalKelas}
                   description="Kelas terdaftar"
-                  iconClass="theme-info"
+                  iconClass="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                 />
 
                 <StatCard
@@ -832,8 +834,7 @@ export default function AdminKelasPage() {
                   label="Total Siswa"
                   value={totalSiswa}
                   description="Siswa pada halaman"
-                  iconClass="theme-card-soft text-[var(--color-info)]"
-                  valueClass="text-[var(--color-info)]"
+                  iconClass="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                 />
 
                 <StatCard
@@ -841,8 +842,7 @@ export default function AdminKelasPage() {
                   label="Punya Wali"
                   value={totalWali}
                   description="Sudah ada wali kelas"
-                  iconClass="theme-success"
-                  valueClass="text-[var(--color-success)]"
+                  iconClass="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                 />
 
                 <StatCard
@@ -850,8 +850,7 @@ export default function AdminKelasPage() {
                   label="Belum Ada Wali"
                   value={totalTanpaWali}
                   description="Belum ditentukan"
-                  iconClass="theme-warning"
-                  valueClass="text-[var(--color-warning)]"
+                  iconClass="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                 />
 
               </section>
@@ -1253,7 +1252,7 @@ export default function AdminKelasPage() {
 
                                   <div className="flex items-center gap-3">
 
-                                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                                       <GraduationCap
                                         size={18}
                                       />
@@ -1667,10 +1666,7 @@ export default function AdminKelasPage() {
                       shadow-sm
                     "
                   >
-                    <School
-                      size={17}
-                      className="text-[var(--color-info)]"
-                    />
+                    <School size={17} className="theme-primary-text" />
                   </div>
 
                   <div>
@@ -1704,7 +1700,7 @@ export default function AdminKelasPage() {
 
                   <div
                     className="
-                      theme-info
+                      bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text
                       flex h-9 w-9 shrink-0
                       items-center justify-center
                       rounded-lg

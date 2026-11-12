@@ -25,7 +25,9 @@ import { getSessionUser } from "@/lib/auth";
 
 // === TEMA & STYLING ===
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+"bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
+
+
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 const themePrimarySoftBorder =
@@ -238,7 +240,7 @@ export default function GuruIzinPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2.5">
                   <div
-                    className={`p-2 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} flex-shrink-0`}
+                    className={`p-2 rounded-lg ${themePrimaryGradient} text-white ${themePrimaryShadow} flex-shrink-0`}
                   >
                     <FileText size={18} />
                   </div>
@@ -277,8 +279,13 @@ export default function GuruIzinPage() {
 
                 <button
                   type="button"
-                  onClick={() => router.push("/guru/jadwal/izin/ajukan")}
-                  className={`inline-flex flex-1 items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg hover:opacity-90 transition-opacity sm:flex-initial ${themeSmallShadow} whitespace-nowrap`}
+onClick={() =>
+                    router.push(
+                      "/guru/jadwal/izin/ajukan"
+                    )
+                  }
+                  className={`inline-flex flex-1 items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white ${themePrimaryGradient} rounded-lg hover:opacity-90 transition-opacity sm:flex-initial ${themeSmallShadow} whitespace-nowrap`}
+
                 >
                   <Plus size={16} />
                   Ajukan Izin
@@ -317,19 +324,19 @@ export default function GuruIzinPage() {
                 icon={Hourglass}
                 label="Menunggu"
                 value={loading ? "..." : summary.menunggu}
-                iconClass={`${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`}
+                iconClass={`${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`}
               />
               <SummaryCard
                 icon={CheckCircle2}
                 label="Disetujui"
                 value={loading ? "..." : summary.disetujui}
-                iconClass={`${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
+                iconClass={`${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`}
               />
               <SummaryCard
                 icon={XCircle}
                 label="Ditolak"
                 value={loading ? "..." : summary.ditolak}
-                iconClass={`${themeDangerSurface} ${themeDangerText} ${themeDangerBorder}`}
+                iconClass={`${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`}
               />
             </div>
 
@@ -446,7 +453,7 @@ export default function GuruIzinPage() {
                           {/* GURU PENGGANTI */}
                           {item.guruPengganti?.namaLengkap && (
                             <div
-                              className={`mt-2.5 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs ${themeInfoSurface} ${themeInfoBorder} theme-text-secondary`}
+                              className={`mt-2.5 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs ${themePrimarySoft} ${themePrimarySoftBorder} theme-text-secondary`}
                             >
                               <UserCheck
                                 size={13}
@@ -522,10 +529,10 @@ export default function GuruIzinPage() {
 function SummaryCard({ icon: Icon, label, value, iconClass }) {
   return (
     <div
-      className={`theme-card rounded-xl ${themeNeutralBorder} p-3.5 ${themeCardShadow} flex items-center gap-3 min-w-0`}
+      className={`theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] p-3.5 ${themeCardShadow} flex items-center gap-3 min-w-0`}
     >
-      <div className={`p-2 rounded-lg border flex-shrink-0 ${iconClass}`}>
-        <Icon size={16} />
+      <div className="p-2 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex-shrink-0">
+        <Icon size={16} className="theme-primary-text shrink-0" />
       </div>
       <div className="min-w-0">
         <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">

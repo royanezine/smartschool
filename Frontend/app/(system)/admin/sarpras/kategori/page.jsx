@@ -619,22 +619,10 @@ export default function KategoriPage() {
 
 
 function StatCard({ icon: Icon, label, value, description, tone = "primary" }) {
-  const toneMap = {
-    primary: {
-      bg: themePrimarySoft,
-      icon: "text-[var(--color-primary)]",
-    },
-    success: {
-      bg: "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
-      icon: "text-[var(--color-success)]",
-    },
-    neutral: {
-      bg: themeNeutralSurface,
-      icon: "theme-text-muted",
-    },
+  const style = {
+    bg: themePrimarySoft,
+    icon: "theme-primary-text",
   };
-
-  const style = toneMap[tone] || toneMap.primary;
 
   return (
     <div

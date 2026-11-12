@@ -36,7 +36,7 @@ import { getAuthPayload, clearSession } from "@/lib/auth";
 
 const themeCard = "theme-card";
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 const themePrimarySoftBorder =
@@ -81,8 +81,7 @@ const dayNames = [
 ];
 
 const subjectColors = [
-  "#2563EB", "#0D9488", "#059669", "#DC2626", "#0891B2",
-  "#D97706", "#7C3AED", "#DB2777", "#F59E0B", "#4F46E5",
+  "var(--color-primary)",
 ];
 
 function normalizeText(value) {
@@ -686,7 +685,7 @@ export default function KalenderGuruPage() {
                   <button
                     type="button"
                     onClick={goToToday}
-                    className={`shrink-0 rounded-xl ${themePrimaryGradient} px-3 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:brightness-105 sm:px-4 sm:text-sm`}
+                    className={`shrink-0 rounded-xl ${themePrimaryGradient} px-3 py-2 text-xs font-semibold text-white ${themePrimaryShadow} transition-all hover:brightness-105 sm:px-4 sm:text-sm`}
                   >
                     Hari ini
                   </button>
@@ -751,7 +750,7 @@ export default function KalenderGuruPage() {
                             onClick={() => setSelectedDate(new Date(date))}
                             className={`
                               relative flex aspect-square min-w-0 flex-col items-center justify-center rounded-lg text-xs font-medium transition-all sm:text-sm
-                              ${isSelected ? `${themePrimaryGradient} scale-95 text-[var(--color-card)] ${themePrimaryShadow}` : ""}
+                              ${isSelected ? `${themePrimaryGradient} scale-95 text-white ${themePrimaryShadow}` : ""}
                               ${isToday && !isSelected ? `border-2 ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText}` : ""}
                               ${!isSelected && !isToday ? `theme-text ${themeNeutralHover}` : ""}
                               ${isWeekend && !isSelected && !isToday ? "theme-text-muted" : ""}
@@ -793,7 +792,7 @@ export default function KalenderGuruPage() {
 
                   <div className={`${themeCard} w-full min-w-0 rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} sm:p-5`}>
                     <h4 className="theme-text mb-3 flex items-center gap-2 text-sm font-semibold">
-                      <Award className="h-4 w-4 text-[var(--color-warning)]" />
+                      <Award className="h-4 w-4 theme-primary-text" />
                       Ringkasan Hari Ini
                     </h4>
 
@@ -801,8 +800,8 @@ export default function KalenderGuruPage() {
                       {[
                         { label: "Total Jam", value: formatDuration(totalMinutes), icon: Timer, color: "var(--color-primary)" },
                         { label: "Sesi", value: totalSessions, icon: Clock, color: "var(--color-primary)" },
-                        { label: "Kelas", value: uniqueClasses.join(", ") || "-", icon: Users, color: "var(--color-info)" },
-                        { label: "Mapel", value: uniqueSubjects.join(", ") || "-", icon: BookOpen, color: "var(--color-warning)" },
+                        { label: "Kelas", value: uniqueClasses.join(", ") || "-", icon: Users, color: "var(--color-primary)" },
+                        { label: "Mapel", value: uniqueSubjects.join(", ") || "-", icon: BookOpen, color: "var(--color-primary)" },
                       ].map((item) => {
                         const Icon = item.icon;
 

@@ -594,7 +594,7 @@ export default function DetailUjianAdminPage() {
 
               <div className="p-5 border theme-border rounded-xl theme-card-soft text-xs space-y-1.5">
                 <div className="flex items-center gap-2 font-semibold theme-text">
-                  <Users size={16} className="text-[var(--color-info)]" />
+                  <Users size={16} className="theme-primary-text" />
                   <span>Pemantauan Sesi Peserta</span>
                 </div>
                 <p className="theme-text-muted leading-relaxed">

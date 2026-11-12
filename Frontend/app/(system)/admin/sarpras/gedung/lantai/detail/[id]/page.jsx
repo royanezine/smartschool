@@ -449,7 +449,7 @@ export default function DetailLantaiPage() {
 
                     <div className="theme-border flex gap-4 border-b p-5 sm:border-r sm:border-b-0 lg:border-b-0">
                       <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeInfoSurface} theme-info`}
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text`}
                       >
                         <CalendarDays size={19} />
                       </div>
@@ -467,7 +467,7 @@ export default function DetailLantaiPage() {
 
                     <div className="flex gap-4 p-5">
                       <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeSuccessSurface} theme-success`}
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text`}
                       >
                         <Users size={19} />
                       </div>

@@ -565,7 +565,7 @@ export default function TabunganSiswaPage() {
                 </div>
               </section>
 
-              <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50/70 p-5 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
+              <div className="flex items-start gap-3 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-5 text-sm theme-primary-text ">
                 <Receipt size={20} className="mt-0.5 shrink-0" />
                 <div>
                   <h3 className="text-sm font-bold">Ringkasan laporan tabungan</h3>

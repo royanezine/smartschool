@@ -53,30 +53,7 @@ function StatCard({
   value,
   type = "blue",
 }) {
-  const styles = {
-    blue: {
-      box: "theme-info",
-      icon: "text-[var(--color-info)]",
-      value: "theme-text",
-    },
-    green: {
-      box: "theme-success",
-      icon: "text-[var(--color-success)]",
-      value: "text-[var(--color-success)]",
-    },
-    orange: {
-      box: "theme-warning",
-      icon: "text-[var(--color-warning)]",
-      value: "text-[var(--color-warning)]",
-    },
-    purple: {
-      box: "theme-card-soft",
-      icon: "text-[var(--color-primary)]",
-      value: "text-[var(--color-primary)]",
-    },
-  };
-
-  const style = styles[type];
+  const style = { box: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]", icon: "theme-primary-text", value: "theme-text" };
 
   return (
     <div className="theme-card theme-border rounded-xl border px-4 py-4 shadow-sm sm:px-5">
@@ -513,7 +490,7 @@ export default function PengaturanAgregatPage() {
             <div className="theme-info theme-border mt-5 rounded-xl border px-5 py-4">
               <div className="flex gap-3">
                 <div className="theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-lg shadow-sm">
-                  <Calculator size={19} className="text-[var(--color-info)]" />
+                  <Calculator size={19} className="theme-primary-text" />
                 </div>
                 <div>
                   <p className="theme-text text-sm font-semibold">Konfigurasi Agregat Nilai</p>
@@ -569,7 +546,7 @@ export default function PengaturanAgregatPage() {
                             <td className="theme-text-muted px-4 py-4 text-center text-sm font-medium">{index + 1}</td>
                             <td className="px-4 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                                   <BookOpen size={17} />
                                 </div>
                                 <div>
@@ -651,7 +628,7 @@ export default function PengaturanAgregatPage() {
             <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div className="theme-card theme-border rounded-xl border p-5">
                 <div className="flex items-center gap-3">
-                  <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
+                  <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-lg">
                     <Calculator size={18} />
                   </div>
                   <div>

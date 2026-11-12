@@ -319,7 +319,7 @@ export default function EditMasterShiftPage() {
 
         {/* Title */}
         <div className="mb-6 flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border theme-border theme-info">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
             <Clock3 size={21} />
           </div>
           <div>

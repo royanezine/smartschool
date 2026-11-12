@@ -164,10 +164,10 @@ function normalizeText(value) {
 
 function HelpCard({ icon: Icon, title, description, children }) {
   return (
-    <div className="theme-border theme-card rounded-xl border p-5 transition-colors">
+    <div className="theme-border theme-card h-full rounded-xl border p-5 transition-colors">
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
-          <Icon size={20} />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+          <Icon size={20} className="theme-primary-text" />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -192,7 +192,7 @@ function FAQItem({ item, open, onToggle }) {
         className="flex w-full items-center justify-between gap-4 p-4 text-left transition hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] sm:p-5"
       >
         <span className="flex min-w-0 items-start gap-3">
-          <span className="mt-0.5 shrink-0 text-blue-500">
+          <span className="theme-primary-text mt-0.5 shrink-0">
             <CircleHelp size={19} />
           </span>
 
@@ -270,12 +270,12 @@ export default function BantuanYayasanPage() {
   };
 
   return (
-    <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
       {/* HEADER */}
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-            <LifeBuoy size={25} />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+            <LifeBuoy size={25} className="theme-primary-text" />
           </div>
 
           <div>
@@ -289,7 +289,7 @@ export default function BantuanYayasanPage() {
           </div>
         </div>
 
-        <span className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400">
+        <span className="theme-primary-text inline-flex w-fit items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-3 py-1.5 text-xs font-medium">
           <ShieldCheck size={15} />
           Bantuan Pengguna Yayasan
         </span>
@@ -297,11 +297,11 @@ export default function BantuanYayasanPage() {
 
       {/* SEARCH HERO */}
       <section className="theme-border theme-card relative overflow-hidden rounded-2xl border p-5 sm:p-8">
-        <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] blur-3xl" />
 
         <div className="relative mx-auto max-w-3xl text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-            <HelpCircle size={26} />
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+            <HelpCircle size={26} className="theme-primary-text" />
           </div>
 
           <h2 className="theme-text mt-4 text-xl font-bold sm:text-2xl">
@@ -325,7 +325,7 @@ export default function BantuanYayasanPage() {
               onChange={handleSearchChange}
               placeholder="Cari bantuan, misalnya profil, sekolah, laporan..."
               aria-label="Cari bantuan"
-              className="theme-border theme-text w-full rounded-xl border bg-[var(--color-card)] py-3.5 pl-12 pr-12 text-sm outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="theme-border theme-text w-full rounded-xl border bg-[var(--color-card)] py-3.5 pl-12 pr-12 text-sm outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]"
             />
 
             {search && (
@@ -355,7 +355,7 @@ export default function BantuanYayasanPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {QUICK_LINKS.map((item) => {
             const Icon = item.icon;
 
@@ -363,10 +363,10 @@ export default function BantuanYayasanPage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group theme-border theme-card flex min-w-0 items-start gap-3 rounded-xl border p-4 transition hover:border-blue-500/50 hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
+                className="group theme-border theme-card flex min-w-0 items-start gap-3 rounded-xl border p-4 transition hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 transition group-hover:bg-blue-500/15">
-                  <Icon size={20} />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] transition group-hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]">
+                  <Icon size={20} className="theme-primary-text" />
                 </div>
 
                 <div className="min-w-0 flex-1">
@@ -376,7 +376,7 @@ export default function BantuanYayasanPage() {
                   <p className="theme-text-muted mt-1 text-xs leading-5">
                     {item.description}
                   </p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-500">
+                  <span className="theme-primary-text mt-3 inline-flex items-center gap-1 text-xs font-semibold">
                     Buka halaman
                     <ChevronRight
                       size={14}
@@ -394,8 +394,8 @@ export default function BantuanYayasanPage() {
       <section className="theme-border theme-card rounded-xl border p-4 sm:p-6">
         <div className="theme-border flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
-              <BookOpen size={20} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+              <BookOpen size={20} className="theme-primary-text" />
             </div>
 
             <div>
@@ -428,7 +428,7 @@ export default function BantuanYayasanPage() {
                   aria-pressed={active}
                   className={`inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition ${
                     active
-                      ? "border-blue-500 bg-blue-500/10 text-blue-500"
+                      ? "border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                       : "theme-border theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
                   }`}
                 >
@@ -457,8 +457,8 @@ export default function BantuanYayasanPage() {
             ))
           ) : (
             <div className="theme-border rounded-xl border border-dashed px-5 py-12 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10 text-blue-500">
-                <Search size={22} />
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                <Search size={22} className="theme-primary-text" />
               </div>
 
               <h3 className="theme-text mt-4 text-sm font-bold">
@@ -474,7 +474,7 @@ export default function BantuanYayasanPage() {
               <button
                 type="button"
                 onClick={clearSearch}
-                className="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+                className="theme-primary mt-4 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition hover:opacity-90"
               >
                 Tampilkan semua bantuan
               </button>
@@ -510,7 +510,7 @@ export default function BantuanYayasanPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <HelpCard
             icon={Lightbulb}
             title="1. Periksa kembali data"
@@ -532,11 +532,11 @@ export default function BantuanYayasanPage() {
       </section>
 
       {/* SUPPORT INFORMATION */}
-      <section className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5 sm:p-6">
+      <section className="rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)] p-5 sm:p-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-              <LifeBuoy size={23} />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+              <LifeBuoy size={23} className="theme-primary-text" />
             </div>
 
             <div>
@@ -582,7 +582,7 @@ export default function BantuanYayasanPage() {
                 window.alert(message);
               }
             }}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+            className="theme-primary inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition hover:opacity-90"
           >
             <MessageCircle size={17} />
             Siapkan Laporan Kendala

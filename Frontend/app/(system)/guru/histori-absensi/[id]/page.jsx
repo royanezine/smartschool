@@ -24,7 +24,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -701,52 +701,52 @@ export default function DetailSiswaPage() {
 
 
               <div
-                className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
+                className={`theme-card rounded-xl border ${themePrimarySoftBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
               >
                 <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
                   Hadir
                 </p>
 
-                <p className="text-xl font-bold text-[var(--color-success)]">
+                <p className="text-xl font-bold theme-text">
                   {totalStats.hadir}
                 </p>
               </div>
 
 
               <div
-                className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
+                className={`theme-card rounded-xl border ${themePrimarySoftBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
               >
                 <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
                   Sakit
                 </p>
 
-                <p className="text-xl font-bold text-[var(--color-warning)]">
+                <p className="text-xl font-bold theme-text">
                   {totalStats.sakit}
                 </p>
               </div>
 
 
               <div
-                className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
+                className={`theme-card rounded-xl border ${themePrimarySoftBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
               >
                 <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
                   Izin
                 </p>
 
-                <p className="text-xl font-bold text-[var(--color-info)]">
+                <p className="text-xl font-bold theme-text">
                   {totalStats.izin}
                 </p>
               </div>
 
 
               <div
-                className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
+                className={`theme-card rounded-xl border ${themePrimarySoftBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
               >
                 <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
                   Alpa
                 </p>
 
-                <p className="text-xl font-bold theme-danger">
+                <p className="text-xl font-bold theme-text">
                   {totalStats.alpa}
                 </p>
               </div>

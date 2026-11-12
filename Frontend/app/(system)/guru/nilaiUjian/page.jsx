@@ -34,7 +34,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -472,7 +472,7 @@ export default function NilaiUjianGuruPage() {
                       type="button"
                       onClick={handleExport}
                       disabled={exporting || loadingNilai}
-                      className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-initial`}
+                      className={`${themePrimaryGradient} text-white ${themePrimaryShadow} inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-initial`}
                     >
                       {exporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                       {exporting ? "Mengunduh..." : "Export Excel"}
@@ -772,7 +772,7 @@ export default function NilaiUjianGuruPage() {
                   accept=".xlsx, .xls"
                   onChange={handleFileChange}
                   disabled={isUploading}
-                  className="theme-input block w-full rounded-xl border px-3 py-2 text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                  className="theme-input block w-full rounded-xl border px-3 py-2 text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:theme-primary-text hover:file:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
                 />
                 <p className="theme-text-muted mt-1 text-[11px]">
                   Maksimal 5 MB. Kolom header wajib: <strong>NISN</strong> atau <strong>NIS</strong>, dan <strong>Nilai</strong>.
@@ -806,7 +806,7 @@ export default function NilaiUjianGuruPage() {
                 <button
                   type="submit"
                   disabled={isUploading || !importFile || !activeKomponenId}
-                  className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
+                  className={`${themePrimaryGradient} text-white ${themePrimaryShadow} inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                 >
                   {isUploading ? (
                     <>

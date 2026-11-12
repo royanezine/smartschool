@@ -55,7 +55,7 @@ const themePrimarySoftBorder =
   "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
 const themePrimaryText =
-  "text-[var(--color-primary)]";
+  "theme-primary-text";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
@@ -787,9 +787,9 @@ export default function JalurPPDBPage() {
                         ? "Tambah jalur PPDB"
                         : "Butuh izin ppdb.create"
                     }
-                    className={`${themePrimaryGradient} flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-medium text-[var(--color-card)] transition hover:brightness-95 ${!izin?.create ? "pointer-events-none opacity-50" : ""}`}
+                    className={`theme-primary flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 ${!izin?.create ? "pointer-events-none opacity-50" : ""}`}
                   >
-                    <Plus size={14} />
+                    <Plus size={14} className="shrink-0 text-white" />
                     Tambah Jalur
                   </Link>
                 </div>
@@ -1077,7 +1077,7 @@ export default function JalurPPDBPage() {
                     confirmDelete
                   }
                   disabled={deleting}
-                  className="rounded-md bg-[var(--color-danger)] px-4 py-2 text-xs font-medium text-[var(--color-card)] transition hover:brightness-90 disabled:opacity-60"
+                  className="rounded-md bg-[var(--color-danger)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-90 disabled:opacity-60"
                 >
                   {deleting
                     ? "Menghapus..."
@@ -1106,10 +1106,7 @@ function SummaryCard({
   soft = false,
   description,
 }) {
-  const toneClass =
-    tone === "success"
-      ? "text-[var(--color-success)]"
-      : "text-[var(--color-primary)]";
+  const toneClass = "theme-primary-text";
 
   if (soft) {
     return (

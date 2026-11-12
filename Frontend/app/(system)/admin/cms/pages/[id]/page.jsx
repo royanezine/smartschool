@@ -315,7 +315,7 @@ export default function PageDetail() {
 
           <main className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto p-6">
             <div className="flex flex-col items-center text-center">
-              <div className="theme-info mb-4 flex h-14 w-14 items-center justify-center rounded-2xl">
+              <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text mb-4 flex h-14 w-14 items-center justify-center rounded-2xl">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
               <h2 className="theme-text text-sm font-bold">
@@ -550,7 +550,7 @@ export default function PageDetail() {
 
                 <div className="theme-card grid grid-cols-1 divide-y divide-[var(--color-border-soft)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
                   <div className="flex items-center gap-3 px-5 py-4 sm:px-6">
-                    <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                       <CalendarDays className="h-4 w-4" />
                     </div>
                     <div>
@@ -602,7 +602,7 @@ export default function PageDetail() {
                   <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-xl">
                           <FileText className="h-4 w-4" />
                         </div>
                         <div>
@@ -653,7 +653,7 @@ export default function PageDetail() {
                   <section className="theme-card theme-border rounded-2xl border shadow-sm">
                     <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-xl">
                           <Menu className="h-4 w-4" />
                         </div>
                         <div>
@@ -784,7 +784,7 @@ export default function PageDetail() {
                 <aside className="min-w-0 space-y-5">
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-xl">
                         <Eye className="h-4 w-4" />
                       </div>
                       <div>
@@ -819,7 +819,7 @@ export default function PageDetail() {
 
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-xl">
                         <Globe2 className="h-4 w-4" />
                       </div>
                       <div>

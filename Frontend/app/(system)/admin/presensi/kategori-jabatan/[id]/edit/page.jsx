@@ -333,8 +333,8 @@ export default function EditKategoriJabatanPage() {
                         </div>
                       </section>
 
-                      <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
-                        <Info size={17} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text theme-border flex items-start gap-3 rounded-2xl border p-4">
+                        <Info size={17} className="mt-0.5 shrink-0 theme-primary-text" />
                         <p className="text-xs leading-5">
                           Tarif tidak diubah dari halaman ini. Untuk menambah
                           atau mengubah tarif, gunakan tombol{" "}
@@ -372,7 +372,7 @@ export default function EditKategoriJabatanPage() {
                     <aside className="flex min-w-0 flex-col gap-6">
                       <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                         <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                          <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                          <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                             <Eye className="h-4 w-4" />
                           </div>
                           <h2 className="theme-text text-sm font-bold">
@@ -422,7 +422,7 @@ export default function EditKategoriJabatanPage() {
 
                       <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                         <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                          <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                             <Lightbulb size={17} />
                           </div>
                           <h2 className="theme-text text-sm font-bold">

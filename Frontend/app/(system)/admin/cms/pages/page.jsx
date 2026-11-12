@@ -258,7 +258,7 @@ export default function PagesPage() {
 
           <main className="theme-page flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto p-6">
             <div className="flex flex-col items-center text-center">
-              <div className="theme-info mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border">
+              <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
 
@@ -307,7 +307,7 @@ export default function PagesPage() {
               <div className="mb-6 flex flex-col gap-4 lg:mb-7 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
                   <div className="flex items-center gap-3">
-                    <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border">
                       <LayoutTemplate className="h-5 w-5" />
                     </div>
 
@@ -418,7 +418,7 @@ export default function PagesPage() {
 
                 <div className="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
                   <div className="min-w-0 max-w-2xl">
-                    <div className="theme-info mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium">
                       <Globe2 className="h-3.5 w-3.5" />
                       Website Content
                     </div>
@@ -476,7 +476,7 @@ export default function PagesPage() {
                           Draft
                         </span>
 
-                        <FileText className="hidden h-4 w-4 text-[var(--color-warning)] sm:block" />
+                        <FileText className="hidden h-4 w-4 theme-primary-text sm:block" />
                       </div>
 
                       <p className="theme-text text-xl font-bold sm:text-2xl">
@@ -528,7 +528,7 @@ export default function PagesPage() {
               <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-card-soft theme-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div className="flex items-center gap-3">
-                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl border">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-xl border">
                       <File className="h-4 w-4" />
                     </div>
 
@@ -588,7 +588,7 @@ export default function PagesPage() {
                               >
                                 <td className="px-6 py-4">
                                   <div className="flex items-center gap-3">
-                                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
+                                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
                                       <File className="h-4 w-4" />
                                     </div>
 
@@ -674,7 +674,7 @@ export default function PagesPage() {
                         return (
                           <div key={page.id} className="p-4">
                             <div className="flex items-start gap-3">
-                              <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
+                              <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
                                 <File className="h-4 w-4" />
                               </div>
 
@@ -796,7 +796,7 @@ export default function PagesPage() {
 
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                 <div className="theme-card theme-border rounded-2xl border p-5">
-                  <div className="theme-info mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
+                  <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
                     <LayoutTemplate className="h-4 w-4" />
                   </div>
 
@@ -809,7 +809,7 @@ export default function PagesPage() {
                 </div>
 
                 <div className="theme-card theme-border rounded-2xl border p-5">
-                  <div className="theme-info mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
+                  <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
                     <Globe2 className="h-4 w-4" />
                   </div>
 
@@ -852,7 +852,7 @@ export default function PagesPage() {
           <div className="theme-card theme-border max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-3xl border shadow-2xl">
             <div className="theme-border flex items-center justify-between border-b px-5 py-4">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border">
+                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border">
                   <Eye className="h-4 w-4" />
                 </div>
 

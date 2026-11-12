@@ -451,7 +451,7 @@ export default function ModulClassPage() {
 
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                                <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center shrink-0">
                                   <UserCheck size={15} />
                                 </div>
                                 <div>

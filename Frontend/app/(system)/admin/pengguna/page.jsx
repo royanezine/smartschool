@@ -952,7 +952,7 @@ export default function PenggunaPage() {
                 value={statistics.siswa}
                 description="Pengguna dengan role Siswa"
                 icon={UserRound}
-                iconClass="theme-info"
+                iconClass="theme-primary-text"
                 loading={loading}
               />
 
@@ -961,7 +961,7 @@ export default function PenggunaPage() {
                 value={statistics.staff}
                 description="Pengguna dengan role Staff"
                 icon={BriefcaseBusiness}
-                iconClass="theme-warning"
+                iconClass="theme-primary-text"
                 loading={loading}
               />
             </div>

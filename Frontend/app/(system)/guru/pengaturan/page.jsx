@@ -140,8 +140,8 @@ function UbahKataSandiGuruSection() {
   return (
     <div className="rounded-2xl border theme-border theme-card overflow-hidden shadow-sm">
       <div className="flex items-center gap-3 px-5 sm:px-6 py-4 border-b theme-border-soft">
-        <div className="w-10 h-10 rounded-xl theme-info flex items-center justify-center flex-shrink-0">
-          <Lock size={18} className="text-[var(--color-info)]" />
+        <div className="w-10 h-10 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center flex-shrink-0">
+          <Lock size={18} className="theme-primary-text" />
         </div>
         <div className="min-w-0">
           <h2 className="text-sm sm:text-base font-bold theme-text">
@@ -517,8 +517,8 @@ export default function GuruPengaturanPage() {
             {tabAktif === "profil" && (
               <div className="rounded-2xl border theme-border theme-card overflow-hidden shadow-sm">
                 <div className="flex items-center gap-3 px-5 sm:px-6 py-4 border-b theme-border-soft">
-                  <div className="w-10 h-10 rounded-xl theme-info flex items-center justify-center flex-shrink-0">
-                    <Settings size={18} className="text-[var(--color-info)]" />
+                  <div className="w-10 h-10 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center flex-shrink-0">
+                    <Settings size={18} className="theme-primary-text" />
                   </div>
 
                   <div className="min-w-0">

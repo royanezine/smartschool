@@ -35,9 +35,9 @@ import { getUjianById } from "@/services/ujian.service";
 import { deleteSoal } from "@/services/soalUjian.service";
 
 const JENIS_SOAL = {
-  pilihan_ganda: { label: "Pilihan Ganda", color: "#2563EB", bg: "rgba(37,99,235,0.10)" },
-  esai: { label: "Esai", color: "#7C3AED", bg: "rgba(124,58,237,0.10)" },
-  benar_salah: { label: "Benar / Salah", color: "#0891B2", bg: "rgba(8,145,178,0.10)" },
+  pilihan_ganda: { label: "Pilihan Ganda", color: "var(--color-primary)", bg: "color-mix(in srgb, var(--color-primary) 10%, transparent)" },
+  esai: { label: "Esai", color: "var(--color-primary)", bg: "color-mix(in srgb, var(--color-primary) 10%, transparent)" },
+  benar_salah: { label: "Benar / Salah", color: "var(--color-primary)", bg: "color-mix(in srgb, var(--color-primary) 10%, transparent)" },
 };
 
 function parseObject(response) {
@@ -89,18 +89,17 @@ function getPilihan(item) {
   return [];
 }
 
-function StatCard({ label, value, icon: Icon, color }) {
+function StatCard({ label, value, icon: Icon }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm">
       <span
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-        style={{ backgroundColor: `${color}15`, color }}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
       >
         <Icon size={18} />
       </span>
-      <div className="min-w-0">
-        <p className="truncate text-xs font-medium text-[var(--color-text-secondary)]">{label}</p>
-        <p className="text-xl font-bold text-[var(--color-text)]">{value}</p>
+      <div>
+        <p className="text-xs font-medium text-[var(--color-text-secondary)]">{label}</p>
+        <p className="mt-0.5 text-lg font-bold text-[var(--color-text)]">{value}</p>
       </div>
     </div>
   );
@@ -507,20 +506,17 @@ export default function KelolaSoalUjianPage() {
               label="Total Soal"
               value={stats.total}
               icon={ListChecks}
-              color="var(--school-primary)"
             />
             <StatCard
               label="Pilihan Ganda"
               value={stats.pilihanGanda}
               icon={CheckCircle2}
-              color="#16A34A"
             />
-            <StatCard label="Esai" value={stats.esai} icon={FileText} color="#7C3AED" />
+            <StatCard label="Esai" value={stats.esai} icon={FileText} />
             <StatCard
               label="Total Poin"
               value={formatPoin(stats.totalPoin)}
               icon={ClipboardList}
-              color="var(--school-accent)"
             />
           </div>
 
@@ -709,12 +705,12 @@ export default function KelolaSoalUjianPage() {
                               className="mt-3 rounded-xl border px-3 py-2.5"
                               style={{
                                 backgroundColor:
-                                  "color-mix(in srgb, #7C3AED 8%, transparent)",
+                                  "color-mix(in srgb, var(--color-primary) 8%, transparent)",
                                 borderColor:
-                                  "color-mix(in srgb, #7C3AED 20%, var(--color-border))",
+                                  "color-mix(in srgb, var(--color-primary) 20%, var(--color-border))",
                               }}
                             >
-                              <p className="text-xs font-semibold" style={{ color: "#7C3AED" }}>
+                              <p className="text-xs font-semibold theme-primary-text">
                                 Soal Esai
                               </p>
                               <p className="mt-0.5 text-xs text-[var(--color-text-secondary)]">

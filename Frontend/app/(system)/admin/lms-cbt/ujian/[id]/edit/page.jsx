@@ -234,7 +234,7 @@ export default function EditUjianAdminPage() {
                 <div className="theme-card border theme-border rounded-xl p-6 shadow-sm">
                   <div className="mb-6 p-4 rounded-xl theme-card-soft border theme-border flex flex-wrap items-center justify-between gap-4 text-xs">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                         <BookOpen size={16} className="text-[var(--color-primary)]" />
                       </div>
                       <div>
@@ -245,7 +245,7 @@ export default function EditUjianAdminPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                         <UserRound size={16} className="text-[var(--color-primary)]" />
                       </div>
                       <div>
@@ -256,7 +256,7 @@ export default function EditUjianAdminPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                         <FileText size={16} className="text-[var(--color-primary)]" />
                       </div>
                       <div>
@@ -419,7 +419,7 @@ export default function EditUjianAdminPage() {
                 <aside className="space-y-5">
                   <section className="theme-card border theme-border rounded-xl p-5 shadow-sm">
                     <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                         <Info size={16} className="text-[var(--color-primary)]" />
                       </div>
                       <h2 className="text-sm font-bold theme-text">Panduan Edit</h2>

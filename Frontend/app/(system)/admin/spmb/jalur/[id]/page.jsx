@@ -97,7 +97,7 @@ function getPeriodeStatus(jalur) {
   if (start && now < start) {
     return {
       label: "Akan Datang",
-      color: "text-[var(--color-info)] bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)]",
+      color: "theme-primary-text bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)]",
     };
   }
 
@@ -288,9 +288,9 @@ export default function DetailJalurPage() {
                     {canUpdate && (
                       <Link
                         href={`/admin/spmb/jalur/${encodeURIComponent(id)}/edit`}
-                        className={`${themePrimaryGradient} inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95`}
+                        className="theme-primary inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-xs font-semibold text-white shadow-sm transition hover:opacity-90"
                       >
-                        <Pencil size={14} />
+                        <Pencil size={14} className="shrink-0 text-white" />
                         Edit Jalur
                       </Link>
                     )}
@@ -349,8 +349,8 @@ export default function DetailJalurPage() {
                   <div className="p-6 sm:p-8">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex items-start gap-3.5">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                          <Route size={24} />
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                          <Route size={24} className="theme-primary-text shrink-0" />
                         </div>
                         <div>
                           <div className="flex flex-wrap items-center gap-2.5">
@@ -419,7 +419,7 @@ export default function DetailJalurPage() {
 
                       {/* Tanggal Mulai */}
                       <div className="flex items-start gap-3.5">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <CalendarDays size={18} />
                         </div>
                         <div>
@@ -437,7 +437,7 @@ export default function DetailJalurPage() {
 
                       {/* Tanggal Selesai */}
                       <div className="flex items-start gap-3.5">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <Clock3 size={18} />
                         </div>
                         <div>

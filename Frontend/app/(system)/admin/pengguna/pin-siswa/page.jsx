@@ -637,7 +637,7 @@ export default function PengaturanPinPage() {
                 value={totalSudahAtur}
                 description="Siswa yang sudah membuat PIN"
                 icon={CheckCircle2}
-                iconClass="theme-success"
+                iconClass="theme-primary-text"
                 loading={loading}
               />
 
@@ -646,7 +646,7 @@ export default function PengaturanPinPage() {
                 value={totalBelumAtur}
                 description="Siswa yang perlu membuat PIN"
                 icon={KeyRound}
-                iconClass="theme-warning"
+                iconClass="theme-primary-text"
                 loading={loading}
               />
             </div>

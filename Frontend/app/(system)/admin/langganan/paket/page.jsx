@@ -292,7 +292,7 @@ export default function PaketSayaPage() {
                     }
                     description="Status langganan sekolah"
                     icon={CheckCircle2}
-                    iconClass="text-[var(--color-success)]"
+                    iconClass="theme-primary-text"
                   />
 
                   <StatCard

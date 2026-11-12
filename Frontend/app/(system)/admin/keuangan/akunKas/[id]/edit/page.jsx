@@ -179,7 +179,7 @@ export default function EditAkunKasPage() {
                   </Link>
 
                   <div className="flex items-center gap-3">
-                    <div className="theme-info flex h-12 w-12 items-center justify-center rounded-xl border">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-12 w-12 items-center justify-center rounded-xl border">
                       <Wallet size={23} />
                     </div>
 
@@ -368,10 +368,7 @@ export default function EditAkunKasPage() {
                     </div>
 
                     <div className="theme-card-soft theme-border flex items-start gap-3 rounded-xl border p-4">
-                      <Info
-                        size={18}
-                        className="mt-0.5 shrink-0 text-[var(--color-info)]"
-                      />
+                      <Info size={18} className="mt-0.5 shrink-0 theme-primary-text" />
                       <p className="theme-text-secondary text-xs leading-5">
                         Perubahan nama, jenis, dan status akan dikirim ke
                         endpoint update akun kas yang tersedia di Backend.

@@ -171,9 +171,9 @@ export default function TambahModulClassPage() {
           </div>
 
           <div className="w-full mb-6 p-4 rounded-xl border border-[color-mix(in_srgb,var(--color-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] flex items-start gap-3 text-xs theme-text">
-            <Info size={18} className="text-[var(--color-info)] shrink-0 mt-0.5" />
+            <Info size={18} className="theme-primary-text shrink-0 mt-0.5" />
             <div className="leading-relaxed">
-              <p className="font-semibold text-[var(--color-info)]">
+              <p className="font-semibold theme-primary-text">
                 Relasi Kelas & Mata Pelajaran LMS
               </p>
               <p className="mt-0.5 text-xs opacity-90">
@@ -258,7 +258,7 @@ export default function TambahModulClassPage() {
 
                   <div className="space-y-2">
                     <label className="block text-xs font-semibold theme-text uppercase tracking-wider flex items-center gap-1.5">
-                      <UserCheck size={15} className="text-emerald-600" />
+                      <UserCheck size={15} className="theme-primary-text" />
                       <span>Guru Pengampu *</span>
                     </label>
                     <select

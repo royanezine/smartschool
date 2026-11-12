@@ -369,7 +369,7 @@ export default function FinalisasiNilaiPage() {
                       </span>
                     </p>
                   </div>
-                  <ClipboardCheck size={19} className="text-teal-600" />
+                  <ClipboardCheck size={19} className="theme-primary-text" />
                 </div>
                 <p className="theme-text-secondary mt-3 text-xs">
                   Berdasarkan kelengkapan komponen nilai
@@ -512,9 +512,9 @@ export default function FinalisasiNilaiPage() {
                   <span
                     className={`inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold ${
                       isFinalized
-                        ? "bg-teal-500/10 text-teal-700"
+                        ? "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]"
                         : readyToFinalize
-                          ? "bg-blue-500/10 text-blue-700"
+                          ? "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                           : "bg-amber-500/10 text-amber-700"
                     }`}
                   >
@@ -625,7 +625,7 @@ export default function FinalisasiNilaiPage() {
                               <span
                                 className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
                                   complete
-                                    ? "text-teal-600"
+                                    ? "text-[var(--color-success)]"
                                     : "text-amber-600"
                                 }`}
                               >
@@ -838,7 +838,7 @@ export default function FinalisasiNilaiPage() {
               </div>
               <div className="mt-3 flex justify-between gap-3 text-sm">
                 <span className="theme-text-secondary">Nilai lengkap</span>
-                <span className="font-semibold text-teal-600">
+                <span className="font-semibold text-[var(--color-success)]">
                   {completedStudents.length}
                 </span>
               </div>

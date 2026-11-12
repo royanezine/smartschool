@@ -625,7 +625,7 @@ export default function MateriModulAjarPage() {
                     Berkas teks & modul PDF
                   </p>
                 </div>
-                <div className="w-11 h-11 rounded-xl theme-danger flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                   <FileText size={21} />
                 </div>
               </div>
@@ -651,7 +651,7 @@ export default function MateriModulAjarPage() {
                     Media video pembelajaran
                   </p>
                 </div>
-                <div className="w-11 h-11 rounded-xl theme-info flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                   <Video size={21} />
                 </div>
               </div>
@@ -677,7 +677,7 @@ export default function MateriModulAjarPage() {
                     Link sumber eksternal
                   </p>
                 </div>
-                <div className="w-11 h-11 rounded-xl theme-warning flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                   <LinkIcon size={21} />
                 </div>
               </div>

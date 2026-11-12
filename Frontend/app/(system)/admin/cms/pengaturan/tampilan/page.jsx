@@ -554,16 +554,16 @@ export default function TampilanPage() {
             <nav className="flex items-center gap-2 text-sm">
               <a
                 href="/admin/cms"
-                className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+                className="theme-text-muted hover:text-[var(--color-primary)]"
               >
                 Dashboard
               </a>
 
-              <ChevronRight className="h-4 w-4 text-slate-400" />
+              <ChevronRight className="h-4 w-4 theme-text-muted" />
 
               <a
                 href="/admin/cms/pengaturan"
-                className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+                className="theme-text-muted hover:text-[var(--color-primary)]"
               >
                 Pengaturan
               </a>

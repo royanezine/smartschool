@@ -26,7 +26,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -550,7 +550,7 @@ export default function HistoriAbsensiPage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] flex items-center justify-center ${themePrimaryShadow} flex-shrink-0`}
+                        className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${themePrimaryGradient} text-white flex items-center justify-center ${themePrimaryShadow} flex-shrink-0`}
                       >
                         <BarChart3
                           size={22}
@@ -900,13 +900,14 @@ export default function HistoriAbsensiPage() {
               <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3">
 
                 <div
-                  className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                  className={`theme-card rounded-2xl border ${themePrimarySoftBorder} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-lg ${themeNeutralSurface} theme-text-secondary flex items-center justify-center mb-3`}
+                    className={`w-8 h-8 rounded-lg ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center mb-3`}
                   >
                     <BarChart3
                       size={15}
+                      className="theme-primary-text shrink-0"
                     />
                   </div>
 
@@ -921,11 +922,12 @@ export default function HistoriAbsensiPage() {
 
 
                 <div
-                  className={`theme-card rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                  className={`theme-card rounded-2xl border ${themePrimarySoftBorder} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)] text-[var(--color-success)] flex items-center justify-center mb-3">
+                  <div className={`w-8 h-8 rounded-lg ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center mb-3`}>
                     <CheckCircle2
                       size={15}
+                      className="theme-primary-text shrink-0"
                     />
                   </div>
 
@@ -933,18 +935,19 @@ export default function HistoriAbsensiPage() {
                     Hadir
                   </p>
 
-                  <p className="text-2xl font-bold mt-0.5 text-[var(--color-success)]">
+                  <p className="text-2xl font-bold mt-0.5 theme-text">
                     {stats.hadir}
                   </p>
                 </div>
 
 
                 <div
-                  className={`theme-card rounded-2xl border ${themeWarningBorder} ${themeWarningSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                  className={`theme-card rounded-2xl border ${themePrimarySoftBorder} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-warning)_15%,transparent)] text-[var(--color-warning)] flex items-center justify-center mb-3">
+                  <div className={`w-8 h-8 rounded-lg ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center mb-3`}>
                     <Stethoscope
                       size={15}
+                      className="theme-primary-text shrink-0"
                     />
                   </div>
 
@@ -952,18 +955,19 @@ export default function HistoriAbsensiPage() {
                     Sakit
                   </p>
 
-                  <p className="text-2xl font-bold mt-0.5 text-[var(--color-warning)]">
+                  <p className="text-2xl font-bold mt-0.5 theme-text">
                     {stats.sakit}
                   </p>
                 </div>
 
 
                 <div
-                  className={`theme-card rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                  className={`theme-card rounded-2xl border ${themePrimarySoftBorder} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-info)_15%,transparent)] text-[var(--color-info)] flex items-center justify-center mb-3">
+                  <div className={`w-8 h-8 rounded-lg ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center mb-3`}>
                     <FileText
                       size={15}
+                      className="theme-primary-text shrink-0"
                     />
                   </div>
 
@@ -971,18 +975,19 @@ export default function HistoriAbsensiPage() {
                     Izin
                   </p>
 
-                  <p className="text-2xl font-bold mt-0.5 text-[var(--color-info)]">
+                  <p className="text-2xl font-bold mt-0.5 theme-text">
                     {stats.izin}
                   </p>
                 </div>
 
 
                 <div
-                  className={`theme-card rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                  className={`theme-card rounded-2xl border ${themePrimarySoftBorder} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
                 >
-                  <div className={`w-8 h-8 rounded-lg ${themeNeutralSurface} theme-danger flex items-center justify-center mb-3`}>
+                  <div className={`w-8 h-8 rounded-lg ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center mb-3`}>
                     <XCircle
                       size={15}
+                      className="theme-primary-text shrink-0"
                     />
                   </div>
 
@@ -990,7 +995,7 @@ export default function HistoriAbsensiPage() {
                     Alpa
                   </p>
 
-                  <p className="text-2xl font-bold mt-0.5 theme-danger">
+                  <p className="text-2xl font-bold mt-0.5 theme-text">
                     {stats.alpa}
                   </p>
                 </div>
@@ -1000,18 +1005,18 @@ export default function HistoriAbsensiPage() {
                   className={`rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-card)_55%,transparent)] ${themePrimaryText} flex items-center justify-center mb-3`}
+                    className={`w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] ${themePrimaryText} flex items-center justify-center mb-3`}
                   >
                     {stats.persentase >=
                     80 ? (
                       <TrendingUp
                         size={16}
-                        className="text-[var(--color-success)]"
+                        className="theme-primary-text shrink-0"
                       />
                     ) : (
                       <TrendingDown
                         size={16}
-                        className="text-[var(--color-warning)]"
+                        className="theme-primary-text shrink-0"
                       />
                     )}
                   </div>
@@ -1022,12 +1027,7 @@ export default function HistoriAbsensiPage() {
 
                   <div className="flex items-center gap-1">
                     <p
-                      className={`text-2xl font-bold ${
-                        stats.persentase >=
-                        80
-                          ? "text-[var(--color-success)]"
-                          : "text-[var(--color-warning)]"
-                      }`}
+                      className="text-2xl font-bold theme-primary-text"
                     >
                       {stats.persentase}%
                     </p>
@@ -1372,7 +1372,7 @@ export default function HistoriAbsensiPage() {
                               className={`w-8 h-8 rounded-lg text-xs font-semibold transition ${
                                 currentPage ===
                                 pageNum
-                                  ? `${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow}`
+                                  ? `${themePrimaryGradient} text-white ${themeSmallShadow}`
                                   : `theme-text-secondary ${themeNeutralHover}`
                               }`}
                             >

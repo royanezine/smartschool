@@ -459,7 +459,7 @@ function StatCard({ label, value, icon: Icon, color }) {
         </div>
 
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-xl ${color}`}
+          className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
         >
           <Icon className="h-5 w-5" />
         </div>

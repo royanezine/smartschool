@@ -455,7 +455,7 @@ export default function TambahUserPage() {
                 {/* === KOLOM KIRI: Form Utama === */}
                 <div className="theme-card theme-border min-w-0 space-y-6 overflow-hidden rounded-2xl border p-4 shadow-sm sm:p-5 lg:p-6">
                   <div className="theme-border-soft mb-6 flex items-center gap-3 border-b pb-4">
-                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-xl">
                       <Info size={17} />
                     </div>
                     <div>
@@ -802,7 +802,7 @@ export default function TambahUserPage() {
                   {/* Card Ringkasan/Preview */}
                   <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                      <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                         <Eye className="h-4 w-4" />
                       </div>
                       <h2 className="theme-text text-sm font-bold">Preview Akun</h2>
@@ -837,7 +837,7 @@ export default function TambahUserPage() {
                   {/* Card Panduan */}
                   <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                      <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <Lightbulb className="h-4 w-4" />
                       </div>
                       <h2 className="theme-text text-sm font-bold">Panduan</h2>
@@ -867,8 +867,8 @@ export default function TambahUserPage() {
                   </div>
 
                   {/* Info Biru */}
-                  <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
-                    <Info size={16} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                  <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text theme-border flex items-start gap-3 rounded-2xl border p-4">
+                    <Info size={16} className="mt-0.5 shrink-0 theme-primary-text" />
                     <p className="text-[11px] leading-5">
                       Status akun yang baru dibuat akan otomatis menjadi <b>Aktif</b> setelah tersimpan di backend.
                     </p>

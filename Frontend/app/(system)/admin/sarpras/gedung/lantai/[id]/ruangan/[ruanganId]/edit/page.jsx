@@ -201,7 +201,7 @@ export default function EditRuanganPage() {
 
             {/* Informative Status Notification */}
             {infoMessage && (
-              <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)] p-4 sm:p-5 text-sm theme-info">
+              <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)] p-4 sm:p-5 text-sm bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <CheckCircle2 size={20} className="shrink-0 mt-0.5 text-[var(--color-info)]" />
                 <div className="space-y-1">
                   <p className="font-semibold text-sm">Simulasi Update Berhasil</p>

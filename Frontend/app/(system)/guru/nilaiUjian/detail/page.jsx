@@ -30,7 +30,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -443,7 +443,7 @@ export default function DetailNilaiSiswaPage() {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className={`mt-6 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-2.5 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90`}
+                className={`mt-6 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-2.5 text-sm font-bold text-white ${themePrimaryShadow} transition hover:opacity-90`}
               >
                 <ArrowLeft className="h-4 w-4" />
                 Kembali

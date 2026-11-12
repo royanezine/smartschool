@@ -859,7 +859,7 @@ export default function PenggajianPage() {
                                       `/admin/keuangan/penggajian/${item.id}`
                                     )
                                   }
-                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg theme-text-muted transition hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
+                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                                 >
                                   <Eye size={16} />
                                 </button>
@@ -869,7 +869,7 @@ export default function PenggajianPage() {
                                   title="Edit penggajian"
                                   aria-label={`Edit penggajian ${item.pengguna?.namaLengkap ?? ""}`}
                                   onClick={() => handleEdit(item)}
-                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg theme-text-muted transition hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/40 dark:hover:text-amber-300"
+                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                                 >
                                   <Pencil size={16} />
                                 </button>
@@ -955,11 +955,9 @@ function SummaryCard({
   tone = "blue",
 }) {
   const toneClasses = {
-    blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
-    emerald:
-      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
-    indigo:
-      "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300",
+    blue: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    emerald: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    indigo: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   return (

@@ -45,7 +45,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -1206,7 +1206,8 @@ export default function GuruMateriPage() {
                           "/guru/materi/tambah"
                         )
                       }
-                      className={`inline-flex items-center gap-2 mt-6 px-5 py-3 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold transition-all ${themePrimaryShadow}`}
+                      className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl ${themePrimaryGradient} text-white text-sm font-semibold transition-all ${themePrimaryShadow}`}
+
                     >
                       <Plus size={16} />
                       Tambah Materi Sekarang
@@ -1257,6 +1258,7 @@ export default function GuruMateriPage() {
                           materi.id
                         }
                         className={`group flex flex-col min-w-0 theme-card border ${themeNeutralBorder} rounded-2xl ${themeSmallShadow} hover:border-[var(--color-primary)] hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_10%,transparent)] transition-all duration-300 overflow-hidden`}
+
                       >
                         <div className="p-5 flex flex-col flex-1">
 

@@ -21,7 +21,7 @@ import { getLaporanInventaris } from "@/services/yayasan.service";
 const KONDISI_OPTIONS = ["Semua Kondisi", "Baik", "Perlu Perbaikan", "Rusak"];
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -65,12 +65,6 @@ const themeWarningSurface =
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
 const formatRupiah = (n) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -100,22 +94,24 @@ const kondisiStyle = (kondisi) => {
 };
 
 function SummaryCard({ icon: Icon, label, value, variant = "primary" }) {
-  const variants = {
-    primary: `${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder}`,
-    success: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
-    warning: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
-    info: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
-  };
+  const dotColor =
+    variant === "success"
+      ? "bg-[var(--color-success)]"
+      : variant === "warning"
+        ? "bg-[var(--color-warning)]"
+        : null;
+
   return (
     <div
       className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeSmallShadow}`}
     >
-      <div className={`shrink-0 rounded-lg border p-2 ${variants[variant]}`}>
-        <Icon size={16} />
+      <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2">
+        <Icon size={16} className="theme-primary-text" />
       </div>
       <div className="min-w-0">
-        <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
-          {label}
+        <p className="flex items-center gap-1.5 truncate text-[11px] font-medium uppercase tracking-wider theme-text-muted">
+          {dotColor && <span className={`h-2 w-2 shrink-0 rounded-full ${dotColor}`} />}
+          <span className="truncate">{label}</span>
         </p>
         <p className="theme-text truncate text-lg font-bold leading-tight">
           {value}
@@ -299,7 +295,7 @@ export default function DataInventarisPage() {
 
               <div className="flex items-center gap-2.5">
                 <div
-                  className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow}`}
+                  className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-white ${themeSmallShadow}`}
                 >
                   <Boxes size={18} />
                 </div>
@@ -311,7 +307,7 @@ export default function DataInventarisPage() {
               <p className="theme-text-secondary ml-[42px] mt-1 flex items-center gap-1.5 text-sm">
                 <Sparkles
                   size={14}
-                  className="shrink-0 text-[var(--color-primary)]"
+                  className="theme-primary-text shrink-0"
                 />
                 <span className="truncate">
                   Rekap aset dan barang inventaris seluruh unit sekolah.
@@ -323,7 +319,7 @@ export default function DataInventarisPage() {
               type="button"
               onClick={handleDownload}
               disabled={loading || filteredInventaris.length === 0}
-              className={`inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] transition-colors ${themePrimaryHover} ${themeSmallShadow} disabled:opacity-50`}
+              className={`theme-primary inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${themeSmallShadow} disabled:opacity-50`}
             >
               <Download size={16} /> Unduh Laporan
             </button>
@@ -405,7 +401,7 @@ export default function DataInventarisPage() {
           </div>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard
               icon={Package}
               label="Total Unit Barang"

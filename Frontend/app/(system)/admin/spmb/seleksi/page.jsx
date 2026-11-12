@@ -356,7 +356,7 @@ function SeleksiSpmbContent() {
                         onClick={() => handlePilihJalur(j.id)}
                         className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-semibold transition ${
                           isSelected
-                            ? `${themePrimaryGradient} border-transparent text-[var(--color-card)] shadow-sm`
+                            ? "theme-primary border-transparent text-white shadow-sm"
                             : `theme-card theme-border theme-text ${themeNeutralHover}`
                         }`}
                       >

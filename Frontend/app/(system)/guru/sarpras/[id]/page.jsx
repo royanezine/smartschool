@@ -101,7 +101,7 @@ const statusConfig = {
   diproses: {
     label: "Diproses",
     className:
-      "bg-[var(--color-info)]/10 text-[var(--color-info)] border-[var(--color-info)]/20",
+      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]",
   },
   selesai: {
     label: "Selesai",
@@ -227,7 +227,7 @@ export default function DetailLaporanKerusakanPage() {
                   <div className="text-center">
                     <Loader2
                       size={30}
-                      className="mx-auto animate-spin text-[var(--color-primary)]"
+                      className="mx-auto animate-spin theme-primary-text"
                     />
 
                     <p className="mt-3 text-sm text-[var(--color-text-secondary)]">

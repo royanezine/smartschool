@@ -133,33 +133,7 @@ function StatCard({
   value,
   type = "blue",
 }) {
-  const styles = {
-    blue: {
-      box: "theme-info",
-      icon: "text-theme-info",
-      value: "theme-text",
-    },
-
-    green: {
-      box: "theme-success",
-      icon: "text-theme-success",
-      value: "text-theme-success",
-    },
-
-    orange: {
-      box: "theme-warning",
-      icon: "text-theme-warning",
-      value: "text-theme-warning",
-    },
-
-    purple: {
-      box: "theme-info",
-      icon: "text-theme-info",
-      value: "text-theme-info",
-    },
-  };
-
-  const style = styles[type];
+  const style = { box: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]", icon: "theme-primary-text", value: "theme-text" };
 
   return (
     <div
@@ -761,7 +735,8 @@ export default function EntryNilaiPage() {
             )}
 
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
+            {/* 4 kartu: 1 kolom -> 2 kolom (sm) -> 4 kolom (xl ke atas, penuh) */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard icon={Users} label="Total Siswa" value={totalStudents} type="blue" />
               <StatCard icon={CircleCheck} label="Nilai Tersedia" value={completedStudents} type="green" />
               <StatCard icon={CircleAlert} label="Belum Ada Nilai" value={incompleteStudents} type="orange" />
@@ -936,7 +911,7 @@ export default function EntryNilaiPage() {
                   </div>
                 </div>
                 <div className="theme-card theme-border flex items-center gap-2 rounded-lg border px-3 py-2">
-                  <ClipboardCheck size={17} className="text-theme-info" />
+                  <ClipboardCheck size={17} className="theme-primary-text" />
                   <div>
                     <p className="theme-text-muted text-[11px]">Sumber Data</p>
                     <p className="theme-text text-xs font-semibold">Sistem SmartSchool</p>

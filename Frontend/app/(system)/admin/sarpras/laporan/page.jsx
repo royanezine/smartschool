@@ -282,6 +282,38 @@ function escapeCsv(value) {
   return `"${text.replace(/"/g, '""')}"`;
 }
 
+function Stat({ label, value, subtitle, icon: Icon }) {
+  const toneClass =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
+
+  return (
+    <div className="theme-card theme-border h-full rounded-2xl border p-5 shadow-xl transition hover:shadow-lg">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider theme-text-muted">
+            {label}
+          </p>
+          <p className="mt-2 text-3xl font-bold tracking-tight theme-text">
+            {value}
+          </p>
+        </div>
+
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ${toneClass}`}
+        >
+          <Icon size={20} />
+        </div>
+      </div>
+
+      {subtitle && (
+        <p className="mt-3 text-xs font-medium theme-text-muted">
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function LaporanPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [laporanList, setLaporanList] = useState([]);
@@ -369,29 +401,29 @@ export default function LaporanPage() {
         key: "total",
         label: "Total Laporan",
         value: laporanList.length,
+        subtitle: "Semua laporan masuk",
         icon: FileBarChart,
-        tone: `${themePrimaryText} ${themePrimarySurface}`,
       },
       {
         key: "menunggu",
-        label: "Menunggu Tindak Lanjut",
+        label: "Menunggu",
         value: laporanList.filter((item) => item.status === "Menunggu").length,
+        subtitle: "Menunggu tindak lanjut",
         icon: Clock,
-        tone: `${themeWarningText} ${themeWarningSurface}`,
       },
       {
         key: "diproses",
-        label: "Sedang Diproses",
+        label: "Diproses",
         value: laporanList.filter((item) => item.status === "Diproses").length,
+        subtitle: "Sedang ditangani",
         icon: AlertTriangle,
-        tone: `${themePrimaryText} ${themePrimarySurface}`,
       },
       {
         key: "selesai",
         label: "Selesai",
         value: laporanList.filter((item) => item.status === "Selesai").length,
+        subtitle: "Sudah diselesaikan",
         icon: CheckCircle2,
-        tone: `${themeSuccessText} ${themeSuccessSurface}`,
       },
     ],
     [laporanList]
@@ -538,36 +570,16 @@ export default function LaporanPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {quickStats.map(({ key, label, value, icon: Icon, tone }) => (
-                <div
+            {/* Stat card seragam: warna mengikuti --color-primary */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {quickStats.map(({ key, label, value, subtitle, icon }) => (
+                <Stat
                   key={key}
-                  className={`
-                    theme-card rounded-2xl border theme-border
-                    ${themeCardShadow}
-                    p-4 flex items-center gap-3.5
-                  `}
-                >
-                  <div
-                    className={`
-                      w-11 h-11 rounded-xl
-                      flex items-center justify-center flex-shrink-0
-                      ${tone}
-                    `}
-                  >
-                    <Icon size={20} />
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="text-xl font-bold theme-text leading-none">
-                      {value}
-                    </p>
-
-                    <p className="text-xs theme-text-muted mt-1 truncate">
-                      {label}
-                    </p>
-                  </div>
-                </div>
+                  label={label}
+                  value={value}
+                  subtitle={subtitle}
+                  icon={icon}
+                />
               ))}
             </div>
 

@@ -550,7 +550,7 @@ export default function TambahPendaftarPage() {
                     <button
                       type="button"
                       onClick={() => router.push("/admin/spmb/jalur")}
-                      className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700"
+                      className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg theme-primary px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:opacity-90"
                     >
                       <Plus size={13} />
                       Buat Jalur PPDB Sekarang
@@ -887,8 +887,8 @@ export default function TambahPendaftarPage() {
 
                     {/* Card: Informasi & Tombol Aksi */}
                     <div className={`theme-card ${themeNeutralBorder} ${themeCardShadow} min-w-0 overflow-hidden rounded-2xl border p-5 sm:p-6`}>
-                      <div className="theme-info flex items-start gap-3 rounded-xl border p-3 mb-5">
-                        <Info size={16} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-start gap-3 rounded-xl border p-3 mb-5">
+                        <Info size={16} className="mt-0.5 shrink-0 theme-primary-text" />
                         <p className="text-[11px] leading-5">
                           Pastikan seluruh data yang diinput sudah sesuai dengan dokumen resmi (Kartu Keluarga, Akta Kelahiran, dll) sebelum menyimpan.
                         </p>

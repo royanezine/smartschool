@@ -252,24 +252,24 @@ export default function CmsDashboardPage() {
 
   const colorClasses = {
     info: {
-      icon: "text-[var(--color-info)]",
-      iconBg: "theme-info",
-      accent: "bg-[var(--color-info)]",
+      icon: "theme-primary-text",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      accent: "bg-[var(--color-primary)]",
     },
     success: {
-      icon: "text-[var(--color-success)]",
-      iconBg: "theme-success",
-      accent: "bg-[var(--color-success)]",
+      icon: "theme-primary-text",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      accent: "bg-[var(--color-primary)]",
     },
     primary: {
-      icon: "text-[var(--color-primary)]",
-      iconBg: "theme-card-soft",
+      icon: "theme-primary-text",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
       accent: "bg-[var(--color-primary)]",
     },
     warning: {
-      icon: "text-[var(--color-warning)]",
-      iconBg: "theme-warning",
-      accent: "bg-[var(--color-warning)]",
+      icon: "theme-primary-text",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      accent: "bg-[var(--color-primary)]",
     },
   };
 
@@ -413,7 +413,7 @@ export default function CmsDashboardPage() {
                 <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-lg">
                         <FileText size={18} />
                       </div>
 
@@ -596,7 +596,7 @@ export default function CmsDashboardPage() {
               <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm lg:col-span-2">
                 <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <div className="theme-warning flex h-9 w-9 items-center justify-center rounded-lg">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                       <Lightbulb size={18} />
                     </div>
                     <div>

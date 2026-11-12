@@ -33,18 +33,6 @@ const textColor = {
   neutral: "text-[var(--color-text-muted)]",
 };
 
-const softBg = {
-  primary:
-    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-  info: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-  success:
-    "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-  warning:
-    "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-  neutral:
-    "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]",
-};
-
 const dotColor = {
   primary: "bg-[var(--color-primary)]",
   info: "bg-[var(--color-info)]",
@@ -81,17 +69,14 @@ function SectionTitle({
   icon: Icon,
   title,
   description,
-  color = "primary",
   action,
 }) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <div
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${softBg[color]}`}
-          >
-            <Icon size={16} className={textColor[color]} />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+            <Icon size={16} className="theme-primary-text" />
           </div>
 
           <h2 className="theme-text text-base font-semibold">
@@ -346,7 +331,6 @@ export default function YayasanDashboardPage() {
         (loading ? "-" : schools.length),
       description: "Sekolah dalam naungan",
       icon: Building2,
-      color: "primary",
     },
     {
       key: "pengguna",
@@ -356,7 +340,6 @@ export default function YayasanDashboardPage() {
         (loading ? "-" : totalSiswa + totalGuru),
       description: "Siswa & tenaga pendidik",
       icon: Users,
-      color: "info",
     },
     {
       key: "aktif",
@@ -364,7 +347,6 @@ export default function YayasanDashboardPage() {
       value: summary?.sekolahAktif ?? "-",
       description: "Status operasional aktif",
       icon: CheckCircle2,
-      color: "success",
     },
     {
       key: "ujiCoba",
@@ -372,7 +354,6 @@ export default function YayasanDashboardPage() {
       value: summary?.sekolahUjiCoba ?? "-",
       description: "Dalam masa uji coba",
       icon: ClipboardCheck,
-      color: "warning",
     },
   ];
 
@@ -383,7 +364,6 @@ export default function YayasanDashboardPage() {
       description:
         "Lihat dan kelola seluruh unit sekolah.",
       icon: Building2,
-      color: "primary",
       path: "/yayasan/sekolah",
       value: loading
         ? "Memuat..."
@@ -395,7 +375,6 @@ export default function YayasanDashboardPage() {
       description:
         "Daftarkan unit sekolah binaan baru.",
       icon: Plus,
-      color: "info",
       path: "/yayasan/sekolah/tambah",
       value: "Pendaftaran baru",
     },
@@ -405,7 +384,6 @@ export default function YayasanDashboardPage() {
       description:
         "Lihat lokasi dan alamat unit sekolah.",
       icon: MapPin,
-      color: "warning",
       path: "/yayasan/lokasi",
       value: loading
         ? "Memuat..."
@@ -417,7 +395,6 @@ export default function YayasanDashboardPage() {
       description:
         "Pantau akun pengguna di seluruh sekolah.",
       icon: Users,
-      color: "success",
       path: "/yayasan/monitoring/users",
       value: loading
         ? "Memuat..."
@@ -432,7 +409,6 @@ export default function YayasanDashboardPage() {
       description:
         "Kelola profil dan informasi yayasan.",
       icon: Settings,
-      color: "neutral",
       path: "/yayasan/pengaturan",
       value: "Profil & NPYP",
     },
@@ -440,7 +416,7 @@ export default function YayasanDashboardPage() {
 
   return (
     <main className="theme-page theme-text min-h-full">
-      <div className="w-full px-4 py-5 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
+      <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="space-y-7">
           {/* HEADER */}
           <header className="theme-border theme-card relative overflow-hidden rounded-3xl border">
@@ -449,11 +425,11 @@ export default function YayasanDashboardPage() {
             <div className="relative flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <div className="mb-3 flex items-center gap-2">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white shadow-sm">
+                  <div className="theme-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm">
                     <LayoutDashboard size={17} />
                   </div>
 
-                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
+                  <span className="theme-primary-text text-xs font-semibold uppercase tracking-[0.16em]">
                     Dashboard Yayasan
                   </span>
                 </div>
@@ -529,10 +505,8 @@ export default function YayasanDashboardPage() {
                   className="theme-border theme-card group min-w-0 rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_color-mix(in_srgb,var(--color-text)_7%,transparent)]"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${softBg[card.color]} ${textColor[card.color]}`}
-                    >
-                      <Icon size={21} />
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                      <Icon size={21} className="theme-primary-text" />
                     </div>
 
                     <ArrowUpRight
@@ -573,13 +547,13 @@ export default function YayasanDashboardPage() {
                   title="Sekolah Binaan"
                   description="Ringkasan unit sekolah yang berada di bawah naungan yayasan."
                   action={
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push("/yayasan/sekolah")
-                      }
-                      className="inline-flex shrink-0 items-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold text-[var(--color-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
-                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push("/yayasan/sekolah")
+                        }
+                        className="theme-primary-text inline-flex shrink-0 items-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                      >
                       Lihat semua
                       <ChevronRight size={14} />
                     </button>
@@ -616,8 +590,8 @@ export default function YayasanDashboardPage() {
                         }
                         className="group flex w-full items-center gap-4 rounded-xl p-3 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
                       >
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] text-[var(--color-primary)]">
-                          <Building2 size={19} />
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                          <Building2 size={19} className="theme-primary-text" />
                         </div>
 
                         <div className="min-w-0 flex-1">
@@ -709,7 +683,6 @@ export default function YayasanDashboardPage() {
                   icon={Bell}
                   title="Notifikasi"
                   description="Aktivitas dan informasi terbaru untuk yayasan."
-                  color="info"
                   action={
                     unreadCount > 0 ? (
                       <span className="shrink-0 rounded-full bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] px-2.5 py-1 text-[10px] font-bold text-[var(--color-warning)]">
@@ -797,7 +770,6 @@ export default function YayasanDashboardPage() {
                 icon={CalendarCheck}
                 title="Ringkasan Kehadiran"
                 description="Rekap presensi seluruh unit sekolah."
-                color="success"
                 action={
                   <span className="theme-text-muted text-xs">
                     Hari ini
@@ -902,7 +874,7 @@ export default function YayasanDashboardPage() {
               <div className="flex items-center gap-2">
                 <ShieldCheck
                   size={18}
-                  className="text-[var(--color-primary)]"
+                  className="theme-primary-text"
                 />
 
                 <h2 className="theme-text text-base font-semibold">
@@ -915,9 +887,13 @@ export default function YayasanDashboardPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {quickActions.map((item) => {
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-6 xl:grid-cols-5">
+              {quickActions.map((item, idx) => {
                 const Icon = item.icon;
+                const spanClass =
+                  idx < 3
+                    ? "sm:col-span-2 xl:col-span-1"
+                    : "sm:col-span-3 xl:col-span-1";
 
                 return (
                   <button
@@ -926,13 +902,11 @@ export default function YayasanDashboardPage() {
                     onClick={() =>
                       router.push(item.path)
                     }
-                    className="theme-border theme-card group min-w-0 rounded-2xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--color-primary)_25%,var(--color-border))] hover:shadow-[0_10px_25px_color-mix(in_srgb,var(--color-text)_6%,transparent)]"
+                    className={`theme-border theme-card group flex min-w-0 flex-col rounded-2xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--color-primary)_25%,var(--color-border))] hover:shadow-[0_10px_25px_color-mix(in_srgb,var(--color-text)_6%,transparent)] ${spanClass}`}
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${softBg[item.color]} ${textColor[item.color]}`}
-                      >
-                        <Icon size={18} />
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                        <Icon size={18} className="theme-primary-text" />
                       </div>
 
                       <ChevronRight

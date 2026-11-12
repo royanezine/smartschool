@@ -37,7 +37,7 @@ import {
 ========================= */
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -821,7 +821,7 @@ export default function EditMateriPage() {
                                 accept=".pdf,.mp4,.mpeg,.webm,.mov"
                                 onChange={handleFileChange}
                                 disabled={saving}
-                                className={`theme-text-secondary w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-[var(--color-card)] ${themePrimaryGradient} disabled:opacity-60`}
+                                className={`theme-text-secondary w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white ${themePrimaryGradient} disabled:opacity-60`}
                               />
 
                               {file && (
@@ -1033,7 +1033,7 @@ export default function EditMateriPage() {
                   <button
                     type="submit"
                     disabled={saving || loading}
-                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-8 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-8 py-2.5 text-sm font-semibold text-white ${themePrimaryShadow} transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                   >
                     {saving ? (
                       <>

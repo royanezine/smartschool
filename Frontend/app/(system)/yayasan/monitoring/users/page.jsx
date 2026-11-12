@@ -164,34 +164,34 @@ export default function MonitoringPenggunaYayasanPage() {
       return {
         label: "Siswa",
         className:
-          "bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)] border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]",
+          "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)] border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]",
       };
     }
     if (r.includes("GURU")) {
       return {
         label: "Guru",
         className:
-          "bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)] text-[var(--color-info)] border-[color-mix(in_srgb,var(--color-info)_24%,transparent)]",
+          "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)] border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]",
       };
     }
     if (r.includes("ADMIN")) {
       return {
         label: "Admin Sekolah",
         className:
-          "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] text-[var(--color-warning)] border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]",
+          "bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] text-[var(--color-primary)] border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]",
       };
     }
     if (r.includes("STAF")) {
       return {
         label: "Staf",
         className:
-          "bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)] theme-text border-neutral-300 dark:border-neutral-700",
+          "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary border-[color-mix(in_srgb,var(--color-text)_14%,transparent)]",
       };
     }
     return {
       label: raw || "-",
       className:
-        "bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] theme-text-secondary border-transparent",
+        "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary border-[color-mix(in_srgb,var(--color-text)_12%,transparent)]",
     };
   };
 
@@ -201,8 +201,8 @@ export default function MonitoringPenggunaYayasanPage() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-              <Users size={22} />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+              <Users size={22} className="theme-primary-text" />
             </div>
             <div>
               <h1 className="theme-text text-xl font-semibold sm:text-2xl">
@@ -232,10 +232,10 @@ export default function MonitoringPenggunaYayasanPage() {
         </div>
 
         {/* KPI Strip */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="theme-card theme-border flex items-center gap-4 rounded-2xl border p-4 sm:p-5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-              <Users size={22} />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+              <Users size={22} className="theme-primary-text" />
             </div>
             <div>
               <p className="theme-text-muted text-xs">Total Pengguna Terdata</p>
@@ -245,12 +245,15 @@ export default function MonitoringPenggunaYayasanPage() {
           </div>
 
           <div className="theme-card theme-border flex items-center gap-4 rounded-2xl border p-4 sm:p-5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] text-[var(--color-success)]">
-              <UserCheck size={22} />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+              <UserCheck size={22} className="theme-primary-text" />
             </div>
             <div>
-              <p className="theme-text-muted text-xs">Pengguna Aktif</p>
-              <p className="mt-0.5 text-xl font-bold text-[var(--color-success)]">
+              <p className="flex items-center gap-1.5 text-xs theme-text-muted">
+                <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
+                Pengguna Aktif
+              </p>
+              <p className="theme-text mt-0.5 text-xl font-bold">
                 {statistik.aktif}
               </p>
               <p className="theme-text-muted text-[11px]">Akun berstatus aktif</p>
@@ -258,12 +261,15 @@ export default function MonitoringPenggunaYayasanPage() {
           </div>
 
           <div className="theme-card theme-border flex items-center gap-4 rounded-2xl border p-4 sm:p-5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-danger)_12%,transparent)] text-[var(--color-danger)]">
-              <UserX size={22} />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+              <UserX size={22} className="theme-primary-text" />
             </div>
             <div>
-              <p className="theme-text-muted text-xs">Pengguna Nonaktif</p>
-              <p className="mt-0.5 text-xl font-bold text-[var(--color-danger)]">
+              <p className="flex items-center gap-1.5 text-xs theme-text-muted">
+                <span className="h-2 w-2 rounded-full bg-[var(--color-danger)]" />
+                Pengguna Nonaktif
+              </p>
+              <p className="theme-text mt-0.5 text-xl font-bold">
                 {statistik.nonaktif}
               </p>
               <p className="theme-text-muted text-[11px]">Akun dinonaktifkan</p>
@@ -286,7 +292,7 @@ export default function MonitoringPenggunaYayasanPage() {
               <Search size={16} className="theme-text-muted absolute left-3.5 top-3.5" />
               <button
                 type="submit"
-                className="absolute right-2 top-2 rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white transition-all hover:opacity-90"
+                className="theme-primary absolute right-2 top-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all hover:opacity-90"
               >
                 Cari
               </button>
@@ -334,7 +340,7 @@ export default function MonitoringPenggunaYayasanPage() {
               <button
                 type="button"
                 onClick={() => setCurrentPage(1)}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white"
+                className="theme-primary mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold"
               >
                 <RefreshCw size={12} /> Coba Lagi
               </button>

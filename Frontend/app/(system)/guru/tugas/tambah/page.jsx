@@ -26,7 +26,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -762,7 +762,7 @@ export default function TambahTugasPage() {
                             loading ||
                             kelasMapel.length === 0
                           }
-                          className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60`}
+                          className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60`}
                         >
                           {saving ? (
                             <>

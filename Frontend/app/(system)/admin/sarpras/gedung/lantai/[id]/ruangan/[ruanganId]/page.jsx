@@ -225,7 +225,7 @@ export default function DetailRuanganPage() {
                   <p className="theme-text-muted text-xs font-semibold uppercase tracking-wider">
                     Total Asset / Sarana
                   </p>
-                  <Boxes size={18} className="text-[var(--color-warning)]" />
+                  <Boxes size={18} className="theme-primary-text" />
                 </div>
                 <p className="theme-text text-2xl font-bold mt-2">0 Unit</p>
                 <p className="theme-text-muted text-xs mt-0.5">Menunggu alokasi inventaris</p>
@@ -324,7 +324,7 @@ export default function DetailRuanganPage() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themeSoftSurface} text-[var(--color-info)]`}>
+                    <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themeSoftSurface} theme-primary-text`}>
                       <School size={22} />
                     </div>
                     <h3 className="theme-text text-sm font-bold mt-3">
@@ -369,19 +369,19 @@ export default function DetailRuanganPage() {
                   </div>
 
                   <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
-                    <Armchair size={20} className="mx-auto text-[var(--color-info)]" />
+                    <Armchair size={20} className="mx-auto theme-primary-text" />
                     <p className="theme-text text-lg font-bold mt-2">0</p>
                     <p className="theme-text-muted text-xs font-medium">Kursi Siswa/Guru</p>
                   </div>
 
                   <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
-                    <Boxes size={20} className="mx-auto text-[var(--color-warning)]" />
+                    <Boxes size={20} className="mx-auto theme-primary-text" />
                     <p className="theme-text text-lg font-bold mt-2">0</p>
                     <p className="theme-text-muted text-xs font-medium">Papan Tulis / Screen</p>
                   </div>
 
                   <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
-                    <PackagePlus size={20} className="mx-auto text-[var(--color-success)]" />
+                    <PackagePlus size={20} className="mx-auto theme-primary-text" />
                     <p className="theme-text text-lg font-bold mt-2">0</p>
                     <p className="theme-text-muted text-xs font-medium">Asset Lainnya</p>
                   </div>
@@ -389,7 +389,7 @@ export default function DetailRuanganPage() {
 
                 {/* Empty State for Assets */}
                 <div className="rounded-xl border border-dashed theme-border p-8 text-center bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]">
-                  <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themeSoftSurface} text-[var(--color-warning)]`}>
+                  <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themeSoftSurface} theme-primary-text`}>
                     <Boxes size={22} />
                   </div>
                   <h3 className="theme-text text-sm font-bold mt-3">

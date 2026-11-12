@@ -212,7 +212,7 @@ export default function TambahLaporanKerusakanPage() {
                   </Link>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-primary)]">
+                    <p className="text-xs font-semibold uppercase tracking-wider theme-primary-text">
                       Sarana &amp; Prasarana
                     </p>
 

@@ -260,7 +260,7 @@ export default function DaftarRuanganPage() {
               <div className={`theme-card theme-border rounded-xl border p-4 ${themeCardShadow}`}>
                 <div className="flex items-center justify-between">
                   <p className="theme-text-muted text-xs font-medium">Terhubung Kelas</p>
-                  <School size={16} className="text-[var(--color-success)]" />
+                  <School size={16} className="theme-primary-text" />
                 </div>
                 <p className="theme-text text-2xl font-bold mt-2">0</p>
                 <p className="theme-text-muted text-[11px] mt-0.5">Ruang kelas aktif</p>
@@ -269,7 +269,7 @@ export default function DaftarRuanganPage() {
               <div className={`theme-card theme-border rounded-xl border p-4 ${themeCardShadow}`}>
                 <div className="flex items-center justify-between">
                   <p className="theme-text-muted text-xs font-medium">Ruang Umum / Lab</p>
-                  <Building2 size={16} className="text-[var(--color-info)]" />
+                  <Building2 size={16} className="theme-primary-text" />
                 </div>
                 <p className="theme-text text-2xl font-bold mt-2">0</p>
                 <p className="theme-text-muted text-[11px] mt-0.5">Tanpa penugasan kelas</p>
@@ -278,7 +278,7 @@ export default function DaftarRuanganPage() {
               <div className={`theme-card theme-border rounded-xl border p-4 ${themeCardShadow}`}>
                 <div className="flex items-center justify-between">
                   <p className="theme-text-muted text-xs font-medium">Total Asset</p>
-                  <Boxes size={16} className="text-[var(--color-warning)]" />
+                  <Boxes size={16} className="theme-primary-text" />
                 </div>
                 <p className="theme-text text-2xl font-bold mt-2">0 Unit</p>
                 <p className="theme-text-muted text-[11px] mt-0.5">Inventaris ruangan</p>

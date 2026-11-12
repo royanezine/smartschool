@@ -170,8 +170,8 @@ function Section({
   return (
     <section className="overflow-hidden rounded-2xl border theme-card shadow-sm">
       <div className="flex items-center gap-3 border-b theme-border px-4 py-4 sm:px-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
-          <Icon size={18} className="text-[var(--color-info)]" />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+          <Icon size={18} />
         </div>
 
         <div className="min-w-0">
@@ -590,7 +590,7 @@ export default function AdminGuruEditPage() {
 
           <main className="theme-page flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto px-4">
             <div className="max-w-md text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full theme-danger">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <X size={32} />
               </div>
               <h2 className="mt-4 text-xl font-bold theme-text">
@@ -650,11 +650,8 @@ export default function AdminGuruEditPage() {
                   </button>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-lg theme-warning">
-                      <Edit
-                        size={21}
-                        className="text-[var(--color-warning)]"
-                      />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                      <Edit size={21} />
                     </div>
                     <div>
                       <h1 className="text-xl font-bold theme-text sm:text-2xl">
@@ -1065,10 +1062,10 @@ export default function AdminGuruEditPage() {
                       )}
                     </Section>
 
-                    <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
+                    <div className="border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] flex items-start gap-3 rounded-2xl p-4">
                       <Info
                         size={17}
-                        className="mt-0.5 shrink-0 text-[var(--color-info)]"
+                        className="mt-0.5 shrink-0 theme-primary-text"
                       />
                       <div>
                         <p className="text-sm font-semibold theme-text">
@@ -1082,7 +1079,7 @@ export default function AdminGuruEditPage() {
 
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                        <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <Lightbulb size={17} />
                         </div>
                         <h2 className="theme-text text-sm font-bold">Panduan</h2>

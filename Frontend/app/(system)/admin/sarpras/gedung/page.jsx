@@ -90,7 +90,7 @@ const themeFocus =
 function StatCard({ icon: Icon, label, value, description, iconClass, valueClass }) {
   return (
     <div
-      className={`group rounded-2xl border theme-border theme-card p-4 ${themeCardShadow} transition-all hover:-translate-y-0.5 ${themeCardHoverShadow} sm:p-5`}
+      className={`group h-full rounded-2xl border theme-border theme-card p-4 ${themeCardShadow} transition-all hover:-translate-y-0.5 ${themeCardHoverShadow} sm:p-5`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
@@ -584,10 +584,7 @@ export default function SarprasGedungPage() {
                             onClick={exportExcel}
                             className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm theme-text-secondary transition ${themeNeutralHover}`}
                           >
-                            <FileSpreadsheet
-                              size={16}
-                              className="text-[var(--color-success)]"
-                            />
+                            <FileSpreadsheet size={16} className="theme-primary-text" />
                             Export Excel
                           </button>
 
@@ -646,7 +643,8 @@ export default function SarprasGedungPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+              {/* FIX: grid hanya sampai 3 kolom agar 3 card memenuhi lebar penuh */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <StatCard
                   icon={Building}
                   label="Total Gedung"
@@ -661,8 +659,8 @@ export default function SarprasGedungPage() {
                   label="Total Lantai"
                   value={totalLantai}
                   description="Seluruh lantai"
-                  iconClass={`${themeInfoSurface} text-[var(--color-info)]`}
-                  valueClass="text-[var(--color-info)]"
+                  iconClass="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
+                  valueClass="theme-text"
                 />
 
                 <StatCard
@@ -670,8 +668,8 @@ export default function SarprasGedungPage() {
                   label="Gedung Berfoto"
                   value={totalFoto}
                   description="Memiliki URL foto"
-                  iconClass={`${themeSuccessSurface} text-[var(--color-success)]`}
-                  valueClass="text-[var(--color-success)]"
+                  iconClass="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
+                  valueClass="theme-text"
                 />
               </div>
 

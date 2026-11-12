@@ -595,8 +595,8 @@ export default function PengaturanSpmbPage() {
                       </div>
 
                       {/* Card: Info Tambahan (Opsional untuk keseimbangan) */}
-                      <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
-                        <Globe size={16} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text theme-border flex items-start gap-3 rounded-2xl border p-4">
+                        <Globe size={16} className="mt-0.5 shrink-0 theme-primary-text" />
                         <p className="text-[11px] leading-5">
                           Konfigurasi ini memengaruhi seluruh halaman publik PPDB, termasuk form pendaftaran calon siswa.
                         </p>

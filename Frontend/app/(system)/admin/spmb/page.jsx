@@ -33,7 +33,7 @@ import {
   isPengumumanEndpointMissing,
 } from "@/services/ppdb.service";
 
-const themePrimaryText = "text-[var(--color-primary)]";
+const themePrimaryText = "theme-primary-text";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -425,7 +425,7 @@ export default function SpmbOverviewPage() {
                       <div
                         className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
                       >
-                        <Icon size={19} />
+                        <Icon size={19} className="theme-primary-text shrink-0" />
                       </div>
 
                       <span

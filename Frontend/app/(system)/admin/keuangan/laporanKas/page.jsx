@@ -285,7 +285,7 @@ export default function LaporanKasPage() {
               <section className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                 <div>
                   <div className="flex items-center gap-3">
-                    <div className="theme-info flex h-12 w-12 items-center justify-center rounded-xl border">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-12 w-12 items-center justify-center rounded-xl border">
                       <FileBarChart size={23} />
                     </div>
 
@@ -307,7 +307,7 @@ export default function LaporanKasPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                 
+
 
                   <button
                     type="button"
@@ -492,7 +492,6 @@ export default function LaporanKasPage() {
                   value={rupiah(saldoAwal)}
                   icon={Wallet}
                   description="Saldo sebelum periode"
-                  tone="primary"
                 />
 
                 <MetricCard
@@ -500,7 +499,6 @@ export default function LaporanKasPage() {
                   value={rupiah(totalMasuk)}
                   icon={TrendingUp}
                   description="Akumulasi pemasukan"
-                  tone="success"
                 />
 
                 <MetricCard
@@ -508,7 +506,6 @@ export default function LaporanKasPage() {
                   value={rupiah(totalKeluar)}
                   icon={TrendingDown}
                   description="Akumulasi pengeluaran"
-                  tone="danger"
                 />
 
                 <MetricCard
@@ -516,7 +513,6 @@ export default function LaporanKasPage() {
                   value={rupiah(saldoAkhir)}
                   icon={Wallet}
                   description="Saldo setelah periode"
-                  tone="info"
                 />
 
                 <MetricCard
@@ -524,7 +520,6 @@ export default function LaporanKasPage() {
                   value={rupiah(selisih)}
                   icon={TrendingUp}
                   description="Masuk dikurangi keluar"
-                  tone={selisih >= 0 ? "success" : "danger"}
                 />
 
                 <MetricCard
@@ -532,7 +527,6 @@ export default function LaporanKasPage() {
                   value={totalKategori}
                   icon={Layers3}
                   description={`${totalTransaksi} transaksi tercatat`}
-                  tone="primary"
                 />
               </section>
 
@@ -541,7 +535,7 @@ export default function LaporanKasPage() {
                 <div className="theme-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div>
                     <div className="flex items-center gap-2">
-                      <div className="theme-info flex h-8 w-8 items-center justify-center rounded-lg border">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 items-center justify-center rounded-lg border">
                         <FileText size={15} />
                       </div>
                       <h2 className="theme-text text-sm font-bold">
@@ -696,33 +690,7 @@ function MetricCard({
   value,
   icon: Icon,
   description,
-  tone = "primary",
 }) {
-  const toneMap = {
-    primary: {
-      surface: "bg-[var(--color-primary-background)]",
-      text: "text-[var(--color-primary)]",
-    },
-    success: {
-      surface: "bg-[var(--color-success-background)]",
-      text: "text-[var(--color-success)]",
-    },
-    warning: {
-      surface: "bg-[var(--color-warning-background)]",
-      text: "text-[var(--color-warning)]",
-    },
-    danger: {
-      surface: "bg-[var(--color-danger-background)]",
-      text: "text-[var(--color-danger)]",
-    },
-    info: {
-      surface: "bg-[var(--color-info-background)]",
-      text: "text-[var(--color-info)]",
-    },
-  };
-
-  const current = toneMap[tone] || toneMap.primary;
-
   return (
     <div className="theme-card rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
@@ -738,19 +706,7 @@ function MetricCard({
           </p>
         </div>
 
-        <div
-          className={`
-            ${current.surface}
-            ${current.text}
-            flex
-            h-10
-            w-10
-            shrink-0
-            items-center
-            justify-center
-            rounded-xl
-          `}
-        >
+        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
           <Icon size={19} />
         </div>
       </div>

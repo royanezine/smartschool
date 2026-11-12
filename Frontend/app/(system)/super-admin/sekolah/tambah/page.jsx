@@ -66,7 +66,7 @@ const themeNeutralHover =
   "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:border-[color-mix(in_srgb,var(--color-text)_16%,transparent)]";
 
 const themePrimaryButton =
-  "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-[var(--color-card)]";
+  "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-white";
 
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -304,7 +304,7 @@ export default function TambahSekolahPage() {
             className={`hidden shrink-0 items-center gap-2.5 rounded-xl border theme-border theme-card px-3 py-2.5 ${themeCardShadow} md:flex`}
           >
             <div
-              className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)]`}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themePrimaryBorder} ${themePrimarySurface} ${themePrimaryText}`}
             >
               <School size={17} />
             </div>
@@ -443,7 +443,7 @@ export default function TambahSekolahPage() {
             <div className={`border-b ${themeDivider} px-4 py-4 sm:px-6`}>
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themePrimaryBorder} ${themePrimarySurface} ${themePrimaryText}`}
                 >
                   <MapPin size={19} />
                 </div>
@@ -569,7 +569,7 @@ export default function TambahSekolahPage() {
             <div className={`border-b ${themeDivider} px-4 py-4 sm:px-6`}>
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)]`}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themePrimaryBorder} ${themePrimarySurface} ${themePrimaryText}`}
                 >
                   <Building2 size={19} />
                 </div>

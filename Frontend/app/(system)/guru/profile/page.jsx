@@ -39,7 +39,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -234,7 +234,7 @@ export default function ProfilGuruPage() {
               <button
                 type="button"
                 onClick={loadProfile}
-                className={`mt-5 inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow}`}
+                className={`mt-5 inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition ${themePrimaryGradient} ${themePrimaryShadow}`}
               >
                 Coba Lagi
               </button>
@@ -302,7 +302,7 @@ export default function ProfilGuruPage() {
                   <button
                     type="button"
                     onClick={handleEditProfile}
-                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-[var(--color-card)] transition sm:w-auto ${themePrimaryGradient} ${themePrimaryShadow}`}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white transition sm:w-auto ${themePrimaryGradient} ${themePrimaryShadow}`}
                   >
                     <Edit3 size={17} />
                     Edit Profil
@@ -318,7 +318,7 @@ export default function ProfilGuruPage() {
                   className={`relative h-32 overflow-hidden sm:h-40 ${themePrimaryGradient}`}
                 >
                   <div
-                    className="absolute -right-10 -top-20 h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--color-card)_18%,transparent)] blur-3xl"
+                    className="absolute -right-10 -top-20 h-56 w-56 rounded-full bg-white/10 blur-3xl"
                   />
 
                   <div
@@ -345,7 +345,7 @@ export default function ProfilGuruPage() {
                           type="button"
                           aria-label="Ubah foto profil"
                           onClick={handleEditProfile}
-                          className={`absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[var(--color-card)] text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow}`}
+                          className={`absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[var(--color-card)] text-white transition ${themePrimaryGradient} ${themePrimaryShadow}`}
                         >
                           <Camera size={14} />
                         </button>
@@ -831,7 +831,7 @@ export default function ProfilGuruPage() {
                       className={`rounded-2xl border p-5 ${themeSuccessSurface} ${themeSuccessBorder}`}
                     >
                       <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-card)] ${themePrimaryGradient}`}
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl text-white ${themePrimaryGradient}`}
                       >
                         <ShieldCheck size={19} />
                       </div>
@@ -851,7 +851,7 @@ export default function ProfilGuruPage() {
                       className={`rounded-2xl border p-5 ${themeInfoSurface} ${themeInfoBorder}`}
                     >
                       <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-card)] ${themePrimaryGradient}`}
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl text-white ${themePrimaryGradient}`}
                       >
                         <InfoIcon />
                       </div>
@@ -1320,7 +1320,7 @@ function QuickAction({
       className={`group flex w-full items-center gap-3 rounded-xl border border-transparent p-3 text-left transition ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]`}
     >
       <div
-        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText} transition group-hover:text-[var(--color-card)] group-hover:${themePrimaryGradient}`}
+        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText} transition group-hover:text-white group-hover:${themePrimaryGradient}`}
       >
         <Icon size={16} />
       </div>

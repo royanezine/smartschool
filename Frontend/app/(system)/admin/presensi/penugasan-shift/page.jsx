@@ -519,11 +519,9 @@ function getJumlahSiswa(kelas) {
 
 function StatCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const tones = {
-    blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
-    emerald:
-      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
-    amber:
-      "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+    blue: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    emerald: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    amber: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   return (
@@ -558,7 +556,7 @@ function ShiftBadge({ shift }) {
 
   if (normalized === "pagi") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2.5 py-1 text-xs font-semibold theme-primary-text">
         <Clock3 size={13} />
         Pagi
       </span>
@@ -567,7 +565,7 @@ function ShiftBadge({ shift }) {
 
   if (normalized === "siang") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-md bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-950/50 dark:text-orange-300">
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2.5 py-1 text-xs font-semibold theme-primary-text">
         <Clock3 size={13} />
         Siang
       </span>
@@ -576,7 +574,7 @@ function ShiftBadge({ shift }) {
 
   if (shift) {
     return (
-      <span className="inline-flex max-w-[180px] items-center gap-1.5 rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300">
+      <span className="inline-flex max-w-[180px] items-center gap-1.5 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2.5 py-1 text-xs font-semibold theme-primary-text">
         <Clock3 size={13} />
         <span className="truncate">{shift}</span>
       </span>
@@ -1175,7 +1173,7 @@ export default function PenugasanShiftPage() {
             {activeTab === "siswa" && (
               <div className="theme-card mb-6 flex flex-col gap-3 rounded-xl border theme-border p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                     <CalendarClock size={19} />
                   </div>
                   <div>
@@ -1235,15 +1233,15 @@ export default function PenugasanShiftPage() {
                           <div className="flex items-center justify-between border-b theme-border pb-3">
                             <span className="flex items-center gap-2 text-sm font-bold theme-text">
                               {kode === "pagi" ? (
-                                <Sun size={16} className="text-blue-500" />
+                                <Sun size={16} className="theme-primary-text" />
                               ) : (
-                                <Sunset size={16} className="text-orange-500" />
+                                <Sunset size={16} className="theme-primary-text" />
                               )}
                               Shift {shiftItem.nama || (kode === "pagi" ? "Pagi" : "Siang")}
                             </span>
                             <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
                               kode === "pagi"
-                                ? "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"
+                                ? "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                                 : "bg-orange-50 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300"
                             }`}>
                               {kode}
@@ -1500,7 +1498,7 @@ export default function PenugasanShiftPage() {
                           >
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text ">
                                   <UserRound size={19} />
                                 </div>
                                 <div className="min-w-0">
@@ -1586,7 +1584,7 @@ export default function PenugasanShiftPage() {
                           >
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-950/50 dark:text-purple-300">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text ">
                                   <BookOpen size={19} />
                                 </div>
                                 <div>

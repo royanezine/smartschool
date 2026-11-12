@@ -682,17 +682,16 @@ function ActionButton({
 }
 
 function StatCard({ icon, label, value, color, subtext }) {
+  const primaryStyle =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
+
   const colors = {
-    emerald:
-      "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]",
-    red: "bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-[var(--color-danger)]",
-    blue: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]",
-    purple:
-      "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]",
-    amber:
-      "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]",
-    slate:
-      "bg-[color-mix(in_srgb,var(--color-text-muted)_10%,transparent)] text-[var(--color-text-muted)]",
+    emerald: primaryStyle,
+    red: primaryStyle,
+    blue: primaryStyle,
+    purple: primaryStyle,
+    amber: primaryStyle,
+    slate: primaryStyle,
   };
 
   return (

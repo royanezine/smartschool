@@ -33,7 +33,7 @@ import { getDetailPeminjaman } from "@/services/sarpras.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -113,7 +113,7 @@ const statusConfig = {
   dipinjam: {
     label: "Sedang Berlangsung",
     icon: Clock,
-    pill: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+    pill: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
     dot: "bg-[var(--color-info)]",
     desc: "Aset sedang dipinjam. Pastikan dikembalikan sesuai jadwal.",
   },
@@ -375,7 +375,7 @@ export default function DetailPeminjamanPage() {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className={`mt-5 inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold transition ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  className={`mt-5 inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold transition ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                 >
                   Kembali ke Daftar
                 </button>
@@ -405,7 +405,7 @@ export default function DetailPeminjamanPage() {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className={`mt-5 inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold transition ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  className={`mt-5 inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold transition ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                 >
                   Kembali ke Daftar
                 </button>
@@ -418,21 +418,21 @@ export default function DetailPeminjamanPage() {
 
 
                 <div
-                  className={`relative overflow-hidden rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  className={`relative overflow-hidden rounded-xl ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                 >
                   <div
-                    className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] blur-2xl"
+                    className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl"
                   />
 
                   <div
-                    className="absolute -bottom-16 right-16 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-card)_8%,transparent)] blur-2xl"
+                    className="absolute -bottom-16 right-16 h-32 w-32 rounded-full bg-white/10 blur-2xl"
                   />
 
                   <div className="relative p-5 sm:p-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex min-w-0 items-start gap-4">
                         <div
-                          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-card)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]"
+                          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white/10"
                         >
                           <ClipboardList size={18} />
                         </div>
@@ -457,7 +457,7 @@ export default function DetailPeminjamanPage() {
 
                       {status && StatusIcon && (
                         <span
-                          className="inline-flex flex-shrink-0 items-center gap-1.5 self-start rounded-md border border-[color-mix(in_srgb,var(--color-card)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-2.5 py-1 text-[11px] font-semibold backdrop-blur-sm"
+                          className="inline-flex flex-shrink-0 items-center gap-1.5 self-start rounded-md border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold backdrop-blur-sm"
                         >
                           <StatusIcon size={12} />
                           {status.label}
@@ -468,7 +468,7 @@ export default function DetailPeminjamanPage() {
 
                     {status?.desc && (
                       <div
-                        className="mt-4 flex items-start gap-2.5 rounded-lg border border-[color-mix(in_srgb,var(--color-card)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-3.5 py-2.5 backdrop-blur-sm"
+                        className="mt-4 flex items-start gap-2.5 rounded-lg border border-white/20 bg-white/10 px-3.5 py-2.5 backdrop-blur-sm"
                       >
                         <Info
                           size={13}

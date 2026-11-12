@@ -631,7 +631,7 @@ export default function EditLantaiPage() {
                       >
                         <div className="flex items-start gap-3">
                           <div
-                            className={`theme-card theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themeButtonShadow}`}
+                            className={`theme-card flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text ${themeButtonShadow}`}
                           >
                             <Info size={16} />
                           </div>

@@ -234,7 +234,7 @@ export default function EditMapelPage() {
             <div className="p-4 sm:p-6 lg:p-8">
               <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col items-center justify-center min-h-[500px]">
-                  <div className="w-12 h-12 rounded-xl theme-info flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                     <Loader2
                       size={24}
                       className="text-[var(--color-primary)] animate-spin"
@@ -466,7 +466,7 @@ export default function EditMapelPage() {
                 >
                   <div className="px-6 py-5 border-b theme-border-soft theme-card-soft">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg theme-info flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                         <BookMarked
                           size={18}
                           className="text-[var(--color-primary)]"
@@ -764,8 +764,9 @@ export default function EditMapelPage() {
                               font-mono
                               text-xs
                               font-semibold
-                              theme-info
-                              border
+                              bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                              theme-primary-text
+                              border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
                               px-2.5
                               py-1
                               rounded-lg
@@ -795,7 +796,7 @@ export default function EditMapelPage() {
                     </div>
                   </div>
 
-                  <div className="theme-info rounded-2xl border p-5">
+                  <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-8 h-8 rounded-lg theme-card flex items-center justify-center">
                         <Info
@@ -847,11 +848,8 @@ export default function EditMapelPage() {
 
                   <div className="theme-card rounded-2xl border theme-border shadow-sm p-5">
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-lg theme-success flex items-center justify-center shrink-0">
-                        <School
-                          size={18}
-                          className="text-[var(--color-success)]"
-                        />
+                      <div className="w-9 h-9 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center shrink-0">
+                        <School size={18} />
                       </div>
 
                       <div>

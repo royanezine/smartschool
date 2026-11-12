@@ -143,7 +143,7 @@ export default function EditCategoryPage() {
                 </Link>
 
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="theme-warning flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                     <Tags className="h-6 w-6" />
                   </div>
                   <div className="min-w-0">
@@ -267,7 +267,7 @@ export default function EditCategoryPage() {
                   {/* Card: Preview */}
                   <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                      <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <Eye className="h-4 w-4" />
                       </div>
                       <h2 className="theme-text text-sm font-bold">Preview Data</h2>
@@ -301,7 +301,7 @@ export default function EditCategoryPage() {
                   {/* Card: Panduan */}
                   <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                      <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <BookOpen className="h-4 w-4" />
                       </div>
                       <h2 className="theme-text text-sm font-bold">Panduan Edit</h2>
@@ -326,7 +326,7 @@ export default function EditCategoryPage() {
 
                   {/* Card: Info Biru */}
                   <section className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
-                    <Lightbulb size={16} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                    <Lightbulb size={16} className="mt-0.5 shrink-0 theme-primary-text" />
                     <p className="text-xs leading-5">
                       Perubahan nama kategori akan langsung diterapkan pada daftar artikel yang menggunakannya.
                     </p>

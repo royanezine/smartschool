@@ -24,7 +24,7 @@ const KARTU_IDENTITAS_URL = "/admin/siswa/kartu-identitas";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -156,7 +156,7 @@ function StudentCard({ siswa }) {
           className="absolute right-[25%] -top-20 w-44 h-44 rounded-full border-[22px]"
           style={{
             borderColor:
-              "color-mix(in srgb, var(--color-card) 10%, transparent)",
+              "rgba(255, 255, 255, 0.12)",
           }}
         />
 
@@ -164,7 +164,7 @@ function StudentCard({ siswa }) {
           className="absolute right-[5%] bottom-[-70px] w-48 h-48 rounded-full border-[28px]"
           style={{
             borderColor:
-              "color-mix(in srgb, var(--color-card) 10%, transparent)",
+              "rgba(255, 255, 255, 0.12)",
           }}
         />
       </div>
@@ -593,7 +593,7 @@ function IDCardPageContent() {
 
               <button
                 onClick={handleBackToKartuIdentitas}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Kartu Identitas
@@ -663,7 +663,7 @@ function IDCardPageContent() {
 
                 <button
                   onClick={handlePrint}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
                 >
                   <Download size={16} />
                   Cetak / Simpan
@@ -815,7 +815,7 @@ function IDCardPageContent() {
 
               <button
                 onClick={handlePrint}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow}`}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow}`}
               >
                 <Printer size={16} />
                 Cetak ID Card

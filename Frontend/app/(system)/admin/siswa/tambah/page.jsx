@@ -73,10 +73,10 @@ const initialForm = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "w-full rounded-lg border theme-border theme-input theme-text px-3 py-2.5 text-sm outline-none transition placeholder:theme-text-muted focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-60";
 
 const labelClass =
-  "mb-1.5 block text-sm font-medium text-slate-700";
+  "mb-1.5 block text-sm font-medium theme-text-secondary";
 
 function extractRows(response) {
   const candidates = [
@@ -120,7 +120,7 @@ function Field({
         {Icon && (
           <Icon
             size={17}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
           />
         )}
 
@@ -178,18 +178,18 @@ function Section({
   children,
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
+    <section className="overflow-hidden rounded-xl border theme-border theme-card shadow-sm">
+      <div className="border-b theme-border px-5 py-4 sm:px-6">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-blue-50 p-2 text-blue-700">
+          <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2 theme-primary-text">
             <Icon size={20} />
           </div>
 
           <div>
-            <h2 className="font-semibold text-slate-900">
+            <h2 className="font-semibold theme-text">
               {title}
             </h2>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs theme-text-muted">
               {description}
             </p>
           </div>
@@ -217,15 +217,15 @@ function TabButton({
       aria-pressed={active}
       className={`flex w-full items-start gap-3 rounded-lg border p-4 text-left transition ${
         active
-          ? "border-blue-600 bg-blue-50 ring-2 ring-blue-100"
-          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+          ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] ring-2 ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
+          : "theme-border theme-card hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
       }`}
     >
       <div
         className={`rounded-lg p-2 ${
           active
-            ? "bg-blue-600 text-white"
-            : "bg-slate-100 text-slate-600"
+            ? "theme-primary"
+            : "theme-surface theme-text-muted"
         }`}
       >
         <Icon size={18} />
@@ -234,7 +234,7 @@ function TabButton({
       <div className="min-w-0">
         <p
           className={`text-sm font-semibold ${
-            active ? "text-blue-900" : "text-slate-900"
+            active ? "theme-primary-text" : "theme-text"
           }`}
         >
           {title}
@@ -242,7 +242,7 @@ function TabButton({
 
         <p
           className={`mt-0.5 text-xs leading-5 ${
-            active ? "text-blue-800/80" : "text-slate-500"
+            active ? "theme-primary-text" : "theme-text-muted"
           }`}
         >
           {description}
@@ -671,7 +671,7 @@ export default function TambahSiswaPage() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="flex h-screen w-full overflow-hidden theme-page theme-text">
       <Sidebar role="admin" />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -684,18 +684,18 @@ export default function TambahSiswaPage() {
             <button
               type="button"
               onClick={() => router.push("/admin/siswa")}
-              className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-blue-700"
+              className="mb-5 inline-flex items-center gap-2 text-sm font-medium theme-text-secondary transition hover:text-[var(--color-primary)]"
             >
               <ArrowLeft size={18} />
               Kembali ke Data Siswa
             </button>
 
             <div className="mb-6">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-2xl font-bold tracking-tight theme-text">
                 Tambah Siswa
               </h1>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm theme-text-muted">
                 Pilih cara menambahkan siswa: import banyak data
                 sekaligus dari Excel, atau isi satu siswa secara manual.
               </p>
@@ -732,19 +732,19 @@ export default function TambahSiswaPage() {
             </div>
 
             {mode === "import" && (
-              <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
+              <section className="overflow-hidden rounded-xl border theme-border theme-card shadow-sm">
+                <div className="border-b theme-border px-5 py-4 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-emerald-50 p-2 text-emerald-700">
+                    <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2 theme-primary-text">
                       <FileSpreadsheet size={20} />
                     </div>
 
                     <div>
-                      <h2 className="font-semibold text-slate-900">
+                      <h2 className="font-semibold theme-text">
                         Import Siswa dari Excel
                       </h2>
 
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="mt-0.5 text-xs theme-text-muted">
                         Tambahkan banyak siswa sekaligus menggunakan file Excel.
                       </p>
                     </div>
@@ -752,7 +752,7 @@ export default function TambahSiswaPage() {
                 </div>
 
                 <div className="space-y-4 p-5 sm:p-6">
-                  <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                  <div className="rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4 text-sm theme-primary-text">
                     <div className="flex items-start gap-2">
                       <Info size={18} className="mt-0.5 shrink-0" />
 
@@ -787,7 +787,7 @@ export default function TambahSiswaPage() {
                   {importError && (
                     <div
                       role="alert"
-                      className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+                      className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30 p-3 text-sm text-red-700 dark:text-red-300"
                     >
                       <AlertCircle size={18} className="mt-0.5 shrink-0" />
                       <p>{importError}</p>
@@ -797,25 +797,25 @@ export default function TambahSiswaPage() {
                   {importSuccess && (
                     <div
                       role="status"
-                      className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700"
+                      className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-950/30 p-3 text-sm text-green-700 dark:text-green-300"
                     >
                       <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
                       <p>{importSuccess}</p>
                     </div>
                   )}
 
-                  <div className="rounded-lg border border-slate-200 p-4">
+                  <div className="rounded-lg border theme-border p-4">
                     <div className="mb-3 flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full theme-primary text-xs font-bold">
                         1
                       </span>
 
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className="text-sm font-semibold theme-text">
                         Download template Excel
                       </p>
                     </div>
 
-                    <p className="mb-3 text-xs leading-5 text-slate-500">
+                    <p className="mb-3 text-xs leading-5 theme-text-muted">
                       Gunakan template resmi agar format kolom sesuai dengan
                       proses import siswa.
                     </p>
@@ -824,20 +824,20 @@ export default function TambahSiswaPage() {
                       type="button"
                       onClick={handleDownloadTemplate}
                       disabled={importing}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border theme-border theme-card px-4 py-2.5 text-sm font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
                     >
                       <Download size={17} />
                       Download Template
                     </button>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 p-4">
+                  <div className="rounded-lg border theme-border p-4">
                     <div className="mb-3 flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full theme-primary text-xs font-bold">
                         2
                       </span>
 
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className="text-sm font-semibold theme-text">
                         Pilih file Excel yang sudah diisi
                       </p>
                     </div>
@@ -845,7 +845,7 @@ export default function TambahSiswaPage() {
                     <div className="flex flex-col gap-3 sm:flex-row">
                       <label
                         htmlFor="fileImportSiswa"
-                        className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 ${
+                        className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border theme-border theme-card px-4 py-2.5 text-sm font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] ${
                           importing
                             ? "pointer-events-none opacity-50"
                             : ""
@@ -866,19 +866,19 @@ export default function TambahSiswaPage() {
                     </div>
 
                     {importFile && (
-                      <div className="mt-3 flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="mt-3 flex flex-col gap-3 rounded-lg border theme-border theme-surface p-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex min-w-0 items-center gap-3">
                           <FileSpreadsheet
                             size={24}
-                            className="shrink-0 text-emerald-700"
+                            className="shrink-0 theme-primary-text"
                           />
 
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-slate-800">
+                            <p className="truncate text-sm font-medium theme-text">
                               {importFile.name}
                             </p>
 
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs theme-text-muted">
                               {(importFile.size / 1024).toFixed(1)} KB
                             </p>
                           </div>
@@ -888,7 +888,7 @@ export default function TambahSiswaPage() {
                           type="button"
                           onClick={handleRemoveImportFile}
                           disabled={importing}
-                          className="inline-flex items-center justify-center gap-1 text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+                          className="inline-flex items-center justify-center gap-1 text-sm font-medium text-red-600 dark:text-red-400 hover:opacity-80 disabled:opacity-50"
                         >
                           <X size={16} />
                           Hapus file
@@ -897,13 +897,13 @@ export default function TambahSiswaPage() {
                     )}
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 p-4">
+                  <div className="rounded-lg border theme-border p-4">
                     <div className="mb-3 flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full theme-primary text-xs font-bold">
                         3
                       </span>
 
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className="text-sm font-semibold theme-text">
                         Jalankan import
                       </p>
                     </div>
@@ -912,7 +912,7 @@ export default function TambahSiswaPage() {
                       type="button"
                       onClick={handleImportSiswa}
                       disabled={!importFile || importing}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                      className="theme-primary inline-flex w-full items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                     >
                       {importing ? (
                         <>
@@ -928,7 +928,7 @@ export default function TambahSiswaPage() {
                     </button>
 
                     {!importFile && (
-                      <p className="mt-2 text-xs text-slate-500">
+                      <p className="mt-2 text-xs theme-text-muted">
                         Tombol aktif setelah file Excel dipilih.
                       </p>
                     )}
@@ -939,7 +939,7 @@ export default function TambahSiswaPage() {
 
             {mode === "manual" && (
               <>
-                <div className="mb-5 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+                <div className="mb-5 flex items-start gap-3 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4 text-sm theme-primary-text">
                   <Info size={20} className="mt-0.5 shrink-0" />
 
                   <div>
@@ -1033,7 +1033,7 @@ export default function TambahSiswaPage() {
                         disabled={loading}
                       />
 
-                      <p className="mt-1.5 text-xs text-slate-500">
+                      <p className="mt-1.5 text-xs theme-text-muted">
                         Gunakan kata sandi awal yang aman dan sampaikan
                         kepada siswa melalui cara yang aman.
                       </p>
@@ -1135,7 +1135,7 @@ export default function TambahSiswaPage() {
                           onClick={loadKelas}
                           disabled={loadingKelas || loading}
                           title="Muat ulang kelas"
-                          className="inline-flex shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                          className="inline-flex shrink-0 items-center justify-center rounded-lg border theme-border theme-card px-3 theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
                         >
                           <RefreshCw
                             size={17}
@@ -1147,7 +1147,7 @@ export default function TambahSiswaPage() {
                       </div>
 
                       {selectedKelas && (
-                        <p className="mt-2 text-xs text-slate-500">
+                        <p className="mt-2 text-xs theme-text-muted">
                           Dipilih: {selectedKelas.nama}
                           {selectedKelas.tingkat
                             ? `, tingkat ${selectedKelas.tingkat}`
@@ -1215,7 +1215,7 @@ export default function TambahSiswaPage() {
                       <div className="relative">
                         <CalendarDays
                           size={17}
-                          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                         />
 
                         <input
@@ -1255,13 +1255,13 @@ export default function TambahSiswaPage() {
                     />
 
                     <div className="sm:col-span-2">
-                      <label className="flex items-start gap-2 text-sm text-slate-700">
+                      <label className="flex items-start gap-2 text-sm theme-text-secondary">
                         <input
                           type="checkbox"
                           name="alamatSesuaiDomisili"
                           checked={form.alamatSesuaiDomisili}
                           onChange={handleChange}
-                          className="mt-1 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+                          className="mt-1 rounded theme-border text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                           disabled={loading}
                         />
 
@@ -1443,7 +1443,7 @@ export default function TambahSiswaPage() {
                       type="button"
                       onClick={() => router.push("/admin/siswa")}
                       disabled={loading}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border theme-border theme-card px-5 py-2.5 text-sm font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Batal
                     </button>
@@ -1451,7 +1451,7 @@ export default function TambahSiswaPage() {
                     <button
                       type="submit"
                       disabled={loading || loadingKelas}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg theme-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {loading ? (
                         <>

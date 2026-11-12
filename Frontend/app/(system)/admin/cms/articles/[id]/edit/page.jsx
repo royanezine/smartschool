@@ -279,7 +279,7 @@ export default function EditArticlePage() {
                 <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                   <div className="theme-card-soft theme-border-soft border-b px-6 py-5">
                     <div className="flex items-center gap-3">
-                      <div className="theme-info flex h-10 w-10 items-center justify-center rounded-lg">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 items-center justify-center rounded-lg">
                         <FileText className="h-5 w-5" />
                       </div>
                       <div>

@@ -244,8 +244,8 @@ export default function RaporDetailPage() {
             </div>
 
             <div className="theme-card rounded-xl border theme-border shadow-sm print:shadow-none print:border-0 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-5 print:bg-white print:text-slate-900 print:border-b print:border-slate-300">
-                <p className="text-xs font-medium tracking-wide text-blue-100 uppercase">
+              <div className="theme-primary text-white px-6 py-5 print:bg-white print:text-slate-900 print:border-b print:border-slate-300">
+                <p className="text-xs font-medium tracking-wide text-white/80 uppercase">
                   Laporan Hasil Belajar Peserta Didik
                 </p>
 
@@ -253,7 +253,7 @@ export default function RaporDetailPage() {
                   Buku Rapor Siswa
                 </h2>
 
-                <p className="text-xs text-blue-100 mt-1">
+                <p className="text-xs text-white/80 mt-1">
                   Tahun Ajaran:{" "}
                   {tahunAjaranInfo?.tahunAjaran || "Belum tersedia"} &bull;
                   Semester:{" "}
@@ -263,7 +263,7 @@ export default function RaporDetailPage() {
 
               <div className="p-6 grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6 text-sm">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg theme-info print:hidden">
+                  <div className="p-2.5 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text print:hidden">
                     <User size={18} />
                   </div>
 
@@ -279,7 +279,7 @@ export default function RaporDetailPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg theme-info print:hidden">
+                  <div className="p-2.5 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text print:hidden">
                     <GraduationCap size={18} />
                   </div>
 

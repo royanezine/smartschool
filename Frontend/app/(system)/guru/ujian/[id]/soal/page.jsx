@@ -36,7 +36,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -550,9 +550,7 @@ export default function FormSoalUjianPage() {
                 <div
                   className={`absolute -right-24 -top-24 h-64 w-64 rounded-full ${themePrimarySoft} blur-3xl`}
                 />
-                <div
-                  className={`absolute -bottom-28 left-1/3 h-56 w-56 rounded-full ${themeInfoSurface} blur-3xl`}
-                />
+                <div className="absolute -bottom-28 left-1/3 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
               </div>
 
               <div className="relative flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
@@ -566,7 +564,7 @@ export default function FormSoalUjianPage() {
                   </button>
 
                   <div
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                   >
                     <ClipboardList size={23} />
                   </div>
@@ -604,7 +602,7 @@ export default function FormSoalUjianPage() {
                         </span>
 
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-lg border ${themeInfoBorder} ${themeInfoSurface} px-2.5 py-1.5 text-xs font-semibold text-[var(--color-info)]`}
+                          className={`inline-flex items-center gap-1.5 rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-1.5 text-xs font-semibold ${themePrimaryText}`}
                         >
                           <FileText size={13} />
                           {ujian?.kelasMapel?.mataPelajaran?.nama ||
@@ -836,7 +834,7 @@ export default function FormSoalUjianPage() {
                             <span
                               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${
                                 isCorrect
-                                  ? "bg-[var(--color-success)] text-[var(--color-card)]"
+                                  ? "bg-[var(--color-success)] text-white"
                                   : `${themeNeutralSurface} theme-text-secondary`
                               }`}
                             >
@@ -907,9 +905,9 @@ export default function FormSoalUjianPage() {
                     </div>
 
                     <div
-                      className={`mt-4 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-4 py-3`}
+                      className={`mt-4 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} px-4 py-3`}
                     >
-                      <p className="text-xs leading-5 text-[var(--color-info)]">
+                      <p className={`text-xs leading-5 ${themePrimaryText}`}>
                         Kunci jawaban disimpan berdasarkan teks pilihan. Pastikan
                         setiap pilihan berbeda dan jawaban benar sesuai salah satu
                         pilihan yang tersedia.
@@ -920,7 +918,7 @@ export default function FormSoalUjianPage() {
 
                 {form.jenisSoal === "benar_salah" && (
                   <div
-                    className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4 sm:p-5`}
+                    className={`rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4 sm:p-5`}
                   >
                     <h3 className="theme-text flex items-center gap-2 text-sm font-bold">
                       <ListChecks size={16} className={themePrimaryText} />
@@ -969,17 +967,17 @@ export default function FormSoalUjianPage() {
 
                 {form.jenisSoal === "esai" && (
                   <div
-                    className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4 sm:p-5`}
+                    className={`rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4 sm:p-5`}
                   >
                     <div className="flex gap-3">
                       <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} text-[var(--color-info)] ${themeSmallShadow}`}
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText} ${themeSmallShadow}`}
                       >
                         <FileText size={19} />
                       </div>
 
                       <div>
-                        <p className="text-sm font-bold text-[var(--color-info)]">
+                        <p className={`text-sm font-bold ${themePrimaryText}`}>
                           Soal Esai
                         </p>
                         <p className="theme-text-secondary mt-1 text-xs leading-5">
@@ -1006,7 +1004,7 @@ export default function FormSoalUjianPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-2.5 text-sm font-semibold text-white ${themePrimaryShadow} transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
                   >
                     {saving ? (
                       <>
@@ -1069,12 +1067,12 @@ export default function FormSoalUjianPage() {
                       </div>
 
                       <div
-                        className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-3.5 py-3`}
+                        className={`rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} px-3.5 py-3`}
                       >
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--color-info)]">
+                        <p className={`text-[10px] font-bold uppercase tracking-wide ${themePrimaryText}`}>
                           Mapel
                         </p>
-                        <p className="mt-1 break-words text-sm font-semibold text-[var(--color-info)]">
+                        <p className={`mt-1 break-words text-sm font-semibold ${themePrimaryText}`}>
                           {ujian?.kelasMapel?.mataPelajaran?.nama || "-"}
                         </p>
                       </div>

@@ -234,7 +234,7 @@ export default function EditAgregatPage() {
                 {/* Kolom Kiri: Form Input */}
                 <div className="theme-card rounded-xl border p-6 shadow-sm">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="theme-info flex h-10 w-10 items-center justify-center rounded-lg">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 items-center justify-center rounded-lg">
                       <BookOpen size={20} />
                     </div>
                     <div>
@@ -350,9 +350,9 @@ export default function EditAgregatPage() {
                 <aside className="space-y-5">
                   <section className="rounded-xl border border-[color-mix(in_srgb,var(--color-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] p-5">
                     <div className="flex items-start gap-3">
-                      <Info size={18} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                      <Info size={18} className="mt-0.5 shrink-0 theme-primary-text" />
                       <div>
-                        <h3 className="text-xs font-bold text-[var(--color-info)]">Panduan Edit</h3>
+                        <h3 className="text-xs font-bold theme-primary-text">Panduan Edit</h3>
                         <p className="mt-1 text-[11px] leading-relaxed text-[color-mix(in_srgb,var(--color-info)_80%,var(--color-text))]">
                           Pastikan total bobot (Tugas + UTS + UAS + Praktik) berjumlah tepat 100% sebelum menyimpan.
                         </p>

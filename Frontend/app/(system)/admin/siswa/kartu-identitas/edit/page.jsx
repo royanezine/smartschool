@@ -32,7 +32,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -188,7 +188,7 @@ function FotoEditor({
             absolute -bottom-1.5 -right-1.5
             w-8 h-8 rounded-full
             ${themePrimaryGradient}
-            text-[var(--color-card)]
+            text-white
             flex items-center justify-center
             ${themePrimaryShadow}
             hover:brightness-110
@@ -546,7 +546,7 @@ function EditContent() {
                     inline-flex items-center gap-2
                     px-4 py-2
                     ${themePrimaryGradient}
-                    text-[var(--color-card)]
+                    text-white
                     rounded-xl
                     text-sm font-medium
                     ${themePrimaryShadow}
@@ -626,7 +626,7 @@ function EditContent() {
                   className={`
                     w-10 h-10 rounded-xl
                     ${themePrimaryGradient}
-                    text-[var(--color-card)]
+                    text-white
                     flex items-center justify-center
                     ${themePrimaryShadow}
                   `}
@@ -1194,7 +1194,7 @@ function EditContent() {
               inline-flex items-center gap-2
               px-5 py-2.5 rounded-xl
               ${themePrimaryGradient}
-              text-[var(--color-card)]
+              text-white
               text-sm font-semibold
               ${themePrimaryShadow}
               hover:brightness-110

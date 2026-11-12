@@ -386,7 +386,7 @@ export default function DetailKategoriJabatanPage() {
                     <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                       <div className="flex flex-col justify-between gap-3 border-b theme-border p-5 sm:flex-row sm:items-center sm:p-6">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                             <History size={19} />
                           </div>
                           <div>
@@ -569,7 +569,7 @@ export default function DetailKategoriJabatanPage() {
 
                     <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm p-5 sm:p-6">
                       <div className="flex items-center gap-2 mb-4">
-                        <Users size={18} className="text-indigo-600 dark:text-indigo-400" />
+                        <Users size={18} className="theme-primary-text" />
                         <h2 className="text-sm font-bold theme-text">Jumlah Pegawai</h2>
                       </div>
                       <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
@@ -582,8 +582,8 @@ export default function DetailKategoriJabatanPage() {
                       </div>
                     </section>
 
-                    <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
-                      <Info size={17} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text theme-border flex items-start gap-3 rounded-2xl border p-4">
+                      <Info size={17} className="mt-0.5 shrink-0 theme-primary-text" />
                       <p className="text-xs leading-5">
                         Perubahan tarif disimpan sebagai riwayat baru. Perhitungan gaji mengikuti aturan sistem dan riwayat tarif yang berlaku pada periode penggajian.
                       </p>
@@ -591,7 +591,7 @@ export default function DetailKategoriJabatanPage() {
 
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                        <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <Lightbulb size={17} />
                         </div>
                         <h2 className="theme-text text-sm font-bold">Panduan</h2>

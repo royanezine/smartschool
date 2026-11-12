@@ -22,7 +22,6 @@ const categories = [
     title: "Akademik",
     desc: "Rekap nilai, kehadiran, dan capaian belajar per unit sekolah",
     icon: BookOpen,
-    color: "primary",
     path: "/yayasan/laporan/akademik",
     stat: "-",
   },
@@ -31,7 +30,6 @@ const categories = [
     title: "Guru",
     desc: "Rekap kinerja, kehadiran, dan beban mengajar tenaga pendidik",
     icon: GraduationCap,
-    color: "info",
     path: "/yayasan/laporan/guru",
     stat: "-",
   },
@@ -40,7 +38,6 @@ const categories = [
     title: "Inventaris",
     desc: "Kondisi aset dan sarana-prasarana tiap unit sekolah",
     icon: Package,
-    color: "warning",
     path: "/yayasan/laporan/iventaris",
     stat: "-",
   },
@@ -49,38 +46,19 @@ const categories = [
     title: "Siswa",
     desc: "Rekap data induk, mutasi, dan demografi siswa lintas unit",
     icon: UserSquare2,
-    color: "success",
     path: "/yayasan/laporan/siswa",
     stat: "-",
   },
 ];
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
-  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 
 const themePrimarySoftBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
-
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
-const themeSuccessSurface =
-  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
-
-const themeSuccessBorder =
-  "border-[color-mix(in_srgb,var(--color-success)_22%,transparent)]";
-
-const themeWarningSurface =
-  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
-
-const themeWarningBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_22%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -88,43 +66,13 @@ const themeCardShadow =
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
 
-const categoryTheme = {
-  primary: {
-    surface: themePrimarySoft,
-    border: themePrimarySoftBorder,
-    text: "text-[var(--color-primary)]",
-    hoverBorder:
-      "hover:border-[color-mix(in_srgb,var(--color-primary)_38%,transparent)]",
-    ring: "group-hover:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-    decoration: "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
-  },
-  info: {
-    surface: themeInfoSurface,
-    border: themeInfoBorder,
-    text: "text-[var(--color-info)]",
-    hoverBorder:
-      "hover:border-[color-mix(in_srgb,var(--color-info)_38%,transparent)]",
-    ring: "group-hover:ring-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-    decoration: "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]",
-  },
-  warning: {
-    surface: themeWarningSurface,
-    border: themeWarningBorder,
-    text: "text-[var(--color-warning)]",
-    hoverBorder:
-      "hover:border-[color-mix(in_srgb,var(--color-warning)_38%,transparent)]",
-    ring: "group-hover:ring-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-    decoration: "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]",
-  },
-  success: {
-    surface: themeSuccessSurface,
-    border: themeSuccessBorder,
-    text: "text-[var(--color-success)]",
-    hoverBorder:
-      "hover:border-[color-mix(in_srgb,var(--color-success)_38%,transparent)]",
-    ring: "group-hover:ring-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-    decoration: "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
-  },
+const primaryCardTheme = {
+  surface: themePrimarySoft,
+  border: themePrimarySoftBorder,
+  hoverBorder:
+    "hover:border-[color-mix(in_srgb,var(--color-primary)_38%,transparent)]",
+  ring: "group-hover:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+  decoration: "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
 };
 
 export default function LaporanYayasanPage() {
@@ -211,7 +159,7 @@ export default function LaporanYayasanPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2.5">
               <div
-                className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
               >
                 <FileText size={18} />
               </div>
@@ -252,10 +200,10 @@ export default function LaporanYayasanPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {dynamicCategories.map((item) => {
             const Icon = item.icon;
-            const c = categoryTheme[item.color];
+            const c = primaryCardTheme;
             return (
               <button
                 key={item.key}
@@ -268,9 +216,9 @@ export default function LaporanYayasanPage() {
                 <div className="relative min-w-0">
                   <div className="flex items-start justify-between">
                     <div
-                      className={`shrink-0 rounded-xl p-3 ${c.surface} ${c.text} ring-4 ring-transparent ${c.ring} transition-all duration-300 sm:p-3.5`}
+                      className={`shrink-0 rounded-xl p-3 ${c.surface} ring-4 ring-transparent ${c.ring} transition-all duration-300 sm:p-3.5`}
                     >
-                      <Icon size={22} />
+                      <Icon size={22} className="theme-primary-text" />
                     </div>
                     <ChevronRight
                       size={20}
@@ -284,7 +232,7 @@ export default function LaporanYayasanPage() {
                     {item.desc}
                   </p>
                   <div
-                    className={`mt-4 inline-flex max-w-full items-center truncate rounded-full px-2.5 py-1 text-xs font-medium ${c.text} ${c.surface}`}
+                    className={`mt-4 inline-flex max-w-full items-center truncate rounded-full px-2.5 py-1 text-xs font-medium theme-primary-text ${c.surface}`}
                   >
                     {loading ? (
                       <span className="flex items-center gap-1">
