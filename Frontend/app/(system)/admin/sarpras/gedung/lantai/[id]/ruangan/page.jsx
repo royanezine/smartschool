@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Eye,
   Pencil,
+  Trash2,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -26,6 +27,12 @@ import {
   getGedung,
   getLantaiByGedung,
 } from "@/services/infrastruktur.service";
+import {
+  getRuangan,
+  getAset,
+  deleteRuangan,
+} from "@/services/sarpras.service";
+import { getKelas } from "@/services/kelas.service";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -38,6 +45,14 @@ const themeSoftSurface =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
+function extractArray(res) {
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res?.data)) return res.data;
+  if (Array.isArray(res?.data?.data)) return res.data.data;
+  if (Array.isArray(res?.data?.ruangan)) return res.data.ruangan;
+  return [];
+}
+
 export default function DaftarRuanganPage() {
   const router = useRouter();
   const params = useParams();
@@ -45,17 +60,26 @@ export default function DaftarRuanganPage() {
 
   const [lantai, setLantai] = useState(null);
   const [gedung, setGedung] = useState(null);
+  const [ruanganList, setRuanganList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [deletingId, setDeletingId] = useState(null);
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
 
-      const gedungResult = await getGedung();
+      const [gedungResult, ruanganResult, asetResult, kelasResult] =
+        await Promise.all([
+          getGedung(),
+          getRuangan(),
+          getAset().catch(() => ({ data: [] })),
+          getKelas({ limit: 200 }).catch(() => ({ data: [] })),
+        ]);
+
       if (!gedungResult?.success) {
         throw new Error(gedungResult?.message || "Gagal mengambil data gedung.");
       }
@@ -83,31 +107,79 @@ export default function DaftarRuanganPage() {
 
       setLantai(foundLantai);
       setGedung(foundGedung);
+
+      const allRuangan = extractArray(ruanganResult);
+      const allAset = extractArray(asetResult);
+      const allKelas = extractArray(kelasResult);
+
+      const filteredByFloor = allRuangan
+        .filter((r) => String(r.lantaiId || r.lantai?.id || "") === String(id))
+        .map((r) => {
+          const asetInRoom = allAset.filter(
+            (a) => String(a.ruanganId || "") === String(r.id)
+          );
+          const kelasConnected = allKelas.find(
+            (k) => String(k.ruanganId || k.ruangan?.id || "") === String(r.id)
+          );
+          return {
+            ...r,
+            kode: r.lokasi || "-",
+            kelas: kelasConnected || null,
+            jumlahKelas: r._count?.kelas ?? (kelasConnected ? 1 : 0),
+            totalAsset: asetInRoom.length,
+            status: "aktif",
+          };
+        });
+
+      setRuanganList(filteredByFloor);
     } catch (err) {
       console.error(err);
-      setError(err?.message || "Gagal memuat konteks lantai.");
+      setError(err?.message || "Gagal memuat data ruangan.");
     } finally {
       setLoading(false);
     }
   }, [id]);
 
   useEffect(() => {
-    if (id) {
+    if (!id) return;
+    const timer = setTimeout(() => {
       loadData();
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [id, loadData]);
 
-  // Data ruangan saat ini 100% empty state karena Backend belum menyediakan API /api/infrastruktur/ruangan
-  const ruanganList = [];
+  const handleDelete = async (room) => {
+    if (!room?.id) return;
+    const confirmed = window.confirm(
+      `Hapus ruangan "${room.nama}"? Ruangan yang masih dipakai kelas tidak dapat dihapus.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(room.id);
+      setError("");
+      await deleteRuangan(room.id);
+      await loadData();
+    } catch (err) {
+      setError(err?.message || "Gagal menghapus ruangan.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const filteredRuangan = ruanganList.filter((item) => {
     const matchSearch =
       item.nama?.toLowerCase().includes(search.toLowerCase()) ||
-      item.kode?.toLowerCase().includes(search.toLowerCase());
+      item.kode?.toLowerCase().includes(search.toLowerCase()) ||
+      (item.keterangan || "").toLowerCase().includes(search.toLowerCase());
     const matchStatus =
       statusFilter === "all" ? true : item.status === statusFilter;
     return matchSearch && matchStatus;
   });
+
+  const terhubungKelasCount = ruanganList.filter((r) => (r.jumlahKelas || 0) > 0).length;
+  const ruangUmumCount = Math.max(0, ruanganList.length - terhubungKelasCount);
+  const totalAssetCount = ruanganList.reduce((acc, r) => acc + (r.totalAsset || 0), 0);
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -238,12 +310,6 @@ export default function DaftarRuanganPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="inline-flex items-center gap-1.5 rounded-lg border theme-border px-3 py-1 text-xs font-semibold theme-text-secondary bg-[var(--color-card)]">
-                  <span className="h-2 w-2 rounded-full bg-[var(--color-info)] animate-pulse" />
-                  Frontend Ready • Backend API Pending
-                </span>
-              </div>
             </div>
 
             {/* Summary Stat Cards */}
@@ -262,7 +328,7 @@ export default function DaftarRuanganPage() {
                   <p className="theme-text-muted text-xs font-medium">Terhubung Kelas</p>
                   <School size={16} className="theme-primary-text" />
                 </div>
-                <p className="theme-text text-2xl font-bold mt-2">0</p>
+                <p className="theme-text text-2xl font-bold mt-2">{terhubungKelasCount}</p>
                 <p className="theme-text-muted text-[11px] mt-0.5">Ruang kelas aktif</p>
               </div>
 
@@ -271,7 +337,7 @@ export default function DaftarRuanganPage() {
                   <p className="theme-text-muted text-xs font-medium">Ruang Umum / Lab</p>
                   <Building2 size={16} className="theme-primary-text" />
                 </div>
-                <p className="theme-text text-2xl font-bold mt-2">0</p>
+                <p className="theme-text text-2xl font-bold mt-2">{ruangUmumCount}</p>
                 <p className="theme-text-muted text-[11px] mt-0.5">Tanpa penugasan kelas</p>
               </div>
 
@@ -280,7 +346,7 @@ export default function DaftarRuanganPage() {
                   <p className="theme-text-muted text-xs font-medium">Total Asset</p>
                   <Boxes size={16} className="theme-primary-text" />
                 </div>
-                <p className="theme-text text-2xl font-bold mt-2">0 Unit</p>
+                <p className="theme-text text-2xl font-bold mt-2">{totalAssetCount} Unit</p>
                 <p className="theme-text-muted text-[11px] mt-0.5">Inventaris ruangan</p>
               </div>
             </div>
@@ -382,7 +448,7 @@ export default function DaftarRuanganPage() {
                             Belum Ada Data Ruangan
                           </h3>
                           <p className="theme-text-muted text-xs max-w-md mx-auto mt-1 leading-relaxed">
-                            Data ruangan pada {lantai?.nama || "lantai ini"} belum terdaftar. Saat ini endpoint backend untuk ruangan sedang dipersiapkan.
+                            Belum ada data ruangan yang terdaftar pada {lantai?.nama || "lantai ini"}. Tambahkan ruangan baru menggunakan tombol di bawah.
                           </p>
                           <div className="mt-5 flex justify-center gap-3">
                             <button
@@ -478,6 +544,19 @@ export default function DaftarRuanganPage() {
                                 className="p-2 rounded-lg theme-text-secondary hover:text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] transition"
                               >
                                 <Pencil size={15} />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={deletingId === item.id}
+                                onClick={() => handleDelete(item)}
+                                title="Hapus Ruangan"
+                                className="p-2 rounded-lg theme-text-secondary hover:text-[var(--color-danger)] hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] transition disabled:opacity-50"
+                              >
+                                {deletingId === item.id ? (
+                                  <Loader2 size={15} className="animate-spin" />
+                                ) : (
+                                  <Trash2 size={15} />
+                                )}
                               </button>
                             </div>
                           </td>

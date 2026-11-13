@@ -18,8 +18,16 @@ import {
   Loader2,
   AlertCircle,
   ClipboardList,
+  Pencil,
+  Trash2,
+  X,
 } from "lucide-react";
-import { getLaporanKerusakan } from "@/services/sarpras.service";
+import {
+  getLaporanKerusakan,
+  updateLaporanKerusakan,
+  deleteLaporanKerusakan,
+} from "@/services/sarpras.service";
+import { getAuthRole } from "@/lib/auth";
 
 const jenisOptions = ["Semua", "Kerusakan", "Pemeriksaan"];
 const targetOptions = ["Semua", "Fasilitas", "Inventaris"];
@@ -255,6 +263,13 @@ function formatTanggal(value) {
   }).format(date);
 }
 
+function toApiStatus(status) {
+  const label = getStatusLabel(status);
+  if (label === "Diproses") return "diproses";
+  if (label === "Selesai") return "selesai";
+  return "menunggu";
+}
+
 function normalizeLaporan(item) {
   const status = getStatusLabel(
     item?.status || item?.statusLaporan || item?.statusPenanganan
@@ -269,6 +284,9 @@ function normalizeLaporan(item) {
     pelapor: getPelapor(item),
     tanggal: getTanggal(item),
     status,
+    rawStatus: toApiStatus(status),
+    deskripsi: item?.deskripsi || item?.keterangan || "",
+    catatanPerbaikan: item?.catatanPerbaikan || "",
     asetNama:
       item?.aset?.nama ||
       item?.aset?.namaAset ||
@@ -324,6 +342,32 @@ export default function LaporanPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [userRole, setUserRole] = useState("");
+
+  const [editModal, setEditModal] = useState({
+    open: false,
+    item: null,
+    status: "menunggu",
+    catatanPerbaikan: "",
+    deskripsi: "",
+    loading: false,
+    error: "",
+  });
+
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    item: null,
+    loading: false,
+    error: "",
+  });
+
+  const canDeleteLaporan =
+    userRole === "super_admin" || userRole === "admin_sekolah";
+
+  useEffect(() => {
+    setUserRole(getAuthRole() || "");
+  }, []);
 
   const notifications = [];
 
@@ -483,6 +527,92 @@ export default function LaporanPage() {
     setJenisFilter("Semua");
     setTargetFilter("Semua");
     setStatusFilter("Semua");
+  };
+
+  const handleOpenEditModal = (item) => {
+    setNotice("");
+    setEditModal({
+      open: true,
+      item,
+      status: item.rawStatus || toApiStatus(item.status),
+      catatanPerbaikan: item.catatanPerbaikan || "",
+      deskripsi: item.deskripsi || item.judul || "",
+      loading: false,
+      error: "",
+    });
+  };
+
+  const handleSubmitEditModal = async (e) => {
+    e.preventDefault();
+    if (!editModal.item?.id) return;
+
+    if (!editModal.deskripsi.trim()) {
+      setEditModal((prev) => ({
+        ...prev,
+        error: "Deskripsi kerusakan tidak boleh kosong.",
+      }));
+      return;
+    }
+
+    setEditModal((prev) => ({ ...prev, loading: true, error: "" }));
+    try {
+      await updateLaporanKerusakan(editModal.item.id, {
+        status: editModal.status,
+        deskripsi: editModal.deskripsi.trim(),
+        catatanPerbaikan: editModal.catatanPerbaikan.trim() || null,
+      });
+
+      setEditModal({
+        open: false,
+        item: null,
+        status: "menunggu",
+        catatanPerbaikan: "",
+        deskripsi: "",
+        loading: false,
+        error: "",
+      });
+      setNotice("Status laporan kerusakan berhasil diperbarui.");
+      await loadLaporan(true);
+    } catch (err) {
+      setEditModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: err?.message || "Gagal memperbarui laporan kerusakan.",
+      }));
+    }
+  };
+
+  const handleOpenDeleteModal = (item) => {
+    setNotice("");
+    setDeleteModal({
+      open: true,
+      item,
+      loading: false,
+      error: "",
+    });
+  };
+
+  const handleConfirmDeleteModal = async () => {
+    if (!deleteModal.item?.id) return;
+
+    setDeleteModal((prev) => ({ ...prev, loading: true, error: "" }));
+    try {
+      await deleteLaporanKerusakan(deleteModal.item.id);
+      setDeleteModal({
+        open: false,
+        item: null,
+        loading: false,
+        error: "",
+      });
+      setNotice("Laporan kerusakan berhasil dihapus.");
+      await loadLaporan(true);
+    } catch (err) {
+      setDeleteModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: err?.message || "Gagal menghapus laporan kerusakan.",
+      }));
+    }
   };
 
   return (
@@ -690,6 +820,31 @@ export default function LaporanPage() {
               </div>
             </div>
 
+            {notice && (
+              <div
+                className={`
+                  flex items-start gap-3 p-4 rounded-xl
+                  border ${themeSuccessBorder} ${themeSuccessSurface}
+                `}
+              >
+                <CheckCircle2
+                  size={19}
+                  className={`${themeSuccessText} mt-0.5 flex-shrink-0`}
+                />
+                <p className={`flex-1 text-sm font-medium ${themeSuccessText}`}>
+                  {notice}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setNotice("")}
+                  className="theme-text-muted hover:theme-text"
+                  aria-label="Tutup pemberitahuan"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+
             {error && (
               <div
                 className={`
@@ -784,6 +939,8 @@ export default function LaporanPage() {
                       <th className="px-5 py-3 font-medium">Tanggal</th>
 
                       <th className="px-5 py-3 font-medium">Status</th>
+
+                      <th className="px-5 py-3 font-medium text-right">Aksi</th>
                     </tr>
                   </thead>
 
@@ -795,7 +952,7 @@ export default function LaporanPage() {
                   >
                     {loading ? (
                       <tr>
-                        <td colSpan={6} className="py-14 text-center">
+                        <td colSpan={7} className="py-14 text-center">
                           <div className="flex flex-col items-center gap-2">
                             <Loader2
                               size={25}
@@ -851,6 +1008,11 @@ export default function LaporanPage() {
                                       {item.asetNama}
                                     </p>
                                   )}
+                                  {item.catatanPerbaikan && (
+                                    <p className="text-xs theme-text-secondary mt-0.5">
+                                      Catatan: {item.catatanPerbaikan}
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             </td>
@@ -898,12 +1060,39 @@ export default function LaporanPage() {
                                 {item.status}
                               </span>
                             </td>
+
+                            <td className="px-5 py-3.5 text-right">
+                              <div className="inline-flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditModal(item)}
+                                  className={`
+                                    inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg
+                                    border ${themePrimaryBorder} ${themePrimarySurface} ${themePrimaryText}
+                                    text-xs font-medium transition hover:brightness-95
+                                  `}
+                                >
+                                  <Pencil size={13} />
+                                  Kelola Status
+                                </button>
+                                {canDeleteLaporan && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenDeleteModal(item)}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-red-200 bg-red-50 text-xs font-medium text-red-700 transition hover:bg-red-100 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
+                                  >
+                                    <Trash2 size={13} />
+                                    Hapus
+                                  </button>
+                                )}
+                              </div>
+                            </td>
                           </tr>
                         );
                       })
                     ) : (
                       <tr>
-                        <td colSpan={6} className="py-14 text-center">
+                        <td colSpan={7} className="py-14 text-center">
                           <div className="flex flex-col items-center gap-2">
                             <div
                               className={`
@@ -936,6 +1125,210 @@ export default function LaporanPage() {
           </div>
         </main>
       </div>
+
+      {editModal.open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-laporan-title"
+        >
+          <form
+            onSubmit={handleSubmitEditModal}
+            className="theme-card theme-border w-full max-w-lg rounded-2xl border p-6 shadow-xl"
+          >
+            <div className="mb-4 flex items-center justify-between border-b theme-border pb-3">
+              <h3 id="edit-laporan-title" className="text-base font-bold theme-text">
+                Kelola Status Laporan Kerusakan
+              </h3>
+              <button
+                type="button"
+                onClick={() =>
+                  setEditModal({
+                    open: false,
+                    item: null,
+                    status: "menunggu",
+                    catatanPerbaikan: "",
+                    deskripsi: "",
+                    loading: false,
+                    error: "",
+                  })
+                }
+                className="rounded-lg p-1 theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                aria-label="Tutup modal edit laporan"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide theme-text-muted">
+                  Aset Terkait
+                </p>
+                <p className="mt-1 text-sm font-medium theme-text">
+                  {editModal.item?.asetNama || "-"} ({editModal.item?.pelapor || "-"})
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide theme-text-muted">
+                  Deskripsi Kerusakan
+                </label>
+                <textarea
+                  rows={2}
+                  value={editModal.deskripsi}
+                  onChange={(e) =>
+                    setEditModal((prev) => ({
+                      ...prev,
+                      deskripsi: e.target.value,
+                      error: "",
+                    }))
+                  }
+                  className="theme-input theme-border w-full rounded-xl border px-3 py-2 text-sm outline-none focus:border-[var(--color-primary)]"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide theme-text-muted">
+                  Status Penanganan
+                </label>
+                <select
+                  value={editModal.status}
+                  onChange={(e) =>
+                    setEditModal((prev) => ({
+                      ...prev,
+                      status: e.target.value,
+                    }))
+                  }
+                  className="theme-input theme-border h-10 w-full rounded-xl border px-3 text-sm outline-none focus:border-[var(--color-primary)]"
+                >
+                  <option value="menunggu">Menunggu</option>
+                  <option value="diproses">Diproses</option>
+                  <option value="selesai">Selesai</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide theme-text-muted">
+                  Catatan Perbaikan
+                </label>
+                <textarea
+                  rows={3}
+                  value={editModal.catatanPerbaikan}
+                  onChange={(e) =>
+                    setEditModal((prev) => ({
+                      ...prev,
+                      catatanPerbaikan: e.target.value,
+                    }))
+                  }
+                  placeholder="Tuliskan tindakan atau progres perbaikan..."
+                  className="theme-input theme-border w-full rounded-xl border px-3 py-2 text-sm outline-none focus:border-[var(--color-primary)]"
+                />
+              </div>
+
+              {editModal.error && (
+                <p className="text-xs text-red-600 dark:text-red-400">
+                  {editModal.error}
+                </p>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={editModal.loading}
+                onClick={() =>
+                  setEditModal({
+                    open: false,
+                    item: null,
+                    status: "menunggu",
+                    catatanPerbaikan: "",
+                    deskripsi: "",
+                    loading: false,
+                    error: "",
+                  })
+                }
+                className="rounded-xl border theme-border px-4 py-2 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                disabled={editModal.loading}
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-60"
+              >
+                {editModal.loading && <Loader2 size={15} className="animate-spin" />}
+                Simpan Perubahan
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {deleteModal.open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-laporan-title"
+        >
+          <div className="theme-card theme-border w-full max-w-md rounded-2xl border p-6 shadow-xl">
+            <div className="mb-3 flex items-center justify-between border-b theme-border pb-3">
+              <h3 id="delete-laporan-title" className="text-base font-bold theme-text">
+                Hapus Laporan Kerusakan
+              </h3>
+              <button
+                type="button"
+                onClick={() =>
+                  setDeleteModal({ open: false, item: null, loading: false, error: "" })
+                }
+                className="rounded-lg p-1 theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                aria-label="Tutup modal hapus laporan"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="text-sm theme-text-secondary">
+              Apakah Anda yakin ingin menghapus laporan{" "}
+              <span className="font-semibold theme-text">
+                {deleteModal.item?.judul}
+              </span>
+              ? Tindakan ini tidak dapat dibatalkan.
+            </p>
+
+            {deleteModal.error && (
+              <p className="mt-3 text-xs text-red-600 dark:text-red-400">
+                {deleteModal.error}
+              </p>
+            )}
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={deleteModal.loading}
+                onClick={() =>
+                  setDeleteModal({ open: false, item: null, loading: false, error: "" })
+                }
+                className="rounded-xl border theme-border px-4 py-2 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={deleteModal.loading}
+                onClick={handleConfirmDeleteModal}
+                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+              >
+                {deleteModal.loading && <Loader2 size={15} className="animate-spin" />}
+                Hapus Laporan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

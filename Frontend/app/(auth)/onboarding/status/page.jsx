@@ -1,7 +1,8 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { cekStatusPembayaranTenant } from "@/services/tenant.service";
 import Image from "next/image";
 import {
   CheckCircle2,
@@ -25,9 +26,36 @@ function WaitingActivationContent() {
   // Backend HEAD tidak menyediakan GET /api/tenant/status endpoint
   // Status pembayaran hanya dapat diperiksa melalui Midtrans webhook yang akan
   // mengaktifkan akun secara otomatis setelah pembayaran berhasil
-  // Halaman ini hanya menampilkan informasi menunggu tanpa polling ke endpoint yang tidak ada
-
   const hasParams = Boolean(email || orderId);
+  const canPollPayment = Boolean(orderId && String(orderId).startsWith("REG-"));
+
+  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [checkError, setCheckError] = useState("");
+
+  const handleCheckStatus = useCallback(async () => {
+    if (!canPollPayment) return;
+    try {
+      setCheckingStatus(true);
+      setCheckError("");
+      const res = await cekStatusPembayaranTenant(String(orderId));
+      setPaymentStatus(res?.data?.status || null);
+      setStatusMessage(res?.message || "");
+    } catch (err) {
+      setCheckError(err?.message || "Gagal memeriksa status pembayaran.");
+    } finally {
+      setCheckingStatus(false);
+    }
+  }, [canPollPayment, orderId]);
+
+  useEffect(() => {
+    if (canPollPayment) {
+      Promise.resolve().then(() => {
+        handleCheckStatus();
+      });
+    }
+  }, [canPollPayment, handleCheckStatus]);
 
   return (
     <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
@@ -135,6 +163,45 @@ function WaitingActivationContent() {
                 <p className="text-sm font-medium text-slate-800 mt-1">
                   {orderId}
                 </p>
+              </div>
+            )}
+
+            {canPollPayment && (
+              <div className="mt-4 space-y-2">
+                {statusMessage && (
+                  <div
+                    className={`rounded-xl border px-4 py-3 text-xs ${
+                      paymentStatus === "aktif"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        : "border-blue-200 bg-blue-50 text-blue-700"
+                    }`}
+                  >
+                    <p className="font-semibold">
+                      Status Terkini: {paymentStatus || "menunggu"}
+                    </p>
+                    <p className="mt-0.5">{statusMessage}</p>
+                  </div>
+                )}
+
+                {checkError && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs text-red-700">
+                    {checkError}
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleCheckStatus}
+                  disabled={checkingStatus}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold py-2.5 transition disabled:opacity-60"
+                >
+                  {checkingStatus && (
+                    <Loader2 size={14} className="animate-spin" />
+                  )}
+                  {checkingStatus
+                    ? "Memeriksa Status ke Backend..."
+                    : "Cek Status Pembayaran & Aktivasi"}
+                </button>
               </div>
             )}
 

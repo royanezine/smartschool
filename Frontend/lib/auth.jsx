@@ -476,13 +476,28 @@ export function registerAuthApiHandlers(handlers = {}) {
   }
 }
 
-function getCleanApiBase() {
-  const apiUrl = (
-    (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_API_URL) ||
-    "http://localhost:5000"
-  ).replace(/\/+$/, "");
-  return apiUrl.endsWith("/api") ? apiUrl : `${apiUrl}/api`;
+export function getBackendOrigin() {
+  const envUrl = (
+    typeof process !== "undefined" ? process.env?.NEXT_PUBLIC_API_URL : ""
+  )?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "").replace(/\/api(?:\/v1)?$/i, "");
+  }
+  if (typeof window !== "undefined") {
+    return ["localhost", "127.0.0.1"].includes(window.location.hostname)
+      ? "http://localhost:5000"
+      : window.location.origin;
+  }
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
 }
+
+export function getCleanApiBase() {
+  const origin = getBackendOrigin();
+  return origin ? `${origin}/api` : "/api";
+}
+
+export const resolveApiOrigin = getBackendOrigin;
+export const resolveApiBaseUrl = getCleanApiBase;
 
 export async function requestNewAccessToken() {
   if (activeRefreshPromise) {

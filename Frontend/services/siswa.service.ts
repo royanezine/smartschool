@@ -12,6 +12,7 @@ export interface CreateSiswaData {
   nipd?: string | null;
   kelasId?: string | null;
   tahunAjaranId?: string;
+  jurusanId?: string | null;
 
   nik?: string | null;
   jenisKelamin?: string | null;
@@ -58,13 +59,13 @@ export interface UpdateSiswaData {
   namaLengkap?: string;
   namaPengguna?: string;
   email?: string;
-  kataSandi?: string;
 
   nis?: string | null;
   nisn?: string | null;
   nipd?: string | null;
   kelasId?: string | null;
   tahunAjaranId?: string;
+  jurusanId?: string | null;
 
   nik?: string | null;
   jenisKelamin?: string | null;
@@ -161,15 +162,25 @@ export async function getSemuaSiswa(params: SiswaQuery = {}) {
   });
 }
 
+export async function getSiswaById(id: string) {
+  if (!id?.trim()) {
+    throw new Error("ID siswa wajib diisi.");
+  }
+
+  return apiFetch(`/api/siswa/${encodeURIComponent(id.trim())}`, {
+    method: "GET",
+  });
+}
+
 export async function updateSiswa(
   id: string,
   data: UpdateSiswaData
 ) {
-  if (!id) {
+  if (!id?.trim()) {
     throw new Error("ID siswa wajib diisi.");
   }
 
-  return apiFetch(`/api/siswa/${id}`, {
+  return apiFetch(`/api/siswa/${encodeURIComponent(id.trim())}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });

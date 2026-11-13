@@ -30,6 +30,7 @@ import { getUjianById } from "@/services/ujian.service";
 
 import {
   getSoalByUjian,
+  getSoalById,
   createSoal,
   updateSoal,
 } from "@/services/soalUjian.service";
@@ -169,9 +170,10 @@ export default function FormSoalUjianPage() {
         setLoading(true);
         setError("");
 
-        const [ujianResponse, soalResponse] = await Promise.all([
+        const [ujianResponse, soalResponse, soalDetailResponse] = await Promise.all([
           getUjianById(String(ujianId)),
           getSoalByUjian(String(ujianId)),
+          isEdit ? getSoalById(String(soalId)) : Promise.resolve(null),
         ]);
 
         if (!active) return;
@@ -183,9 +185,7 @@ export default function FormSoalUjianPage() {
         setTotalSoal(soalData.length);
 
         if (isEdit) {
-          const found = soalData.find(
-            (item) => String(item.id) === String(soalId)
-          );
+          const found = parseObject(soalDetailResponse);
 
           if (!found) {
             setError(

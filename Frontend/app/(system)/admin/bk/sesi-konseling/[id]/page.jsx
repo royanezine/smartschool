@@ -7,7 +7,7 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import CanAccess from "@/app/components/auth/CanAccess";
 
-import { getSesiKonseling } from "@/services/bk.service";
+import { getSesiKonselingById } from "@/services/bk.service";
 
 export default function DetailSesiKonselingPage() {
   const router = useRouter();
@@ -22,9 +22,7 @@ export default function DetailSesiKonselingPage() {
     async function load() {
       try {
         setLoading(true);
-        const result = await getSesiKonseling();
-        const list = Array.isArray(result) ? result : [];
-        const item = list.find((x) => String(x.id) === String(id));
+        const item = await getSesiKonselingById(String(id));
 
         if (!item) {
           throw new Error("Data sesi konseling tidak ditemukan.");

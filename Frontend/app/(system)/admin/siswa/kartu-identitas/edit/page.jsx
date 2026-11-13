@@ -1,27 +1,25 @@
 "use client";
 
-import { Suspense, useState, useMemo, useRef, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { getSemuaSiswa, updateSiswa } from "@/services/siswa.service";
+import { getSiswaById, updateSiswa } from "@/services/siswa.service";
 import { getKelas } from "@/services/kelas.service";
+import { getJurusan } from "@/services/jurusan.service";
+import { getTahunAjaran } from "@/services/tahunAjaran.service";
 
 import {
   ArrowLeft,
   Save,
-  Camera,
   User,
   Fingerprint,
   Cake,
-  Heart,
-  BookOpen,
   School,
   Phone,
   Mail,
   MapPin,
   GraduationCap,
-  CalendarDays,
   Users,
   X,
   Venus,
@@ -71,173 +69,41 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 
-const OPSI_STATUS = ["Aktif", "Nonaktif"];
+const OPSI_STATUS = [
+  { value: "aktif", label: "Aktif" },
+  { value: "nonaktif", label: "Nonaktif" },
+];
 
 const OPSI_JENIS_KELAMIN = [
-  "Laki-laki",
-  "Perempuan",
+  { value: "laki-laki", label: "Laki-laki" },
+  { value: "perempuan", label: "Perempuan" },
 ];
 
-const OPSI_AGAMA = [
-  "Islam",
-  "Kristen",
-  "Katolik",
-  "Hindu",
-  "Buddha",
-  "Konghucu",
-];
-
-const OPSI_STATUS_KELUARGA = [
-  "Anak Kandung",
-  "Anak Tiri",
-  "Anak Angkat",
-];
-
-function FotoPlaceholder() {
-  return (
-    <svg
-      viewBox="0 0 200 200"
-      className="w-full h-full"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect
-        width="200"
-        height="200"
-        fill="var(--color-border-soft)"
-      />
-
-      <circle
-        cx="100"
-        cy="80"
-        r="38"
-        fill="var(--color-card)"
-      />
-
-      <path
-        d="M30 200c0-51.7 31.3-93.6 70-93.6s70 41.9 70 93.6H30z"
-        fill="var(--color-card)"
-      />
-    </svg>
-  );
+function extractList(response) {
+  const result = response?.data ?? response;
+  if (Array.isArray(result)) return result;
+  if (Array.isArray(result?.data)) return result.data;
+  if (Array.isArray(result?.items)) return result.items;
+  return [];
 }
 
+function optionalText(value) {
+  const normalized = String(value ?? "").trim();
+  return normalized || null;
+}
 
-function FotoEditor({
-  siswaId,
-  foto,
-  onChange,
-}) {
-  const fileInputRef = useRef(null);
+function formatDateInput(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
+}
 
-  const handlePilihFoto = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFotoChange = (e) => {
-    const file = e.target.files?.[0];
-
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("File yang dipilih harus berupa gambar.");
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      onChange(reader.result);
-    };
-
-    reader.readAsDataURL(file);
-  };
-
-  const handleHapusFoto = () => {
-    onChange(null);
-  };
-
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-
-      <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
-        <div
-          className={`
-            w-full h-full rounded-2xl overflow-hidden
-            border-2 border-[var(--color-card)]
-            ring-1 ${themeNeutralBorder}
-            ${themeSmallShadow}
-          `}
-        >
-          {foto ? (
-            <img
-              src={foto}
-              alt="Foto siswa"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <FotoPlaceholder />
-          )}
-        </div>
-
-
-        <button
-          type="button"
-          onClick={handlePilihFoto}
-          title="Ubah foto"
-          className={`
-            absolute -bottom-1.5 -right-1.5
-            w-8 h-8 rounded-full
-            ${themePrimaryGradient}
-            text-white
-            flex items-center justify-center
-            ${themePrimaryShadow}
-            hover:brightness-110
-            transition-all
-          `}
-        >
-          <Camera size={14} />
-        </button>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFotoChange}
-          className="hidden"
-        />
-      </div>
-
-
-      <div className="space-y-1.5">
-        <p className="text-sm font-medium theme-text">
-          Foto Profil Siswa
-        </p>
-
-        <p className="text-xs theme-text-muted max-w-md">
-          Format JPG atau PNG. Disarankan menggunakan foto
-          dengan rasio 1:1 agar tampilan kartu identitas lebih
-          rapi.
-        </p>
-
-        {foto && (
-          <button
-            type="button"
-            onClick={handleHapusFoto}
-            className="
-              inline-flex items-center gap-1.5
-              text-xs font-medium
-              theme-danger
-              hover:opacity-80
-              transition-colors
-            "
-          >
-            <X size={12} />
-            Hapus foto
-          </button>
-        )}
-      </div>
-    </div>
-  );
+function normalizeGenderValue(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (normalized === "l" || normalized === "laki-laki") return "laki-laki";
+  if (normalized === "p" || normalized === "perempuan") return "perempuan";
+  return "";
 }
 
 
@@ -350,7 +216,11 @@ function EditContent() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(null);
-  const [foto, setFoto] = useState(null);
+  const [opsiKelas, setOpsiKelas] = useState([]);
+  const [opsiJurusan, setOpsiJurusan] = useState([]);
+  const [initialKelasId, setInitialKelasId] = useState("");
+  const [initialTahunAjaranId, setInitialTahunAjaranId] = useState("");
+  const [activeTahunAjaranId, setActiveTahunAjaranId] = useState("");
   const [siswaAsli, setSiswaAsli] = useState(null);
   const [loadingSiswa, setLoadingSiswa] = useState(true);
 
@@ -366,53 +236,87 @@ function EditContent() {
 
       try {
         setLoadingSiswa(true);
-        const [res, resKelas] = await Promise.allSettled([
-          getSemuaSiswa({ search: String(id), limit: 50 }),
-          getKelas({ limit: 100 }),
+        const [res, resKelas, resJurusan, resTahun] = await Promise.allSettled([
+          getSiswaById(String(id)),
+          getKelas({ page: 1, limit: 100 }),
+          getJurusan({ page: 1, limit: 100 }),
+          getTahunAjaran(),
         ]);
         if (!active) return;
-        if (resKelas.status === "fulfilled") {
-          const val = resKelas.value;
-          const kList = Array.isArray(val?.data) ? val.data : Array.isArray(val) ? val : [];
-          setOpsiKelas(kList.map((k) => k.nama).filter(Boolean));
-        }
-        const siswaVal = res.status === "fulfilled" ? res.value : null;
-        const list = Array.isArray(siswaVal?.data) ? siswaVal.data : [];
-        if (!active) return;
-        
-        const found = list.find(
-          (item) =>
-            String(item.id) === String(id) ||
-            String(item.nis) === String(id) ||
-            String(item.nisn) === String(id)
-        );
 
-        if (found) {
+        if (resKelas.status === "fulfilled") {
+          setOpsiKelas(extractList(resKelas.value));
+        }
+        if (resJurusan.status === "fulfilled") {
+          setOpsiJurusan(extractList(resJurusan.value));
+        }
+        if (resTahun.status === "fulfilled") {
+          const years = extractList(resTahun.value);
+          const activeYear =
+            years.find(
+              (y) => String(y?.status || "").toLowerCase() === "aktif"
+            ) || years[0];
+          if (activeYear?.id) {
+            setActiveTahunAjaranId(String(activeYear.id));
+          }
+        }
+
+        const siswaVal = res.status === "fulfilled" ? res.value : null;
+        const found = siswaVal?.data?.data ?? siswaVal?.data ?? siswaVal;
+        if (!active) return;
+
+        if (found?.id) {
+          const activeKelasRel = Array.isArray(found.kelasSiswa)
+            ? found.kelasSiswa[0]
+            : null;
+          const kelasAwal =
+            activeKelasRel?.kelasId ||
+            activeKelasRel?.kelas?.id ||
+            found.kelasId ||
+            "";
+          const tahunAwal =
+            activeKelasRel?.tahunAjaranId ||
+            activeKelasRel?.kelas?.tahunAjaranId ||
+            "";
+
+          const rawStatus = String(found.status || "aktif").trim().toLowerCase();
           const mapped = {
             id: found.id,
+            namaPengguna: found.namaPengguna || "",
             nama: found.namaLengkap || "",
             nis: found.nis || "",
+            nipd: found.nipd || "",
             nisn: found.nisn || "",
-            nik: "-",
-            kelas: found.kelas?.nama || "Umum",
-            status: found.status || "Aktif",
-            tempatLahir: "-",
-            tglLahir: "-",
-            jenisKelamin: found.jenisKelamin || "Laki-laki",
-            agama: "Islam",
-            statusKeluarga: "Anak Kandung",
-            sekolahAsal: "-",
-            tahunMasuk: "-",
-            tanggalMasuk: "-",
-            namaAyah: "-",
-            pekerjaanAyah: "-",
-            namaIbu: "-",
-            pekerjaanIbu: "-",
-            telpOrangTua: "-",
+            nik: found.nik || "",
+            kelasId: kelasAwal ? String(kelasAwal) : "",
+            jurusanId: found.jurusanId ? String(found.jurusanId) : "",
+            status: rawStatus === "nonaktif" ? "nonaktif" : "aktif",
+            tempatLahir: found.tempatLahir || "",
+            tglLahir: formatDateInput(found.tanggalLahir),
+            jenisKelamin: normalizeGenderValue(found.jenisKelamin),
+            namaAyah: found.namaAyah || "",
+            nikAyah: found.nikAyah || "",
+            pekerjaanAyah: found.pekerjaanAyah || "",
+            noHpAyah: found.noHpAyah || "",
+            namaIbu: found.namaIbu || "",
+            nikIbu: found.nikIbu || "",
+            pekerjaanIbu: found.pekerjaanIbu || "",
+            noHpIbu: found.noHpIbu || "",
+            namaWaliPesertaDidik: found.namaWaliPesertaDidik || "",
             telp: found.noTelepon || "",
             email: found.email || "",
-            alamat: "-",
+            alamat: found.alamat || "",
+            alamatKtp: found.alamatKtp || "",
+            alamatDomisili: found.alamatDomisili || "",
+            alamatSesuaiDomisili: Boolean(found.alamatSesuaiDomisili),
+            provinsi: found.provinsi || "",
+            kotaKabupaten: found.kotaKabupaten || "",
+            kecamatan: found.kecamatan || "",
+            kelurahan: found.kelurahan || "",
+            kodePos: found.kodePos || "",
           };
+          setInitialKelasId(kelasAwal ? String(kelasAwal) : "");
+          setInitialTahunAjaranId(tahunAwal ? String(tahunAwal) : "");
           setSiswaAsli(mapped);
           setForm(mapped);
         }
@@ -423,18 +327,19 @@ function EditContent() {
       }
     }
 
-    const timer = setTimeout(() => {
-      loadSiswa();
-    }, 0);
+    loadSiswa();
 
     return () => {
       active = false;
-      clearTimeout(timer);
     };
   }, [searchParams]);
 
   const updateField = (field) => (e) => {
-    const value = e?.target ? e.target.value : e;
+    const value = e?.target
+      ? e.target.type === "checkbox"
+        ? e.target.checked
+        : e.target.value
+      : e;
     setForm((prev) => ({
       ...prev,
       [field]: value,
@@ -461,24 +366,85 @@ function EditContent() {
     e.preventDefault();
     if (!form) return;
 
-    if (!form.nama?.trim() || !form.nis?.trim() || !form.nisn?.trim()) {
-      alert("Nama, NIS, dan NISN wajib diisi.");
+    if (!form.nama?.trim() || form.nama.trim().length < 2) {
+      alert("Nama lengkap wajib diisi (minimal 2 karakter).");
       return;
+    }
+
+    if (form.nik?.trim() && !/^\d{16}$/.test(form.nik.trim())) {
+      alert("NIK harus terdiri dari tepat 16 angka.");
+      return;
+    }
+
+    if ((form.namaWaliPesertaDidik || "").trim().length > 20) {
+      alert("Nama wali peserta didik maksimal 20 karakter.");
+      return;
+    }
+
+    const payload = {
+      namaLengkap: form.nama.trim(),
+      ...(form.namaPengguna?.trim()
+        ? { namaPengguna: form.namaPengguna.trim() }
+        : {}),
+      ...(form.email?.trim() ? { email: form.email.trim() } : {}),
+      nis: optionalText(form.nis),
+      nipd: optionalText(form.nipd),
+      nisn: optionalText(form.nisn),
+      nik: optionalText(form.nik),
+      status: form.status === "nonaktif" ? "nonaktif" : "aktif",
+      jenisKelamin: optionalText(form.jenisKelamin),
+      tempatLahir: optionalText(form.tempatLahir),
+      tanggalLahir: form.tglLahir || null,
+      noTelepon: optionalText(form.telp),
+      alamat: optionalText(form.alamat),
+      alamatKtp: optionalText(form.alamatKtp),
+      alamatDomisili: form.alamatSesuaiDomisili
+        ? optionalText(form.alamatKtp || form.alamat || form.alamatDomisili)
+        : optionalText(form.alamatDomisili),
+      alamatSesuaiDomisili: Boolean(form.alamatSesuaiDomisili),
+      provinsi: optionalText(form.provinsi),
+      kotaKabupaten: optionalText(form.kotaKabupaten),
+      kecamatan: optionalText(form.kecamatan),
+      kelurahan: optionalText(form.kelurahan),
+      kodePos: optionalText(form.kodePos),
+      namaAyah: optionalText(form.namaAyah),
+      nikAyah: optionalText(form.nikAyah),
+      pekerjaanAyah: optionalText(form.pekerjaanAyah),
+      noHpAyah: optionalText(form.noHpAyah),
+      namaIbu: optionalText(form.namaIbu),
+      nikIbu: optionalText(form.nikIbu),
+      pekerjaanIbu: optionalText(form.pekerjaanIbu),
+      noHpIbu: optionalText(form.noHpIbu),
+      namaWaliPesertaDidik: optionalText(form.namaWaliPesertaDidik),
+      jurusanId: form.jurusanId ? String(form.jurusanId) : null,
+    };
+
+    if (form.kelasId) {
+      const selectedKelas = opsiKelas.find(
+        (k) => String(k.id) === String(form.kelasId)
+      );
+      payload.kelasId = String(form.kelasId);
+      const selectedTahunAjaranId =
+        selectedKelas?.tahunAjaranId || selectedKelas?.tahunAjaran?.id;
+      if (selectedTahunAjaranId) {
+        payload.tahunAjaranId = String(selectedTahunAjaranId);
+      }
+    } else if (initialKelasId) {
+      const detachTahunAjaranId =
+        initialTahunAjaranId || activeTahunAjaranId;
+      if (!detachTahunAjaranId) {
+        alert("Tahun ajaran tidak ditemukan untuk melepas kelas.");
+        return;
+      }
+      payload.kelasId = null;
+      payload.tahunAjaranId = String(detachTahunAjaranId);
     }
 
     setSaving(true);
     try {
-      await updateSiswa(String(form.id), {
-        namaLengkap: form.nama.trim(),
-        email: form.email?.trim() || undefined,
-        nis: form.nis.trim(),
-        nisn: form.nisn.trim(),
-        status: form.status || "Aktif",
-        jenisKelamin: form.jenisKelamin,
-        noTelepon: form.telp?.trim() || undefined,
-      });
+      await updateSiswa(String(form.id), payload);
 
-      router.push("/admin/siswa/kartu-identitas");
+      router.push(`/admin/siswa/kartu-identitas/${form.id}`);
     } catch (err) {
       console.error("Gagal menyimpan data siswa:", err);
       alert(err?.message || "Gagal menyimpan perubahan data siswa.");
@@ -486,6 +452,14 @@ function EditContent() {
       setSaving(false);
     }
   };
+
+  if (loadingSiswa) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center theme-page">
+        <p className="text-sm theme-text-secondary">Memuat data siswa...</p>
+      </div>
+    );
+  }
 
   if (!siswaAsli) {
     return (
@@ -652,19 +626,6 @@ function EditContent() {
 
 
             <SectionCard
-              icon={Camera}
-              title="Foto Profil"
-              description="Kelola foto profil siswa."
-            >
-              <FotoEditor
-                siswaId={form.id}
-                foto={foto}
-                onChange={setFoto}
-              />
-            </SectionCard>
-
-
-            <SectionCard
               icon={IdCard}
               title="Informasi Utama"
               description="Informasi identitas utama siswa."
@@ -675,7 +636,6 @@ function EditContent() {
                   icon={User}
                   label="Nama Lengkap"
                   required
-                  className="sm:col-span-2"
                 >
                   <input
                     type="text"
@@ -683,15 +643,28 @@ function EditContent() {
                     onChange={updateField("nama")}
                     className={inputClass}
                     placeholder="Contoh: Ahmad Fauzan"
+                    maxLength={100}
                     required
                   />
                 </FieldWrapper>
 
+                <FieldWrapper
+                  icon={UserRound}
+                  label="Username"
+                >
+                  <input
+                    type="text"
+                    value={form.namaPengguna || ""}
+                    onChange={updateField("namaPengguna")}
+                    className={inputClass}
+                    placeholder="Username login siswa"
+                    maxLength={50}
+                  />
+                </FieldWrapper>
 
                 <FieldWrapper
                   icon={Fingerprint}
                   label="NIS"
-                  required
                 >
                   <input
                     type="text"
@@ -699,15 +672,27 @@ function EditContent() {
                     onChange={updateField("nis")}
                     className={`${inputClass} font-mono`}
                     placeholder="Nomor Induk Siswa"
-                    required
+                    maxLength={20}
                   />
                 </FieldWrapper>
 
+                <FieldWrapper
+                  icon={Fingerprint}
+                  label="NIPD"
+                >
+                  <input
+                    type="text"
+                    value={form.nipd || ""}
+                    onChange={updateField("nipd")}
+                    className={`${inputClass} font-mono`}
+                    placeholder="Nomor Induk Peserta Didik"
+                    maxLength={20}
+                  />
+                </FieldWrapper>
 
                 <FieldWrapper
                   icon={Fingerprint}
                   label="NISN"
-                  required
                 >
                   <input
                     type="text"
@@ -715,10 +700,9 @@ function EditContent() {
                     onChange={updateField("nisn")}
                     className={`${inputClass} font-mono`}
                     placeholder="10 digit NISN"
-                    required
+                    maxLength={20}
                   />
                 </FieldWrapper>
-
 
                 <FieldWrapper
                   icon={Fingerprint}
@@ -730,31 +714,24 @@ function EditContent() {
                     onChange={updateField("nik")}
                     className={`${inputClass} font-mono`}
                     placeholder="16 digit NIK"
+                    maxLength={16}
                   />
                 </FieldWrapper>
-
 
                 <FieldWrapper
                   icon={UserRound}
                   label="Status Siswa"
                 >
                   <select
-                    value={
-                      form.status || "Aktif"
-                    }
+                    value={form.status || "aktif"}
                     onChange={updateField("status")}
                     className={inputClass}
                   >
-                    {OPSI_STATUS.map(
-                      (option) => (
-                        <option
-                          key={option}
-                          value={option}
-                        >
-                          {option}
-                        </option>
-                      )
-                    )}
+                    {OPSI_STATUS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                 </FieldWrapper>
               </div>
@@ -805,88 +782,23 @@ function EditContent() {
 
                 <FieldWrapper
                   icon={
-                    form.jenisKelamin ===
-                    "Perempuan"
+                    form.jenisKelamin === "perempuan"
                       ? Venus
                       : Mars
                   }
                   label="Jenis Kelamin"
                 >
                   <select
-                    value={
-                      form.jenisKelamin ||
-                      "Laki-laki"
-                    }
-                    onChange={updateField(
-                      "jenisKelamin"
-                    )}
+                    value={form.jenisKelamin || ""}
+                    onChange={updateField("jenisKelamin")}
                     className={inputClass}
                   >
-                    {OPSI_JENIS_KELAMIN.map(
-                      (option) => (
-                        <option
-                          key={option}
-                          value={option}
-                        >
-                          {option}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </FieldWrapper>
-
-
-                <FieldWrapper
-                  icon={BookOpen}
-                  label="Agama"
-                >
-                  <select
-                    value={
-                      form.agama || "Islam"
-                    }
-                    onChange={updateField(
-                      "agama"
-                    )}
-                    className={inputClass}
-                  >
-                    {OPSI_AGAMA.map(
-                      (option) => (
-                        <option
-                          key={option}
-                          value={option}
-                        >
-                          {option}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </FieldWrapper>
-
-
-                <FieldWrapper
-                  icon={Heart}
-                  label="Status Dalam Keluarga"
-                >
-                  <select
-                    value={
-                      form.statusKeluarga ||
-                      "Anak Kandung"
-                    }
-                    onChange={updateField(
-                      "statusKeluarga"
-                    )}
-                    className={inputClass}
-                  >
-                    {OPSI_STATUS_KELUARGA.map(
-                      (option) => (
-                        <option
-                          key={option}
-                          value={option}
-                        >
-                          {option}
-                        </option>
-                      )
-                    )}
+                    <option value="">Pilih jenis kelamin</option>
+                    {OPSI_JENIS_KELAMIN.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                 </FieldWrapper>
               </div>
@@ -896,95 +808,46 @@ function EditContent() {
             <SectionCard
               icon={School}
               title="Informasi Akademik"
-              description="Informasi kelas dan riwayat pendidikan siswa."
+              description="Informasi penempatan kelas dan jurusan siswa."
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
 
                 <FieldWrapper
                   icon={GraduationCap}
                   label="Kelas"
-                  required
                 >
                   <select
-                    value={
-                      form.kelas || ""
-                    }
-                    onChange={updateField(
-                      "kelas"
-                    )}
+                    value={form.kelasId || ""}
+                    onChange={updateField("kelasId")}
                     className={inputClass}
-                    required
                   >
-                    <option value="">
-                      Pilih kelas
-                    </option>
+                    <option value="">Tidak ada / Lepas kelas</option>
 
-                    {opsiKelas.map(
-                      (option) => (
-                        <option
-                          key={option}
-                          value={option}
-                        >
-                          {option}
-                        </option>
-                      )
-                    )}
+                    {opsiKelas.map((option) => (
+                      <option key={option.id} value={String(option.id)}>
+                        {option.nama}
+                      </option>
+                    ))}
                   </select>
                 </FieldWrapper>
 
-
                 <FieldWrapper
-                  icon={CalendarDays}
-                  label="Tahun Masuk"
+                  icon={GraduationCap}
+                  label="Jurusan"
                 >
-                  <input
-                    type="text"
-                    value={
-                      form.tahunMasuk || ""
-                    }
-                    onChange={updateField(
-                      "tahunMasuk"
-                    )}
+                  <select
+                    value={form.jurusanId || ""}
+                    onChange={updateField("jurusanId")}
                     className={inputClass}
-                    placeholder="Contoh: 2024"
-                  />
-                </FieldWrapper>
+                  >
+                    <option value="">Tidak ada / Pilih jurusan</option>
 
-
-                <FieldWrapper
-                  icon={School}
-                  label="Sekolah Asal"
-                  className="sm:col-span-2"
-                >
-                  <input
-                    type="text"
-                    value={
-                      form.sekolahAsal || ""
-                    }
-                    onChange={updateField(
-                      "sekolahAsal"
-                    )}
-                    className={inputClass}
-                    placeholder="Contoh: SMP Negeri 1 Depok"
-                  />
-                </FieldWrapper>
-
-
-                <FieldWrapper
-                  icon={CalendarDays}
-                  label="Tanggal Masuk Sekolah"
-                  className="sm:col-span-2"
-                >
-                  <input
-                    type="date"
-                    value={
-                      form.tanggalMasuk || ""
-                    }
-                    onChange={updateField(
-                      "tanggalMasuk"
-                    )}
-                    className={inputClass}
-                  />
+                    {opsiJurusan.map((option) => (
+                      <option key={option.id} value={String(option.id)}>
+                        {option.nama} ({option.kode})
+                      </option>
+                    ))}
+                  </select>
                 </FieldWrapper>
               </div>
             </SectionCard>
@@ -997,93 +860,106 @@ function EditContent() {
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
 
-                <FieldWrapper
-                  icon={User}
-                  label="Nama Ayah"
-                >
+                <FieldWrapper icon={User} label="Nama Ayah">
                   <input
                     type="text"
-                    value={
-                      form.namaAyah || ""
-                    }
-                    onChange={updateField(
-                      "namaAyah"
-                    )}
+                    value={form.namaAyah || ""}
+                    onChange={updateField("namaAyah")}
                     className={inputClass}
                     placeholder="Nama lengkap ayah"
+                    maxLength={100}
                   />
                 </FieldWrapper>
 
-
-                <FieldWrapper
-                  icon={BriefcaseIcon}
-                  label="Pekerjaan Ayah"
-                >
+                <FieldWrapper icon={Fingerprint} label="NIK Ayah">
                   <input
                     type="text"
-                    value={
-                      form.pekerjaanAyah || ""
-                    }
-                    onChange={updateField(
-                      "pekerjaanAyah"
-                    )}
+                    value={form.nikAyah || ""}
+                    onChange={updateField("nikAyah")}
+                    className={inputClass}
+                    placeholder="NIK ayah"
+                    maxLength={20}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={BriefcaseIcon} label="Pekerjaan Ayah">
+                  <input
+                    type="text"
+                    value={form.pekerjaanAyah || ""}
+                    onChange={updateField("pekerjaanAyah")}
                     className={inputClass}
                     placeholder="Contoh: Karyawan Swasta"
+                    maxLength={50}
                   />
                 </FieldWrapper>
 
+                <FieldWrapper icon={Phone} label="Nomor HP Ayah">
+                  <input
+                    type="tel"
+                    value={form.noHpAyah || ""}
+                    onChange={updateField("noHpAyah")}
+                    className={inputClass}
+                    placeholder="Contoh: 0812-3456-7890"
+                    maxLength={20}
+                  />
+                </FieldWrapper>
 
-                <FieldWrapper
-                  icon={User}
-                  label="Nama Ibu"
-                >
+                <FieldWrapper icon={User} label="Nama Ibu">
                   <input
                     type="text"
-                    value={
-                      form.namaIbu || ""
-                    }
-                    onChange={updateField(
-                      "namaIbu"
-                    )}
+                    value={form.namaIbu || ""}
+                    onChange={updateField("namaIbu")}
                     className={inputClass}
                     placeholder="Nama lengkap ibu"
+                    maxLength={100}
                   />
                 </FieldWrapper>
 
-
-                <FieldWrapper
-                  icon={BriefcaseIcon}
-                  label="Pekerjaan Ibu"
-                >
+                <FieldWrapper icon={Fingerprint} label="NIK Ibu">
                   <input
                     type="text"
-                    value={
-                      form.pekerjaanIbu || ""
-                    }
-                    onChange={updateField(
-                      "pekerjaanIbu"
-                    )}
+                    value={form.nikIbu || ""}
+                    onChange={updateField("nikIbu")}
                     className={inputClass}
-                    placeholder="Contoh: Guru"
+                    placeholder="NIK ibu"
+                    maxLength={20}
                   />
                 </FieldWrapper>
 
+                <FieldWrapper icon={BriefcaseIcon} label="Pekerjaan Ibu">
+                  <input
+                    type="text"
+                    value={form.pekerjaanIbu || ""}
+                    onChange={updateField("pekerjaanIbu")}
+                    className={inputClass}
+                    placeholder="Contoh: Guru"
+                    maxLength={50}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={Phone} label="Nomor HP Ibu">
+                  <input
+                    type="tel"
+                    value={form.noHpIbu || ""}
+                    onChange={updateField("noHpIbu")}
+                    className={inputClass}
+                    placeholder="Contoh: 0812-3456-7890"
+                    maxLength={20}
+                  />
+                </FieldWrapper>
 
                 <FieldWrapper
-                  icon={Phone}
-                  label="Nomor Telepon Orang Tua / Wali"
+                  icon={UserRound}
+                  label="Nama Wali Peserta Didik (maks. 20 karakter)"
                   className="sm:col-span-2"
                 >
                   <input
-                    type="tel"
-                    value={
-                      form.telpOrangTua || ""
-                    }
-                    onChange={updateField(
-                      "telpOrangTua"
-                    )}
+                    type="text"
+                    value={form.namaWaliPesertaDidik || ""}
+                    onChange={updateField("namaWaliPesertaDidik")}
                     className={inputClass}
-                    placeholder="Contoh: 0812-3456-7890"
+                    placeholder="Maksimal 20 karakter"
+                    maxLength={20}
                   />
                 </FieldWrapper>
               </div>
@@ -1093,45 +969,86 @@ function EditContent() {
             <SectionCard
               icon={Phone}
               title="Kontak & Alamat"
-              description="Informasi kontak siswa."
+              description="Informasi kontak dan alamat siswa."
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
 
-                <FieldWrapper
-                  icon={Phone}
-                  label="Nomor Telepon Siswa"
-                >
+                <FieldWrapper icon={Phone} label="Nomor Telepon Siswa">
                   <input
                     type="tel"
-                    value={
-                      form.telp || ""
-                    }
-                    onChange={updateField(
-                      "telp"
-                    )}
+                    value={form.telp || ""}
+                    onChange={updateField("telp")}
                     className={inputClass}
                     placeholder="Contoh: 0812-3456-7890"
+                    maxLength={20}
                   />
                 </FieldWrapper>
 
-
-                <FieldWrapper
-                  icon={Mail}
-                  label="Email Siswa"
-                >
+                <FieldWrapper icon={Mail} label="Email Siswa">
                   <input
                     type="email"
-                    value={
-                      form.email || ""
-                    }
-                    onChange={updateField(
-                      "email"
-                    )}
+                    value={form.email || ""}
+                    onChange={updateField("email")}
                     className={inputClass}
                     placeholder="nama@student.sch.id"
+                    maxLength={100}
                   />
                 </FieldWrapper>
 
+                <FieldWrapper icon={MapPin} label="Provinsi">
+                  <input
+                    type="text"
+                    value={form.provinsi || ""}
+                    onChange={updateField("provinsi")}
+                    className={inputClass}
+                    placeholder="Masukkan provinsi"
+                    maxLength={50}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={MapPin} label="Kota / Kabupaten">
+                  <input
+                    type="text"
+                    value={form.kotaKabupaten || ""}
+                    onChange={updateField("kotaKabupaten")}
+                    className={inputClass}
+                    placeholder="Masukkan kota/kabupaten"
+                    maxLength={50}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={MapPin} label="Kecamatan">
+                  <input
+                    type="text"
+                    value={form.kecamatan || ""}
+                    onChange={updateField("kecamatan")}
+                    className={inputClass}
+                    placeholder="Masukkan kecamatan"
+                    maxLength={50}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={MapPin} label="Kelurahan / Desa">
+                  <input
+                    type="text"
+                    value={form.kelurahan || ""}
+                    onChange={updateField("kelurahan")}
+                    className={inputClass}
+                    placeholder="Masukkan kelurahan"
+                    maxLength={50}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={MapPin} label="Kode Pos">
+                  <input
+                    type="text"
+                    value={form.kodePos || ""}
+                    onChange={updateField("kodePos")}
+                    className={inputClass}
+                    placeholder="Kode pos"
+                    maxLength={10}
+                  />
+                </FieldWrapper>
 
                 <FieldWrapper
                   icon={MapPin}
@@ -1139,15 +1056,55 @@ function EditContent() {
                   className="sm:col-span-2"
                 >
                   <textarea
-                    value={
-                      form.alamat || ""
-                    }
-                    onChange={updateField(
-                      "alamat"
-                    )}
-                    rows={4}
+                    value={form.alamat || ""}
+                    onChange={updateField("alamat")}
+                    rows={3}
                     className={`${inputClass} resize-none`}
                     placeholder="Masukkan alamat lengkap siswa"
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper
+                  icon={MapPin}
+                  label="Alamat KTP"
+                  className="sm:col-span-2"
+                >
+                  <textarea
+                    value={form.alamatKtp || ""}
+                    onChange={updateField("alamatKtp")}
+                    rows={3}
+                    className={`${inputClass} resize-none`}
+                    placeholder="Masukkan alamat sesuai KTP"
+                  />
+                </FieldWrapper>
+
+                <div className="sm:col-span-2">
+                  <label className="inline-flex items-center gap-2 text-xs font-medium theme-text-secondary cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(form.alamatSesuaiDomisili)}
+                      onChange={updateField("alamatSesuaiDomisili")}
+                    />
+                    Alamat domisili sama dengan alamat KTP
+                  </label>
+                </div>
+
+                <FieldWrapper
+                  icon={MapPin}
+                  label="Alamat Domisili"
+                  className="sm:col-span-2"
+                >
+                  <textarea
+                    value={
+                      form.alamatSesuaiDomisili
+                        ? form.alamatKtp || form.alamat || form.alamatDomisili || ""
+                        : form.alamatDomisili || ""
+                    }
+                    onChange={updateField("alamatDomisili")}
+                    rows={3}
+                    disabled={Boolean(form.alamatSesuaiDomisili)}
+                    className={`${inputClass} resize-none`}
+                    placeholder="Masukkan alamat domisili"
                   />
                 </FieldWrapper>
               </div>
@@ -1243,14 +1200,6 @@ function BriefcaseIcon(props) {
 }
 
 
-function EditSiswaPageContent() {
-  return (
-    <Suspense fallback={null}>
-      <EditContent />
-    </Suspense>
-  );
-}
-
 export default function Edit() {
   return (
     <Suspense
@@ -1261,5 +1210,4 @@ export default function Edit() {
       <EditContent />
     </Suspense>
   );
-const [opsiKelas, setOpsiKelas] = useState([]);
-  }
+}

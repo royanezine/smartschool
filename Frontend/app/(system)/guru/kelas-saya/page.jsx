@@ -1295,7 +1295,7 @@ export default function GuruKelasSayaPage() {
 
           <button
             type="button"
-            onClick={() => router.push("/guru/mataPelajaran")}
+            onClick={() => router.push("/guru/materi")}
             className={`
               inline-flex
               shrink-0

@@ -437,7 +437,7 @@ export default function AdminDashboardPage() {
 
                       <button
                         type="button"
-                        onClick={() => router.push("/admin/manajemenKehadiran")}
+                        onClick={() => router.push("/admin/presensi")}
                         className="theme-card theme-border theme-text inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:shadow-sm"
                       >
                         <Clock className="h-4 w-4" />
@@ -546,7 +546,7 @@ export default function AdminDashboardPage() {
                       cabang.rekapKehadiran && (
                         <button
                           type="button"
-                          onClick={() => router.push("/admin/manajemenKehadiran")}
+                          onClick={() => router.push("/admin/presensi")}
                           className={`inline-flex items-center gap-1 text-sm font-semibold ${themePrimaryText} transition hover:opacity-75`}
                         >
                           Lihat detail
@@ -622,7 +622,7 @@ export default function AdminDashboardPage() {
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    router.push("/admin/manajemenKehadiran")
+                                    router.push("/admin/presensi")
                                   }
                                   className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3.5 py-2 text-xs font-semibold text-white transition hover:opacity-90"
                                 >

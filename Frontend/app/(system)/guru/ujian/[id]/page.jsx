@@ -31,7 +31,7 @@ import {
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
-import { getUjianById } from "@/services/ujian.service";
+import { getUjianById, getHasilUjian } from "@/services/ujian.service";
 import { deleteSoal } from "@/services/soalUjian.service";
 
 const JENIS_SOAL = {
@@ -161,6 +161,8 @@ export default function KelolaSoalUjianPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [ujian, setUjian] = useState(null);
   const [soal, setSoal] = useState([]);
+  const [hasilPeserta, setHasilPeserta] = useState([]);
+  const [hasilInfo, setHasilInfo] = useState("");
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
   const [error, setError] = useState("");
@@ -173,8 +175,17 @@ export default function KelolaSoalUjianPage() {
     try {
       setLoading(true);
       setError("");
-      const response = await getUjianById(ujianId);
-      const ujianData = parseObject(response);
+      setHasilInfo("");
+      const [detailResult, hasilResult] = await Promise.allSettled([
+        getUjianById(ujianId),
+        getHasilUjian(ujianId, { page: 1, limit: 50 }),
+      ]);
+
+      if (detailResult.status !== "fulfilled") {
+        throw detailResult.reason;
+      }
+
+      const ujianData = parseObject(detailResult.value);
       if (!ujianData || !ujianData.id) {
         throw new Error("Data ujian tidak ditemukan.");
       }
@@ -184,6 +195,16 @@ export default function KelolaSoalUjianPage() {
         (a, b) => Number(a.nomorUrut || 0) - Number(b.nomorUrut || 0)
       );
       setSoal(sortedSoal);
+
+      if (hasilResult.status === "fulfilled") {
+        setHasilPeserta(Array.isArray(hasilResult.value?.data) ? hasilResult.value.data : []);
+      } else {
+        setHasilPeserta([]);
+        const reasonMsg = hasilResult.reason?.message || "";
+        if (reasonMsg) {
+          setHasilInfo(reasonMsg);
+        }
+      }
     } catch (err) {
       console.error("LOAD DETAIL UJIAN ERROR:", err);
       setError(err?.message || "Gagal mengambil data detail ujian.");
@@ -195,7 +216,13 @@ export default function KelolaSoalUjianPage() {
   }, [ujianId]);
 
   useEffect(() => {
-    loadData();
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) loadData();
+    });
+    return () => {
+      active = false;
+    };
   }, [loadData]);
 
   const stats = useMemo(() => {
@@ -789,6 +816,99 @@ export default function KelolaSoalUjianPage() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </section>
+
+          <section className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-sm">
+            <div className="flex flex-col gap-2 border-b border-[var(--color-border)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              <div>
+                <h2 className="text-base font-bold text-[var(--color-text)]">
+                  Hasil & Sesi Peserta
+                </h2>
+                <p className="mt-0.5 text-xs text-[var(--color-text-secondary)] sm:text-sm">
+                  Daftar percobaan dan nilai siswa yang mengikuti ujian ini.
+                </p>
+              </div>
+              <span
+                className="w-fit rounded-lg px-3 py-1.5 text-xs font-semibold"
+                style={{
+                  backgroundColor:
+                    "color-mix(in srgb, var(--school-primary) 10%, transparent)",
+                  color: "var(--school-primary)",
+                }}
+              >
+                {hasilPeserta.length} Peserta
+              </span>
+            </div>
+
+            {hasilInfo ? (
+              <div className="px-5 py-6 text-xs text-[var(--color-text-secondary)]">
+                {hasilInfo}
+              </div>
+            ) : hasilPeserta.length === 0 ? (
+              <div className="px-5 py-10 text-center text-xs text-[var(--color-text-secondary)]">
+                Belum ada siswa yang mengumpulkan atau memulai ujian ini.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="border-b border-[var(--color-border)] bg-[var(--color-input)] text-[11px] uppercase tracking-wider text-[var(--color-text-secondary)]">
+                    <tr>
+                      <th className="px-4 py-3">Nama Siswa</th>
+                      <th className="px-4 py-3">NIS / NISN</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3">Benar / Salah</th>
+                      <th className="px-4 py-3">Nilai</th>
+                      <th className="px-4 py-3 text-right">Detail</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--color-border)]">
+                    {hasilPeserta.map((item) => {
+                      const nilaiAkhir =
+                        item?.hasilAsesmen?.totalNilai ?? item?.nilai ?? "-";
+                      return (
+                        <tr key={item.id} className="hover:bg-[var(--color-input)]">
+                          <td className="px-4 py-3 font-semibold text-[var(--color-text)]">
+                            {item?.pengguna?.namaLengkap || "-"}
+                          </td>
+                          <td className="px-4 py-3 text-[var(--color-text-secondary)]">
+                            {item?.pengguna?.nisn || item?.pengguna?.nis || "-"}
+                          </td>
+                          <td className="px-4 py-3 capitalize text-[var(--color-text-secondary)]">
+                            {item?.status || "-"}
+                          </td>
+                          <td className="px-4 py-3 text-[var(--color-text-secondary)]">
+                            {item?.hasilAsesmen
+                              ? `${item.hasilAsesmen.jumlahBenar ?? 0} / ${item.hasilAsesmen.jumlahSalah ?? 0}`
+                              : "-"}
+                          </td>
+                          <td className="px-4 py-3 font-bold text-[var(--school-primary)]">
+                            {nilaiAkhir !== null && nilaiAkhir !== undefined
+                              ? nilaiAkhir
+                              : "-"}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                router.push(
+                                  `/guru/nilaiUjian/detail?ujianId=${encodeURIComponent(
+                                    ujianId
+                                  )}&siswaId=${encodeURIComponent(item.siswaId || "")}`
+                                )
+                              }
+                              className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] px-2.5 py-1 text-xs font-medium text-[var(--color-text)] transition hover:border-[var(--school-primary)] hover:text-[var(--school-primary)]"
+                            >
+                              <Eye size={13} />
+                              Lihat
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
           </section>

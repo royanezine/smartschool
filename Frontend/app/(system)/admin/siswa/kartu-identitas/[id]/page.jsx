@@ -21,7 +21,7 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { getUserById } from "@/services/user.service";
+import { getSiswaById } from "@/services/siswa.service";
 
 
 const themePrimaryGradient =
@@ -32,6 +32,8 @@ const themePrimarySoft =
 
 const themePrimarySoftBorder =
   "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText = "text-[var(--color-primary)]";
 
 const themePrimaryHover =
   "hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
@@ -186,7 +188,7 @@ export default function DetailSiswaPage() {
   useEffect(() => {
     let isMounted = true;
 
-    const timer = setTimeout(async () => {
+    async function fetchDetail() {
       if (!id) {
         if (isMounted) setLoading(false);
         return;
@@ -194,40 +196,72 @@ export default function DetailSiswaPage() {
 
       try {
         if (isMounted) setLoading(true);
-        const res = await getUserById(id);
-        const data = res?.data ?? res;
+        const res = await getSiswaById(String(id));
+        const data = res?.data?.data ?? res?.data ?? res;
 
-        if (data && isMounted) {
+        if (data?.id && isMounted) {
           const kNama =
             data.kelasSiswa?.[0]?.kelas?.nama ??
             data.kelas?.nama ??
             data.kelasNama ??
             "-";
 
+          const genderRaw = String(data.jenisKelamin || "").trim().toLowerCase();
+          const normalizedGender =
+            genderRaw === "l" || genderRaw === "laki-laki"
+              ? "L"
+              : genderRaw === "p" || genderRaw === "perempuan"
+              ? "P"
+              : "-";
+
+          const rawStatus = String(data.status || "aktif").trim().toLowerCase();
+          const alamatParts = [
+            data.alamatDomisili || data.alamat || data.alamatKtp,
+            data.kelurahan,
+            data.kecamatan,
+            data.kotaKabupaten,
+            data.provinsi,
+            data.kodePos,
+          ].filter(Boolean);
+
+          const ortuNama =
+            data.namaAyah || data.namaIbu || data.namaWaliPesertaDidik || "-";
+          const ortuHubungan = data.namaAyah
+            ? "Ayah Kandung"
+            : data.namaIbu
+            ? "Ibu Kandung"
+            : data.namaWaliPesertaDidik
+            ? "Wali"
+            : "-";
+
           setSiswa({
             id: data.id,
             nama: data.namaLengkap || data.nama || "Tanpa Nama",
+            nis: data.nis || "-",
+            nipd: data.nipd || "-",
             nisn: data.nisn || "-",
             nik: data.nik || "-",
+            email: data.email || "-",
             kelas: kNama,
-            jenjang: "Sekolah Menengah Kejuruan",
-            waliKelas: "-",
-            tahunMasuk: data.dibuatPada ? String(new Date(data.dibuatPada).getFullYear()) : "2025",
-            jenisKelamin: data.jenisKelamin === "L" || data.jenisKelamin === "Laki-laki" ? "L" : "P",
+            jurusan: data.jurusan?.nama || "-",
+            jenisKelamin: normalizedGender,
             tempatLahir: data.tempatLahir || "-",
             tanggalLahir: data.tanggalLahir
               ? new Date(data.tanggalLahir).toLocaleDateString("id-ID")
               : "-",
-            agama: data.agama || "-",
             noTelepon: data.noTelepon || "-",
-            alamat: data.alamat || data.alamatDomisili || "-",
-            status: data.status || "aktif",
-            namaOrtu: data.namaAyah || data.namaIbu || data.namaWaliPesertaDidik || "-",
-            hubunganOrtu: data.namaAyah ? "Ayah Kandung" : data.namaIbu ? "Ibu Kandung" : "Wali",
+            alamat: alamatParts.length > 0 ? alamatParts.join(", ") : "-",
+            alamatKtp: data.alamatKtp || "-",
+            status: rawStatus === "nonaktif" ? "nonaktif" : "aktif",
+            namaOrtu: ortuNama,
+            hubunganOrtu: ortuHubungan,
             teleponOrtu: data.noHpAyah || data.noHpIbu || "-",
-            alamatOrtu: data.alamat || "-",
-            avatar: data.avatar || null,
-            sekolahNama: data.sekolah?.nama || "SMARTSCHOOL",
+            alamatOrtu: data.alamatKtp || data.alamat || "-",
+            namaAyah: data.namaAyah || "-",
+            pekerjaanAyah: data.pekerjaanAyah || "-",
+            namaIbu: data.namaIbu || "-",
+            pekerjaanIbu: data.pekerjaanIbu || "-",
+            namaWali: data.namaWaliPesertaDidik || "-",
           });
         }
       } catch (err) {
@@ -236,11 +270,12 @@ export default function DetailSiswaPage() {
       } finally {
         if (isMounted) setLoading(false);
       }
-    }, 0);
+    }
+
+    fetchDetail();
 
     return () => {
       isMounted = false;
-      clearTimeout(timer);
     };
   }, [id]);
 
@@ -423,8 +458,8 @@ export default function DetailSiswaPage() {
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${themeNeutralSurface} ${themeNeutralBorder} border theme-text-secondary text-xs font-semibold`}
                       >
-                        <CalendarDays size={13} />
-                        Masuk {siswa.tahunMasuk}
+                        <GraduationCap size={13} />
+                        {siswa.jurusan !== "-" ? siswa.jurusan : "Umum"}
                       </span>
                     </div>
                   </div>
@@ -450,6 +485,12 @@ export default function DetailSiswaPage() {
                 />
 
                 <InfoItem
+                  label="NIS"
+                  value={siswa.nis}
+                  icon={<Hash size={16} />}
+                />
+
+                <InfoItem
                   label="NISN"
                   value={siswa.nisn}
                   icon={<Hash size={16} />}
@@ -466,7 +507,9 @@ export default function DetailSiswaPage() {
                   value={
                     siswa.jenisKelamin === "L"
                       ? "Laki-laki"
-                      : "Perempuan"
+                      : siswa.jenisKelamin === "P"
+                      ? "Perempuan"
+                      : "-"
                   }
                   icon={<UserRound size={16} />}
                 />
@@ -484,8 +527,8 @@ export default function DetailSiswaPage() {
                 />
 
                 <InfoItem
-                  label="Agama"
-                  value={siswa.agama}
+                  label="Email"
+                  value={siswa.email}
                   icon={<UserRound size={16} />}
                 />
 
@@ -545,21 +588,15 @@ export default function DetailSiswaPage() {
                 />
 
                 <InfoItem
-                  label="Jenjang"
-                  value={siswa.jenjang}
+                  label="Jurusan"
+                  value={siswa.jurusan}
                   icon={<GraduationCap size={16} />}
                 />
 
                 <InfoItem
-                  label="Wali Kelas"
-                  value={siswa.waliKelas}
-                  icon={<UserRound size={16} />}
-                />
-
-                <InfoItem
-                  label="Tahun Masuk"
-                  value={siswa.tahunMasuk}
-                  icon={<CalendarDays size={16} />}
+                  label="NIPD"
+                  value={siswa.nipd}
+                  icon={<Hash size={16} />}
                 />
 
                 <InfoItem
@@ -586,26 +623,44 @@ export default function DetailSiswaPage() {
 
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <InfoItem
-                  label="Nama Orang Tua / Wali"
-                  value={siswa.namaOrtu}
+                  label="Nama Ayah"
+                  value={siswa.namaAyah}
                   icon={<UserRound size={16} />}
                 />
 
                 <InfoItem
-                  label="Hubungan"
-                  value={siswa.hubunganOrtu}
+                  label="Pekerjaan Ayah"
+                  value={siswa.pekerjaanAyah}
                   icon={<Users size={16} />}
                 />
 
                 <InfoItem
-                  label="No. Telepon"
+                  label="Nama Ibu"
+                  value={siswa.namaIbu}
+                  icon={<UserRound size={16} />}
+                />
+
+                <InfoItem
+                  label="Pekerjaan Ibu"
+                  value={siswa.pekerjaanIbu}
+                  icon={<Users size={16} />}
+                />
+
+                <InfoItem
+                  label="Nama Wali Peserta Didik"
+                  value={siswa.namaWali}
+                  icon={<UserRound size={16} />}
+                />
+
+                <InfoItem
+                  label="No. Telepon Orang Tua"
                   value={siswa.teleponOrtu}
                   icon={<Phone size={16} />}
                 />
 
                 <InfoItem
-                  label="Alamat"
-                  value={siswa.alamatOrtu}
+                  label="Alamat KTP"
+                  value={siswa.alamatKtp}
                   icon={<MapPin size={16} />}
                 />
               </div>

@@ -29,7 +29,9 @@ import {
 } from "lucide-react";
 
 import { getProfile, updateProfile } from "@/services/user.service";
+import { getAuditLogs } from "@/services/auditLog.service";
 import { changePassword } from "@/services/auth.services";
+import { getBackendOrigin } from "@/lib/auth";
 
 // Warna solid primary (tanpa #000 hardcoded) supaya ikut perubahan tema dari CMS.
 const themePrimaryGradient = "bg-[var(--color-primary)]";
@@ -190,9 +192,7 @@ function getAvatarUrl(avatar) {
 
   if (/^https?:\/\//i.test(avatar)) return avatar;
 
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-  ).replace(/\/+$/, "");
+  const baseUrl = getBackendOrigin();
 
   return `${baseUrl}/${avatar.replace(/^\/+/, "")}`;
 }
@@ -1158,26 +1158,111 @@ function SecurityTab() {
 }
 
 function ActivityTab() {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchLogs = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await getAuditLogs({ page: 1, limit: 15 });
+      const items = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res)
+        ? res
+        : [];
+      setLogs(items);
+    } catch (err) {
+      setError(err?.message || "Gagal memuat log aktivitas platform.");
+      setLogs([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      fetchLogs();
+    });
+  }, [fetchLogs]);
+
   return (
     <div className="space-y-4">
-      <SectionHeader
-        icon={Activity}
-        title="Riwayat Aktivitas"
-        description="Riwayat aktivitas belum diambil karena endpoint log aktivitas belum tersedia dalam kode BE yang diberikan."
-      />
-
-      <div
-        className={`flex flex-col items-center text-center py-10 px-4 rounded-lg border border-dashed ${themeNeutralBorder}`}
-      >
-        <Activity size={28} className="theme-text-muted mb-3" />
-        <p className="text-sm font-medium theme-text">
-          Data aktivitas belum tersedia
-        </p>
-        <p className="text-xs theme-text-secondary mt-1 max-w-md">
-          Agar riwayat login dan perubahan data dapat ditampilkan, diperlukan
-          endpoint BE yang mengembalikan log aktivitas akun.
-        </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <SectionHeader
+          icon={Activity}
+          title="Riwayat Aktivitas Platform"
+          description="Menampilkan log audit aktivitas terbaru dari endpoint GET /api/audit-log."
+        />
+        <button
+          type="button"
+          onClick={fetchLogs}
+          disabled={loading}
+          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium ${themeNeutralBorder} theme-text disabled:opacity-50`}
+        >
+          {loading ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <Clock size={13} />
+          )}
+          Muat Ulang
+        </button>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs text-red-700">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex items-center justify-center py-10 text-xs theme-text-secondary gap-2">
+          <Loader2 size={16} className="animate-spin" />
+          Memuat riwayat aktivitas...
+        </div>
+      ) : logs.length === 0 ? (
+        <div
+          className={`flex flex-col items-center text-center py-10 px-4 rounded-lg border border-dashed ${themeNeutralBorder}`}
+        >
+          <Activity size={28} className="theme-text-muted mb-3" />
+          <p className="text-sm font-medium theme-text">
+            Belum ada log aktivitas tercatat
+          </p>
+          <p className="text-xs theme-text-secondary mt-1 max-w-md">
+            Aktivitas perubahan data atau autentikasi yang tercatat pada sistem akan muncul di sini.
+          </p>
+        </div>
+      ) : (
+        <div className={`divide-y rounded-lg border ${themeNeutralBorder}`}>
+          {logs.map((item) => (
+            <div
+              key={item.id}
+              className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between text-xs"
+            >
+              <div className="min-w-0">
+                <p className="font-semibold theme-text">
+                  {item.aksi || "-"}{" "}
+                  {item.entitas ? (
+                    <span className="font-normal theme-text-secondary">
+                      ({item.entitas})
+                    </span>
+                  ) : null}
+                </p>
+                <p className="theme-text-secondary mt-0.5 truncate">
+                  {item.namaPelaku || item.peranPelaku || "Sistem"}
+                  {item.alamatIp ? ` • IP: ${item.alamatIp}` : ""}
+                </p>
+              </div>
+              <span className="theme-text-muted shrink-0 text-[11px]">
+                {item.dibuatPada
+                  ? new Date(item.dibuatPada).toLocaleString("id-ID")
+                  : "-"}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

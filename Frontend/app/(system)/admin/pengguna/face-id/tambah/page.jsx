@@ -44,13 +44,9 @@ const themeCardShadow =
   "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 
 
-const API_BASE = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
+import { getCleanApiBase } from "@/lib/auth";
 
-const API_URL = API_BASE.endsWith("/api")
-  ? API_BASE
-  : `${API_BASE}/api`;
+const API_URL = getCleanApiBase();
 
 
 const roleConfig = {
@@ -808,7 +804,7 @@ export default function TambahFaceIdPage() {
                         </div>
                         <div>
                           <p className="text-sm font-bold">Foto wajah berhasil diambil</p>
-                          <p className="text-xs mt-1 leading-5">Periksa kembali foto wajah, lalu klik "Simpan Face ID".</p>
+                          <p className="text-xs mt-1 leading-5">Periksa kembali foto wajah, lalu klik &quot;Simpan Face ID&quot;.</p>
                         </div>
                       </div>
                     )}

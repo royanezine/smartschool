@@ -7,7 +7,10 @@ import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
-import { getPenggajian } from "@/services/penggajian.service";
+import {
+  freezePeriodePenggajian,
+  getPenggajian,
+} from "@/services/penggajian.service";
 
 import {
   Wallet,
@@ -209,6 +212,12 @@ export default function PenggajianPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
+  const [showFreezeModal, setShowFreezeModal] = useState(false);
+  const [freezeBulan, setFreezeBulan] = useState(String(now.getMonth() + 1));
+  const [freezeTahun, setFreezeTahun] = useState(String(now.getFullYear()));
+  const [freezingPeriode, setFreezingPeriode] = useState(false);
+  const [freezeError, setFreezeError] = useState("");
+
   const [sortBy, setSortBy] = useState("nama");
   const [sortOrder, setSortOrder] = useState("asc");
 
@@ -384,6 +393,59 @@ export default function PenggajianPage() {
     setPage(1);
   }
 
+  function handleOpenFreezeModal() {
+    const defaultBulan = bulan ? Number(bulan) : now.getMonth() + 1;
+    const defaultTahun = tahun ? Number(tahun) : now.getFullYear();
+    setFreezeBulan(String(defaultBulan));
+    setFreezeTahun(String(defaultTahun));
+    setFreezeError("");
+    setShowFreezeModal(true);
+  }
+
+  async function handleFreezePeriodeSubmit(event) {
+    event.preventDefault();
+    const bulanNum = Number(freezeBulan);
+    const tahunNum = Number(freezeTahun);
+
+    if (!Number.isInteger(bulanNum) || bulanNum < 1 || bulanNum > 12) {
+      setFreezeError("Bulan harus antara 1 sampai 12.");
+      return;
+    }
+
+    if (!Number.isInteger(tahunNum) || tahunNum < 2000 || tahunNum > 2100) {
+      setFreezeError("Tahun harus antara 2000 sampai 2100.");
+      return;
+    }
+
+    setFreezingPeriode(true);
+    setFreezeError("");
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await freezePeriodePenggajian({
+        bulan: bulanNum,
+        tahun: tahunNum,
+      });
+
+      const payload = response?.data?.data ?? response?.data ?? response;
+      const totalDibekukan = payload?.totalDibekukan;
+      const monthLabel = MONTHS[bulanNum - 1] ?? `Bulan ${bulanNum}`;
+      const fallbackMessage =
+        totalDibekukan !== undefined
+          ? `Sebanyak ${totalDibekukan} data penggajian draft periode ${monthLabel} ${tahunNum} berhasil dibekukan.`
+          : `Periode penggajian ${monthLabel} ${tahunNum} berhasil dibekukan.`;
+
+      setShowFreezeModal(false);
+      setNotice(response?.message || fallbackMessage);
+      await loadData(true);
+    } catch (err) {
+      setFreezeError(getErrorMessage(err));
+    } finally {
+      setFreezingPeriode(false);
+    }
+  }
+
   function handleEdit(item) {
     if (!item?.id) {
       setError("ID data penggajian tidak ditemukan.");
@@ -456,11 +518,7 @@ export default function PenggajianPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push(
-                      "/admin/keuangan/penggajian/bekukan"
-                    )
-                  }
+                  onClick={handleOpenFreezeModal}
                   className={buttonSecondary}
                 >
                   <LockKeyhole size={16} />
@@ -943,6 +1001,126 @@ export default function PenggajianPage() {
           </div>
         </main>
       </div>
+
+      {showFreezeModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="freeze-periode-title"
+        >
+          <div className="theme-card w-full max-w-md rounded-2xl border theme-border p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-300">
+                  <LockKeyhole size={20} />
+                </div>
+                <div>
+                  <h2
+                    id="freeze-periode-title"
+                    className="text-base font-bold theme-text"
+                  >
+                    Bekukan Periode Penggajian
+                  </h2>
+                  <p className="mt-0.5 text-xs theme-text-muted">
+                    Seluruh data penggajian berstatus Draft pada periode dipilih
+                    akan dikunci permanen menjadi Dibekukan.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                aria-label="Tutup dialog"
+                disabled={freezingPeriode}
+                onClick={() => setShowFreezeModal(false)}
+                className="rounded-lg p-1.5 theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleFreezePeriodeSubmit} className="mt-5 space-y-4">
+              {freezeError && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
+                >
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                  <span>{freezeError}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="freeze-bulan"
+                    className="mb-1.5 block text-xs font-semibold theme-text-secondary"
+                  >
+                    Bulan
+                  </label>
+                  <select
+                    id="freeze-bulan"
+                    value={freezeBulan}
+                    onChange={(e) => setFreezeBulan(e.target.value)}
+                    disabled={freezingPeriode}
+                    className={inputClass}
+                  >
+                    {MONTHS.map((name, idx) => (
+                      <option key={name} value={String(idx + 1)}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="freeze-tahun"
+                    className="mb-1.5 block text-xs font-semibold theme-text-secondary"
+                  >
+                    Tahun
+                  </label>
+                  <input
+                    id="freeze-tahun"
+                    type="number"
+                    min={2000}
+                    max={2100}
+                    value={freezeTahun}
+                    onChange={(e) => setFreezeTahun(e.target.value)}
+                    disabled={freezingPeriode}
+                    className={inputClass}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col-reverse gap-2 border-t theme-border pt-4 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  disabled={freezingPeriode}
+                  onClick={() => setShowFreezeModal(false)}
+                  className={buttonSecondary}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={freezingPeriode}
+                  className={buttonPrimary}
+                >
+                  {freezingPeriode ? (
+                    <LoaderCircle size={16} className="animate-spin" />
+                  ) : (
+                    <LockKeyhole size={16} />
+                  )}
+                  {freezingPeriode ? "Membekukan..." : "Bekukan Periode"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

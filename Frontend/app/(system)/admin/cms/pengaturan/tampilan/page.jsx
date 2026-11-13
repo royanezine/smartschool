@@ -2,6 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { getToken as getTokenFromLib } from "@/lib/auth";
 import {
   Save,
@@ -18,15 +19,9 @@ import {
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { useCmsTheme } from "@/app/components/CmsThemeProvider";
+import { getCleanApiBase } from "@/lib/auth";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-const apiUrl = API_BASE_URL.replace(/\/+$/, "");
-
-const THEME_API_URL = apiUrl.endsWith("/api")
-  ? `${apiUrl}/cms/tema`
-  : `${apiUrl}/api/cms/tema`;
+const THEME_API_URL = `${getCleanApiBase()}/cms/tema`;
 
 const DEFAULT_TEMA = {
   tema: {
@@ -552,21 +547,21 @@ export default function TampilanPage() {
           <div className="mx-auto w-full max-w-none space-y-6">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm">
-              <a
+              <Link
                 href="/admin/cms"
                 className="theme-text-muted hover:text-[var(--color-primary)]"
               >
                 Dashboard
-              </a>
+              </Link>
 
               <ChevronRight className="h-4 w-4 theme-text-muted" />
 
-              <a
+              <Link
                 href="/admin/cms/pengaturan"
                 className="theme-text-muted hover:text-[var(--color-primary)]"
               >
                 Pengaturan
-              </a>
+              </Link>
 
               <ChevronRight className="h-4 w-4 text-slate-400" />
 

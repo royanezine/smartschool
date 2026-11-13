@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 import { getDaftarIzin } from "@/services/izin.service";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, getBackendOrigin } from "@/lib/auth";
 
 // === TEMA & STYLING ===
 const themePrimaryGradient =
@@ -144,9 +144,7 @@ function normalizeResponseData(response) {
 function buildUploadUrl(path) {
   if (!path) return "#";
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-    .replace(/\/+$/, "")
-    .replace(/\/api$/i, "");
+  const apiUrl = getBackendOrigin();
   return `${apiUrl}${path.startsWith("/") ? "" : "/"}${path}`;
 }
 

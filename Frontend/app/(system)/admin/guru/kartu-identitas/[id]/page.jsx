@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { getUserById } from "@/services/user.service";
+import { getBackendOrigin } from "@/lib/auth";
 import {
   ArrowLeft,
   CreditCard,
@@ -84,9 +85,7 @@ function getAvatarUrl(avatar) {
   if (!avatar || typeof avatar !== "string") return null;
   if (/^(https?:|data:)/i.test(avatar)) return avatar;
 
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-  ).replace(/\/+$/, "");
+  const baseUrl = getBackendOrigin();
 
   return `${baseUrl}/${avatar.replace(/^\/+/, "")}`;
 }

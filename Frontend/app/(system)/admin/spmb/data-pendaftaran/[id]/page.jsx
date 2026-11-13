@@ -10,6 +10,7 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { getBackendOrigin } from "@/lib/auth";
 import {
   ArrowLeft,
   UserRound,
@@ -32,6 +33,8 @@ import {
 import {
   getPendaftarPpdbById,
   verifikasiPpdb,
+  getHasilSeleksiPpdb,
+  simpanHasilSeleksiPpdb,
 } from "@/services/ppdb.service";
 import { getKelas } from "@/services/kelas.service";
 
@@ -191,10 +194,9 @@ function getFotoUrl(item) {
     return value;
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const baseUrl = getBackendOrigin();
 
-  return `${baseUrl.replace(/\/+$/, "")}/${value.replace(/^\/+/, "")}`;
+  return `${baseUrl}/${value.replace(/^\/+/, "")}`;
 }
 
 
@@ -312,6 +314,14 @@ export default function DetailPendaftaranPage() {
   const [memproses, setMemproses] = useState(false);
   const [actionError, setActionError] = useState("");
   const [actionSuccess, setActionSuccess] = useState("");
+  const [hasilNilaiTes, setHasilNilaiTes] = useState("");
+  const [hasilPeringkat, setHasilPeringkat] = useState("");
+  const [hasilStatus, setHasilStatus] = useState("");
+  const [hasilCatatan, setHasilCatatan] = useState("");
+  const [loadingHasil, setLoadingHasil] = useState(false);
+  const [savingHasil, setSavingHasil] = useState(false);
+  const [hasilError, setHasilError] = useState("");
+  const [hasilSuccess, setHasilSuccess] = useState("");
 
 
   const loadDetail = useCallback(async () => {
@@ -323,11 +333,36 @@ export default function DetailPendaftaranPage() {
 
     try {
       setLoading(true);
+      setLoadingHasil(true);
       setError("");
 
-      const response = await getPendaftarPpdbById(id);
+      const [detailRes, hasilRes] = await Promise.allSettled([
+        getPendaftarPpdbById(id),
+        getHasilSeleksiPpdb(id),
+      ]);
 
-      setData(response?.data || null);
+      if (detailRes.status === "rejected") {
+        throw detailRes.reason;
+      }
+
+      const detailData = detailRes.value?.data || null;
+      setData(detailData);
+
+      if (hasilRes.status === "fulfilled") {
+        const hs = hasilRes.value?.data || detailData?.hasilSeleksi || null;
+        setHasilNilaiTes(
+          hs?.nilaiTes !== null && hs?.nilaiTes !== undefined
+            ? String(hs.nilaiTes)
+            : ""
+        );
+        setHasilPeringkat(
+          hs?.peringkat !== null && hs?.peringkat !== undefined
+            ? String(hs.peringkat)
+            : ""
+        );
+        setHasilStatus(hs?.statusKelulusan || "");
+        setHasilCatatan(hs?.catatan || "");
+      }
     } catch (err) {
       setData(null);
       setError(
@@ -337,6 +372,7 @@ export default function DetailPendaftaranPage() {
       );
     } finally {
       setLoading(false);
+      setLoadingHasil(false);
     }
   }, [id]);
 
@@ -417,6 +453,55 @@ export default function DetailPendaftaranPage() {
     }
   }
 
+  async function handleSimpanHasilSeleksi(e) {
+    e.preventDefault();
+    if (!id) return;
+
+    const nilaiParsed =
+      hasilNilaiTes.trim() === "" ? null : Number(hasilNilaiTes);
+    if (
+      nilaiParsed !== null &&
+      (Number.isNaN(nilaiParsed) || nilaiParsed < 0 || nilaiParsed > 100)
+    ) {
+      setHasilError("Nilai tes harus berupa angka antara 0 sampai 100.");
+      return;
+    }
+
+    const peringkatParsed =
+      hasilPeringkat.trim() === "" ? null : Number(hasilPeringkat);
+    if (
+      peringkatParsed !== null &&
+      (!Number.isInteger(peringkatParsed) || peringkatParsed < 1)
+    ) {
+      setHasilError("Peringkat harus berupa bilangan bulat minimal 1.");
+      return;
+    }
+
+    try {
+      setSavingHasil(true);
+      setHasilError("");
+      setHasilSuccess("");
+
+      await simpanHasilSeleksiPpdb(id, {
+        nilaiTes: nilaiParsed,
+        peringkat: peringkatParsed,
+        statusKelulusan: hasilStatus || null,
+        catatan: hasilCatatan.trim() || null,
+      });
+
+      setHasilSuccess("Hasil seleksi pendaftar berhasil disimpan.");
+      await loadDetail();
+    } catch (err) {
+      setHasilError(
+        err instanceof Error
+          ? err.message
+          : "Gagal menyimpan hasil seleksi pendaftar."
+      );
+    } finally {
+      setSavingHasil(false);
+    }
+  }
+
 
   const statusInfo = normalizeStatus(
     data?.status
@@ -426,8 +511,7 @@ export default function DetailPendaftaranPage() {
 
   const fotoUrl = getFotoUrl(data);
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const apiUrl = getBackendOrigin();
 
   const getFileUrl = (urlFile) => {
     if (!urlFile) {
@@ -1208,6 +1292,101 @@ export default function DetailPendaftaranPage() {
                           </>
                         )}
                       </div>
+                    </Section>
+
+                    <Section
+                      title="Penetapan Hasil Seleksi"
+                      icon={FileCheck2}
+                    >
+                      {loadingHasil ? (
+                        <div className="flex items-center gap-2 text-xs theme-text-muted">
+                          <Loader2 size={14} className="animate-spin" />
+                          Memuat hasil seleksi...
+                        </div>
+                      ) : (
+                        <form onSubmit={handleSimpanHasilSeleksi} className="space-y-3 text-xs">
+                          {hasilError && (
+                            <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-3 py-2 text-[var(--color-danger)]">
+                              {hasilError}
+                            </div>
+                          )}
+                          {hasilSuccess && (
+                            <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-success)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] px-3 py-2 text-[var(--color-success)]">
+                              {hasilSuccess}
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div>
+                              <label className="mb-1 block font-semibold theme-text">
+                                Nilai Tes (0 - 100)
+                              </label>
+                              <input
+                                type="number"
+                                min={0}
+                                max={100}
+                                step="0.01"
+                                value={hasilNilaiTes}
+                                onChange={(e) => setHasilNilaiTes(e.target.value)}
+                                placeholder="Kosongkan jika tidak ada"
+                                className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                              />
+                            </div>
+                            <div>
+                              <label className="mb-1 block font-semibold theme-text">
+                                Peringkat
+                              </label>
+                              <input
+                                type="number"
+                                min={1}
+                                step="1"
+                                value={hasilPeringkat}
+                                onChange={(e) => setHasilPeringkat(e.target.value)}
+                                placeholder="Contoh: 1"
+                                className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="mb-1 block font-semibold theme-text">
+                              Status Kelulusan Seleksi
+                            </label>
+                            <select
+                              value={hasilStatus}
+                              onChange={(e) => setHasilStatus(e.target.value)}
+                              className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                            >
+                              <option value="">-- Belum Ditetapkan --</option>
+                              <option value="lulus">Lulus</option>
+                              <option value="cadangan">Cadangan</option>
+                              <option value="tidak_lulus">Tidak Lulus</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="mb-1 block font-semibold theme-text">
+                              Catatan Hasil Seleksi
+                            </label>
+                            <textarea
+                              rows={2}
+                              value={hasilCatatan}
+                              onChange={(e) => setHasilCatatan(e.target.value)}
+                              placeholder="Catatan evaluasi tim seleksi..."
+                              className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                            />
+                          </div>
+
+                          <button
+                            type="submit"
+                            disabled={savingHasil}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 font-semibold text-white transition hover:brightness-95 disabled:opacity-60"
+                          >
+                            {savingHasil && <Loader2 size={14} className="animate-spin" />}
+                            Simpan Hasil Seleksi
+                          </button>
+                        </form>
+                      )}
                     </Section>
 
 

@@ -16,6 +16,8 @@ import {
   Hash,
   Sparkles,
   Pencil,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -24,6 +26,7 @@ import {
   getGedung,
   getLantaiByGedung,
 } from "@/services/infrastruktur.service";
+import { getRuangan, updateRuangan } from "@/services/sarpras.service";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -34,6 +37,13 @@ const themeCardShadow =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
+function extractArray(res) {
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res?.data)) return res.data;
+  if (Array.isArray(res?.data?.data)) return res.data.data;
+  return [];
+}
+
 export default function EditRuanganPage() {
   const router = useRouter();
   const params = useParams();
@@ -42,24 +52,27 @@ export default function EditRuanganPage() {
 
   const [lantai, setLantai] = useState(null);
   const [gedung, setGedung] = useState(null);
-  const [loadingContext, setLoadingContext] = useState(true);
+  const [, setLoadingContext] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Form states pre-filled
-  const [nama, setNama] = useState(`Ruangan ${ruanganId || ""}`.trim());
-  const [kode, setKode] = useState("R-101");
+  const [nama, setNama] = useState("");
+  const [kode, setKode] = useState("");
   const [kelasId, setKelasId] = useState("");
-  const [kapasitas, setKapasitas] = useState("36");
+  const [kapasitas, setKapasitas] = useState("");
   const [status, setStatus] = useState("aktif");
   const [errors, setErrors] = useState({});
   const [infoMessage, setInfoMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const loadContext = useCallback(async () => {
     try {
       setLoadingContext(true);
-      const gedungResult = await getGedung();
-      if (!gedungResult?.success) return;
+      const [gedungResult, ruanganResult] = await Promise.all([
+        getGedung(),
+        getRuangan(),
+      ]);
 
-      const gedungList = Array.isArray(gedungResult.data) ? gedungResult.data : [];
+      const gedungList = Array.isArray(gedungResult?.data) ? gedungResult.data : [];
       for (const item of gedungList) {
         const result = await getLantaiByGedung(item.id);
         if (!result?.success) continue;
@@ -72,20 +85,41 @@ export default function EditRuanganPage() {
           break;
         }
       }
+
+      const roomList = extractArray(ruanganResult);
+      const foundRoom = roomList.find((r) => String(r.id) === String(ruanganId));
+      if (foundRoom) {
+        setNama(foundRoom.nama || "");
+        setKode(foundRoom.lokasi || "");
+        setKapasitas(
+          foundRoom.kapasitas !== null && foundRoom.kapasitas !== undefined
+            ? String(foundRoom.kapasitas)
+            : ""
+        );
+        const ket = String(foundRoom.keterangan || "").toLowerCase();
+        if (ket.includes("perbaikan")) setStatus("perbaikan");
+        else if (ket.includes("nonaktif")) setStatus("nonaktif");
+        else setStatus("aktif");
+      } else {
+        setSubmitError("Data ruangan tidak ditemukan.");
+      }
     } catch (err) {
       console.error(err);
+      setSubmitError(err?.message || "Gagal memuat data ruangan.");
     } finally {
       setLoadingContext(false);
     }
-  }, [id]);
+  }, [id, ruanganId]);
 
   useEffect(() => {
-    if (id) {
+    if (!id || !ruanganId) return;
+    const timer = setTimeout(() => {
       loadContext();
-    }
-  }, [id, loadContext]);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [id, ruanganId, loadContext]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -100,13 +134,31 @@ export default function EditRuanganPage() {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setInfoMessage("");
+      setSubmitError("");
       return;
     }
 
-    setErrors({});
-    setInfoMessage(
-      "Validasi update berhasil! Catatan: Perubahan belum tersimpan ke database karena endpoint backend `PUT /api/infrastruktur/ruangan/:id` belum diimplementasikan di Backend (Backend Gap)."
-    );
+    try {
+      setErrors({});
+      setSubmitError("");
+      setSubmitting(true);
+
+      await updateRuangan(String(ruanganId), {
+        nama: nama.trim(),
+        gedungId: gedung?.id || lantai?.gedungId || null,
+        lantaiId: id || null,
+        lokasi: kode.trim() || null,
+        kapasitas: kapasitas ? Number(kapasitas) : null,
+        keterangan: status ? `Status: ${status}` : null,
+      });
+
+      setInfoMessage("Perubahan ruangan berhasil disimpan.");
+      router.push(`/admin/sarpras/gedung/lantai/${id}/ruangan/${ruanganId}`);
+    } catch (err) {
+      setSubmitError(err?.message || "Gagal memperbarui data ruangan.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const selectedKelasObj = lantai?.kelas?.find((k) => String(k.id) === String(kelasId));
@@ -199,12 +251,23 @@ export default function EditRuanganPage() {
               </div>
             </div>
 
+            {/* Error Banner */}
+            {submitError && (
+              <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)] p-4 text-sm theme-danger">
+                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-sm">Gagal Memperbarui Ruangan</p>
+                  <p className="text-xs leading-relaxed mt-0.5">{submitError}</p>
+                </div>
+              </div>
+            )}
+
             {/* Informative Status Notification */}
             {infoMessage && (
-              <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)] p-4 sm:p-5 text-sm bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
-                <CheckCircle2 size={20} className="shrink-0 mt-0.5 text-[var(--color-info)]" />
+              <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_6%,transparent)] p-4 sm:p-5 text-sm theme-success">
+                <CheckCircle2 size={20} className="shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="font-semibold text-sm">Simulasi Update Berhasil</p>
+                  <p className="font-semibold text-sm">Berhasil Diperbarui</p>
                   <p className="text-xs leading-relaxed opacity-95">{infoMessage}</p>
                   <div className="pt-2 flex items-center gap-2">
                     <button
@@ -414,10 +477,11 @@ export default function EditRuanganPage() {
                     </button>
                     <button
                       type="submit"
-                      className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition-all`}
+                      disabled={submitting}
+                      className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition-all disabled:opacity-60`}
                     >
-                      <Save size={16} />
-                      Simpan Perubahan
+                      {submitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                      {submitting ? "Menyimpan..." : "Simpan Perubahan"}
                     </button>
                   </div>
                 </form>

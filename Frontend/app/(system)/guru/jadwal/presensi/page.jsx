@@ -27,9 +27,18 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000";
+function getBackendOrigin() {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "").replace(/\/api(?:\/v1)?$/i, "");
+  }
+  if (typeof window !== "undefined") {
+    return ["localhost", "127.0.0.1"].includes(window.location.hostname)
+      ? "http://localhost:5000"
+      : window.location.origin;
+  }
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
+}
 
 
 const themePrimaryGradient =
@@ -534,7 +543,7 @@ export default function PresensiGuruPage() {
           jadwalResponse,
         ] = await Promise.all([
           fetch(
-            `${API_URL}/api/absensi/saya`,
+            `${getBackendOrigin()}/api/absensi/saya`,
             {
               method: "GET",
               headers,
@@ -543,7 +552,7 @@ export default function PresensiGuruPage() {
           ),
 
           fetch(
-            `${API_URL}/api/jadwal-mengajar`,
+            `${getBackendOrigin()}/api/jadwal-mengajar`,
             {
               method: "GET",
               headers,
@@ -1092,7 +1101,7 @@ export default function PresensiGuruPage() {
 
         const response =
           await fetch(
-            `${API_URL}/api/absensi/`,
+            `${getBackendOrigin()}/api/absensi/`,
             {
               method: "POST",
 

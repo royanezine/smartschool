@@ -1,6 +1,7 @@
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+import { getBackendOrigin } from "../lib/auth";
+
+const API_URL = getBackendOrigin();
 
 const BK_BASE_PATH = "/api/bk";
 
@@ -940,6 +941,19 @@ export async function getAsesmenMinatBakat(): Promise<
   AsesmenMinatBakat[]
 > {
   return request<AsesmenMinatBakat[]>(ASESMEN_PATH, {
+    method: "GET",
+    cache: "no-store",
+  });
+}
+
+export async function getAsesmenMinatBakatById(
+  id: string
+): Promise<AsesmenMinatBakat> {
+  if (!id) {
+    throw new Error("ID asesmen wajib diisi");
+  }
+
+  return request<AsesmenMinatBakat>(`${ASESMEN_PATH}/${encodeURIComponent(id)}`, {
     method: "GET",
     cache: "no-store",
   });

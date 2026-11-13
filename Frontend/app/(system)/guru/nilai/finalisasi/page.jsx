@@ -14,7 +14,9 @@ import {
   Info,
   Loader2,
   LockKeyhole,
+  Pencil,
   RefreshCw,
+  Save,
   Search,
   ShieldCheck,
   SlidersHorizontal,
@@ -28,6 +30,7 @@ import {
   getGridNilai,
   getKomponenNilai,
   getNilaiKelasSaya,
+  inputNilaiBulk,
 } from "@/services/nilai.service";
 
 function formatScore(value) {
@@ -83,6 +86,9 @@ export default function FinalisasiNilaiPage() {
   const [loadingClasses, setLoadingClasses] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editedScores, setEditedScores] = useState({});
+  const [savingBulk, setSavingBulk] = useState(false);
 
   const loadClasses = useCallback(async () => {
     setLoadingClasses(true);
@@ -141,6 +147,8 @@ export default function FinalisasiNilaiPage() {
 
       setKomponenData(komponenResult);
       setGrid(gridResult);
+      setEditedScores({});
+      setEditMode(false);
     } catch (err) {
       console.error("Gagal mengambil detail nilai:", err);
       setKomponenData({
@@ -220,6 +228,95 @@ export default function FinalisasiNilaiPage() {
     selectedClass?.status === "final";
 
   const readyToFinalize = allComplete && bobotValid && !isFinalized;
+
+  const dirtyEntries = useMemo(() => {
+    const entries = [];
+    for (const student of students) {
+      for (const comp of komponen) {
+        const key = `${student.penggunaId}:${comp.id}`;
+        if (!(key in editedScores)) continue;
+        const raw = String(editedScores[key] ?? "").trim();
+        if (raw === "") continue;
+        const orig = student.nilai?.[comp.id];
+        const num = Number(raw);
+        if (Number.isNaN(num)) continue;
+        if (orig === null || orig === undefined || Number(orig) !== num) {
+          entries.push({
+            penggunaId: student.penggunaId,
+            komponenNilaiId: comp.id,
+            nilai: num,
+          });
+        }
+      }
+    }
+    return entries;
+  }, [students, komponen, editedScores]);
+
+  const invalidEditedCount = useMemo(() => {
+    let count = 0;
+    for (const student of students) {
+      for (const comp of komponen) {
+        const key = `${student.penggunaId}:${comp.id}`;
+        if (!(key in editedScores)) continue;
+        const raw = String(editedScores[key] ?? "").trim();
+        if (raw === "") {
+          const orig = student.nilai?.[comp.id];
+          if (orig !== null && orig !== undefined) count += 1;
+          continue;
+        }
+        const num = Number(raw);
+        if (!Number.isFinite(num) || num < 0 || num > 100) {
+          count += 1;
+        }
+      }
+    }
+    return count;
+  }, [students, komponen, editedScores]);
+
+  const handleScoreChange = (penggunaId, komponenNilaiId, value) => {
+    const key = `${penggunaId}:${komponenNilaiId}`;
+    setEditedScores((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleSaveBulk = async () => {
+    if (!selectedClassId || isFinalized) return;
+
+    setNotice("");
+    setError("");
+
+    if (invalidEditedCount > 0) {
+      setError(
+        "Terdapat nilai yang tidak valid. Pastikan seluruh sel yang diubah berisi angka 0 sampai 100."
+      );
+      return;
+    }
+
+    if (dirtyEntries.length === 0) {
+      setNotice("Tidak ada perubahan nilai untuk disimpan.");
+      return;
+    }
+
+    setSavingBulk(true);
+
+    try {
+      const result = await inputNilaiBulk({
+        kelasMapelId: selectedClassId,
+        nilai: dirtyEntries,
+      });
+
+      const savedCount = result?.jumlahDisimpan ?? dirtyEntries.length;
+      await loadDetail(selectedClassId);
+      setNotice(`Sebanyak ${savedCount} nilai komponen berhasil disimpan.`);
+    } catch (err) {
+      console.error("Simpan nilai bulk gagal:", err);
+      setError(err?.message || "Gagal menyimpan perubahan nilai ke server.");
+    } finally {
+      setSavingBulk(false);
+    }
+  };
 
   const finalizedCount = classes.filter((item) => item.status === "final")
     .length;
@@ -509,31 +606,88 @@ export default function FinalisasiNilaiPage() {
                     </p>
                   </div>
 
-                  <span
-                    className={`inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold ${
-                      isFinalized
-                        ? "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]"
-                        : readyToFinalize
-                          ? "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
-                          : "bg-amber-500/10 text-amber-700"
-                    }`}
-                  >
-                    {isFinalized ? (
-                      <CheckCircle2 size={14} />
-                    ) : readyToFinalize ? (
-                      <Check size={14} />
-                    ) : (
-                      <Info size={14} />
-                    )}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold ${
+                        isFinalized
+                          ? "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]"
+                          : readyToFinalize
+                            ? "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
+                            : "bg-amber-500/10 text-amber-700"
+                      }`}
+                    >
+                      {isFinalized ? (
+                        <CheckCircle2 size={14} />
+                      ) : readyToFinalize ? (
+                        <Check size={14} />
+                      ) : (
+                        <Info size={14} />
+                      )}
 
-                    {isFinalized
-                      ? "Sudah difinalisasi"
-                      : !bobotValid
-                        ? "Total bobot belum 100%"
-                        : readyToFinalize
-                          ? "Siap difinalisasi"
-                          : `${incompleteStudents.length} siswa belum lengkap`}
-                  </span>
+                      {isFinalized
+                        ? "Sudah difinalisasi"
+                        : !bobotValid
+                          ? "Total bobot belum 100%"
+                          : readyToFinalize
+                            ? "Siap difinalisasi"
+                            : `${incompleteStudents.length} siswa belum lengkap`}
+                    </span>
+
+                    {!isFinalized && komponen.length > 0 && students.length > 0 && (
+                      <>
+                        {!editMode ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditMode(true);
+                              setError("");
+                              setNotice("");
+                            }}
+                            disabled={showLoading || savingBulk}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)] transition hover:opacity-90 disabled:opacity-50"
+                          >
+                            <Pencil size={13} />
+                            Input / Edit Nilai
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditedScores({});
+                                setEditMode(false);
+                                setError("");
+                              }}
+                              disabled={savingBulk}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] px-3 py-1.5 text-xs font-semibold theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
+                            >
+                              <X size={13} />
+                              Batal Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleSaveBulk}
+                              disabled={
+                                savingBulk ||
+                                invalidEditedCount > 0 ||
+                                dirtyEntries.length === 0
+                              }
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3.5 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {savingBulk ? (
+                                <Loader2 size={13} className="animate-spin" />
+                              ) : (
+                                <Save size={13} />
+                              )}
+                              {savingBulk
+                                ? "Menyimpan..."
+                                : `Simpan Nilai (${dirtyEntries.length})`}
+                            </button>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -586,8 +740,23 @@ export default function FinalisasiNilaiPage() {
 
                     {!showLoading &&
                       filteredStudents.map((student) => {
+                        const previewStudent = editMode
+                          ? {
+                              ...student,
+                              nilai: Object.fromEntries(
+                                komponen.map((comp) => {
+                                  const key = `${student.penggunaId}:${comp.id}`;
+                                  const val =
+                                    key in editedScores
+                                      ? editedScores[key]
+                                      : student.nilai?.[comp.id];
+                                  return [comp.id, val];
+                                })
+                              ),
+                            }
+                          : student;
                         const finalScore = hitungNilaiAkhir(
-                          student,
+                          previewStudent,
                           komponen
                         );
                         const complete = finalScore !== null;
@@ -609,14 +778,46 @@ export default function FinalisasiNilaiPage() {
                               </p>
                             </td>
 
-                            {komponen.map((item) => (
-                              <td
-                                key={item.id}
-                                className="theme-text px-4 py-4 tabular-nums"
-                              >
-                                {formatScore(student.nilai?.[item.id])}
-                              </td>
-                            ))}
+                            {komponen.map((item) => {
+                              const key = `${student.penggunaId}:${item.id}`;
+                              const hasDraft = key in editedScores;
+                              const orig = student.nilai?.[item.id];
+                              const currentVal = hasDraft
+                                ? editedScores[key]
+                                : orig === null || orig === undefined
+                                  ? ""
+                                  : String(orig);
+
+                              return (
+                                <td
+                                  key={item.id}
+                                  className="theme-text px-4 py-4 tabular-nums"
+                                >
+                                  {editMode && !isFinalized ? (
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      max={100}
+                                      step="0.01"
+                                      aria-label={`Nilai ${item.nama} untuk ${student.namaLengkap}`}
+                                      value={currentVal}
+                                      onChange={(e) =>
+                                        handleScoreChange(
+                                          student.penggunaId,
+                                          item.id,
+                                          e.target.value
+                                        )
+                                      }
+                                      disabled={savingBulk}
+                                      placeholder="0-100"
+                                      className="theme-input w-20 rounded-md border border-[color-mix(in_srgb,var(--color-text)_18%,transparent)] px-2.5 py-1.5 text-sm outline-none focus:border-[var(--color-primary)]"
+                                    />
+                                  ) : (
+                                    formatScore(student.nilai?.[item.id])
+                                  )}
+                                </td>
+                              );
+                            })}
 
                             <td className="theme-text px-4 py-4 font-bold tabular-nums">
                               {formatScore(finalScore)}
@@ -719,6 +920,13 @@ export default function FinalisasiNilaiPage() {
                     setNotice("");
 
                     if (!selectedClass) return;
+
+                    if (dirtyEntries.length > 0 || editMode) {
+                      setNotice(
+                        "Simpan atau batalkan perubahan nilai pada grid terlebih dahulu sebelum finalisasi."
+                      );
+                      return;
+                    }
 
                     if (isFinalized) {
                       setNotice("Nilai kelas ini sudah difinalisasi.");

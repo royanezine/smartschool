@@ -370,7 +370,7 @@ export default function DetailMateriPage() {
           <div className="theme-card theme-border w-full max-w-md rounded-2xl border p-6 shadow-2xl">
             <h3 className="theme-text text-lg font-bold">Hapus Materi?</h3>
             <p className="theme-text-secondary mt-2 text-sm leading-relaxed">
-              Materi <strong>"{data?.judul}"</strong> akan dihapus dari sistem. Tindakan ini tidak dapat dibatalkan.
+              Materi <strong>&quot;{data?.judul}&quot;</strong> akan dihapus dari sistem. Tindakan ini tidak dapat dibatalkan.
             </p>
 
             {deleteError && (

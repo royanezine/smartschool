@@ -35,10 +35,6 @@ export default function EditCategoryPage() {
     status: "aktif",
   });
 
-  useEffect(() => {
-    if (id) loadCategory();
-  }, [id]);
-
   async function loadCategory() {
     try {
       setLoading(true);
@@ -58,6 +54,10 @@ export default function EditCategoryPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (id) loadCategory();
+  }, [id]);
 
   function handleChange(e) {
     const { name, value } = e.target;

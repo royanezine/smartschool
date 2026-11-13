@@ -1,5 +1,5 @@
 import { apiFetch } from "../lib/api";
-import { getToken } from "../lib/auth";
+import { getToken, getCleanApiBase } from "../lib/auth";
 
 
 export type AbsensiStatus = "hadir" | "izin" | "sakit" | "alpha";
@@ -578,10 +578,96 @@ export async function getKelasSaya(): Promise<KelasSaya> {
 export async function getAbsensiSiswa(
   siswaId: string,
 ): Promise<Absensi[]> {
-  throw new Error(
-    "Backend tidak menyediakan riwayat absensi per siswa. " +
-      `Gunakan getAbsensiKelas(kelasId) lalu filter penggunaId = ${siswaId}.`
+  if (!siswaId) {
+    throw new Error("ID siswa wajib diisi.");
+  }
+  const result = await apiFetch(
+    `/api/absensi/siswa/${encodeURIComponent(siswaId)}?page=1&limit=100`,
+    { method: "GET" }
   );
+  return Array.isArray(result?.data) ? result.data : [];
+}
+
+export interface RiwayatAbsensiSiswaResponse {
+  success?: boolean;
+  data: Absensi[];
+  meta?: {
+    page: number;
+    limit: number;
+    totalData: number;
+    totalPages: number;
+  };
+}
+
+export async function getRiwayatAbsensiSiswa(
+  siswaId: string,
+  params: { page?: number; limit?: number } = {}
+): Promise<RiwayatAbsensiSiswaResponse> {
+  if (!siswaId) {
+    throw new Error("ID siswa wajib diisi.");
+  }
+
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", String(params.page));
+  if (params.limit) query.set("limit", String(params.limit));
+
+  const qs = query.toString();
+  const url = `/api/absensi/siswa/${encodeURIComponent(siswaId)}${qs ? `?${qs}` : ""}`;
+  const result = await apiFetch(url, { method: "GET" });
+
+  return {
+    success: Boolean(result?.success ?? true),
+    data: Array.isArray(result?.data) ? result.data : [],
+    meta: result?.meta,
+  };
+}
+
+export interface RekapAbsensiSiswaItem {
+  siswa: {
+    id: string;
+    namaLengkap: string;
+    nisn?: string | null;
+  };
+  kelas?: {
+    id: string;
+    nama: string;
+  } | null;
+  total: number;
+  hadir: number;
+  izin: number;
+  sakit: number;
+  alpha: number;
+  persentaseHadir: number;
+}
+
+export interface RekapAbsensiMapelData {
+  rekapSiswa: RekapAbsensiSiswaItem[];
+  totalData: number;
+  riwayat: Absensi[];
+}
+
+export async function getRekapAbsensiMapel(params: {
+  mataPelajaranId?: string;
+  kelasId?: string;
+  tanggalMulai?: string;
+  tanggalSelesai?: string;
+} = {}): Promise<RekapAbsensiMapelData> {
+  const query = new URLSearchParams();
+  if (params.mataPelajaranId) query.set("mataPelajaranId", params.mataPelajaranId);
+  if (params.kelasId) query.set("kelasId", params.kelasId);
+  if (params.tanggalMulai) query.set("tanggalMulai", params.tanggalMulai);
+  if (params.tanggalSelesai) query.set("tanggalSelesai", params.tanggalSelesai);
+
+  const qs = query.toString();
+  const url = `/api/absensi/rekap-mapel${qs ? `?${qs}` : ""}`;
+  const result = await apiFetch(url, { method: "GET" });
+  const payload = result?.data ?? result;
+
+  return {
+    rekapSiswa: Array.isArray(payload?.rekapSiswa) ? payload.rekapSiswa : [],
+    totalData: Number(payload?.totalData) || 0,
+    riwayat: Array.isArray(payload?.riwayat) ? payload.riwayat : [],
+  };
 }
 
 
@@ -927,11 +1013,7 @@ export interface AbsensiExportResult {
 }
 
 function resolveExportBaseUrl(): string {
-  const base = (
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-  ).replace(/\/+$/, "");
-
-  return base.endsWith("/api") ? base : `${base}/api`;
+  return getCleanApiBase();
 }
 
 function buildAbsensiQuery(params: AbsensiListParams): string {
@@ -1017,6 +1099,8 @@ const absensiService = {
   absenManual,
   getKelasSaya,
   getAbsensiSiswa,
+  getRiwayatAbsensiSiswa,
+  getRekapAbsensiMapel,
   checkInShift,
   checkOutShift,
   getRiwayatShiftSaya,

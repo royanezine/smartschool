@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { getToken, getStoredUser, getSessionUser } from "@/lib/auth";
+import { getToken, getStoredUser, getSessionUser, getBackendOrigin } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -311,11 +311,7 @@ function getBackendFileUrl(url) {
     return url;
   }
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:5000/api";
-
-  const backendOrigin = apiUrl.replace(/\/api\/?$/, "");
+  const backendOrigin = getBackendOrigin();
 
   if (url.startsWith("/")) {
     return `${backendOrigin}${url}`;

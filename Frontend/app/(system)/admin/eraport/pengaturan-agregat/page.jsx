@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation"; // Tambahkan useRouter
 import { getMataPelajaran } from "@/services/mataPelajaran.service";
 import {
   getAgregatRapor,
+  getKkm,
+  setKkm,
   updateAgregatRapor,
 } from "@/services/pengaturan.service";
 import { getTahunAjaran } from "@/services/tahunAjaran.service";
@@ -94,7 +96,12 @@ export default function PengaturanAgregatPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [kkmDefaultInput, setKkmDefaultInput] = useState("75");
+  const [kkmSaving, setKkmSaving] = useState(false);
+  const [kkmNotice, setKkmNotice] = useState("");
+  const [kkmError, setKkmError] = useState("");
   const masterMapelListRef = useRef([]);
+  const kkmConfigRef = useRef({ kkmDefault: 75, kkmPerMapel: {} });
 
   const currentTahunAjaran = useMemo(
     () => tahunAjaranList.find((ta) => ta.id === selectedTahunAjaranId),
@@ -121,8 +128,14 @@ export default function PengaturanAgregatPage() {
       });
 
       const list = mapelsToUse || masterMapelListRef.current;
+      const kkmCfg = kkmConfigRef.current || { kkmDefault: 75, kkmPerMapel: {} };
       const mapped = list.map((m, idx) => {
         const savedItem = aggregateMap.get(m.id);
+        const mapelKey = String(m.nama || "").trim().toLowerCase();
+        const kkmFromGlobal =
+          mapelKey && kkmCfg.kkmPerMapel?.[mapelKey] !== undefined
+            ? Number(kkmCfg.kkmPerMapel[mapelKey])
+            : Number(kkmCfg.kkmDefault ?? 75);
         return {
           id: m.id || `mapel-${idx}`,
           mapel: m.nama || "Mata Pelajaran",
@@ -132,7 +145,7 @@ export default function PengaturanAgregatPage() {
           uts: savedItem ? Number(savedItem.uts) : 25,
           uas: savedItem ? Number(savedItem.uas) : 30,
           praktik: savedItem ? Number(savedItem.praktik) : 20,
-          kkm: savedItem ? Number(savedItem.kkm) : 75,
+          kkm: savedItem ? Number(savedItem.kkm) : kkmFromGlobal,
           status: m.status === "tidak_aktif" ? "Nonaktif" : "Aktif",
         };
       });
@@ -156,12 +169,22 @@ export default function PengaturanAgregatPage() {
         setLoading(true);
         setErrorMsg("");
 
-        const [taRes, mapelRes] = await Promise.allSettled([
+        const [taRes, mapelRes, kkmRes] = await Promise.allSettled([
           getTahunAjaran(),
           getMataPelajaran(),
+          getKkm(),
         ]);
 
         if (!active) return;
+
+        if (kkmRes.status === "fulfilled" && kkmRes.value?.data) {
+          const cfg = {
+            kkmDefault: Number(kkmRes.value.data.kkmDefault ?? 75),
+            kkmPerMapel: kkmRes.value.data.kkmPerMapel || {},
+          };
+          kkmConfigRef.current = cfg;
+          setKkmDefaultInput(String(cfg.kkmDefault));
+        }
 
         const taList =
           taRes.status === "fulfilled" && Array.isArray(taRes.value)
@@ -315,6 +338,56 @@ export default function PengaturanAgregatPage() {
     setSaved(false);
   };
 
+  const handleSaveKkmGlobal = async () => {
+    const parsedDefault = Number(kkmDefaultInput);
+    if (
+      !Number.isInteger(parsedDefault) ||
+      parsedDefault < 0 ||
+      parsedDefault > 100
+    ) {
+      setKkmError("KKM Default harus berupa bilangan bulat antara 0 sampai 100.");
+      setKkmNotice("");
+      return;
+    }
+
+    const kkmPerMapel = {};
+    for (const s of subjects) {
+      const key = String(s.mapel || "").trim().toLowerCase();
+      const val = Math.round(Number(s.kkm));
+      if (key && Number.isInteger(val) && val >= 0 && val <= 100) {
+        kkmPerMapel[key] = val;
+      }
+    }
+
+    try {
+      setKkmSaving(true);
+      setKkmError("");
+      setKkmNotice("");
+      const res = await setKkm({
+        kkmDefault: parsedDefault,
+        kkmPerMapel,
+      });
+      const updated = res?.data || {
+        kkmDefault: parsedDefault,
+        kkmPerMapel,
+      };
+      kkmConfigRef.current = {
+        kkmDefault: Number(updated.kkmDefault ?? parsedDefault),
+        kkmPerMapel: updated.kkmPerMapel || kkmPerMapel,
+      };
+      setKkmDefaultInput(String(kkmConfigRef.current.kkmDefault));
+      setKkmNotice(
+        `KKM Global Sekolah (${kkmConfigRef.current.kkmDefault}) dan ${Object.keys(kkmConfigRef.current.kkmPerMapel).length} mapel berhasil disimpan ke server.`
+      );
+    } catch (err) {
+      setKkmError(
+        err?.message || "Gagal menyimpan KKM Global Sekolah ke server."
+      );
+    } finally {
+      setKkmSaving(false);
+    }
+  };
+
 
   const handleEditRedirect = (subject) => {
     // Arahkan ke halaman edit terpisah dengan membawa ID mata pelajaran
@@ -420,6 +493,64 @@ export default function PengaturanAgregatPage() {
               <StatCard icon={CircleCheck} label="Mapel Aktif" value={activeSubjects} type="green" />
               <StatCard icon={Calculator} label="Konfigurasi Valid" value={validSubjects} type="purple" />
               <StatCard icon={CircleAlert} label="Bobot Tidak Valid" value={invalidSubjects} type="orange" />
+            </div>
+
+            <div className="theme-card theme-border mt-5 rounded-xl border p-4 shadow-sm sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="theme-text text-sm font-bold">
+                    KKM Global Sekolah
+                  </h2>
+                  <p className="theme-text-muted mt-0.5 text-xs">
+                    Standar KKM default dan sinkronisasi KKM per mata pelajaran ke pengaturan sekolah.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-end gap-2.5">
+                  <div>
+                    <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
+                      KKM Default (0–100)
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={kkmDefaultInput}
+                      disabled={loading || kkmSaving}
+                      onChange={(e) => {
+                        setKkmDefaultInput(e.target.value);
+                        setKkmError("");
+                      }}
+                      className="theme-input h-10 w-32 rounded-lg px-3 text-sm font-semibold outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    disabled={loading || kkmSaving}
+                    onClick={handleSaveKkmGlobal}
+                    className="theme-primary flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {kkmSaving ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Save size={16} />
+                    )}
+                    {kkmSaving ? "Menyimpan..." : "Simpan KKM Global"}
+                  </button>
+                </div>
+              </div>
+
+              {kkmError && (
+                <p className="mt-3 text-xs font-medium text-red-600 dark:text-red-400">
+                  {kkmError}
+                </p>
+              )}
+              {kkmNotice && (
+                <p className="mt-3 text-xs font-medium text-[var(--color-success)]">
+                  {kkmNotice}
+                </p>
+              )}
             </div>
 
             <div className="theme-card theme-border mt-5 rounded-xl border p-4 shadow-sm sm:p-5">

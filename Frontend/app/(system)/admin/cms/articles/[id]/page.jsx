@@ -109,12 +109,6 @@ export default function ArticleDetailPage() {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  useEffect(() => {
-    if (!articleId) return;
-
-    loadArticle();
-  }, [articleId]);
-
   async function loadArticle() {
     try {
       setLoading(true);
@@ -152,6 +146,12 @@ export default function ArticleDetailPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (!articleId) return;
+
+    loadArticle();
+  }, [articleId]);
 
   async function handleDelete() {
     if (!article) return;

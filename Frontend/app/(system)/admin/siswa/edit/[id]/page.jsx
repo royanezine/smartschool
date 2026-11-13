@@ -20,27 +20,56 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { getUserById, updateUser } from "@/services/user.service";
+import { getSiswaById, updateSiswa } from "@/services/siswa.service";
 import { getKelas } from "@/services/kelas.service";
+import { getJurusan } from "@/services/jurusan.service";
+import { getTahunAjaran } from "@/services/tahunAjaran.service";
 
 const INITIAL_FORM = {
+  namaPengguna: "",
   namaLengkap: "",
+  email: "",
+  nis: "",
   nipd: "",
   nisn: "",
+  nik: "",
   status: "aktif",
   jenisKelamin: "",
   tempatLahir: "",
   tanggalLahir: "",
-  email: "",
   noTelepon: "",
   alamat: "",
+  alamatKtp: "",
+  alamatDomisili: "",
+  alamatSesuaiDomisili: false,
   provinsi: "",
-  kota: "",
+  kotaKabupaten: "",
   kecamatan: "",
   kelurahan: "",
-  namaOrangTua: "",
-  noTeleponOrangTua: "",
+  kodePos: "",
+  namaAyah: "",
+  nikAyah: "",
+  pekerjaanAyah: "",
+  noHpAyah: "",
+  namaIbu: "",
+  nikIbu: "",
+  pekerjaanIbu: "",
+  noHpIbu: "",
+  namaWaliPesertaDidik: "",
+  jurusanId: "",
 };
+
+function optionalText(value) {
+  const normalized = String(value ?? "").trim();
+  return normalized || null;
+}
+
+function normalizeGenderValue(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (normalized === "l" || normalized === "laki-laki") return "laki-laki";
+  if (normalized === "p" || normalized === "perempuan") return "perempuan";
+  return value ? String(value).trim() : "";
+}
 
 function getResponseData(response) {
   const result = response?.data ?? response;
@@ -93,7 +122,11 @@ export default function EditSiswaPage() {
   const [success, setSuccess] = useState("");
 
   const [kelasList, setKelasList] = useState([]);
+  const [jurusanList, setJurusanList] = useState([]);
   const [kelasId, setKelasId] = useState("");
+  const [initialKelasId, setInitialKelasId] = useState("");
+  const [initialTahunAjaranId, setInitialTahunAjaranId] = useState("");
+  const [activeTahunAjaranId, setActiveTahunAjaranId] = useState("");
   const [kelasSearch, setKelasSearch] = useState("");
   const [kelasDropdownOpen, setKelasDropdownOpen] = useState(false);
   const [loadingKelas, setLoadingKelas] = useState(false);
@@ -104,14 +137,37 @@ export default function EditSiswaPage() {
       setLoadingKelas(true);
       setKelasError("");
 
-      const response = await getKelas({
-        page: 1,
-        limit: 100,
-        sortBy: "nama",
-        sortOrder: "asc",
-      });
+      const [kelasRes, jurusanRes, tahunAjaranRes] = await Promise.allSettled([
+        getKelas({
+          page: 1,
+          limit: 100,
+          sortBy: "nama",
+          sortOrder: "asc",
+        }),
+        getJurusan({ page: 1, limit: 100 }),
+        getTahunAjaran(),
+      ]);
 
-      setKelasList(getResponseData(response));
+      if (kelasRes.status === "fulfilled") {
+        setKelasList(getResponseData(kelasRes.value));
+      } else {
+        throw kelasRes.reason;
+      }
+
+      if (jurusanRes.status === "fulfilled") {
+        setJurusanList(getResponseData(jurusanRes.value));
+      }
+
+      if (tahunAjaranRes.status === "fulfilled") {
+        const years = getResponseData(tahunAjaranRes.value);
+        const activeYear =
+          years.find(
+            (y) => String(y?.status || "").toLowerCase() === "aktif"
+          ) || years[0];
+        if (activeYear?.id) {
+          setActiveTahunAjaranId(String(activeYear.id));
+        }
+      }
     } catch (err) {
       console.error("Gagal mengambil daftar kelas:", err);
       setKelasError(
@@ -129,7 +185,7 @@ export default function EditSiswaPage() {
       setLoading(true);
       setError("");
 
-      const response = await getUserById(id);
+      const response = await getSiswaById(String(id));
       const result = response?.data ?? response;
       const user = result?.data ?? result;
 
@@ -137,36 +193,63 @@ export default function EditSiswaPage() {
         throw new Error("Data siswa tidak ditemukan.");
       }
 
+      const rawStatus = String(user.status || "aktif").trim().toLowerCase();
+
       setForm({
+        namaPengguna: user.namaPengguna || "",
         namaLengkap: user.namaLengkap || user.name || "",
-        nipd: user.nipd || user.nis || "",
+        email: user.email || "",
+        nis: user.nis || "",
+        nipd: user.nipd || "",
         nisn: user.nisn || "",
-        status: user.status || "aktif",
-        jenisKelamin: user.jenisKelamin || "",
+        nik: user.nik || "",
+        status: rawStatus === "nonaktif" ? "nonaktif" : "aktif",
+        jenisKelamin: normalizeGenderValue(user.jenisKelamin),
         tempatLahir: user.tempatLahir || "",
         tanggalLahir: formatTanggal(user.tanggalLahir),
-        email: user.email || "",
         noTelepon: user.noTelepon || user.telepon || "",
         alamat: user.alamat || "",
+        alamatKtp: user.alamatKtp || "",
+        alamatDomisili: user.alamatDomisili || "",
+        alamatSesuaiDomisili: Boolean(user.alamatSesuaiDomisili),
         provinsi: user.provinsi || "",
-        kota: user.kota || "",
+        kotaKabupaten: user.kotaKabupaten || user.kota || "",
         kecamatan: user.kecamatan || "",
         kelurahan: user.kelurahan || "",
-        namaOrangTua: user.namaOrangTua || "",
-        noTeleponOrangTua:
-          user.noTeleponOrangTua || user.teleponOrangTua || "",
+        kodePos: user.kodePos || "",
+        namaAyah: user.namaAyah || "",
+        nikAyah: user.nikAyah || "",
+        pekerjaanAyah: user.pekerjaanAyah || "",
+        noHpAyah: user.noHpAyah || "",
+        namaIbu: user.namaIbu || "",
+        nikIbu: user.nikIbu || "",
+        pekerjaanIbu: user.pekerjaanIbu || "",
+        noHpIbu: user.noHpIbu || "",
+        namaWaliPesertaDidik: user.namaWaliPesertaDidik || "",
+        jurusanId: user.jurusanId ? String(user.jurusanId) : "",
       });
 
+      const activeKelasRel = Array.isArray(user.kelasSiswa)
+        ? user.kelasSiswa[0]
+        : null;
       const kelasAwal =
+        activeKelasRel?.kelasId ||
+        activeKelasRel?.kelas?.id ||
         user.kelasId ||
         user.anggotaKelas?.[0]?.kelasId ||
         user.anggotaKelas?.[0]?.kelas?.id ||
         user.kelas?.id ||
         "";
+      const tahunAjaranAwal =
+        activeKelasRel?.tahunAjaranId ||
+        activeKelasRel?.kelas?.tahunAjaranId ||
+        user.tahunAjaranId ||
+        "";
 
-      if (kelasAwal) {
-        setKelasId(String(kelasAwal));
-      }
+      const kelasStr = kelasAwal ? String(kelasAwal) : "";
+      setKelasId(kelasStr);
+      setInitialKelasId(kelasStr);
+      setInitialTahunAjaranId(tahunAjaranAwal ? String(tahunAjaranAwal) : "");
     } catch (err) {
       console.error("Gagal mengambil data siswa:", err);
       setError(getErrorMessage(err, "Gagal mengambil data siswa."));
@@ -176,8 +259,10 @@ export default function EditSiswaPage() {
   }, [id]);
 
   useEffect(() => {
-    loadSiswa();
-    loadKelas();
+    Promise.resolve().then(() => {
+      loadSiswa();
+      loadKelas();
+    });
   }, [loadSiswa, loadKelas]);
 
   const filteredKelas = useMemo(() => {
@@ -215,11 +300,11 @@ export default function EditSiswaPage() {
   );
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
 
     setForm((previous) => ({
       ...previous,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -233,34 +318,97 @@ export default function EditSiswaPage() {
     event.preventDefault();
 
     try {
-      setSaving(true);
       setError("");
       setSuccess("");
 
+      if (form.namaLengkap.trim().length < 2) {
+        setError("Nama lengkap minimal 2 karakter.");
+        return;
+      }
+
+      if (form.nik.trim() && !/^\d{16}$/.test(form.nik.trim())) {
+        setError("NIK harus terdiri dari tepat 16 angka.");
+        return;
+      }
+
+      if (form.namaWaliPesertaDidik.trim().length > 20) {
+        setError("Nama wali peserta didik maksimal 20 karakter.");
+        return;
+      }
+
       const payload = {
-        namaLengkap: form.namaLengkap,
-        nipd: form.nipd,
-        nisn: form.nisn,
-        status: form.status,
-        jenisKelamin: form.jenisKelamin,
-        tempatLahir: form.tempatLahir,
+        namaLengkap: form.namaLengkap.trim(),
+        ...(form.namaPengguna.trim()
+          ? { namaPengguna: form.namaPengguna.trim() }
+          : {}),
+        ...(form.email.trim() ? { email: form.email.trim() } : {}),
+        nis: optionalText(form.nis),
+        nipd: optionalText(form.nipd),
+        nisn: optionalText(form.nisn),
+        nik: optionalText(form.nik),
+        status: form.status === "nonaktif" ? "nonaktif" : "aktif",
+        jenisKelamin: optionalText(form.jenisKelamin),
+        tempatLahir: optionalText(form.tempatLahir),
         tanggalLahir: form.tanggalLahir || null,
-        email: form.email,
-        noTelepon: form.noTelepon,
-        alamat: form.alamat,
-        provinsi: form.provinsi,
-        kota: form.kota,
-        kecamatan: form.kecamatan,
-        kelurahan: form.kelurahan,
-        namaOrangTua: form.namaOrangTua,
-        noTeleponOrangTua: form.noTeleponOrangTua,
+        noTelepon: optionalText(form.noTelepon),
+        alamat: optionalText(form.alamat),
+        alamatKtp: optionalText(form.alamatKtp),
+        alamatDomisili: form.alamatSesuaiDomisili
+          ? optionalText(form.alamatKtp || form.alamat || form.alamatDomisili)
+          : optionalText(form.alamatDomisili),
+        alamatSesuaiDomisili: Boolean(form.alamatSesuaiDomisili),
+        provinsi: optionalText(form.provinsi),
+        kotaKabupaten: optionalText(form.kotaKabupaten),
+        kecamatan: optionalText(form.kecamatan),
+        kelurahan: optionalText(form.kelurahan),
+        kodePos: optionalText(form.kodePos),
+        namaAyah: optionalText(form.namaAyah),
+        nikAyah: optionalText(form.nikAyah),
+        pekerjaanAyah: optionalText(form.pekerjaanAyah),
+        noHpAyah: optionalText(form.noHpAyah),
+        namaIbu: optionalText(form.namaIbu),
+        nikIbu: optionalText(form.nikIbu),
+        pekerjaanIbu: optionalText(form.pekerjaanIbu),
+        noHpIbu: optionalText(form.noHpIbu),
+        namaWaliPesertaDidik: optionalText(form.namaWaliPesertaDidik),
+        jurusanId: form.jurusanId ? String(form.jurusanId) : null,
       };
 
-      await updateUser(id, payload);
+      if (kelasId) {
+        payload.kelasId = String(kelasId);
+        const selectedTahunAjaranId =
+          selectedKelas?.tahunAjaranId || selectedKelas?.tahunAjaran?.id;
+        if (selectedTahunAjaranId) {
+          payload.tahunAjaranId = String(selectedTahunAjaranId);
+        }
+      } else if (initialKelasId) {
+        const detachTahunAjaranId =
+          initialTahunAjaranId || activeTahunAjaranId;
+        if (!detachTahunAjaranId) {
+          setError(
+            "Tahun ajaran tidak ditemukan untuk melepas kelas siswa."
+          );
+          return;
+        }
+        payload.kelasId = null;
+        payload.tahunAjaranId = String(detachTahunAjaranId);
+      }
 
-      setSuccess(
-        "Data siswa berhasil diperbarui. Pilihan kelas belum disimpan karena endpoint perubahan anggota kelas belum tersedia."
-      );
+      setSaving(true);
+      await updateSiswa(String(id), payload);
+
+      setInitialKelasId(kelasId ? String(kelasId) : "");
+      if (kelasId) {
+        setInitialTahunAjaranId(
+          String(
+            selectedKelas?.tahunAjaranId ||
+              selectedKelas?.tahunAjaran?.id ||
+              initialTahunAjaranId ||
+              ""
+          )
+        );
+      }
+      setSuccess("Data siswa dan penempatan kelas berhasil diperbarui.");
     } catch (err) {
       console.error("Gagal memperbarui data siswa:", err);
       setError(getErrorMessage(err, "Gagal memperbarui data siswa."));
@@ -331,13 +479,23 @@ export default function EditSiswaPage() {
                 icon={<GraduationCap size={19} />}
               >
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <Field label="NIS" required>
+                  <Field label="NIS">
+                    <Input
+                      name="nis"
+                      value={form.nis}
+                      onChange={handleChange}
+                      placeholder="Masukkan NIS"
+                      maxLength={20}
+                    />
+                  </Field>
+
+                  <Field label="NIPD">
                     <Input
                       name="nipd"
                       value={form.nipd}
                       onChange={handleChange}
-                      placeholder="Masukkan NIS"
-                      required
+                      placeholder="Masukkan NIPD"
+                      maxLength={20}
                     />
                   </Field>
 
@@ -347,7 +505,23 @@ export default function EditSiswaPage() {
                       value={form.nisn}
                       onChange={handleChange}
                       placeholder="Masukkan NISN"
+                      maxLength={20}
                     />
+                  </Field>
+
+                  <Field label="Jurusan">
+                    <Select
+                      name="jurusanId"
+                      value={form.jurusanId}
+                      onChange={handleChange}
+                    >
+                      <option value="">Tidak ada / Pilih jurusan</option>
+                      {jurusanList.map((jurusan) => (
+                        <option key={jurusan.id} value={String(jurusan.id)}>
+                          {jurusan.nama} ({jurusan.kode})
+                        </option>
+                      ))}
+                    </Select>
                   </Field>
 
                   <Field label="Kelas">
@@ -506,8 +680,7 @@ export default function EditSiswaPage() {
                     )}
 
                     <Hint>
-                      Pilihan kelas saat ini belum tersimpan ke database karena
-                      endpoint perubahan keanggotaan kelas belum tersedia.
+                      Perubahan kelas siswa disimpan langsung ke server sesuai tahun ajaran kelas terpilih.
                     </Hint>
                   </Field>
 
@@ -519,8 +692,6 @@ export default function EditSiswaPage() {
                     >
                       <option value="aktif">Aktif</option>
                       <option value="nonaktif">Nonaktif</option>
-                      <option value="lulus">Lulus</option>
-                      <option value="keluar">Keluar</option>
                     </Select>
                   </Field>
                 </div>
@@ -538,7 +709,29 @@ export default function EditSiswaPage() {
                       value={form.namaLengkap}
                       onChange={handleChange}
                       placeholder="Masukkan nama lengkap"
+                      maxLength={100}
                       required
+                    />
+                  </Field>
+
+                  <Field label="Username">
+                    <Input
+                      name="namaPengguna"
+                      value={form.namaPengguna}
+                      onChange={handleChange}
+                      placeholder="Masukkan username"
+                      maxLength={50}
+                    />
+                  </Field>
+
+                  <Field label="NIK">
+                    <Input
+                      name="nik"
+                      value={form.nik}
+                      onChange={handleChange}
+                      placeholder="16 digit NIK"
+                      maxLength={16}
+                      inputMode="numeric"
                     />
                   </Field>
 
@@ -549,8 +742,8 @@ export default function EditSiswaPage() {
                       onChange={handleChange}
                     >
                       <option value="">Pilih jenis kelamin</option>
-                      <option value="L">Laki-laki</option>
-                      <option value="P">Perempuan</option>
+                      <option value="laki-laki">Laki-laki</option>
+                      <option value="perempuan">Perempuan</option>
                     </Select>
                   </Field>
 
@@ -560,6 +753,7 @@ export default function EditSiswaPage() {
                       value={form.tempatLahir}
                       onChange={handleChange}
                       placeholder="Masukkan tempat lahir"
+                      maxLength={50}
                     />
                   </Field>
 
@@ -575,7 +769,7 @@ export default function EditSiswaPage() {
               </FormSection>
 
               <FormSection
-                title="Informasi Kontak"
+                title="Informasi Kontak & Alamat"
                 description="Informasi email, nomor telepon, dan alamat siswa."
                 icon={<MapPin size={19} />}
               >
@@ -587,6 +781,7 @@ export default function EditSiswaPage() {
                       value={form.email}
                       onChange={handleChange}
                       placeholder="nama@email.com"
+                      maxLength={100}
                     />
                   </Field>
 
@@ -596,6 +791,7 @@ export default function EditSiswaPage() {
                       value={form.noTelepon}
                       onChange={handleChange}
                       placeholder="Masukkan nomor telepon"
+                      maxLength={20}
                     />
                   </Field>
 
@@ -605,15 +801,17 @@ export default function EditSiswaPage() {
                       value={form.provinsi}
                       onChange={handleChange}
                       placeholder="Masukkan provinsi"
+                      maxLength={50}
                     />
                   </Field>
 
                   <Field label="Kota/Kabupaten">
                     <Input
-                      name="kota"
-                      value={form.kota}
+                      name="kotaKabupaten"
+                      value={form.kotaKabupaten}
                       onChange={handleChange}
                       placeholder="Masukkan kota/kabupaten"
+                      maxLength={50}
                     />
                   </Field>
 
@@ -623,6 +821,7 @@ export default function EditSiswaPage() {
                       value={form.kecamatan}
                       onChange={handleChange}
                       placeholder="Masukkan kecamatan"
+                      maxLength={50}
                     />
                   </Field>
 
@@ -632,6 +831,18 @@ export default function EditSiswaPage() {
                       value={form.kelurahan}
                       onChange={handleChange}
                       placeholder="Masukkan kelurahan/desa"
+                      maxLength={50}
+                    />
+                  </Field>
+
+                  <Field label="Kode Pos">
+                    <Input
+                      name="kodePos"
+                      value={form.kodePos}
+                      onChange={handleChange}
+                      placeholder="Masukkan kode pos"
+                      maxLength={10}
+                      inputMode="numeric"
                     />
                   </Field>
 
@@ -646,6 +857,48 @@ export default function EditSiswaPage() {
                       />
                     </Field>
                   </div>
+
+                  <div className="md:col-span-2">
+                    <Field label="Alamat KTP">
+                      <Textarea
+                        name="alamatKtp"
+                        value={form.alamatKtp}
+                        onChange={handleChange}
+                        placeholder="Masukkan alamat KTP"
+                        rows={3}
+                      />
+                    </Field>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="inline-flex cursor-pointer items-center gap-2.5 text-sm font-medium text-[var(--color-text-secondary)]">
+                      <input
+                        type="checkbox"
+                        name="alamatSesuaiDomisili"
+                        checked={Boolean(form.alamatSesuaiDomisili)}
+                        onChange={handleChange}
+                        className="h-4 w-4 rounded border-[var(--color-border)] text-[var(--color-primary)]"
+                      />
+                      Alamat domisili sama dengan alamat KTP
+                    </label>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Field label="Alamat Domisili">
+                      <Textarea
+                        name="alamatDomisili"
+                        value={
+                          form.alamatSesuaiDomisili
+                            ? form.alamatKtp || form.alamat || form.alamatDomisili
+                            : form.alamatDomisili
+                        }
+                        onChange={handleChange}
+                        placeholder="Masukkan alamat domisili"
+                        rows={3}
+                        disabled={Boolean(form.alamatSesuaiDomisili)}
+                      />
+                    </Field>
+                  </div>
                 </div>
               </FormSection>
 
@@ -655,23 +908,99 @@ export default function EditSiswaPage() {
                 icon={<Users size={19} />}
               >
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  <Field label="Nama Orang Tua/Wali">
+                  <Field label="Nama Ayah">
                     <Input
-                      name="namaOrangTua"
-                      value={form.namaOrangTua}
+                      name="namaAyah"
+                      value={form.namaAyah}
                       onChange={handleChange}
-                      placeholder="Masukkan nama orang tua/wali"
+                      placeholder="Masukkan nama ayah"
+                      maxLength={100}
                     />
                   </Field>
 
-                  <Field label="Nomor Telepon Orang Tua/Wali">
+                  <Field label="NIK Ayah">
                     <Input
-                      name="noTeleponOrangTua"
-                      value={form.noTeleponOrangTua}
+                      name="nikAyah"
+                      value={form.nikAyah}
                       onChange={handleChange}
-                      placeholder="Masukkan nomor telepon"
+                      placeholder="Masukkan NIK ayah"
+                      maxLength={20}
+                      inputMode="numeric"
                     />
                   </Field>
+
+                  <Field label="Pekerjaan Ayah">
+                    <Input
+                      name="pekerjaanAyah"
+                      value={form.pekerjaanAyah}
+                      onChange={handleChange}
+                      placeholder="Masukkan pekerjaan ayah"
+                      maxLength={50}
+                    />
+                  </Field>
+
+                  <Field label="Nomor HP Ayah">
+                    <Input
+                      name="noHpAyah"
+                      value={form.noHpAyah}
+                      onChange={handleChange}
+                      placeholder="Masukkan nomor HP ayah"
+                      maxLength={20}
+                    />
+                  </Field>
+
+                  <Field label="Nama Ibu">
+                    <Input
+                      name="namaIbu"
+                      value={form.namaIbu}
+                      onChange={handleChange}
+                      placeholder="Masukkan nama ibu"
+                      maxLength={100}
+                    />
+                  </Field>
+
+                  <Field label="NIK Ibu">
+                    <Input
+                      name="nikIbu"
+                      value={form.nikIbu}
+                      onChange={handleChange}
+                      placeholder="Masukkan NIK ibu"
+                      maxLength={20}
+                      inputMode="numeric"
+                    />
+                  </Field>
+
+                  <Field label="Pekerjaan Ibu">
+                    <Input
+                      name="pekerjaanIbu"
+                      value={form.pekerjaanIbu}
+                      onChange={handleChange}
+                      placeholder="Masukkan pekerjaan ibu"
+                      maxLength={50}
+                    />
+                  </Field>
+
+                  <Field label="Nomor HP Ibu">
+                    <Input
+                      name="noHpIbu"
+                      value={form.noHpIbu}
+                      onChange={handleChange}
+                      placeholder="Masukkan nomor HP ibu"
+                      maxLength={20}
+                    />
+                  </Field>
+
+                  <div className="md:col-span-2">
+                    <Field label="Nama Wali Peserta Didik (maks. 20 karakter)">
+                      <Input
+                        name="namaWaliPesertaDidik"
+                        value={form.namaWaliPesertaDidik}
+                        onChange={handleChange}
+                        placeholder="Masukkan nama wali (maks. 20 karakter)"
+                        maxLength={20}
+                      />
+                    </Field>
+                  </div>
                 </div>
               </FormSection>
 
@@ -725,7 +1054,7 @@ export default function EditSiswaPage() {
                     <div>
                       <p className="text-xs font-semibold text-[var(--color-text)]">Penempatan Kelas</p>
                       <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--color-text-muted)]">
-                        Pilih kelas yang sesuai. Saat ini perubahan kelas belum dapat disimpan ke database.
+                        Pilih atau lepas kelas siswa sesuai tahun ajaran aktif kelas tersebut.
                       </p>
                     </div>
                   </div>

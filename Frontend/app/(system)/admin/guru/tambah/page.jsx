@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { createUser, getUsers } from "@/services/user.service";
+import { getRoles } from "@/services/role.service";
 import { getKategoriJabatan } from "@/services/kategoriJabatan.service";
 import { getAllJabatan } from "@/services/jabatan.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
@@ -191,17 +192,31 @@ export default function TambahGuruPage() {
         setLoadingRole(true);
         setError("");
 
-        const response = await getUsers({
-          page: 1,
-          limit: 1,
-          role: "guru",
-        });
+        let roleId = "";
 
-        if (!mounted) return;
+        try {
+          const roles = await getRoles();
+          if (!mounted) return;
+          const guruRole = extractArray(roles).find(
+            (r) => String(r?.nama || "").trim().toLowerCase() === "guru"
+          );
+          roleId = guruRole?.id || "";
+        } catch {
+          // fallback ke query user guru bila daftar role gagal dimuat
+        }
 
-        const guru = extractArray(response)[0] || null;
+        if (!roleId) {
+          const response = await getUsers({
+            page: 1,
+            limit: 1,
+            role: "guru",
+          });
 
-        const roleId = guru?.peran?.id || guru?.peranId || "";
+          if (!mounted) return;
+
+          const guru = extractArray(response)[0] || null;
+          roleId = guru?.peran?.id || guru?.peranId || "";
+        }
 
         if (roleId) {
           setGuruRoleId(roleId);

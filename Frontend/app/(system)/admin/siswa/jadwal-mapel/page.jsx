@@ -126,11 +126,13 @@ function StatCard({ icon: Icon, title, value }) {
 }
 
 export default function JadwalPelajaranPage() {
+  const router = useRouter();
   const [isCollapsed, setIsCollapsed] =
     useState(false);
 
   const [kelasList, setKelasList] = useState([]);
   const [rawJadwal, setRawJadwal] = useState([]);
+  const [jadwalData, setJadwalData] = useState({});
   const [loading, setLoading] = useState(true);
   const [kelasAktif, setKelasAktif] = useState("");
 
@@ -185,6 +187,9 @@ export default function JadwalPelajaranPage() {
   }, []);
 
   const jadwalKelasAktif = useMemo(() => {
+    if (kelasAktif && jadwalData[kelasAktif]) {
+      return jadwalData[kelasAktif];
+    }
     const jadwal = {};
     const normalizedKelas = (kelasAktif || "").trim().toLowerCase();
 

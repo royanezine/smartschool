@@ -1,14 +1,6 @@
-import { getToken as getAuthToken } from "../lib/auth";
+import { getToken as getAuthToken, getCleanApiBase } from "../lib/auth";
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000/api"
-).replace(/\/+$/, "");
-
-
-const BASE_URL = API_URL.endsWith("/api")
-  ? API_URL
-  : `${API_URL}/api`;
+const BASE_URL = getCleanApiBase();
 
 
 

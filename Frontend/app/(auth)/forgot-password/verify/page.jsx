@@ -17,6 +17,19 @@ import {
 
 import { setSession, getRoleHome } from "@/lib/auth";
 
+function getBackendOrigin() {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "").replace(/\/api(?:\/v1)?$/i, "");
+  }
+  if (typeof window !== "undefined") {
+    return ["localhost", "127.0.0.1"].includes(window.location.hostname)
+      ? "http://localhost:5000"
+      : window.location.origin;
+  }
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
+}
+
 export default function VerifikasiPage() {
   const router = useRouter();
 
@@ -64,17 +77,8 @@ export default function VerifikasiPage() {
     try {
       setLoading(true);
 
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL;
-
-      if (!API_URL) {
-        throw new Error(
-          "NEXT_PUBLIC_API_URL belum dikonfigurasi.",
-        );
-      }
-
       const response = await fetch(
-        `${API_URL}/api/auth/verify-register`,
+        `${getBackendOrigin()}/api/auth/verify-register`,
         {
           method: "POST",
 
@@ -151,11 +155,12 @@ export default function VerifikasiPage() {
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950">
       <div className="absolute inset-0">
         <Image
-          src="/images/auth-bg.jpg"
-          alt=""
+          src="/hero/hero.png"
+          alt="Gedung Smart School"
           fill
           priority
-          className="object-cover"
+          sizes="100vw"
+          className="object-cover object-center"
         />
 
         <div className="absolute inset-0 bg-slate-950/70" />

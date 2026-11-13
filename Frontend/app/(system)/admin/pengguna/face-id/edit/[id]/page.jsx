@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { getToken } from "@/lib/auth";
+import { getToken, getBackendOrigin } from "@/lib/auth";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -18,8 +18,7 @@ const themeCardShadow = "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_
 const themePrimaryShadow = "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
 function getBackendBaseUrl() {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  return apiUrl.trim().replace(/\/api\/v1\/?$/i, "").replace(/\/api\/?$/i, "").replace(/\/+$/, "");
+  return getBackendOrigin();
 }
 
 function getFileUrl(filePath) {
@@ -64,15 +63,6 @@ export default function EditFaceIdPage() {
 
   const API_URL = getBackendBaseUrl();
   const API_PREFIX = `${API_URL}/api`;
-
-  useEffect(() => {
-    if (!id) return;
-    fetchUser();
-
-    return () => {
-      stopCamera();
-    };
-  }, [id]);
 
   const fetchUser = async () => {
     try {
@@ -174,6 +164,15 @@ export default function EditFaceIdPage() {
     setCameraActive(false);
   };
 
+  useEffect(() => {
+    if (!id) return;
+    fetchUser();
+
+    return () => {
+      stopCamera();
+    };
+  }, [id]);
+
   const capturePhoto = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -270,10 +269,13 @@ export default function EditFaceIdPage() {
       const token = getToken();
       if (!token) throw new Error("Token login tidak ditemukan.");
 
-      const response = await fetch(`${API_PREFIX}/absensi/register-face/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${API_PREFIX}/users/${encodeURIComponent(String(id))}/face-id`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       const contentType = response.headers.get("content-type") || "";
       const responseText = await response.text();
@@ -282,7 +284,7 @@ export default function EditFaceIdPage() {
       if (contentType.includes("application/json")) {
         result = JSON.parse(responseText);
       } else {
-        if (response.status === 404) throw new Error("Endpoint hapus tidak ditemukan (404). Pastikan Anda sudah menambahkan route delete di backend.");
+        if (response.status === 404) throw new Error("Endpoint hapus Face ID tidak ditemukan (404).");
         throw new Error(`API tidak mengembalikan JSON. Status: ${response.status}`);
       }
 

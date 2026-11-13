@@ -685,7 +685,7 @@ export default function AdminTahunAjaranPage() {
                                         {daftarKelas.map((kelasItem) => (
                                           <Link
                                             key={kelasItem.id}
-                                            href={`/admin/kelas/${kelasItem.id}`}
+                                            href={`/admin/akademik/kelas/${kelasItem.id}`}
                                             className="theme-card-soft rounded-lg border theme-border px-2.5 py-1.5 text-xs font-medium theme-text-secondary transition hover:theme-info"
                                           >
                                             {kelasItem?.nama || "Kelas"}

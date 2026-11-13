@@ -1,8 +1,7 @@
 
-import { getToken as getAuthToken } from "../lib/auth";
+import { getToken as getAuthToken, getBackendOrigin } from "../lib/auth";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = getBackendOrigin();
 
 const BASE_ENDPOINT = "/api/jadwal-mengajar";
 

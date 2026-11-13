@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { getBackendOrigin } from "@/lib/auth";
 import {
   BookOpenCheck,
   Plus,
@@ -61,19 +62,11 @@ const themeCardShadow =
   "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
-).replace(/\/+$/, "");
-
-const FILE_BASE_URL = API_URL.endsWith("/api")
-  ? API_URL.slice(0, -4)
-  : API_URL;
-
 function getFileUrl(url) {
   if (!url) return "#";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   const clean = url.startsWith("/") ? url : `/${url}`;
-  return `${FILE_BASE_URL}${clean}`;
+  return `${getBackendOrigin()}${clean}`;
 }
 
 function formatTanggal(isoString) {

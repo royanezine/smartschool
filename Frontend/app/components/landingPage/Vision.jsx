@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Monitor,
   ChartColumn,
@@ -130,13 +131,13 @@ export default function Vision() {
             sekolahmu hari ini.
           </p>
 
-          <a
+          <Link
             href="/daftar-sekolah"
             className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[0.98]"
           >
             Daftar sekarang
             <ArrowUpRight size={16} />
-          </a>
+          </Link>
         </div>
       </div>
     </section>

@@ -624,6 +624,20 @@ export default function AdminKelasEditPage() {
     );
   }
 
+  const selectedTingkat =
+    TINGKAT_OPTIONS.find(
+      (item) =>
+        String(item.value) ===
+        String(form.tingkat)
+    );
+
+  const selectedTahun =
+    tahunAjaranList.find(
+      (item) =>
+        String(item.id) ===
+        String(form.tahunAjaranId)
+    );
+
   const selectedGedung =
     gedungList.find(
       (item) =>

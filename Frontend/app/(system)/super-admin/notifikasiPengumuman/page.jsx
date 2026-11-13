@@ -7,6 +7,7 @@ import {
   markAllNotifikasiAsRead,
   kirimBroadcastPengumuman,
 } from "@/services/notifikasi.service";
+import TemplateNotifikasiTab from "@/app/components/super-admin/TemplateNotifikasiTab";
 import { useRouter } from "next/navigation";
 import {
   Bell,
@@ -27,6 +28,7 @@ import {
   AlertTriangle,
   Info,
   Save,
+  FileText,
 } from "lucide-react";
 
 
@@ -540,10 +542,35 @@ export default function NotifikasiPengumumanPage() {
                   </span>
                 )}
               </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab("template");
+                  setCurrentPage(1);
+                }}
+                className={`
+                  flex items-center gap-2 px-4 py-2.5 text-sm font-medium
+                  rounded-t-lg border-b-2 transition-colors
+                  ${
+                    activeTab === "template"
+                      ? `border-[var(--color-primary)] ${themePrimaryText} ${themePrimarySoft}`
+                      : `border-transparent theme-text-secondary ${themeNeutralHover}`
+                  }
+                `}
+              >
+                <FileText size={16} />
+
+                Template Notifikasi
+              </button>
             </nav>
           </div>
 
-
+          {activeTab === "template" ? (
+            <TemplateNotifikasiTab
+              onToast={(message, type = "success") => setToast({ message, type })}
+            />
+          ) : (
+            <>
           <div
             className={`theme-card rounded-xl border theme-border p-4 ${themeCardShadow}`}
           >
@@ -1068,6 +1095,8 @@ export default function NotifikasiPengumumanPage() {
               </>
             )}
           </div>
+            </>
+          )}
 
 
           <div
@@ -1076,6 +1105,8 @@ export default function NotifikasiPengumumanPage() {
             © 2026 SmartSchool •{" "}
             {activeTab === "notifikasi"
               ? "Notifikasi"
+              : activeTab === "template"
+              ? "Template Notifikasi"
               : "Pengumuman"}{" "}
             terakhir diperbarui hari ini
           </div>

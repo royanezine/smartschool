@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
-import { getDetailUjian } from "@/services/ujian.service";
+import { getDetailUjian, getHasilUjian } from "@/services/ujian.service";
 
 import {
   AlertCircle,
@@ -260,7 +260,7 @@ function getScoreLabel(score) {
 }
 
 
-export default function DetailNilaiSiswaPage() {
+function DetailNilaiSiswaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -292,22 +292,61 @@ export default function DetailNilaiSiswaPage() {
       try {
         setLoading(true);
         setError("");
-        const res = await getDetailUjian(ujianId);
-        const detail = parseObject(res);
+        const [resDetail, resHasil] = await Promise.allSettled([
+          getDetailUjian(ujianId),
+          getHasilUjian(ujianId, { page: 1, limit: 100 }),
+        ]);
+
+        if (resDetail.status !== "fulfilled") {
+          throw resDetail.reason;
+        }
+
+        const detail = parseObject(resDetail.value);
+        const hasilList =
+          resHasil.status === "fulfilled" && Array.isArray(resHasil.value?.data)
+            ? resHasil.value.data
+            : [];
+
+        const matchedAttempt = siswaId
+          ? hasilList.find(
+              (item) =>
+                String(item?.siswaId || "") === String(siswaId) ||
+                String(item?.pengguna?.id || "") === String(siswaId)
+            ) || null
+          : hasilList.length === 1
+          ? hasilList[0]
+          : null;
+
+        const siswaData =
+          matchedAttempt || siswaId
+            ? {
+                id: matchedAttempt?.siswaId || matchedAttempt?.pengguna?.id || siswaId,
+                nama:
+                  matchedAttempt?.pengguna?.namaLengkap ||
+                  namaParam ||
+                  "-",
+                nisn:
+                  matchedAttempt?.pengguna?.nisn ||
+                  matchedAttempt?.pengguna?.nis ||
+                  nisnParam ||
+                  "-",
+                nilai:
+                  matchedAttempt?.hasilAsesmen?.totalNilai ??
+                  matchedAttempt?.nilai ??
+                  (nilaiParam !== null && nilaiParam !== ""
+                    ? Number(nilaiParam)
+                    : null),
+                status:
+                  matchedAttempt?.status || statusParam || "selesai",
+                dimulaiPada: matchedAttempt?.dimulaiPada || null,
+                selesaiPada: matchedAttempt?.selesaiPada || null,
+                hasilAsesmen: matchedAttempt?.hasilAsesmen || null,
+              }
+            : null;
+
         if (!cancelled && detail) {
           setData({
-            siswa: siswaId
-              ? {
-                  id: siswaId,
-                  nama: namaParam || "-",
-                  nisn: nisnParam || "-",
-                  nilai:
-                    nilaiParam !== null && nilaiParam !== ""
-                      ? Number(nilaiParam)
-                      : null,
-                  status: statusParam || "selesai",
-                }
-              : null,
+            siswa: siswaData,
             ujian: {
               id: ujianId,
               nama: detail.judul || detail.nama || "Ujian",
@@ -950,5 +989,19 @@ export default function DetailNilaiSiswaPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function DetailNilaiSiswaPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center theme-page">
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)]" />
+        </div>
+      }
+    >
+      <DetailNilaiSiswaContent />
+    </Suspense>
   );
 }

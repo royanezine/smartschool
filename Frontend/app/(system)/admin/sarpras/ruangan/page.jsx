@@ -611,7 +611,7 @@ export default function RuanganPage() {
             <h3 className="theme-text text-center text-lg font-bold">Hapus Ruangan?</h3>
             <p className="theme-text-secondary mt-2 text-center text-sm">
               Apakah Anda yakin ingin menghapus ruangan{" "}
-              <strong className="theme-text">"{deleteTarget.nama}"</strong>?
+              <strong className="theme-text">&quot;{deleteTarget.nama}&quot;</strong>?
               Tindakan ini tidak dapat dibatalkan.
             </p>
             <div className="mt-6 flex gap-3">

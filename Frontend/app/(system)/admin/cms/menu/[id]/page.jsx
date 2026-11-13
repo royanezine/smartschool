@@ -91,14 +91,33 @@ function getRuntimeBase() {
   };
 }
 
-function getBaseDomain(hostname) {
-  if (!hostname) return "";
-  if (hostname === "localhost") return hostname;
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return hostname;
+const ROOT_DOMAIN = "smartschool.citrasolusi.id";
 
-  const parts = hostname.split(".");
-  if (parts.length <= 2) return hostname;
-  return parts.slice(-2).join(".");
+function getBaseDomain(hostname, sekolahSlug = "") {
+  const cleanHost = String(hostname || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\.$/, "");
+
+  if (!cleanHost) return "";
+  if (cleanHost === "localhost" || cleanHost.endsWith(".localhost")) {
+    return "localhost";
+  }
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(cleanHost)) return cleanHost;
+
+  if (cleanHost === ROOT_DOMAIN || cleanHost.endsWith(`.${ROOT_DOMAIN}`)) {
+    return ROOT_DOMAIN;
+  }
+
+  if (sekolahSlug && cleanHost.startsWith(`${sekolahSlug.toLowerCase()}.`)) {
+    return cleanHost.slice(sekolahSlug.length + 1);
+  }
+
+  if (cleanHost.startsWith("www.")) {
+    return cleanHost.slice(4);
+  }
+
+  return cleanHost;
 }
 
 function getSekolahSlug(item) {
@@ -134,7 +153,7 @@ function resolveCtaLink(link, item) {
   if (!hostname) return normalizedPath;
 
   const sekolahSlug = getSekolahSlug(item);
-  const baseDomain = getBaseDomain(hostname);
+  const baseDomain = getBaseDomain(hostname, sekolahSlug);
   const portPart = port ? `:${port}` : "";
 
   console.group("[resolveCtaLink]");
@@ -557,7 +576,7 @@ export default function DetailMenuKonfigurasiPage() {
               <p className="theme-text-secondary mt-2 text-sm leading-6">
                 Konfigurasi{" "}
                 <strong className="theme-text">
-                  "{item.judul || "Tanpa Judul"}"
+                  &quot;{item.judul || "Tanpa Judul"}&quot;
                 </strong>{" "}
                 akan dinonaktifkan melalui endpoint backend.
               </p>

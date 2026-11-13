@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import {
@@ -74,12 +75,12 @@ export default function PengaturanPage() {
             
             {/* BREADCRUMB */}
             <nav className="flex items-center gap-2 text-sm">
-              <a
+              <Link
                 href="/admin/cms"
                 className="theme-text-muted hover:text-[var(--color-primary)] transition"
               >
                 Dashboard
-              </a>
+              </Link>
               <ChevronRight className="w-4 h-4 theme-text-placeholder" />
               <span className="text-[var(--color-primary)] font-semibold">
                 Pengaturan

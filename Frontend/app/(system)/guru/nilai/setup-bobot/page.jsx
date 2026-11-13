@@ -13,13 +13,19 @@ import {
   Info,
   Loader2,
   LockKeyhole,
+  Plus,
   RefreshCw,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-import { getKomponenNilai, getNilaiKelasSaya } from "@/services/nilai.service";
+import {
+  createKomponenNilai,
+  getKomponenNilai,
+  getNilaiKelasSaya,
+} from "@/services/nilai.service";
 
 // Semua warna memakai token tema (--color-*) supaya ikut perubahan dari CMS.
 const themePrimarySoft =
@@ -108,6 +114,18 @@ export default function SetupBobotPage() {
   const [loadingKomponen, setLoadingKomponen] = useState(false);
 
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [formKomponen, setFormKomponen] = useState({
+    nama: "",
+    jenis: "tugas",
+    bobot: "",
+    nilaiMaksimum: "100",
+    kelompok: "umum",
+  });
 
   const loadClasses = useCallback(async () => {
     setLoadingClasses(true);
@@ -218,6 +236,74 @@ export default function SetupBobotPage() {
     : "Pilih mata pelajaran";
 
   const showLoading = loadingClasses || loadingKomponen;
+  const canCreateKomponen =
+    Boolean(selectedClassId) && !isFinalized && sisaBobot > 0;
+
+  const handleOpenCreateModal = () => {
+    setFormKomponen({
+      nama: "",
+      jenis: "tugas",
+      bobot: sisaBobot > 0 ? String(Math.min(20, sisaBobot)) : "",
+      nilaiMaksimum: "100",
+      kelompok: "umum",
+    });
+    setCreateError("");
+    setShowCreateModal(true);
+  };
+
+  const handleCreateKomponen = async (event) => {
+    event.preventDefault();
+    if (!selectedClassId) return;
+
+    const namaTrim = formKomponen.nama.trim();
+    const bobotNum = Number(formKomponen.bobot);
+    const maksNum = Number(formKomponen.nilaiMaksimum || 100);
+
+    if (!namaTrim) {
+      setCreateError("Nama komponen wajib diisi.");
+      return;
+    }
+    if (!Number.isFinite(bobotNum) || bobotNum <= 0 || bobotNum > 100) {
+      setCreateError("Bobot harus berupa angka lebih dari 0 sampai 100.");
+      return;
+    }
+    if (Math.round((totalWeight + bobotNum) * 100) / 100 > 100) {
+      setCreateError(
+        `Total bobot melebihi 100% (saat ini ${totalWeight}%, sisa ${sisaBobot}%).`
+      );
+      return;
+    }
+    if (!Number.isFinite(maksNum) || maksNum <= 0 || maksNum > 100) {
+      setCreateError("Nilai maksimum harus antara 1 sampai 100.");
+      return;
+    }
+
+    setCreating(true);
+    setCreateError("");
+    setError("");
+    setNotice("");
+
+    try {
+      await createKomponenNilai({
+        kelasMapelId: selectedClassId,
+        nama: namaTrim,
+        jenis: formKomponen.jenis.trim() || "lainnya",
+        bobot: bobotNum,
+        nilaiMaksimum: maksNum,
+        kelompok: formKomponen.kelompok.trim() || "umum",
+      });
+
+      setShowCreateModal(false);
+      setNotice(`Komponen "${namaTrim}" (${bobotNum}%) berhasil ditambahkan.`);
+      await Promise.all([loadKomponen(selectedClassId), loadClasses()]);
+    } catch (err) {
+      setCreateError(
+        err?.message || "Gagal menambahkan komponen nilai baru."
+      );
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -399,13 +485,51 @@ export default function SetupBobotPage() {
                     </p>
                   </div>
 
-                  <span
-                    className={`theme-text-secondary inline-flex w-fit items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium ${themeNeutralBorder}`}
-                  >
-                    <LockKeyhole size={13} />
-                    {subjectLabel}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`theme-text-secondary inline-flex w-fit items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium ${themeNeutralBorder}`}
+                    >
+                      <LockKeyhole size={13} />
+                      {subjectLabel}
+                    </span>
+
+                    <button
+                      type="button"
+                      disabled={!canCreateKomponen || showLoading}
+                      onClick={handleOpenCreateModal}
+                      title={
+                        isFinalized
+                          ? "Nilai sudah difinalisasi, komponen terkunci"
+                          : sisaBobot <= 0
+                            ? "Total bobot sudah 100%"
+                            : "Tambah komponen penilaian baru"
+                      }
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3.5 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Plus size={14} />
+                      Tambah Komponen
+                    </button>
+                  </div>
                 </div>
+
+                {notice && (
+                  <div
+                    role="status"
+                    className="mx-5 mt-4 flex items-start justify-between gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-xs font-medium text-emerald-700 sm:mx-6 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Check size={14} className="shrink-0" />
+                      {notice}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setNotice("")}
+                      aria-label="Tutup pemberitahuan"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
 
                 <div className={`border-b ${themeDivider} p-5 sm:px-6`}>
                   <label
@@ -724,8 +848,10 @@ export default function SetupBobotPage() {
                         size={14}
                         className={`mt-0.5 shrink-0 ${themePrimaryText}`}
                       />
-                      Halaman ini bersifat baca saja: komponen dan bobot yang
-                      sudah tersimpan tidak dapat diubah dari sini.
+                      Komponen baru dapat ditambahkan hingga total bobot 100%
+                      sebelum finalisasi. Untuk komponen yang sudah tersimpan,
+                      edit dan hapus masih bersifat baca saja karena belum
+                      tersedia di backend.
                     </li>
                     <li className="flex gap-2">
                       <Check
@@ -748,6 +874,210 @@ export default function SetupBobotPage() {
           </div>
         </main>
       </div>
+
+      {showCreateModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-komponen-title"
+        >
+          <div className="theme-card w-full max-w-md rounded-2xl border theme-border p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2
+                  id="create-komponen-title"
+                  className="theme-text text-base font-bold"
+                >
+                  Tambah Komponen Nilai
+                </h2>
+                <p className="theme-text-secondary mt-1 text-xs">
+                  {subjectLabel} · Sisa bobot tersedia:{" "}
+                  <span className="font-semibold text-[var(--color-primary)]">
+                    {sisaBobot}%
+                  </span>
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Tutup dialog"
+                disabled={creating}
+                onClick={() => setShowCreateModal(false)}
+                className="theme-text-muted rounded-lg p-1.5 hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateKomponen} className="mt-5 space-y-4">
+              {createError && (
+                <div
+                  role="alert"
+                  className={`flex items-start gap-2 rounded-lg border ${themeDangerBorder} ${themeDangerSurface} p-3 text-xs text-[var(--color-danger)]`}
+                >
+                  <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+                  <span>{createError}</span>
+                </div>
+              )}
+
+              <div>
+                <label
+                  htmlFor="komponen-nama"
+                  className="theme-text-secondary mb-1.5 block text-xs font-semibold"
+                >
+                  Nama Komponen <span className="text-[var(--color-danger)]">*</span>
+                </label>
+                <input
+                  id="komponen-nama"
+                  type="text"
+                  required
+                  value={formKomponen.nama}
+                  onChange={(e) =>
+                    setFormKomponen((prev) => ({
+                      ...prev,
+                      nama: e.target.value,
+                    }))
+                  }
+                  placeholder="Contoh: Tugas Harian 1 / UTS"
+                  disabled={creating}
+                  className={`${themeInput} w-full rounded-lg px-3 py-2.5 text-sm`}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="komponen-jenis"
+                    className="theme-text-secondary mb-1.5 block text-xs font-semibold"
+                  >
+                    Jenis
+                  </label>
+                  <select
+                    id="komponen-jenis"
+                    value={formKomponen.jenis}
+                    onChange={(e) =>
+                      setFormKomponen((prev) => ({
+                        ...prev,
+                        jenis: e.target.value,
+                      }))
+                    }
+                    disabled={creating}
+                    className={`${themeInput} w-full rounded-lg px-3 py-2.5 text-sm`}
+                  >
+                    <option value="tugas">Tugas</option>
+                    <option value="kuis">Kuis</option>
+                    <option value="uts">UTS</option>
+                    <option value="uas">UAS</option>
+                    <option value="praktik">Praktik</option>
+                    <option value="lainnya">Lainnya</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="komponen-kelompok"
+                    className="theme-text-secondary mb-1.5 block text-xs font-semibold"
+                  >
+                    Kelompok
+                  </label>
+                  <select
+                    id="komponen-kelompok"
+                    value={formKomponen.kelompok}
+                    onChange={(e) =>
+                      setFormKomponen((prev) => ({
+                        ...prev,
+                        kelompok: e.target.value,
+                      }))
+                    }
+                    disabled={creating}
+                    className={`${themeInput} w-full rounded-lg px-3 py-2.5 text-sm`}
+                  >
+                    <option value="umum">Umum</option>
+                    <option value="pengetahuan">Pengetahuan</option>
+                    <option value="keterampilan">Keterampilan</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="komponen-bobot"
+                    className="theme-text-secondary mb-1.5 block text-xs font-semibold"
+                  >
+                    Bobot (%) <span className="text-[var(--color-danger)]">*</span>
+                  </label>
+                  <input
+                    id="komponen-bobot"
+                    type="number"
+                    min={0.01}
+                    max={sisaBobot}
+                    step="0.01"
+                    required
+                    value={formKomponen.bobot}
+                    onChange={(e) =>
+                      setFormKomponen((prev) => ({
+                        ...prev,
+                        bobot: e.target.value,
+                      }))
+                    }
+                    disabled={creating}
+                    className={`${themeInput} w-full rounded-lg px-3 py-2.5 text-sm`}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="komponen-maks"
+                    className="theme-text-secondary mb-1.5 block text-xs font-semibold"
+                  >
+                    Nilai Maksimum
+                  </label>
+                  <input
+                    id="komponen-maks"
+                    type="number"
+                    min={1}
+                    max={100}
+                    required
+                    value={formKomponen.nilaiMaksimum}
+                    onChange={(e) =>
+                      setFormKomponen((prev) => ({
+                        ...prev,
+                        nilaiMaksimum: e.target.value,
+                      }))
+                    }
+                    disabled={creating}
+                    className={`${themeInput} w-full rounded-lg px-3 py-2.5 text-sm`}
+                  />
+                </div>
+              </div>
+
+              <div className={`flex flex-col-reverse gap-2 border-t ${themeDivider} pt-4 sm:flex-row sm:justify-end`}>
+                <button
+                  type="button"
+                  disabled={creating}
+                  onClick={() => setShowCreateModal(false)}
+                  className={`inline-flex items-center justify-center rounded-lg border ${themeNeutralBorder} px-4 py-2.5 text-xs font-semibold theme-text-secondary`}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {creating ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Plus size={14} />
+                  )}
+                  {creating ? "Menyimpan..." : "Simpan Komponen"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

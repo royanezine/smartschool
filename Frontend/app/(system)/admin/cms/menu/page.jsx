@@ -482,7 +482,7 @@ export default function CmsMenuPage() {
               <h3 className="theme-text mt-4 text-lg font-bold">Nonaktifkan konfigurasi?</h3>
               <p className="theme-text-secondary mt-2 text-sm leading-6">
                 Konfigurasi{" "}
-                <strong className="theme-text">"{deleteTarget.judul || "Tanpa Judul"}"</strong>{" "}
+                <strong className="theme-text">&quot;{deleteTarget.judul || "Tanpa Judul"}&quot;</strong>{" "}
                 akan dinonaktifkan melalui endpoint backend.
               </p>
             </div>

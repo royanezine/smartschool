@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { getPengaturanGlobalPublik } from "@/services/pengaturan.service";
 import {
+  AlertCircle,
   HelpCircle,
   Search,
   BookOpen,
   MessageCircle,
   Mail,
+  Phone,
   ChevronDown,
   ChevronUp,
   FileText,
@@ -19,6 +23,21 @@ import {
 export default function BantuanSiswaPage() {
   const [query, setQuery] = useState("");
   const [openFaq, setOpenFaq] = useState(null);
+  const [globalInfo, setGlobalInfo] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    getPengaturanGlobalPublik()
+      .then((res) => {
+        if (active && res?.data) {
+          setGlobalInfo(res.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const faqs = [
     {
@@ -69,6 +88,22 @@ export default function BantuanSiswaPage() {
             Temukan jawaban atas pertanyaanmu atau hubungi tim dukungan.
           </p>
         </header>
+
+        {globalInfo?.pemeliharaan?.aktif && (
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-4 text-xs">
+            <AlertCircle
+              size={18}
+              className="mt-0.5 shrink-0 text-[var(--color-warning)]"
+            />
+            <div>
+              <p className="font-semibold theme-text">Pemberitahuan Sistem</p>
+              <p className="mt-0.5 theme-text-secondary">
+                {globalInfo.pemeliharaan.pesan ||
+                  "Sistem sedang dalam pemeliharaan terjadwal."}
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="relative mb-6">
           <Search
@@ -156,18 +191,55 @@ export default function BantuanSiswaPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 sm:p-6">
-              <ContactCard
-                icon={Mail}
-                title="Email Dukungan"
-                value="support@sekolah.sch.id"
-                href="mailto:support@sekolah.sch.id"
-              />
-              <ContactCard
-                icon={MessageCircle}
-                title="Chat Guru / Admin"
-                value="Buka menu pesan di dasbor"
-                href="#"
-              />
+              {globalInfo?.identitas?.emailDukungan ? (
+                <ContactCard
+                  icon={Mail}
+                  title="Email Dukungan"
+                  value={globalInfo.identitas.emailDukungan}
+                  href={`mailto:${globalInfo.identitas.emailDukungan}`}
+                />
+              ) : (
+                <div className="theme-card flex items-center gap-3 rounded-xl border p-4">
+                  <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <Mail size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold theme-text">
+                      Email Dukungan
+                    </p>
+                    <p className="mt-0.5 text-xs theme-text-muted">
+                      Belum dikonfigurasi oleh admin platform.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {globalInfo?.identitas?.teleponDukungan ? (
+                <ContactCard
+                  icon={Phone}
+                  title="Telepon / WhatsApp Dukungan"
+                  value={globalInfo.identitas.teleponDukungan}
+                  href={`tel:${globalInfo.identitas.teleponDukungan}`}
+                />
+              ) : (
+                <Link
+                  href="/siswa/profile"
+                  className="theme-card group flex items-center gap-3 rounded-xl border p-4 transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <MessageCircle size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold theme-text">
+                      {globalInfo?.identitas?.namaAplikasi || "SmartSchool"} Support
+                    </p>
+                    <p className="mt-0.5 truncate text-xs theme-text-muted">
+                      Hubungi wali kelas atau admin sekolah Anda
+                    </p>
+                  </div>
+                  <ExternalLink size={15} className="shrink-0 theme-text-muted" />
+                </Link>
+              )}
             </div>
           </section>
 

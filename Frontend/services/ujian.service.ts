@@ -366,6 +366,76 @@ export const updateSoal = updateSoalUjian;
 export const deleteSoal = deleteSoalUjian;
 
 
+export interface HasilAsesmenRingkas {
+  totalNilai?: number | string | null;
+  jumlahBenar?: number | null;
+  jumlahSalah?: number | null;
+  jumlahLewati?: number | null;
+}
+
+export interface HasilPesertaUjian {
+  id: string;
+  siswaId: string;
+  status?: string | null;
+  dimulaiPada?: string | null;
+  selesaiPada?: string | null;
+  nilai?: number | string | null;
+  pengguna?: {
+    id: string;
+    namaLengkap?: string | null;
+    nisn?: string | null;
+    nis?: string | null;
+  } | null;
+  hasilAsesmen?: HasilAsesmenRingkas | null;
+}
+
+export interface HasilUjianResponse {
+  success?: boolean;
+  data: HasilPesertaUjian[];
+  meta?: {
+    page?: number;
+    limit?: number;
+    total?: number;
+    totalPages?: number;
+  };
+}
+
+export async function getHasilUjian(
+  ujianId: string,
+  params?: { page?: number; limit?: number }
+): Promise<HasilUjianResponse> {
+  if (!ujianId) {
+    throw new Error("ID ujian tidak ditemukan.");
+  }
+
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+  const qs = query.toString() ? `?${query.toString()}` : "";
+
+  const response = await apiFetch(
+    `/api/ujian/${encodeURIComponent(ujianId)}/hasil${qs}`,
+    { method: "GET" }
+  );
+
+  const rawData =
+    response && typeof response === "object" && "data" in response
+      ? (response as { data?: unknown }).data
+      : response;
+
+  return {
+    success:
+      response && typeof response === "object" && "success" in response
+        ? Boolean((response as { success?: boolean }).success)
+        : true,
+    data: Array.isArray(rawData) ? (rawData as HasilPesertaUjian[]) : [],
+    meta:
+      response && typeof response === "object" && "meta" in response
+        ? ((response as { meta?: HasilUjianResponse["meta"] }).meta ?? undefined)
+        : undefined,
+  };
+}
+
 export async function getKelasMapelAdmin(): Promise<any[]> {
   const res = await apiFetch("/api/kelas-mapel");
   const data = res?.data ?? res;

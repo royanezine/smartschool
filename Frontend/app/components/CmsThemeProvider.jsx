@@ -9,17 +9,11 @@ import {
   useState,
 } from "react";
 
-import { clearSession, getToken } from "@/lib/auth";
+import { clearSession, getToken, getCleanApiBase } from "@/lib/auth";
 
 const CmsThemeContext = createContext(null);
 
-const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
-
-const THEME_API_URL = API_BASE_URL.endsWith("/api")
-  ? `${API_BASE_URL}/cms/tema`
-  : `${API_BASE_URL}/api/cms/tema`;
+const THEME_API_URL = `${getCleanApiBase()}/cms/tema`;
 
 const THEME_CACHE_KEY = "smartschool-cms-theme";
 

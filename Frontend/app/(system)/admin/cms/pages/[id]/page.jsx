@@ -856,7 +856,9 @@ export default function PageDetail() {
                               websiteUrl,
                               typeof window !== "undefined"
                                 ? window.location.origin
-                                : "http://localhost"
+                                : (process.env.NODE_ENV === "production"
+                                    ? "https://smartschool.citrasolusi.id"
+                                    : "http://localhost:3000")
                             ).toString()
                           : "URL belum dapat dibuat karena subdomain tidak tersedia"}
                       </p>

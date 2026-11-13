@@ -716,7 +716,7 @@ export default function PagesPage() {
                                     </Link>
 
                                     <Link
-                                      href={`/admin/pages/${page.id}/edit`}
+                                      href={`/admin/cms/pages/${page.id}/edit`}
                                       className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                                     >
                                       <Pencil className="h-4 w-4" />
@@ -965,7 +965,7 @@ export default function PagesPage() {
               )}
 
               <Link
-                href={`/cmsAdmin/pages/${selectedPage.id}/edit`}
+                href={`/admin/cms/pages/${selectedPage.id}/edit`}
                 className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition"
               >
                 <Pencil className="h-4 w-4" />

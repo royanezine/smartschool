@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { getPengaturanGlobalPublik } from "@/services/pengaturan.service";
 import {
   Search,
   HelpCircle,
@@ -225,6 +226,21 @@ export default function BantuanYayasanPage() {
   const [activeCategory, setActiveCategory] = useState("semua");
   const [openFAQ, setOpenFAQ] = useState(1);
   const [showAll, setShowAll] = useState(false);
+  const [globalInfo, setGlobalInfo] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    getPengaturanGlobalPublik()
+      .then((res) => {
+        if (active && res?.data) {
+          setGlobalInfo(res.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filteredFAQs = useMemo(() => {
     const keyword = normalizeText(search);
@@ -548,6 +564,18 @@ export default function BantuanYayasanPage() {
                 yang sudah dilakukan agar administrator dapat membantu
                 memeriksa kendala Anda.
               </p>
+              {(globalInfo?.identitas?.emailDukungan ||
+                globalInfo?.identitas?.teleponDukungan) && (
+                <p className="theme-text-secondary mt-2 text-xs">
+                  Kontak resmi {globalInfo?.identitas?.namaAplikasi || "SmartSchool"}:{" "}
+                  {globalInfo.identitas.emailDukungan || ""}
+                  {globalInfo.identitas.emailDukungan &&
+                  globalInfo.identitas.teleponDukungan
+                    ? " · "
+                    : ""}
+                  {globalInfo.identitas.teleponDukungan || ""}
+                </p>
+              )}
             </div>
           </div>
 

@@ -151,11 +151,11 @@ export default function ProfilGuruPage() {
   }, [loadProfile]);
 
   const handleEditProfile = () => {
-    router.push("/guru/profil/edit");
+    router.push("/guru/pengaturan");
   };
 
   const handleChangePassword = () => {
-    router.push("/guru/profil/keamanan");
+    router.push("/guru/pengaturan");
   };
 
   const handleQuickAction = (type) => {
@@ -168,7 +168,7 @@ export default function ProfilGuruPage() {
     }
 
     if (type === "kelas") {
-      router.push("/guru/kelas");
+      router.push("/guru/kelas-saya");
     }
   };
 

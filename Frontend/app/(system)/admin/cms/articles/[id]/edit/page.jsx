@@ -48,11 +48,6 @@ export default function EditArticlePage() {
     }));
   };
 
-  useEffect(() => {
-    if (!id) return;
-    loadData();
-  }, [id]);
-
   const loadData = async () => {
     try {
       setLoading(true);
@@ -118,6 +113,11 @@ export default function EditArticlePage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!id) return;
+    loadData();
+  }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

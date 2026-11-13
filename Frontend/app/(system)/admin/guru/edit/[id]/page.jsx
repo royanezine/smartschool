@@ -484,8 +484,10 @@ export default function AdminGuruEditPage() {
               shiftKerjaId: form.masterShiftId,
             });
           } else if (originalMasterShiftId) {
-            assignmentWarning =
-              " Profil tersimpan, tetapi master shift lama belum dilepas. API pelepasan shift belum tersedia pada service.";
+            await assignUserShiftAndJabatan({
+              penggunaId: String(id),
+              shiftKerjaId: null,
+            });
           }
         } catch (assignErr) {
           console.error(

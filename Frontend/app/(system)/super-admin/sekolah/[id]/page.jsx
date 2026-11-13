@@ -1166,7 +1166,9 @@ function StatCard({
             <p
                 className={`${valueSize} font-bold theme-text-secondary`}
             >
-                {Number(value) || 0}
+                {value === null || value === undefined || value === "" || value === "-"
+                    ? "-"
+                    : Number(value) || 0}
             </p>
 
             <p

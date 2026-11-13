@@ -29,6 +29,7 @@ import {
 import {
   getPendaftarPpdb,
   getPengumumanPpdb,
+  getPengaturanSpmb,
   isPpdbEndpointMissing,
   isPengumumanEndpointMissing,
 } from "@/services/ppdb.service";
@@ -108,8 +109,8 @@ const modules = [
     status: "partial",
     statusText: "Sedang memeriksa ketersediaan data...",
     cekPendaftar: true,
-    statusSiap: "partial",
-    statusTextSiap: "Fitur sebagian siap (penetapan hasil belum tersedia)",
+    statusSiap: "ready",
+    statusTextSiap: "Terhubung penuh dengan API seleksi & ranking",
   },
   {
     title: "Gelombang",
@@ -144,7 +145,7 @@ const modules = [
     href: "/admin/spmb/pengaturan",
     icon: Settings2,
     status: "partial",
-    statusText: "Fitur siap digunakan (belum terhubung ke alur utama)",
+    statusText: "Sedang memeriksa ketersediaan data...",
   },
 ];
 
@@ -184,6 +185,59 @@ export default function SpmbOverviewPage() {
     status: "partial",
     statusText: "Sedang memeriksa ketersediaan data...",
   });
+  const [pengaturanStatus, setPengaturanStatus] = useState({
+    status: "partial",
+    statusText: "Sedang memeriksa ketersediaan data...",
+  });
+
+  useEffect(() => {
+    let aktif = true;
+
+    (async () => {
+      try {
+        const response = await getPengaturanSpmb();
+
+        if (!response?.success) {
+          throw new Error(
+            response?.message || "Pengaturan SPMB tidak merespons dengan benar."
+          );
+        }
+
+        if (!aktif) return;
+
+        setPengaturanStatus({
+          status: "ready",
+          statusText: "Terhubung penuh dengan API pengaturan SPMB",
+        });
+      } catch (err) {
+        if (!aktif) return;
+
+        if (isPpdbEndpointMissing(err)) {
+          setPengaturanStatus({
+            status: "blocked",
+            statusText: "Fitur pengaturan SPMB belum tersedia saat ini",
+          });
+        } else if (err?.status === 401) {
+          setPengaturanStatus({
+            status: "partial",
+            statusText: "Silakan login sebagai admin untuk mengakses fitur ini",
+          });
+        } else {
+          setPengaturanStatus({
+            status: "partial",
+            statusText:
+              err instanceof Error
+                ? err.message
+                : "Gagal memeriksa ketersediaan pengaturan SPMB",
+          });
+        }
+      }
+    })();
+
+    return () => {
+      aktif = false;
+    };
+  }, []);
 
   useEffect(() => {
     let aktif = true;
@@ -335,6 +389,10 @@ export default function SpmbOverviewPage() {
 
     if (item.title === "Pengumuman") {
       return { ...item, ...pengumumanStatus };
+    }
+
+    if (item.title === "Pengaturan") {
+      return { ...item, ...pengaturanStatus };
     }
 
     if (!item.cekPendaftar) {

@@ -127,6 +127,9 @@ export default function AjukanIzinPage() {
   const themePrimarySoft =
     "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]";
 
+  const themePrimarySoftBorder =
+    "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
   const themeCard =
     "bg-[var(--color-card)] border border-[var(--color-border)]";
 

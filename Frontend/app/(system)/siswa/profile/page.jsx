@@ -26,8 +26,18 @@ import {
   MapPin,
 } from "lucide-react";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+function getBackendOrigin() {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "").replace(/\/api(?:\/v1)?$/i, "");
+  }
+  if (typeof window !== "undefined") {
+    return ["localhost", "127.0.0.1"].includes(window.location.hostname)
+      ? "http://localhost:5000"
+      : window.location.origin;
+  }
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
+}
 
 /* ---------- helpers ---------- */
 
@@ -41,11 +51,9 @@ function getAvatarUrl(avatar) {
     return value;
   }
 
-  if (value.startsWith("/")) {
-    return `${API_URL}${value}`;
-  }
-
-  return `${API_URL}/${value}`;
+  const origin = getBackendOrigin();
+  const normalizedPath = value.startsWith("/") ? value : `/${value}`;
+  return `${origin}${normalizedPath}`;
 }
 
 function getInitials(name) {

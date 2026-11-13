@@ -1,6 +1,6 @@
 "use client";
 
-import { getToken } from "@/lib/auth";
+import { getToken, getCleanApiBase } from "@/lib/auth";
 import {
   useCallback,
   useEffect,
@@ -48,14 +48,7 @@ function normalizeArray(response) {
   return [];
 }
 
-const RAW_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-const API_URL = RAW_API_URL.replace(/\/+$/, "");
-
-const API_BASE = API_URL.endsWith("/api")
-  ? API_URL
-  : `${API_URL}/api`;
+const API_BASE = getCleanApiBase();
 
 const STATUS_OPTIONS = [
   "Semua Status",

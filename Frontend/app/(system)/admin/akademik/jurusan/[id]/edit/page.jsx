@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-import { getJurusan, updateJurusan } from "@/services/jurusan.service";
+import { getJurusanById, updateJurusan } from "@/services/jurusan.service";
 import {
   GraduationCap,
   FlaskConical,
@@ -58,9 +58,8 @@ export default function EditJurusanPage({ params }) {
     (async () => {
       try {
         setLoading(true);
-        const res = await getJurusan({ limit: 100 });
-        const list = res?.data && Array.isArray(res.data) ? res.data : res || [];
-        const found = list.find((j) => String(j.id) === String(id));
+        const res = await getJurusanById(id);
+        const found = res?.data && !Array.isArray(res.data) ? res.data : res;
         if (!found) {
           setError("Jurusan tidak ditemukan.");
           return;

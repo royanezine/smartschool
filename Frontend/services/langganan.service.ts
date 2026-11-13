@@ -347,6 +347,40 @@ export async function getPaymentStatus(
     throw new Error("Order ID tidak ditemukan.");
   }
 
+  let liveOrderId: string | null = null;
+  let liveStatus: string | null = null;
+  let statusError: unknown = null;
+
+  try {
+    const response = await apiFetch(
+      `/api/langganan/sekolah/status/${encodeURIComponent(orderId)}`,
+      {
+        method: "GET",
+        cache: "no-store",
+      }
+    );
+    const payload = unwrapData(response) ?? {};
+    if (payload?.order_id) {
+      liveOrderId = String(payload.order_id);
+    }
+    if (payload?.status) {
+      liveStatus = String(payload.status);
+    }
+  } catch (err) {
+    statusError = err;
+  }
+
+  const applyLiveStatus = (base: PaymentStatusData): PaymentStatusData => ({
+    ...base,
+    order_id: liveOrderId || base.order_id || orderId,
+    status: liveStatus ?? base.status,
+    statusPembayaran: liveStatus ?? base.statusPembayaran,
+    statusLangganan:
+      liveStatus === "success"
+        ? base.statusLangganan || "active"
+        : base.statusLangganan,
+  });
+
   try {
     const pending = await getPendingPayments();
     const pembayaran = pending.find(
@@ -356,7 +390,7 @@ export async function getPaymentStatus(
     );
 
     if (pembayaran) {
-      return buildStatusFromRiwayat(pembayaran);
+      return applyLiveStatus(buildStatusFromRiwayat(pembayaran));
     }
   } catch {
   }
@@ -368,9 +402,31 @@ export async function getPaymentStatus(
     );
 
     if (cocok) {
-      return buildStatusFromLangganan(cocok);
+      return applyLiveStatus(buildStatusFromLangganan(cocok));
     }
   } catch {
+  }
+
+  if (liveStatus) {
+    return {
+      order_id: liveOrderId || orderId,
+      status: liveStatus,
+      jumlah: 0,
+      metode: "Midtrans",
+      midtransPaymentId: null,
+      dibuatPada: null,
+      payment_url: null,
+      siklusPenagihan: null,
+      statusPembayaran: liveStatus,
+      statusLangganan: liveStatus === "success" ? "active" : null,
+      tanggalMulai: null,
+      tanggalBerakhir: null,
+      paket: null,
+    };
+  }
+
+  if (statusError instanceof Error) {
+    throw statusError;
   }
 
   throw new Error("Status pembayaran tidak ditemukan.");

@@ -20,13 +20,9 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { getToken, hasMenuAccess } from "@/lib/auth";
+import { getToken, hasMenuAccess, getBackendOrigin } from "@/lib/auth";
 
-const API_BASE = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-)
-  .replace(/\/+$/, "")
-  .replace(/\/api$/i, "");
+const API_BASE = getBackendOrigin();
 
 const PAGE_SIZE = 10;
 

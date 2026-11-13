@@ -51,6 +51,8 @@ const themeNeutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 

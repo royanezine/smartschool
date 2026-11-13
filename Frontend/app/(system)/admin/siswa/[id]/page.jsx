@@ -25,7 +25,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { getUsers } from "@/services/user.service";
+import { getSiswaById } from "@/services/siswa.service";
 import { getAbsensiKelas } from "@/services/absensi.service";
 import { getKelasSayaDariAnggota } from "@/services/kelas.service";
 import { getTahunAjaran } from "@/services/tahunAjaran.service";
@@ -229,20 +229,13 @@ export default function DetailSiswaPage() {
         setLoading(true);
         setError("");
 
-        const response = await getUsers({
-          page: 1,
-          limit: 1000,
-          role: "siswa",
-        });
+        const response = await getSiswaById(String(id));
 
         if (!mounted) return;
 
-        const users = unwrapList(response);
-        const found = users.find(
-          (item) => String(item?.id) === String(id)
-        );
+        const found = unwrapObject(response);
 
-        if (!found) {
+        if (!found?.id) {
           setSiswa(null);
           setError(
             "Data siswa tidak ditemukan. Pastikan ID siswa tersedia pada data backend."
@@ -351,6 +344,12 @@ export default function DetailSiswaPage() {
   }, [id]);
 
 
+  const resolvedKelasId =
+    kelasSiswa?.id ??
+    siswa?.kelasSiswa?.[0]?.kelasId ??
+    siswa?.kelasSiswa?.[0]?.kelas?.id ??
+    null;
+
   useEffect(() => {
     let mounted = true;
 
@@ -362,7 +361,7 @@ export default function DetailSiswaPage() {
 
       if (loadingAkademik) return;
 
-      if (!kelasSiswa?.id) {
+      if (!resolvedKelasId) {
         setAbsensi([]);
         setErrorAbsensi(
           "Kelas siswa tidak ditemukan, sehingga riwayat absensi tidak dapat dimuat."
@@ -375,7 +374,7 @@ export default function DetailSiswaPage() {
         setLoadingAbsensi(true);
         setErrorAbsensi("");
 
-        const response = await getAbsensiKelas(kelasSiswa.id);
+        const response = await getAbsensiKelas(resolvedKelasId);
 
         if (!mounted) return;
 
@@ -411,7 +410,7 @@ export default function DetailSiswaPage() {
     return () => {
       mounted = false;
     };
-  }, [id, kelasSiswa, loadingAkademik]);
+  }, [id, resolvedKelasId, loadingAkademik]);
 
 
   if (loading) {
@@ -499,13 +498,16 @@ export default function DetailSiswaPage() {
 
   const nis = getText(
     siswa.nis,
+    siswa.nipd,
     siswa.NIS,
     siswa.nomorInduk,
     siswa.nomor_induk
   );
 
+  const nipd = getText(siswa.nipd);
   const nisn = getText(siswa.nisn, siswa.NISN);
-
+  const nik = getText(siswa.nik);
+  const username = getText(siswa.namaPengguna);
 
   const kelasData = kelasSiswa;
 
@@ -513,11 +515,19 @@ export default function DetailSiswaPage() {
     kelasData?.nama,
     kelasData?.namaKelas,
     kelasData?.nama_kelas,
+    siswa.kelasSiswa?.[0]?.kelas?.nama,
     siswa.namaKelas,
     siswa.nama_kelas,
     typeof siswa.kelas === "string" ? siswa.kelas : null,
     siswa.kelas?.nama,
     siswa.kelasSiswa?.kelas?.nama
+  );
+
+  const jurusan = getText(
+    siswa.jurusan?.nama,
+    siswa.jurusan?.kode,
+    kelasData?.jurusan?.namaJurusan,
+    kelasData?.jurusan?.nama
   );
 
   const tingkatRaw =
@@ -535,6 +545,8 @@ export default function DetailSiswaPage() {
     kelasData?.tahun_ajaran_id ??
     kelasData?.tahunAjaran?.id ??
     kelasData?.tahun_ajaran?.id ??
+    siswa.kelasSiswa?.[0]?.tahunAjaranId ??
+    siswa.kelasSiswa?.[0]?.kelas?.tahunAjaranId ??
     null;
 
   const tahunAjaranRelasi =
@@ -562,11 +574,20 @@ export default function DetailSiswaPage() {
     siswa.nama_tahun_ajaran
   );
 
-  const gender = getText(
+  const genderRaw = getText(
     siswa.gender,
     siswa.jenisKelamin,
     siswa.jenis_kelamin
   );
+  const genderNormalized = String(genderRaw).trim().toLowerCase();
+  const gender =
+    genderNormalized === "l" || genderNormalized === "laki-laki"
+      ? "Laki-laki"
+      : genderNormalized === "p" || genderNormalized === "perempuan"
+      ? "Perempuan"
+      : genderRaw;
+
+  const tempatLahir = getText(siswa.tempatLahir);
 
   const tanggalLahir =
     siswa.tglLahir ||
@@ -593,45 +614,46 @@ export default function DetailSiswaPage() {
   const kelurahan = getText(siswa.kelurahan, siswa.desa);
   const kecamatan = getText(siswa.kecamatan);
 
-  const kota = getText(siswa.kota, siswa.kabupaten);
+  const kota = getText(siswa.kotaKabupaten, siswa.kota, siswa.kabupaten);
   const provinsi = getText(siswa.provinsi);
+  const kodePos = getText(siswa.kodePos);
 
-  const namaOrtu = getText(
+  const namaAyah = getText(siswa.namaAyah);
+  const nikAyah = getText(siswa.nikAyah);
+  const pekerjaanAyah = getText(siswa.pekerjaanAyah);
+  const noHpAyah = getText(siswa.noHpAyah);
+
+  const namaIbu = getText(siswa.namaIbu);
+  const nikIbu = getText(siswa.nikIbu);
+  const pekerjaanIbu = getText(siswa.pekerjaanIbu);
+  const noHpIbu = getText(siswa.noHpIbu);
+
+  const namaWali = getText(
+    siswa.namaWaliPesertaDidik,
     siswa.namaOrtu,
     siswa.namaOrangTua,
     siswa.namaWali,
     siswa.nama_orang_tua
   );
 
-  const nikOrtu = getText(
-    siswa.nikOrtu,
-    siswa.nikOrangTua,
-    siswa.nikWali,
-    siswa.nik_orang_tua
-  );
-
-  const pekerjaanOrtu = getText(
-    siswa.pekerjaanOrtu,
-    siswa.pekerjaanOrangTua,
-    siswa.pekerjaanWali,
-    siswa.pekerjaan_orang_tua
-  );
-
-  const alamatKtpOrtu = getText(
+  const alamatKtp = getText(
+    siswa.alamatKtp,
     siswa.alamatKtpOrtu,
     siswa.alamatKtpOrangTua,
     siswa.alamat_ktp_orang_tua
   );
 
-  const alamatDomisiliOrtu = getText(
+  const alamatDomisili = getText(
+    siswa.alamatDomisili,
     siswa.alamatDomisiliOrtu,
     siswa.alamatDomisiliOrangTua,
     siswa.alamat_domisili_orang_tua
   );
 
   const domisiliSama = Boolean(
-    siswa.domisiliSama ||
-      siswa.alamatDomisiliSama ||
+    siswa.alamatSesuaiDomisili ??
+      siswa.domisiliSama ??
+      siswa.alamatDomisiliSama ??
       siswa.alamat_domisili_sama
   );
 
@@ -806,19 +828,25 @@ export default function DetailSiswaPage() {
                   <InfoItem
                     icon={<User size={17} />}
                     label="Jenis Kelamin"
-                    value={
-                      gender === "L"
-                        ? "Laki-laki"
-                        : gender === "P"
-                        ? "Perempuan"
-                        : gender
-                    }
+                    value={gender}
+                  />
+
+                  <InfoItem
+                    icon={<MapPin size={17} />}
+                    label="Tempat Lahir"
+                    value={tempatLahir}
                   />
 
                   <InfoItem
                     icon={<Calendar size={17} />}
                     label="Tanggal Lahir"
                     value={formatDate(tanggalLahir)}
+                  />
+
+                  <InfoItem
+                    icon={<Hash size={17} />}
+                    label="NIK"
+                    value={nik}
                   />
 
                   <InfoItem
@@ -859,10 +887,35 @@ export default function DetailSiswaPage() {
                       className="sm:col-span-2"
                     />
 
+                    <DetailItem
+                      label="Alamat KTP"
+                      value={alamatKtp}
+                      breakText
+                      className="sm:col-span-2"
+                    />
+
+                    <div className="min-w-0 sm:col-span-2">
+                      <DetailItem
+                        label="Alamat Domisili"
+                        value={alamatDomisili}
+                        breakText
+                      />
+
+                      {domisiliSama && (
+                        <div
+                          className={`theme-success ${themeSuccessBorder} ${themeSuccessSurface} mt-3 inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium`}
+                        >
+                          <CheckCircle size={14} />
+                          Alamat domisili sama dengan alamat KTP
+                        </div>
+                      )}
+                    </div>
+
                     <DetailItem label="Kelurahan / Desa" value={kelurahan} />
                     <DetailItem label="Kecamatan" value={kecamatan} />
                     <DetailItem label="Kota / Kabupaten" value={kota} />
                     <DetailItem label="Provinsi" value={provinsi} />
+                    <DetailItem label="Kode Pos" value={kodePos} />
                   </div>
                 </section>
 
@@ -877,39 +930,29 @@ export default function DetailSiswaPage() {
                   />
 
                   <div className="grid grid-cols-1 gap-x-8 gap-y-5 p-5 sm:grid-cols-2 lg:p-6">
-                    <DetailItem label="Nama Orang Tua" value={namaOrtu} />
-                    <DetailItem label="NIK Orang Tua" value={nikOrtu} breakText />
+                    <DetailItem label="Nama Ayah" value={namaAyah} />
+                    <DetailItem label="NIK Ayah" value={nikAyah} breakText />
                     <DetailItem
-                      label="Pekerjaan"
-                      value={pekerjaanOrtu}
+                      label="Pekerjaan Ayah"
+                      value={pekerjaanAyah}
                       icon={<BriefcaseBusiness size={14} />}
                     />
+                    <DetailItem label="Nomor HP Ayah" value={noHpAyah} />
 
-                    <div className="hidden sm:block" />
+                    <DetailItem label="Nama Ibu" value={namaIbu} />
+                    <DetailItem label="NIK Ibu" value={nikIbu} breakText />
+                    <DetailItem
+                      label="Pekerjaan Ibu"
+                      value={pekerjaanIbu}
+                      icon={<BriefcaseBusiness size={14} />}
+                    />
+                    <DetailItem label="Nomor HP Ibu" value={noHpIbu} />
 
                     <DetailItem
-                      label="Alamat KTP"
-                      value={alamatKtpOrtu}
-                      breakText
+                      label="Nama Wali Peserta Didik"
+                      value={namaWali}
                       className="sm:col-span-2"
                     />
-
-                    <div className="min-w-0 sm:col-span-2">
-                      <DetailItem
-                        label="Alamat Domisili"
-                        value={alamatDomisiliOrtu}
-                        breakText
-                      />
-
-                      {domisiliSama && (
-                        <div
-                          className={`theme-success ${themeSuccessBorder} ${themeSuccessSurface} mt-3 inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium`}
-                        >
-                          <CheckCircle size={14} />
-                          Alamat domisili sama dengan alamat KTP
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </section>
 
@@ -1144,10 +1187,13 @@ export default function DetailSiswaPage() {
                       value={status}
                       valueClass={isActive ? "theme-success" : "theme-danger"}
                     />
+                    <SummaryRow label="Username" value={username} />
                     <SummaryRow label="Kelas" value={kelas} />
+                    <SummaryRow label="Jurusan" value={jurusan} />
                     <SummaryRow label="Tingkat Kelas" value={tingkatKelas} />
                     <SummaryRow label="Tahun Ajaran" value={tahunAjaran} />
                     <SummaryRow label="NIS" value={nis} />
+                    <SummaryRow label="NIPD" value={nipd} />
                     <SummaryRow label="NISN" value={nisn} />
                     <SummaryRow label="Bergabung" value={formatDate(joinDate)} />
                   </div>

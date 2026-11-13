@@ -45,7 +45,10 @@ import {
   deleteAdminYayasan,
   getDetailYayasanLangganan,
 } from "@/services/yayasan.service";
-import { getPlatformSekolah } from "@/services/platform.service";
+import {
+  getPlatformSekolah,
+  getPlatformYayasanDetail,
+} from "@/services/platform.service";
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -222,15 +225,56 @@ export default function DetailYayasanSuperAdminPage() {
       setLoading(true);
       setError("");
 
-      // 1. Fetch Yayasan Detail
-      const yysRes = await getYayasanById(yayasanId);
-      const yysData = yysRes?.data || yysRes;
+      // 1. Fetch Yayasan Detail (gabungkan detail inti + direktori platform untuk status sekolah efektif & _count)
+      const [yysRes, platRes] = await Promise.allSettled([
+        getYayasanById(yayasanId),
+        getPlatformYayasanDetail(yayasanId),
+      ]);
+      const baseData =
+        yysRes.status === "fulfilled"
+          ? yysRes.value?.data || yysRes.value
+          : null;
+      const platData =
+        platRes.status === "fulfilled"
+          ? platRes.value?.data || platRes.value
+          : null;
+
+      if (!baseData && !platData) {
+        throw yysRes.status === "rejected"
+          ? yysRes.reason
+          : new Error("Detail yayasan tidak ditemukan.");
+      }
+
+      const yysData = {
+        ...(baseData || {}),
+        ...(platData || {}),
+        diperbaruiPada: baseData?.diperbaruiPada || platData?.diperbaruiPada,
+      };
       setYayasan(yysData);
+
+      const effectiveStatusById = new Map(
+        (Array.isArray(platData?.sekolah) ? platData.sekolah : []).map((s) => [
+          s.id,
+          s.status,
+        ])
+      );
 
       // 2. Fetch Sekolah Naungan
       try {
         const schRes = await getSekolahYayasan(yayasanId);
-        setSekolahList(Array.isArray(schRes?.data) ? schRes.data : Array.isArray(schRes) ? schRes : []);
+        const rawSekolah = Array.isArray(schRes?.data)
+          ? schRes.data
+          : Array.isArray(schRes)
+            ? schRes
+            : [];
+        setSekolahList(
+          rawSekolah.map((sch) => ({
+            ...sch,
+            status: effectiveStatusById.has(sch.id)
+              ? effectiveStatusById.get(sch.id)
+              : sch.status,
+          }))
+        );
       } catch (err) {
         console.warn("Gagal memuat sekolah naungan:", err);
         setSekolahList(yysData?.sekolah || []);

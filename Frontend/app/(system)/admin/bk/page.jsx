@@ -838,7 +838,7 @@ export default function BKPage() {
               icon={Target}
               action="Lihat Semua"
               onAction={() =>
-                router.push("/admin/bk/kategori-pelanggaran")
+                router.push("/admin/bk/kategori-point")
               }
             >
               <table className="w-full min-w-[650px] border-collapse">

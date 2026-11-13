@@ -33,6 +33,7 @@ import {
   getKelas,
   getShiftKelas,
   updateShiftKelas,
+  updateShiftKelasMassal,
 } from "@/services/kelas.service";
 import { getTahunAjaran } from "@/services/tahunAjaran.service";
 import {
@@ -637,6 +638,9 @@ export default function PenugasanShiftPage() {
   const [notice, setNotice] = useState("");
   const [warnings, setWarnings] = useState([]);
   const [updatingKelasId, setUpdatingKelasId] = useState(null);
+  const [selectedKelasIds, setSelectedKelasIds] = useState([]);
+  const [bulkShiftValue, setBulkShiftValue] = useState("pagi");
+  const [bulkUpdatingKelas, setBulkUpdatingKelas] = useState(false);
 
   const [search, setSearch] = useState("");
   const [filterShift, setFilterShift] = useState("semua");
@@ -983,6 +987,89 @@ export default function PenugasanShiftPage() {
     }
   }
 
+  function toggleSelectKelas(kelasId) {
+    setSelectedKelasIds((prev) =>
+      prev.includes(kelasId)
+        ? prev.filter((id) => id !== kelasId)
+        : [...prev, kelasId]
+    );
+  }
+
+  function toggleSelectVisibleKelas(selectableRows) {
+    const rowIds = selectableRows.map((row) => row.id);
+    if (rowIds.length === 0) return;
+
+    const allSelected = rowIds.every((id) => selectedKelasIds.includes(id));
+    if (allSelected) {
+      setSelectedKelasIds((prev) => prev.filter((id) => !rowIds.includes(id)));
+    } else {
+      setSelectedKelasIds((prev) => Array.from(new Set([...prev, ...rowIds])));
+    }
+  }
+
+  async function handleBulkSaveShiftKelas() {
+    if (selectedKelasIds.length === 0) {
+      setError("Pilih minimal 1 kelas terlebih dahulu untuk penugasan massal.");
+      return;
+    }
+
+    if (selectedKelasIds.length > 100) {
+      setError("Penugasan massal maksimal 100 kelas dalam satu kali simpan.");
+      return;
+    }
+
+    const shift = bulkShiftValue || null;
+    if (shift !== null && !["pagi", "siang"].includes(shift)) {
+      setError("Shift kelas hanya boleh pagi, siang, atau tanpa shift.");
+      return;
+    }
+
+    setBulkUpdatingKelas(true);
+    setError("");
+    setNotice("");
+
+    try {
+      await updateShiftKelasMassal({
+        kelasIds: selectedKelasIds,
+        shift,
+      });
+
+      const idSet = new Set(selectedKelasIds.map((id) => String(id)));
+      setKelasList((previous) =>
+        previous.map((item) =>
+          idSet.has(String(item.id))
+            ? { ...item, shift, shiftLoadError: false }
+            : item
+        )
+      );
+
+      const namaShift =
+        shift === "pagi"
+          ? getShiftKelasOptionLabel("pagi", shiftSiswaList)
+          : shift === "siang"
+            ? getShiftKelasOptionLabel("siang", shiftSiswaList)
+            : "";
+
+      const count = selectedKelasIds.length;
+      setSelectedKelasIds([]);
+      setNotice(
+        shift
+          ? `Shift ${count} kelas berhasil diperbarui menjadi ${namaShift}.`
+          : `Shift ${count} kelas berhasil dihapus.`
+      );
+    } catch (bulkError) {
+      console.error("[SHIFT KELAS MASSAL] Gagal menyimpan:", bulkError);
+      setError(
+        getErrorMessage(
+          bulkError,
+          "Gagal menyimpan perubahan shift kelas massal."
+        )
+      );
+    } finally {
+      setBulkUpdatingKelas(false);
+    }
+  }
+
   const activeData = activeTab === "pegawai" ? pegawaiList : kelasList;
 
   const filteredData = useMemo(() => {
@@ -1184,7 +1271,7 @@ export default function PenugasanShiftPage() {
                       {loading
                         ? "Memuat tahun ajaran..."
                         : tahunAjaranAktif
-                          ? `${tahunAjaranAktif.nama} - Semester ${tahunAjaranAktif.semester}`
+                          ? `${tahunAjaranAktif.nama || tahunAjaranAktif.tahun || tahunAjaranAktif.namaTahunAjaran || "-"}${tahunAjaranAktif.semester ? ` - Semester ${tahunAjaranAktif.semester}` : ""}`
                           : "Belum ada tahun ajaran aktif"}
                     </p>
                   </div>
@@ -1443,6 +1530,63 @@ export default function PenugasanShiftPage() {
                     </select>
                   </div>
                 </div>
+
+                {activeTab === "kelas" && (
+                  <div className="mt-4 flex flex-col gap-3 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="font-semibold theme-text">
+                        Penugasan Shift Massal
+                      </span>
+                      <span className="rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] px-2.5 py-0.5 font-semibold theme-primary-text">
+                        {selectedKelasIds.length} kelas dipilih
+                      </span>
+                      {selectedKelasIds.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedKelasIds([])}
+                          className="text-xs font-medium theme-text-muted underline hover:theme-text"
+                        >
+                          Bersihkan pilihan
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <select
+                        value={bulkShiftValue}
+                        disabled={bulkUpdatingKelas}
+                        onChange={(e) => setBulkShiftValue(e.target.value)}
+                        aria-label="Pilih shift untuk penugasan massal"
+                        className="theme-input h-9 rounded-lg border px-3 text-xs font-medium outline-none"
+                      >
+                        <option value="pagi">
+                          {getShiftKelasOptionLabel("pagi", shiftSiswaList)}
+                        </option>
+                        <option value="siang">
+                          {getShiftKelasOptionLabel("siang", shiftSiswaList)}
+                        </option>
+                        <option value="">Kosongkan Shift (Tanpa Shift)</option>
+                      </select>
+
+                      <button
+                        type="button"
+                        disabled={
+                          bulkUpdatingKelas ||
+                          loading ||
+                          selectedKelasIds.length === 0 ||
+                          selectedKelasIds.length > 100
+                        }
+                        onClick={handleBulkSaveShiftKelas}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-lg theme-primary px-3.5 text-xs font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {bulkUpdatingKelas && (
+                          <LoaderCircle size={14} className="animate-spin" />
+                        )}
+                        Terapkan ke Terpilih
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="relative overflow-x-auto">
@@ -1496,6 +1640,18 @@ export default function PenugasanShiftPage() {
                             key={item.id}
                             className="transition hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
                           >
+                            <td className="w-12 px-4 py-4 text-center">
+                              <input
+                                type="checkbox"
+                                aria-label={`Pilih kelas ${item.nama || ""}`}
+                                disabled={
+                                  Boolean(item.shiftLoadError) || bulkUpdatingKelas
+                                }
+                                checked={selectedKelasIds.includes(item.id)}
+                                onChange={() => toggleSelectKelas(item.id)}
+                                className="h-4 w-4 rounded border theme-border accent-[var(--color-primary)]"
+                              />
+                            </td>
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text ">
@@ -1556,6 +1712,30 @@ export default function PenugasanShiftPage() {
                   <table className="w-full min-w-[1050px] text-left text-sm">
                     <thead className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted">
                       <tr>
+                        <th className="w-12 px-4 py-4 text-center">
+                          <input
+                            type="checkbox"
+                            aria-label="Pilih semua kelas di halaman ini"
+                            disabled={
+                              bulkUpdatingKelas ||
+                              visibleData.filter((item) => !item.shiftLoadError)
+                                .length === 0
+                            }
+                            checked={
+                              visibleData.filter((item) => !item.shiftLoadError)
+                                .length > 0 &&
+                              visibleData
+                                .filter((item) => !item.shiftLoadError)
+                                .every((item) => selectedKelasIds.includes(item.id))
+                            }
+                            onChange={() =>
+                              toggleSelectVisibleKelas(
+                                visibleData.filter((item) => !item.shiftLoadError)
+                              )
+                            }
+                            className="h-4 w-4 rounded border theme-border accent-[var(--color-primary)]"
+                          />
+                        </th>
                         <th className="px-5 py-4 font-semibold">Nama Kelas</th>
                         <th className="px-5 py-4 font-semibold">Tingkat</th>
                         <th className="px-5 py-4 font-semibold">Tahun Ajaran</th>
@@ -1582,6 +1762,18 @@ export default function PenugasanShiftPage() {
                             key={item.id}
                             className="transition hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
                           >
+                            <td className="w-12 px-4 py-4 text-center">
+                              <input
+                                type="checkbox"
+                                aria-label={`Pilih kelas ${item.nama || ""}`}
+                                disabled={
+                                  Boolean(item.shiftLoadError) || bulkUpdatingKelas
+                                }
+                                checked={selectedKelasIds.includes(item.id)}
+                                onChange={() => toggleSelectKelas(item.id)}
+                                className="h-4 w-4 rounded border theme-border accent-[var(--color-primary)]"
+                              />
+                            </td>
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text ">

@@ -15,6 +15,35 @@ import {
   X
 } from "lucide-react";
 
+function ViewToggle({ viewMode, setViewMode }) {
+  return (
+    <div className="inline-flex items-center rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
+      <button
+        type="button"
+        onClick={() => setViewMode("grid")}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+          viewMode === "grid"
+            ? "bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-200/50 shadow-sm"
+            : "text-slate-500 hover:text-slate-700"
+        }`}
+      >
+        <LayoutGrid className="w-3.5 h-3.5" /> Grid
+      </button>
+      <button
+        type="button"
+        onClick={() => setViewMode("table")}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+          viewMode === "table"
+            ? "bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-200/50 shadow-sm"
+            : "text-slate-500 hover:text-slate-700"
+        }`}
+      >
+        <List className="w-3.5 h-3.5" /> List
+      </button>
+    </div>
+  );
+}
+
 const MediaTable = ({ media: initialMedia }) => {
   const [media, setMedia] = useState(initialMedia);
   const [viewMode, setViewMode] = useState("table"); 
@@ -62,30 +91,7 @@ const MediaTable = ({ media: initialMedia }) => {
     );
   }
 
-  const ViewToggle = () => (
-    <div className="inline-flex items-center rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
-      <button
-        onClick={() => setViewMode("grid")}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-          viewMode === "grid"
-            ? "bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-200/50 shadow-sm"
-            : "text-slate-500 hover:text-slate-700"
-        }`}
-      >
-        <LayoutGrid className="w-3.5 h-3.5" /> Grid
-      </button>
-      <button
-        onClick={() => setViewMode("table")}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-          viewMode === "table"
-            ? "bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-200/50 shadow-sm"
-            : "text-slate-500 hover:text-slate-700"
-        }`}
-      >
-        <List className="w-3.5 h-3.5" /> List
-      </button>
-    </div>
-  );
+
 
   if (viewMode === "grid") {
     return (
@@ -94,7 +100,7 @@ const MediaTable = ({ media: initialMedia }) => {
           <p className="text-xs font-medium text-slate-500">
             Total <span className="text-slate-700">{media.length}</span> file
           </p>
-          <ViewToggle />
+          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
@@ -180,7 +186,7 @@ const MediaTable = ({ media: initialMedia }) => {
             Total <span className="font-semibold text-slate-700">{media.length}</span> file
           </span>
         </div>
-        <ViewToggle />
+        <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
       </div>
 
       <div className="overflow-x-auto">

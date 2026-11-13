@@ -577,7 +577,7 @@ export default function DetailSekolahPage() {
                       <div className="rounded-xl border theme-border p-3.5 bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
                         <p className="text-xs theme-text-muted">Subdomain Sistem</p>
                         <p className="mt-1 font-mono font-semibold text-sm text-[var(--color-primary)] truncate">
-                          {pengaturan?.subdomain ? `${pengaturan.subdomain}.smartschool.id` : profil.subdomain || "-"}
+                          {pengaturan?.subdomain ? `${pengaturan.subdomain}.smartschool.citrasolusi.id` : profil.subdomain || "-"}
                         </p>
                       </div>
 

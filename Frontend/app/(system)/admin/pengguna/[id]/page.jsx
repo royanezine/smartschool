@@ -782,17 +782,14 @@ export default function DetailPenggunaPage() {
 
           {!loadingMaster && !masterError && !hasShiftAssignment && (
             <div className="mx-4 mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300 sm:mx-6 lg:mx-8">
-              ID penugasan shift belum tersedia pada respons detail pengguna.
-              Daftar shift berhasil dimuat, tetapi tidak ada dasar untuk
-              menentukan shift mana yang ditugaskan kepada pengguna ini.
+              Pengguna ini belum memiliki penugasan shift kerja. Daftar master
+              shift tersedia untuk dipilih apabila ingin menetapkan shift.
             </div>
           )}
 
           {!loadingMaster && !masterError && !hasCategoryAssignment && (
             <div className="mx-4 mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300 sm:mx-6 lg:mx-8">
-              ID kategori jabatan belum tersedia pada respons detail pengguna.
-              Daftar kategori berhasil dimuat, tetapi kategori pengguna tidak
-              bisa ditentukan secara akurat dari daftar master saja.
+              Pengguna ini belum memiliki kategori jabatan yang ditetapkan.
             </div>
           )}
         </section>
@@ -886,8 +883,7 @@ export default function DetailPenggunaPage() {
                   </>
                 ) : (
                   <p className="mt-1 text-xs theme-text-secondary">
-                    Informasi Face ID tidak tersedia pada respons detail
-                    pengguna.
+                    Pengguna ini belum mendaftarkan Face ID.
                   </p>
                 )}
               </div>

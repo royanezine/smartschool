@@ -44,10 +44,9 @@ import {
   BadgeCheck,
 } from "lucide-react";
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000"
-).replace(/\/$/, "");
+import { getCleanApiBase } from "@/lib/auth";
+
+const API_URL = getCleanApiBase();
 
 const extractUsers = (response) => {
   if (Array.isArray(response)) return response;

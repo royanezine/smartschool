@@ -11,14 +11,15 @@ import {
   ArrowLeft,
   BookOpen,
   GraduationCap,
-  X,
-  ClipboardCheck,
   Loader2,
   AlertCircle,
-  Info,
+  CheckCircle2,
+  CalendarDays,
+  FileText,
 } from "lucide-react";
 
 import { getRaportSiswa } from "@/services/raport.service";
+import { getKelasMapelById } from "@/services/kelasMapel.service";
 
 function getResultData(result) {
   if (result?.data?.data) {
@@ -44,7 +45,6 @@ function getGradeStyle(grade) {
 }
 
 export default function DetailNilaiPage() {
-  const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
 
@@ -55,14 +55,8 @@ export default function DetailNilaiPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dataSiswa, setDataSiswa] = useState(null);
-
-  // State untuk menyimpan nilai yang sudah diagregasi
-  const [nilaiDetail, setNilaiDetail] = useState({
-    namaMapel: "Mata Pelajaran",
-    nilaiAkhir: null,
-    kkm: 75,
-    predikat: null,
-  });
+  const [kelasMapelDetail, setKelasMapelDetail] = useState(null);
+  const [selectedMapelName, setSelectedMapelName] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -80,23 +74,36 @@ export default function DetailNilaiPage() {
         setLoading(true);
         setError(null);
 
-        const result = await getRaportSiswa(
-          String(siswaId),
-          String(tahunAjaranId)
-        );
-        
-        const data = getResultData(result);
+        const [raportResult, mapelDetailResult] = await Promise.all([
+          getRaportSiswa(String(siswaId), String(tahunAjaranId)),
+          kelasMapelId ? getKelasMapelById(String(kelasMapelId)).catch(() => null) : Promise.resolve(null),
+        ]);
+
+        const data = getResultData(raportResult);
 
         if (isMounted) {
           if (!data) {
             throw new Error("Data raport siswa tidak ditemukan.");
           }
 
-          // Simulasi nama mapel (karena di halaman detail ini kita tidak fetch ulang data mapel,
-          // idealnya nama mapel di-pass via query param, tapi untuk simplifikasi kita set default dulu)
-          // Jika kamu mau lebih akurat, kamu bisa pass nama mapel di URL.
-          
           setDataSiswa(data);
+          setKelasMapelDetail(mapelDetailResult);
+
+          const targetNama = String(
+            mapelDetailResult?.mataPelajaran?.nama || ""
+          ).trim();
+          const listAkademik = Array.isArray(data.akademik) ? data.akademik : [];
+          const matched = targetNama
+            ? listAkademik.find(
+                (item) =>
+                  String(item?.mapel || "").trim().toLowerCase() ===
+                  targetNama.toLowerCase()
+              )
+            : null;
+
+          setSelectedMapelName(
+            matched?.mapel || targetNama || listAkademik[0]?.mapel || ""
+          );
         }
       } catch (err) {
         if (isMounted) {
@@ -113,26 +120,31 @@ export default function DetailNilaiPage() {
     return () => {
       isMounted = false;
     };
-  }, [siswaId, tahunAjaranId]);
+  }, [siswaId, tahunAjaranId, kelasMapelId]);
 
-  // Karena kita tidak fetch ulang mapel, kita bisa mengekstrak data mapel dari data raport
-  // atau menggunakan data dari props/state.
-  // Sebagai fallback, kita ambil dari data akademik siswa berdasarkan mapel.
-  useEffect(() => {
-    if (dataSiswa?.akademik && Array.isArray(dataSiswa.akademik)) {
-      // Ambil data nilai mapel pertama atau berdasarkan matching id (jika ada)
-      const mapelData = dataSiswa.akademik[0]; // Ambil mapel pertama sebagai contoh
-      
-      if (mapelData) {
-        setNilaiDetail({
-          namaMapel: mapelData.mapel || "Mata Pelajaran",
-          nilaiAkhir: mapelData.totalNilai || null,
-          kkm: mapelData.kkm || 75,
-          predikat: mapelData.totalNilai ? getGrade(mapelData.totalNilai) : null,
-        });
-      }
-    }
-  }, [dataSiswa]);
+  const listAkademik = Array.isArray(dataSiswa?.akademik) ? dataSiswa.akademik : [];
+  const activeMapelData =
+    listAkademik.find(
+      (item) =>
+        String(item?.mapel || "").trim().toLowerCase() ===
+        String(selectedMapelName || "").trim().toLowerCase()
+    ) || null;
+
+  const identitas = dataSiswa?.identitas || dataSiswa?.siswa || {};
+  const displayNamaMapel =
+    activeMapelData?.mapel ||
+    kelasMapelDetail?.mataPelajaran?.nama ||
+    selectedMapelName ||
+    "Mata Pelajaran";
+  const nilaiAkhir =
+    activeMapelData?.totalNilai !== undefined && activeMapelData?.totalNilai !== null
+      ? Number(activeMapelData.totalNilai)
+      : null;
+  const kkm = activeMapelData?.kkm ?? 75;
+  const predikat =
+    activeMapelData?.predikat ||
+    (nilaiAkhir !== null ? getGrade(nilaiAkhir) : null);
+  const kehadiran = dataSiswa?.kehadiran || null;
 
 
   return (
@@ -162,7 +174,7 @@ export default function DetailNilaiPage() {
                     Detail Nilai Siswa
                   </h1>
                   <p className="text-sm theme-text-secondary mt-0.5">
-                    Informasi rincian nilai dan predikat siswa.
+                    Informasi rincian nilai agregat raport dan kehadiran siswa.
                   </p>
                 </div>
               </div>
@@ -186,77 +198,188 @@ export default function DetailNilaiPage() {
             )}
 
             {!loading && !error && dataSiswa && (
-              <div className="w-full grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_350px] 2xl:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
+              <div className="w-full grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
                 
                 {/* Kolom Kiri: Detail Nilai */}
-                <div className="theme-card border theme-border rounded-xl p-6 shadow-sm">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="theme-primary flex h-11 w-11 items-center justify-center rounded-lg">
-                      <GraduationCap size={20} />
+                <div className="space-y-6">
+                  <div className="theme-card border theme-border rounded-xl p-6 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="theme-primary flex h-11 w-11 items-center justify-center rounded-lg">
+                          <GraduationCap size={20} />
+                        </div>
+                        <div>
+                          <p className="theme-text text-sm font-semibold">
+                            {identitas?.nama || "Siswa"}
+                          </p>
+                          <p className="theme-text-secondary text-xs">
+                            NIS {identitas?.nis || "-"} • NISN {identitas?.nisn || "-"}
+                            {identitas?.kelas ? ` • Kelas ${identitas.kelas}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                      {kelasMapelDetail?.kelas?.nama && (
+                        <span className="theme-card-soft theme-border rounded-lg border px-3 py-1 text-xs font-semibold theme-text-secondary">
+                          {kelasMapelDetail.kelas.nama}
+                        </span>
+                      )}
                     </div>
-                    <div>
-                      <p className="theme-text text-sm font-semibold">
-                        {dataSiswa.siswa?.nama || "Nama Siswa"}
-                      </p>
-                      <p className="theme-text-secondary text-xs">
-                        NIS {dataSiswa.siswa?.nis || "-"}
-                      </p>
+
+                    <div className="theme-card theme-border rounded-xl border p-5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="theme-text-muted text-xs">Mata Pelajaran Terpilih</p>
+                          <p className="theme-text mt-1 text-sm font-semibold">
+                            {displayNamaMapel}
+                          </p>
+                        </div>
+                        <BookOpen size={20} className="text-theme-primary" />
+                      </div>
+
+                      <div className="mt-5 grid grid-cols-2 gap-3">
+                        <div className="theme-card-soft theme-border rounded-lg border p-4">
+                          <p className="theme-text-muted text-xs">Nilai Akhir</p>
+                          <p className="theme-text mt-2 text-2xl font-bold">
+                            {nilaiAkhir !== null ? nilaiAkhir : "-"}
+                          </p>
+                        </div>
+                        <div className="theme-card-soft theme-border rounded-lg border p-4">
+                          <p className="theme-text-muted text-xs">KKM</p>
+                          <p className="theme-text mt-2 text-2xl font-bold">
+                            {kkm}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="theme-info mt-4 flex items-center justify-between rounded-xl border px-4 py-4">
+                        <div>
+                          <p className="text-xs font-medium">Predikat</p>
+                          <p className="theme-text-secondary mt-1 text-sm font-semibold">
+                            {nilaiAkhir !== null
+                              ? nilaiAkhir >= kkm
+                                ? "Tuntas memenuhi KKM"
+                                : "Di bawah KKM"
+                              : "Belum ada nilai"}
+                          </p>
+                        </div>
+                        {predikat ? (
+                          <span className={`${getGradeStyle(predikat)} inline-flex min-w-[40px] justify-center rounded-md border px-3 py-1 text-sm font-bold`}>
+                            {predikat}
+                          </span>
+                        ) : (
+                          <span className="theme-text-muted text-sm">Belum ada</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="theme-card theme-border rounded-xl border p-5">
-                    <div className="flex items-center justify-between">
+                  {/* Daftar Semua Nilai Mapel Siswa dari Endpoint Raport */}
+                  <div className="theme-card border theme-border rounded-xl p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
                       <div>
-                        <p className="theme-text-muted text-xs">Mata Pelajaran</p>
-                        <p className="theme-text mt-1 text-sm font-semibold">
-                          {nilaiDetail.namaMapel}
-                        </p>
+                        <h2 className="text-base font-semibold theme-text">Daftar Nilai Semua Mata Pelajaran</h2>
+                        <p className="text-xs theme-text-muted">Klik baris mata pelajaran untuk melihat ringkasan di atas.</p>
                       </div>
-                      <BookOpen size={20} className="text-theme-primary" />
+                      <span className="text-xs font-semibold theme-text-secondary">
+                        {listAkademik.length} Mapel
+                      </span>
                     </div>
 
-                    <div className="mt-5 grid grid-cols-2 gap-3">
-                      <div className="theme-card-soft theme-border rounded-lg border p-4">
-                        <p className="theme-text-muted text-xs">Nilai Akhir</p>
-                        <p className="theme-text mt-2 text-2xl font-bold">
-                          {nilaiDetail.nilaiAkhir !== null ? nilaiDetail.nilaiAkhir : "-"}
-                        </p>
+                    {listAkademik.length === 0 ? (
+                      <p className="text-xs theme-text-muted py-6 text-center">
+                        Belum ada nilai mata pelajaran yang tercatat untuk siswa ini pada tahun ajaran terpilih.
+                      </p>
+                    ) : (
+                      <div className="overflow-x-auto rounded-xl border theme-border">
+                        <table className="w-full text-left text-sm">
+                          <thead className="theme-card-soft border-b theme-border text-xs uppercase theme-text-muted">
+                            <tr>
+                              <th className="px-4 py-3">Mata Pelajaran</th>
+                              <th className="px-4 py-3 text-center">KKM</th>
+                              <th className="px-4 py-3 text-center">Nilai Akhir</th>
+                              <th className="px-4 py-3 text-center">Predikat</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y theme-border">
+                            {listAkademik.map((item) => {
+                              const isSelected =
+                                String(item.mapel || "").toLowerCase() ===
+                                String(displayNamaMapel || "").toLowerCase();
+                              const itemPredikat = item.predikat || getGrade(item.totalNilai);
+                              return (
+                                <tr
+                                  key={item.mapel}
+                                  onClick={() => setSelectedMapelName(item.mapel)}
+                                  className={`cursor-pointer transition ${
+                                    isSelected
+                                      ? "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                                      : "theme-table-hover"
+                                  }`}
+                                >
+                                  <td className="px-4 py-3 font-medium theme-text">{item.mapel}</td>
+                                  <td className="px-4 py-3 text-center theme-text-secondary">{item.kkm ?? 75}</td>
+                                  <td className="px-4 py-3 text-center font-bold theme-text">{item.totalNilai ?? "-"}</td>
+                                  <td className="px-4 py-3 text-center">
+                                    <span className={`${getGradeStyle(itemPredikat)} inline-flex min-w-[32px] justify-center rounded border px-2 py-0.5 text-xs font-bold`}>
+                                      {itemPredikat}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
                       </div>
-                      <div className="theme-card-soft theme-border rounded-lg border p-4">
-                        <p className="theme-text-muted text-xs">KKM</p>
-                        <p className="theme-text mt-2 text-2xl font-bold">
-                          {nilaiDetail.kkm}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="theme-info mt-4 flex items-center justify-between rounded-xl border px-4 py-4">
-                      <div>
-                        <p className="text-xs font-medium">Predikat</p>
-                        <p className="theme-text-secondary mt-1 text-sm font-semibold">
-                          Berdasarkan nilai akhir
-                        </p>
-                      </div>
-                      {nilaiDetail.predikat ? (
-                        <span className={`${getGradeStyle(nilaiDetail.predikat)} inline-flex min-w-[40px] justify-center rounded-md border px-3 py-1 text-sm font-bold`}>
-                          {nilaiDetail.predikat}
-                        </span>
-                      ) : (
-                        <span className="theme-text-muted text-sm">Belum ada</span>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Kolom Kanan: Panduan / Info */}
+                {/* Kolom Kanan: Kehadiran & Catatan */}
                 <aside className="space-y-5">
-                  <section className="rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-5">
+                  {kehadiran && (
+                    <section className="theme-card border theme-border rounded-xl p-5 shadow-sm">
+                      <h3 className="text-sm font-bold theme-text flex items-center gap-2 mb-3">
+                        <CalendarDays size={16} className="text-[var(--color-primary)]" />
+                        Rekap Kehadiran Siswa
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2.5 text-center">
+                        <div className="theme-card-soft border theme-border rounded-lg p-3">
+                          <p className="text-[11px] theme-text-muted">Hadir</p>
+                          <p className="text-lg font-bold theme-text">{kehadiran.hadir ?? 0}</p>
+                        </div>
+                        <div className="theme-card-soft border theme-border rounded-lg p-3">
+                          <p className="text-[11px] theme-text-muted">Izin</p>
+                          <p className="text-lg font-bold theme-text">{kehadiran.izin ?? 0}</p>
+                        </div>
+                        <div className="theme-card-soft border theme-border rounded-lg p-3">
+                          <p className="text-[11px] theme-text-muted">Sakit</p>
+                          <p className="text-lg font-bold theme-text">{kehadiran.sakit ?? 0}</p>
+                        </div>
+                        <div className="theme-card-soft border theme-border rounded-lg p-3">
+                          <p className="text-[11px] theme-text-muted">Alpha</p>
+                          <p className="text-lg font-bold theme-text">{kehadiran.alpha ?? 0}</p>
+                        </div>
+                      </div>
+                    </section>
+                  )}
+
+                  <section className="theme-card border theme-border rounded-xl p-5 shadow-sm">
+                    <h3 className="text-sm font-bold theme-text flex items-center gap-2 mb-2">
+                      <FileText size={16} className="text-[var(--color-primary)]" />
+                      Catatan Wali Kelas
+                    </h3>
+                    <p className="text-xs leading-relaxed theme-text-secondary">
+                      {dataSiswa.catatanWaliKelas || "Belum ada catatan wali kelas."}
+                    </p>
+                  </section>
+
+                  <section className="rounded-xl border border-[color-mix(in_srgb,var(--color-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] p-5">
                     <div className="flex items-start gap-3">
-                      <AlertCircle size={18} className="mt-0.5 shrink-0 text-[var(--color-warning)]" />
+                      <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
                       <div>
-                        <h3 className="text-xs font-bold text-[var(--color-warning)]">Informasi Nilai</h3>
-                        <p className="mt-1 text-[11px] leading-relaxed text-[var(--color-warning)] opacity-90">
-                          Backend saat ini mengirimkan nilai yang sudah diagregasi. Rincian Tugas, UTS, UAS, dan Praktik belum tersedia melalui endpoint raport.
+                        <h3 className="text-xs font-bold text-[var(--color-info)]">Sumber Data Raport</h3>
+                        <p className="mt-1 text-[11px] leading-relaxed theme-text-secondary">
+                          Nilai akhir dan predikat dihitung langsung oleh server melalui agregasi bobot komponen nilai dan KKM resmi sekolah.
                         </p>
                       </div>
                     </div>

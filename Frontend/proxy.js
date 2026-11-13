@@ -21,11 +21,17 @@ const AUTH_ROUTES = [
 const EXCLUDED_PATHS = [
   "/_next",
   "/api",
+  "/uploads",
+  "/hero",
+  "/logo",
+  "/images",
   "/favicon.ico",
   "/robots.txt",
   "/sitemap.xml",
   "/manifest.json",
 ];
+
+const STATIC_ASSET_EXT_RE = /\.(?:svg|png|jpg|jpeg|webp|gif|ico|css|js|woff|woff2|ttf|eot|map|pdf)$/i;
 
 const RESERVED_TENANTS = [
   "www",
@@ -44,6 +50,10 @@ const RESERVED_TENANTS = [
 ];
 
 function isExcludedPath(pathname) {
+  if (STATIC_ASSET_EXT_RE.test(pathname)) {
+    return true;
+  }
+
   return EXCLUDED_PATHS.some(
     (path) =>
       pathname === path ||
@@ -170,6 +180,6 @@ export function proxy(request) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json).*)",
+    "/((?!_next/static|_next/image|uploads|hero|logo|images|favicon.ico|robots.txt|sitemap.xml|manifest.json).*)",
   ],
 };

@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   AlertCircle,
   Filter,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -27,6 +28,7 @@ import {
 } from "@/services/pengaturan.service";
 import { getAuditLogs } from "@/services/auditLog.service";
 import { getSemuaSekolahPlatform } from "@/services/platform.service";
+import KonfigurasiTeknisTab from "@/app/components/super-admin/KonfigurasiTeknisTab";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
@@ -577,6 +579,11 @@ export default function PengaturanSistemPage() {
       key: "aktivitas",
       label: "Riwayat Aktivitas",
       icon: Clock,
+    },
+    {
+      key: "konfigurasi",
+      label: "Konfigurasi Teknis",
+      icon: ShieldCheck,
     },
   ];
 
@@ -1562,6 +1569,8 @@ export default function PengaturanSistemPage() {
                 )}
               </div>
             )}
+
+            {activeTab === "konfigurasi" && <KonfigurasiTeknisTab />}
           </div>
         </div>
 

@@ -16,6 +16,7 @@ import {
   DoorOpen,
   Plus,
   ExternalLink,
+  Eye,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -25,6 +26,7 @@ import {
   getGedung,
   getLantaiByGedung,
 } from "@/services/infrastruktur.service";
+import { getRuangan, getAset } from "@/services/sarpras.service";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -76,6 +78,7 @@ export default function DetailLantaiPage() {
 
   const [data, setData] = useState(null);
   const [gedung, setGedung] = useState(null);
+  const [ruanganList, setRuanganList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -84,7 +87,11 @@ export default function DetailLantaiPage() {
       setLoading(true);
       setError("");
 
-      const gedungResult = await getGedung();
+      const [gedungResult, ruanganResult, asetResult] = await Promise.all([
+        getGedung(),
+        getRuangan().catch(() => ({ data: [] })),
+        getAset().catch(() => ({ data: [] })),
+      ]);
 
       if (!gedungResult?.success) {
         throw new Error(
@@ -125,8 +132,48 @@ export default function DetailLantaiPage() {
         throw new Error("Data lantai tidak ditemukan.");
       }
 
+      const rawRooms = Array.isArray(ruanganResult)
+        ? ruanganResult
+        : Array.isArray(ruanganResult?.data)
+        ? ruanganResult.data
+        : Array.isArray(ruanganResult?.data?.data)
+        ? ruanganResult.data.data
+        : [];
+      const rawAset = Array.isArray(asetResult)
+        ? asetResult
+        : Array.isArray(asetResult?.data)
+        ? asetResult.data
+        : Array.isArray(asetResult?.data?.data)
+        ? asetResult.data.data
+        : [];
+
+      const floorKelas = Array.isArray(foundLantai.kelas) ? foundLantai.kelas : [];
+      const floorRooms = rawRooms
+        .filter((r) => String(r.lantaiId || r.lantai?.id || "") === String(id))
+        .map((r) => {
+          const asetCount = rawAset.filter(
+            (a) => String(a.ruanganId || "") === String(r.id)
+          ).length;
+          const connectedKelas = floorKelas.find(
+            (k) => String(k.ruanganId || k.ruangan?.id || "") === String(r.id)
+          );
+          const ket = String(r.keterangan || "").toLowerCase();
+          const statusText = ket.includes("perbaikan")
+            ? "perbaikan"
+            : ket.includes("nonaktif")
+            ? "nonaktif"
+            : "aktif";
+          return {
+            ...r,
+            asetCount,
+            connectedKelas,
+            statusText,
+          };
+        });
+
       setData(foundLantai);
       setGedung(foundGedung);
+      setRuanganList(floorRooms);
     } catch (err) {
       console.error(err);
       setError(
@@ -320,7 +367,7 @@ export default function DetailLantaiPage() {
 
                   <button
                     onClick={() =>
-                      router.push(`/admin/sarpras/lantai/edit/${data.id}`)
+                      router.push(`/admin/sarpras/gedung/lantai/edit/${data.id}`)
                     }
                     className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold text-[var(--color-card)] transition-all ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 active:scale-[0.98]`}
                   >
@@ -562,38 +609,101 @@ export default function DetailLantaiPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr>
-                          <td colSpan={7} className="px-6 py-12 text-center">
-                            <div
-                              className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeSoftSurface}`}
-                            >
-                              <DoorOpen size={26} className="text-[var(--color-primary)]" />
-                            </div>
-
-                            <h3 className="theme-text-secondary mt-3.5 text-sm font-semibold">
-                              Belum Ada Data Ruangan
-                            </h3>
-
-                            <p className="theme-text-muted mt-1 text-xs max-w-sm mx-auto leading-relaxed">
-                              Data ruangan pada lantai ini belum tersedia. Modul Pengelolaan Ruangan siap digunakan dan sedang menunggu endpoint integrasi Backend.
-                            </p>
-
-                            <div className="mt-4 flex justify-center gap-2.5">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  router.push(
-                                    `/admin/sarpras/gedung/lantai/${data.id}/ruangan/tambah`
-                                  )
-                                }
-                                className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition`}
+                        {ruanganList.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="px-6 py-12 text-center">
+                              <div
+                                className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeSoftSurface}`}
                               >
-                                <Plus size={14} />
-                                Tambah Ruangan Pertama
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
+                                <DoorOpen size={26} className="text-[var(--color-primary)]" />
+                              </div>
+
+                              <h3 className="theme-text-secondary mt-3.5 text-sm font-semibold">
+                                Belum Ada Data Ruangan
+                              </h3>
+
+                              <p className="theme-text-muted mt-1 text-xs max-w-sm mx-auto leading-relaxed">
+                                Belum ada ruangan fisik yang terdaftar pada lantai ini. Tambahkan ruangan baru melalui tombol di bawah.
+                              </p>
+
+                              <div className="mt-4 flex justify-center gap-2.5">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    router.push(
+                                      `/admin/sarpras/gedung/lantai/${data.id}/ruangan/tambah`
+                                    )
+                                  }
+                                  className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition`}
+                                >
+                                  <Plus size={14} />
+                                  Tambah Ruangan Pertama
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : (
+                          ruanganList.map((room, idx) => (
+                            <tr
+                              key={room.id}
+                              className={`theme-border border-b last:border-b-0 ${themeNeutralHover} transition`}
+                            >
+                              <td className="px-6 py-3.5 text-xs font-mono theme-text-muted">
+                                {idx + 1}
+                              </td>
+                              <td className="px-6 py-3.5">
+                                <p className="theme-text text-sm font-semibold">{room.nama}</p>
+                                <p className="theme-text-muted text-xs">
+                                  Kapasitas: {room.kapasitas ?? 0} orang
+                                </p>
+                              </td>
+                              <td className="px-6 py-3.5 text-xs font-mono theme-text-secondary">
+                                {room.lokasi || "-"}
+                              </td>
+                              <td className="px-6 py-3.5">
+                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] theme-success">
+                                  {room.statusText}
+                                </span>
+                              </td>
+                              <td className="px-6 py-3.5 text-xs theme-text-secondary">
+                                {room.connectedKelas?.nama || (
+                                  <span className="theme-text-muted italic">Belum terhubung</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-3.5 text-xs theme-text-secondary">
+                                {room.asetCount} unit
+                              </td>
+                              <td className="px-6 py-3.5 text-right">
+                                <div className="inline-flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      router.push(
+                                        `/admin/sarpras/gedung/lantai/${data.id}/ruangan/${room.id}`
+                                      )
+                                    }
+                                    title="Detail Ruangan"
+                                    className="rounded-lg p-1.5 theme-text-secondary hover:text-[var(--color-primary)] transition"
+                                  >
+                                    <Eye size={15} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      router.push(
+                                        `/admin/sarpras/gedung/lantai/${data.id}/ruangan/${room.id}/edit`
+                                      )
+                                    }
+                                    title="Edit Ruangan"
+                                    className="rounded-lg p-1.5 theme-text-secondary hover:text-[var(--color-primary)] transition"
+                                  >
+                                    <Pencil size={15} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>

@@ -1,19 +1,7 @@
 
-const RAW_API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+import { getToken, getCleanApiBase } from "../lib/auth";
 
-const API_BASE = (() => {
-  const base = RAW_API_BASE.replace(/\/+$/, "");
-
-  if (base.endsWith("/api")) {
-    return base;
-  }
-
-  return `${base}/api`;
-})();
-
-
-import { getToken } from "../lib/auth";
+const API_BASE = getCleanApiBase();
 
 
 const apiFetch = async (

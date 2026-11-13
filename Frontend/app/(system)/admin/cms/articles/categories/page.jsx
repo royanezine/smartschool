@@ -345,7 +345,7 @@ export default function ArticleCategoriesPage() {
               </div>
               <h2 className="theme-text mt-5 text-lg font-bold tracking-tight">Hapus Kategori?</h2>
               <p className="theme-text-secondary mt-2 text-sm leading-6">
-                Kamu yakin ingin menghapus kategori <span className="theme-text font-semibold">"{deleteTarget.nama}"</span>?
+                Kamu yakin ingin menghapus kategori <span className="theme-text font-semibold">&quot;{deleteTarget.nama}&quot;</span>?
               </p>
             </div>
             <div className="theme-card-soft theme-border-soft flex flex-col-reverse gap-2 border-t px-6 py-4 sm:flex-row sm:justify-end">

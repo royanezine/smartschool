@@ -9,7 +9,8 @@ import {
   Fingerprint, ShieldCheck, Edit3, Trash2, Loader2, AlertCircle,
   CheckCircle2, XCircle, BriefcaseBusiness, Clock3, RefreshCw, ExternalLink,
 } from "lucide-react";
-import { apiFetch } from "../../../../../../lib/api";
+import { apiFetch } from "@/lib/api";
+import { getBackendOrigin } from "@/lib/auth";
 
 const themePrimarySoft = "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 const themePrimarySoftBorder = "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
@@ -19,8 +20,7 @@ const themeCardShadow = "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_
 const themePrimaryShadow = "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
 function getBackendBaseUrl() {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  return apiUrl.trim().replace(/\/api\/v1\/?$/i, "").replace(/\/api\/?$/i, "").replace(/\/+$/, "");
+  return getBackendOrigin();
 }
 
 function getBackendFileUrl(filePath) {

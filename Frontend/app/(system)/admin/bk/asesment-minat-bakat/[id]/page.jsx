@@ -7,7 +7,7 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import CanAccess from "@/app/components/auth/CanAccess";
 
-import { getAsesmenMinatBakat } from "@/services/bk.service";
+import { getAsesmenMinatBakatById } from "@/services/bk.service";
 
 export default function DetailAsesmenPage() {
   const router = useRouter();
@@ -23,12 +23,7 @@ export default function DetailAsesmenPage() {
       try {
         setLoading(true);
 
-        const result = await getAsesmenMinatBakat();
-        const list = Array.isArray(result) ? result : [];
-
-        const item = list.find(
-          (x) => String(x.id) === String(id)
-        );
+        const item = await getAsesmenMinatBakatById(String(id));
 
         if (!item) {
           throw new Error(

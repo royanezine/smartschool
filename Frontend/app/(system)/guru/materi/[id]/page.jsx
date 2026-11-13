@@ -21,6 +21,7 @@ import {
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { getBackendOrigin } from "@/lib/auth";
 
 import {
   getMateriPembelajaranById,
@@ -28,11 +29,7 @@ import {
 } from "@/services/materiPembelajaran.service";
 
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
-).replace(/\/+$/, "");
-
-const FILE_BASE_URL = API_URL.replace(/\/api$/, "");
+const FILE_BASE_URL = getBackendOrigin();
 
 
 const themePrimaryGradient =

@@ -379,7 +379,7 @@ export default function TambahSekolahCabangPage() {
                         className="theme-text w-full bg-transparent outline-none"
                       />
                       <span className="theme-text-muted ml-1 shrink-0 font-mono text-xs">
-                        .smartschool.id
+                        .smartschool.citrasolusi.id
                       </span>
                     </div>
                   </div>

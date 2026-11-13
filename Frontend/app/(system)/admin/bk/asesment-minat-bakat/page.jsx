@@ -39,19 +39,12 @@ export default function AsesmenMinatBakatPage() {
     } catch (err) {
       const status = err?.status;
 
-      // Endpoint /api/bk/asesmen-minat-bakat belum tersedia di backend.
-      // Pesan error mentah server tidak ditampilkan ke pengguna.
-      if (
-        status === 400 ||
-        status === 404 ||
-        status === 500 ||
-        status === 501 ||
-        status === 503
-      ) {
+      if (status === 404 || status === 501) {
         setData([]);
         setBackendGap(true);
         setError("");
       } else {
+        setBackendGap(false);
         setError(
           err?.message ||
             "Gagal mengambil data asesmen."
@@ -80,17 +73,12 @@ export default function AsesmenMinatBakatPage() {
     } catch (err) {
       const status = err?.status;
 
-      if (
-        status === 400 ||
-        status === 404 ||
-        status === 500 ||
-        status === 501 ||
-        status === 503
-      ) {
+      if (status === 404 || status === 501) {
         setData([]);
         setBackendGap(true);
         setError("");
       } else {
+        setBackendGap(false);
         setError(
           err?.message ||
             "Gagal memuat ulang data."

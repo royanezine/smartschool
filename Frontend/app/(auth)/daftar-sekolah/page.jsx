@@ -877,7 +877,7 @@ function DaftarSekolahContent() {
                           <p className="text-xs font-medium text-[#475569]">
                             Alamat akses:
                             <span className="ml-1 font-bold text-[#155DFC]">
-                              {subdomain}.smartschool.id
+                              {subdomain}.smartschool.citrasolusi.id
                             </span>
                           </p>
                         </div>
@@ -1396,7 +1396,7 @@ function DaftarSekolahContent() {
                 {!isYayasan && (
                   <SummaryRow
                     label="Alamat akses"
-                    value={subdomain ? `${subdomain}.smartschool.id` : ""}
+                    value={subdomain ? `${subdomain}.smartschool.citrasolusi.id` : ""}
                   />
                 )}
                 <SummaryRow

@@ -314,7 +314,9 @@ export default function TambahSiswaPage() {
   }, []);
 
   useEffect(() => {
-    loadKelas();
+    Promise.resolve().then(() => {
+      loadKelas();
+    });
   }, [loadKelas]);
 
   const handleChange = (event) => {
@@ -577,6 +579,10 @@ export default function TambahSiswaPage() {
       ) {
         return `${label} tidak valid.`;
       }
+    }
+
+    if (form.namaWaliPesertaDidik.trim().length > 20) {
+      return "Nama wali peserta didik maksimal 20 karakter.";
     }
 
     return null;
