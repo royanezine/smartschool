@@ -8,4 +8,5 @@ export const pendaftarQuerySchema = z.object({
   jalurPpdbId: z.string().uuid().optional(),
   gelombangPpdbId: z.string().uuid().optional(),
   status: z.enum(["menunggu", "lulus", "ditolak"]).optional(),
+  jurusanId: z.string().uuid().optional(),
 });

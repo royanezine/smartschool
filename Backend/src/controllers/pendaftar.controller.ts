@@ -18,6 +18,7 @@ function pendaftarFilter(req: AuthRequest) {
     ...(query.jalurPpdbId && { jalurPpdbId: query.jalurPpdbId }),
     ...(query.gelombangPpdbId && { gelombangPpdbId: query.gelombangPpdbId }),
     ...(query.status && { status: query.status }),
+    ...(query.jurusanId && { jurusanId: query.jurusanId }),
     ...(query.search && {
       OR: [
         { namaLengkap: { contains: query.search, mode: "insensitive" } },
@@ -51,7 +52,7 @@ export async function getPendaftar(req: AuthRequest, res: Response, next: NextFu
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
-        include: { jalurPpdb: true, gelombangPpdb: true, hasilSeleksiPpdb: true },
+        include: { jalurPpdb: true, gelombangPpdb: true, hasilSeleksiPpdb: true, jurusan: true },
         orderBy: [{ dibuatPada: "desc" }, { id: "asc" }],
       }),
       countPendaftar(where),
@@ -80,6 +81,7 @@ export async function getDetailPendaftar(req: AuthRequest, res: Response, next: 
       where: { id, dihapusPada: null, ...(sekolahId && { sekolahId }) },
       include: {
         jalurPpdb: true, gelombangPpdb: true,
+        jurusan: true,
         berkasPpdb: { where: { dihapusPada: null }, orderBy: { dibuatPada: "asc" } },
         hasilSeleksiPpdb: true,
         pengguna: { select: { id: true, namaLengkap: true, namaPengguna: true, nisn: true } },
