@@ -7,9 +7,10 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
 import {
-  getAsesmenMinatBakat,
+  getAsesmenMinatBakatById,
   updateAsesmenMinatBakat,
 } from "@/services/bk.service";
+import { getSemuaSiswa } from "@/services/siswa.service";
 
 
 const inputClass =
@@ -24,6 +25,7 @@ export default function EditAsesmenPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [siswaOptions, setSiswaOptions] = useState([]);
 
   const [form, setForm] = useState({
     siswaId: "",
@@ -44,15 +46,19 @@ export default function EditAsesmenPage() {
       try {
         setLoading(true);
 
-        const result = await getAsesmenMinatBakat();
+        const [item, siswaRes] = await Promise.all([
+          getAsesmenMinatBakatById(String(id)),
+          getSemuaSiswa({ limit: 1000 }).catch(() => ({ data: [] })),
+        ]);
 
-        const list = Array.isArray(result)
-          ? result
+        const rows = Array.isArray(siswaRes?.data?.data)
+          ? siswaRes.data.data
+          : Array.isArray(siswaRes?.data)
+          ? siswaRes.data
+          : Array.isArray(siswaRes)
+          ? siswaRes
           : [];
-
-        const item = list.find(
-          (x) => String(x.id) === String(id)
-        );
+        setSiswaOptions(rows);
 
         if (!item) {
           throw new Error(
@@ -264,21 +270,32 @@ export default function EditAsesmenPage() {
 
 
                     <Field
-                      label="Siswa ID"
+                      label="Siswa"
                       required
                     >
-                      <input
+                      <select
                         required
                         value={form.siswaId}
                         onChange={(e) =>
                           setForm({
                             ...form,
-                            siswaId:
-                              e.target.value,
+                            siswaId: e.target.value,
                           })
                         }
                         className={inputClass}
-                      />
+                      >
+                        <option value="">-- Pilih Siswa --</option>
+                        {form.siswaId &&
+                          !siswaOptions.some((s) => String(s.id) === String(form.siswaId)) && (
+                            <option value={form.siswaId}>{form.siswaId}</option>
+                          )}
+                        {siswaOptions.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.namaLengkap || s.user?.namaLengkap || s.id}
+                            {s.nisn || s.nis ? ` (${s.nisn || s.nis})` : ""}
+                          </option>
+                        ))}
+                      </select>
                     </Field>
 
 

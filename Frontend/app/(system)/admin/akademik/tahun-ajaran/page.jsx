@@ -444,7 +444,7 @@ export default function AdminTahunAjaranPage() {
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <div className="flex items-center gap-3">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-xl">
                         <Filter size={16} />
                       </div>
                       <div>
@@ -661,7 +661,7 @@ export default function AdminTahunAjaranPage() {
                                 ) : (
                                   <div className="flex flex-col gap-2">
                                     <div className="flex items-center gap-2">
-                                      <span className="theme-info inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+                                      <span className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold">
                                         <Users size={13} />
                                         {daftarKelas.length} kelas
                                       </span>
@@ -685,7 +685,7 @@ export default function AdminTahunAjaranPage() {
                                         {daftarKelas.map((kelasItem) => (
                                           <Link
                                             key={kelasItem.id}
-                                            href={`/admin/kelas/${kelasItem.id}`}
+                                            href={`/admin/akademik/kelas/${kelasItem.id}`}
                                             className="theme-card-soft rounded-lg border theme-border px-2.5 py-1.5 text-xs font-medium theme-text-secondary transition hover:theme-info"
                                           >
                                             {kelasItem?.nama || "Kelas"}
@@ -719,7 +719,7 @@ export default function AdminTahunAjaranPage() {
                                   <Link
                                     href={`/admin/akademik/tahun-ajaran/${item.id}`}
                                     title="Detail"
-                                    className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:theme-info"
+                                    className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:border theme-border theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                                   >
                                     <Eye size={16} />
                                   </Link>
@@ -827,7 +827,7 @@ export default function AdminTahunAjaranPage() {
               </section>
 
 
-              <section className="theme-info rounded-2xl border theme-border p-5">
+              <section className="border theme-border theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] rounded-2xl border theme-border p-5">
                 <div className="flex items-start gap-3">
                   <div className="theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border theme-border shadow-sm">
                     <Database size={18} />
@@ -858,14 +858,7 @@ export default function AdminTahunAjaranPage() {
 
 
 function StatCard({ label, value, icon: Icon, tone = "primary" }) {
-  const toneMap = {
-    primary: "theme-primary-soft",
-    success: "theme-success",
-    warning: "theme-warning",
-    info: "theme-info",
-    danger: "theme-danger",
-  };
-  const styles = toneMap[tone] || toneMap.primary;
+  const styles = "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
 
   return (
     <div className="theme-card rounded-xl border theme-border p-4 shadow-sm transition hover:shadow-md">

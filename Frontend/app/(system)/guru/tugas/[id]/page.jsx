@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -530,7 +530,7 @@ export default function DetailTugasPage() {
           <button
             type="button"
             onClick={() => router.push("/guru/tugas")}
-            className={`mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} transition hover:opacity-90`}
+            className={`mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${themePrimaryGradient} ${themePrimaryShadow} transition hover:opacity-90`}
           >
             <ArrowLeft size={16} />
             Kembali ke Tugas
@@ -557,7 +557,7 @@ export default function DetailTugasPage() {
           <button
             type="button"
             onClick={() => router.push("/guru/tugas")}
-            className={`mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} transition hover:opacity-90`}
+            className={`mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${themePrimaryGradient} transition hover:opacity-90`}
           >
             <ArrowLeft size={16} />
             Kembali
@@ -833,7 +833,7 @@ export default function DetailTugasPage() {
                 onClick={() =>
                   router.push(`/guru/tugas/${tugas.id}/edit`)
                 }
-                className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} transition hover:opacity-90`}
+                className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${themePrimaryGradient} ${themePrimaryShadow} transition hover:opacity-90`}
               >
                 <Pencil size={16} />
                 Edit Tugas

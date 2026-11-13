@@ -36,9 +36,8 @@ import {
   resetUserPassword,
 } from "@/services/user.service";
 
-
-const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+// Warna solid primary (tanpa #000 hardcoded) supaya ikut perubahan tema dari CMS.
+const themePrimaryGradient = "bg-[var(--color-primary)]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -46,8 +45,7 @@ const themePrimarySoft =
 const themePrimarySoftBorder =
   "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
-const themePrimaryText =
-  "text-[var(--color-primary)]";
+const themePrimaryText = "text-[var(--color-primary)]";
 
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
@@ -67,12 +65,6 @@ const themeNeutralBorder =
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
 const themeSuccessSurface =
   "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
 
@@ -81,9 +73,6 @@ const themeSuccessBorder =
 
 const themeWarningSurface =
   "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
-
-const themeWarningBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
 const themeDangerSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -94,6 +83,8 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
+// Pengganti class `theme-input`: input mengikuti token tema, sama seperti Log Aktivitas.
+const themeInput = `border ${themeNeutralBorder} ${themeNeutralSurface} theme-text`;
 
 export default function KelolaUserPage() {
   const router = useRouter();
@@ -133,7 +124,6 @@ export default function KelolaUserPage() {
 
   const [actionLoading, setActionLoading] = useState(false);
 
-
   const fetchUsers = useCallback(
     async (isRefresh = false) => {
       try {
@@ -149,19 +139,11 @@ export default function KelolaUserPage() {
           page,
           limit,
           search: search.trim(),
-          status:
-            statusFilter !== "semua"
-              ? statusFilter
-              : undefined,
-          role:
-            roleFilter !== "semua"
-              ? roleFilter
-              : undefined,
+          status: statusFilter !== "semua" ? statusFilter : undefined,
+          role: roleFilter !== "semua" ? roleFilter : undefined,
         });
 
-        const data = Array.isArray(response?.data)
-          ? response.data
-          : [];
+        const data = Array.isArray(response?.data) ? response.data : [];
 
         setUsers(data);
 
@@ -172,10 +154,7 @@ export default function KelolaUserPage() {
             page,
             limit,
             totalData: data.length,
-            totalPages:
-              data.length < limit
-                ? page
-                : page + 1,
+            totalPages: data.length < limit ? page : page + 1,
           });
         }
       } catch (err) {
@@ -183,22 +162,13 @@ export default function KelolaUserPage() {
 
         setUsers([]);
 
-        setError(
-          err?.message ||
-            "Gagal mengambil data pengguna."
-        );
+        setError(err?.message || "Gagal mengambil data pengguna.");
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [
-      page,
-      limit,
-      search,
-      statusFilter,
-      roleFilter,
-    ]
+    [page, limit, search, statusFilter, roleFilter]
   );
 
   useEffect(() => {
@@ -216,24 +186,17 @@ export default function KelolaUserPage() {
     return () => clearTimeout(timer);
   }, [search, statusFilter, roleFilter]);
 
-
   const statistics = useMemo(() => {
-    const total =
-      pagination.totalData || users.length;
+    const total = pagination.totalData || users.length;
 
-    const active = users.filter((user) =>
-      isActiveStatus(user?.status)
-    ).length;
+    const active = users.filter((user) => isActiveStatus(user?.status)).length;
 
     const inactive = users.filter(
-      (user) =>
-        !isActiveStatus(user?.status)
+      (user) => !isActiveStatus(user?.status)
     ).length;
 
     const admin = users.filter((user) =>
-      getRoleName(user)
-        .toLowerCase()
-        .includes("admin")
+      getRoleName(user).toLowerCase().includes("admin")
     ).length;
 
     return {
@@ -243,7 +206,6 @@ export default function KelolaUserPage() {
       admin,
     };
   }, [users, pagination.totalData]);
-
 
   const handleDelete = async () => {
     if (!selectedUser?.id) return;
@@ -263,14 +225,9 @@ export default function KelolaUserPage() {
 
       await fetchUsers(true);
     } catch (err) {
-      console.error(
-        "Gagal menghapus user:",
-        err
-      );
+      console.error("Gagal menghapus user:", err);
 
-      const msg =
-        err?.message ||
-        "Gagal menghapus pengguna.";
+      const msg = err?.message || "Gagal menghapus pengguna.";
       setError(msg);
       setToast({
         type: "error",
@@ -283,7 +240,6 @@ export default function KelolaUserPage() {
     }
   };
 
-
   const handleToggleStatus = (user) => {
     if (!user?.id) return;
     setStatusUserToToggle(user);
@@ -293,21 +249,15 @@ export default function KelolaUserPage() {
     if (!statusUserToToggle?.id) return;
     const user = statusUserToToggle;
 
-    const currentlyActive =
-      isActiveStatus(user.status);
+    const currentlyActive = isActiveStatus(user.status);
 
-    const newStatus = currentlyActive
-      ? "nonaktif"
-      : "aktif";
+    const newStatus = currentlyActive ? "nonaktif" : "aktif";
 
     try {
       setActionLoading(true);
       setError("");
 
-      await updateUserStatus(
-        user.id,
-        newStatus
-      );
+      await updateUserStatus(user.id, newStatus);
 
       setToast({
         type: "success",
@@ -317,14 +267,9 @@ export default function KelolaUserPage() {
 
       await fetchUsers(true);
     } catch (err) {
-      console.error(
-        "Gagal mengubah status user:",
-        err
-      );
+      console.error("Gagal mengubah status user:", err);
 
-      const msg =
-        err?.message ||
-        "Gagal mengubah status pengguna.";
+      const msg = err?.message || "Gagal mengubah status pengguna.";
       setError(msg);
       setToast({
         type: "error",
@@ -334,7 +279,6 @@ export default function KelolaUserPage() {
       setActionLoading(false);
     }
   };
-
 
   const openDeleteModal = (user) => {
     setSelectedUser(user);
@@ -349,11 +293,8 @@ export default function KelolaUserPage() {
   };
 
   const handleEdit = (user) => {
-    router.push(
-      `/super-admin/kelola-user/edit-user?id=${user.id}`
-    );
+    router.push(`/super-admin/kelola-user/edit-user?id=${user.id}`);
   };
-
 
   const handlePrevious = () => {
     if (page > 1) {
@@ -362,14 +303,10 @@ export default function KelolaUserPage() {
   };
 
   const handleNext = () => {
-    if (
-      pagination.totalPages &&
-      page < pagination.totalPages
-    ) {
+    if (pagination.totalPages && page < pagination.totalPages) {
       setPage((prev) => prev + 1);
     }
   };
-
 
   const resetFilter = () => {
     setSearch("");
@@ -378,83 +315,70 @@ export default function KelolaUserPage() {
     setPage(1);
   };
 
-
   return (
     <div className="theme-page theme-text min-h-full w-full min-w-0">
       {/* Full width: tidak ada max-width / mx-auto, sehingga selalu menempel ke sidebar saat zoom out */}
       <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-
-
         <section
           className={`relative mb-6 w-full overflow-hidden rounded-3xl ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
           <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -right-20 -top-28 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
 
-            <div className="absolute -right-20 -top-28 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-2xl" />
-
-            <div className="absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] blur-3xl" />
+            <div className="absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/8 blur-3xl" />
 
             <div
               className="absolute inset-0 opacity-[0.08]"
               style={{
                 backgroundImage:
-                  "linear-gradient(color-mix(in srgb, var(--color-card) 80%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-card) 80%, transparent) 1px, transparent 1px)",
-                backgroundSize:
-                  "32px 32px",
+                  "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
+                backgroundSize: "32px 32px",
               }}
             />
           </div>
 
           <div className="relative p-6 md:p-8">
             <div className="flex flex-col gap-7 xl:flex-row xl:items-end xl:justify-between">
-
               <div className="max-w-3xl">
-
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-3 py-1.5 text-xs font-semibold text-[var(--color-card)] backdrop-blur-sm">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
                   <ShieldCheck className="h-3.5 w-3.5" />
                   MANAJEMEN AKSES
                 </div>
 
-                <h1 className="text-3xl font-bold tracking-tight text-[var(--color-card)] md:text-4xl">
+                <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
                   Kelola User
                 </h1>
 
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] md:text-base">
-                  Kelola akun, role, akses, dan
-                  status pengguna SmartSchool
-                  dalam satu dashboard
-                  terpusat.
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-white/80 md:text-base">
+                  Kelola akun, role, akses, dan status pengguna SmartSchool
+                  dalam satu dashboard terpusat.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
-
-                  <span className="rounded-lg border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-3 py-2 text-xs font-medium text-[var(--color-card)] backdrop-blur-sm">
+                  <span className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm">
                     {statistics.total} Pengguna
                   </span>
 
-                  <span className="rounded-lg border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-3 py-2 text-xs font-medium text-[var(--color-card)] backdrop-blur-sm">
+                  <span className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm">
                     {statistics.active} Aktif
                   </span>
 
-                  <span className="rounded-lg border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-3 py-2 text-xs font-medium text-[var(--color-card)] backdrop-blur-sm">
+                  <span className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm">
                     {statistics.admin} Administrator
                   </span>
-
                 </div>
               </div>
 
               <Link
                 href="/super-admin/kelola-user/tambah"
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[color-mix(in_srgb,var(--color-card)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-5 text-sm font-semibold text-[var(--color-card)] backdrop-blur-md transition hover:bg-[color-mix(in_srgb,var(--color-card)_18%,transparent)] xl:w-auto"
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20 xl:w-auto"
               >
                 <UserPlus size={18} />
                 Tambah User
               </Link>
-
             </div>
           </div>
         </section>
-
 
         {error && (
           <div
@@ -463,15 +387,11 @@ export default function KelolaUserPage() {
             <div
               className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themeNeutralSurface} ${themeNeutralBorder}`}
             >
-              <AlertCircle
-                className={`h-5 w-5 ${themePrimaryText}`}
-              />
+              <AlertCircle className={`h-5 w-5 ${themePrimaryText}`} />
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="font-semibold theme-text">
-                Terjadi kesalahan
-              </p>
+              <p className="font-semibold theme-text">Terjadi kesalahan</p>
 
               <p className="mt-1 text-sm leading-5 theme-text-secondary">
                 {error}
@@ -488,16 +408,12 @@ export default function KelolaUserPage() {
           </div>
         )}
 
-
-        <section className="mb-6 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-
+        <section className="mb-6 grid w-full grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard
             label="Total User"
             value={statistics.total}
             description="Seluruh pengguna"
             icon={Users}
-            iconClass={`${themePrimarySoft} ${themePrimaryText}`}
-            valueClass="theme-text"
           />
 
           <StatCard
@@ -505,8 +421,6 @@ export default function KelolaUserPage() {
             value={statistics.active}
             description="Akun dapat mengakses sistem"
             icon={UserCheck}
-            iconClass={`${themeSuccessSurface} text-[var(--color-success)]`}
-            valueClass="text-[var(--color-success)]"
           />
 
           <StatCard
@@ -514,8 +428,6 @@ export default function KelolaUserPage() {
             value={statistics.inactive}
             description="Akun tidak aktif"
             icon={UserX}
-            iconClass={`${themeWarningSurface} text-[var(--color-warning)]`}
-            valueClass="text-[var(--color-warning)]"
           />
 
           <StatCard
@@ -523,128 +435,79 @@ export default function KelolaUserPage() {
             value={statistics.admin}
             description="Memiliki akses administrasi"
             icon={ShieldCheck}
-            iconClass={`${themeInfoSurface} text-[var(--color-info)]`}
-            valueClass="text-[var(--color-info)]"
           />
-
         </section>
-
 
         <section
           className={`mb-6 w-full rounded-2xl border theme-border theme-card p-5 ${themeCardShadow}`}
         >
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
-
-
             <div className="relative min-w-0 flex-1">
-
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-muted" />
 
               <input
                 type="text"
                 value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
-                }
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="Cari nama, email, username..."
-                className={`theme-input h-11 w-full rounded-xl pl-10 pr-4 text-sm outline-none transition ${themeFocus}`}
+                className={`${themeInput} h-11 w-full rounded-xl pl-10 pr-4 text-sm outline-none transition ${themeFocus}`}
               />
-
             </div>
 
-
             <div className="relative w-full xl:w-48">
-
               <Filter className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-muted" />
 
               <select
                 value={statusFilter}
-                onChange={(e) =>
-                  setStatusFilter(e.target.value)
-                }
-                className={`theme-input h-11 w-full appearance-none rounded-xl pl-10 pr-10 text-sm font-medium outline-none transition ${themeFocus}`}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className={`${themeInput} h-11 w-full appearance-none rounded-xl pl-10 pr-10 text-sm font-medium outline-none transition ${themeFocus}`}
               >
-                <option value="semua">
-                  Semua Status
-                </option>
-                <option value="aktif">
-                  Aktif
-                </option>
-                <option value="nonaktif">
-                  Nonaktif
-                </option>
+                <option value="semua">Semua Status</option>
+                <option value="aktif">Aktif</option>
+                <option value="nonaktif">Nonaktif</option>
               </select>
 
               <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-muted" />
-
             </div>
 
-
             <div className="relative w-full xl:w-52">
-
               <ShieldCheck className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-muted" />
 
               <select
                 value={roleFilter}
-                onChange={(e) =>
-                  setRoleFilter(e.target.value)
-                }
-                className={`theme-input h-11 w-full appearance-none rounded-xl pl-10 pr-10 text-sm font-medium outline-none transition ${themeFocus}`}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className={`${themeInput} h-11 w-full appearance-none rounded-xl pl-10 pr-10 text-sm font-medium outline-none transition ${themeFocus}`}
               >
-                <option value="semua">
-                  Semua Role
-                </option>
+                <option value="semua">Semua Role</option>
 
-                <option value="super_admin">
-                  Super Admin
-                </option>
+                <option value="super_admin">Super Admin</option>
 
-                <option value="admin_sekolah">
-                  Admin Sekolah
-                </option>
+                <option value="admin_sekolah">Admin Sekolah</option>
 
-                <option value="guru">
-                  Guru
-                </option>
+                <option value="guru">Guru</option>
 
-                <option value="siswa">
-                  Siswa
-                </option>
+                <option value="siswa">Siswa</option>
 
-                <option value="yayasan">
-                  Yayasan
-                </option>
+                <option value="yayasan">Yayasan</option>
               </select>
 
               <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-muted" />
-
             </div>
-
 
             <button
               type="button"
-              onClick={() =>
-                fetchUsers(true)
-              }
+              onClick={() => fetchUsers(true)}
               disabled={refreshing}
               className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border theme-border theme-card px-4 text-sm font-semibold theme-text-secondary transition hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)] hover:text-[var(--color-primary)] ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-60 xl:w-auto`}
             >
               <RefreshCw
-                className={`h-4 w-4 ${
-                  refreshing
-                    ? "animate-spin"
-                    : ""
-                }`}
+                className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
               />
               Refresh
             </button>
-
           </div>
 
-
-          {(search ||
-            statusFilter !== "semua" ||
-            roleFilter !== "semua") && (
+          {(search || statusFilter !== "semua" || roleFilter !== "semua") && (
             <div
               className={`mt-4 flex flex-wrap items-center gap-2 border-t ${themeDivider} pt-4`}
             >
@@ -655,35 +518,21 @@ export default function KelolaUserPage() {
               {search && (
                 <FilterChip
                   label={`Pencarian: ${search}`}
-                  onRemove={() =>
-                    setSearch("")
-                  }
+                  onRemove={() => setSearch("")}
                 />
               )}
 
               {statusFilter !== "semua" && (
                 <FilterChip
-                  label={`Status: ${formatStatus(
-                    statusFilter
-                  )}`}
-                  onRemove={() =>
-                    setStatusFilter(
-                      "semua"
-                    )
-                  }
+                  label={`Status: ${formatStatus(statusFilter)}`}
+                  onRemove={() => setStatusFilter("semua")}
                 />
               )}
 
               {roleFilter !== "semua" && (
                 <FilterChip
-                  label={`Role: ${formatRole(
-                    roleFilter
-                  )}`}
-                  onRemove={() =>
-                    setRoleFilter(
-                      "semua"
-                    )
-                  }
+                  label={`Role: ${formatRole(roleFilter)}`}
+                  onRemove={() => setRoleFilter("semua")}
                 />
               )}
 
@@ -698,18 +547,13 @@ export default function KelolaUserPage() {
           )}
         </section>
 
-
         <section
           className={`w-full overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
         >
-
-
           <div
             className={`flex flex-col gap-3 border-b ${themeDivider} px-6 py-5 sm:flex-row sm:items-center sm:justify-between`}
           >
-
             <div className="flex items-center gap-3">
-
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
               >
@@ -717,9 +561,7 @@ export default function KelolaUserPage() {
               </div>
 
               <div>
-                <h2 className="font-bold theme-text">
-                  Daftar Pengguna
-                </h2>
+                <h2 className="font-bold theme-text">Daftar Pengguna</h2>
 
                 <p className="mt-0.5 text-xs theme-text-muted">
                   Menampilkan{" "}
@@ -728,188 +570,118 @@ export default function KelolaUserPage() {
                   </span>{" "}
                   dari{" "}
                   <span className="font-semibold theme-text-secondary">
-                    {pagination.totalData ||
-                      users.length}
+                    {pagination.totalData || users.length}
                   </span>{" "}
                   pengguna
                 </p>
               </div>
-
             </div>
 
             <span
               className={`self-start rounded-lg ${themeNeutralSurface} px-3 py-1.5 text-xs font-semibold theme-text-secondary sm:self-auto`}
             >
-              {pagination.totalData ||
-                users.length}{" "}
-              pengguna
+              {pagination.totalData || users.length} pengguna
             </span>
-
           </div>
-
 
           {loading ? (
             <LoadingState />
           ) : users.length === 0 ? (
-            <EmptyState
-              search={search}
-              onReset={resetFilter}
-            />
+            <EmptyState search={search} onReset={resetFilter} />
           ) : (
             <>
               <div className="w-full overflow-x-auto">
                 <table className="w-full min-w-[1100px] table-auto">
-
                   <thead>
                     <tr
                       className={`border-b ${themeDivider} ${themeNeutralSurface}`}
                     >
-                      <TableHeader>
-                        Pengguna
-                      </TableHeader>
+                      <TableHeader>Pengguna</TableHeader>
 
-                      <TableHeader>
-                        Email
-                      </TableHeader>
+                      <TableHeader>Email</TableHeader>
 
-                      <TableHeader>
-                        Role
-                      </TableHeader>
+                      <TableHeader>Role</TableHeader>
 
-                      <TableHeader>
-                        Sekolah / Yayasan
-                      </TableHeader>
+                      <TableHeader>Sekolah / Yayasan</TableHeader>
 
-                      <TableHeader center>
-                        Status
-                      </TableHeader>
+                      <TableHeader center>Status</TableHeader>
 
-                      <TableHeader right>
-                        Aksi
-                      </TableHeader>
+                      <TableHeader right>Aksi</TableHeader>
                     </tr>
                   </thead>
 
                   <tbody>
                     {users.map((user) => {
-                      const active =
-                        isActiveStatus(
-                          user?.status
-                        );
+                      const active = isActiveStatus(user?.status);
 
                       return (
                         <tr
                           key={user.id}
                           className={`group border-b ${themeDivider} transition ${themeNeutralHover}`}
                         >
-
-
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-
                               <Avatar user={user} />
 
                               <div className="min-w-0">
                                 <p className="truncate text-sm font-bold theme-text">
-                                  {getUserName(
-                                    user
-                                  )}
+                                  {getUserName(user)}
                                 </p>
 
                                 <p className="mt-1 truncate text-xs theme-text-muted">
-                                  @{getUsername(
-                                    user
-                                  )}
+                                  @{getUsername(user)}
                                 </p>
                               </div>
-
                             </div>
                           </td>
 
-
                           <td className="px-6 py-4">
                             <span className="truncate text-sm theme-text-secondary">
-                              {user.email ||
-                                "-"}
+                              {user.email || "-"}
                             </span>
                           </td>
 
-
                           <td className="px-6 py-4">
-                            <RoleBadge
-                              role={getRoleName(
-                                user
-                              )}
-                            />
+                            <RoleBadge role={getRoleName(user)} />
                           </td>
-
 
                           <td className="px-6 py-4">
                             <span className="truncate text-sm theme-text-secondary">
-                              {getTenantName(
-                                user
-                              )}
+                              {getTenantName(user)}
                             </span>
                           </td>
-
 
                           <td className="px-6 py-4 text-center">
-                            <StatusBadge
-                              active={active}
-                              status={
-                                user.status
-                              }
-                            />
+                            <StatusBadge active={active} status={user.status} />
                           </td>
-
 
                           <td className="px-6 py-4">
                             <div className="flex items-center justify-end gap-1">
-
-
                               <button
                                 type="button"
                                 title="Lihat detail"
-                                onClick={() =>
-                                  handleDetail(
-                                    user
-                                  )
-                                }
+                                onClick={() => handleDetail(user)}
                                 className={`rounded-lg p-2 theme-text-muted transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
                               >
                                 <Eye className="h-4 w-4" />
                               </button>
 
-
                               <button
                                 type="button"
                                 title="Edit user"
-                                onClick={() =>
-                                  handleEdit(
-                                    user
-                                  )
-                                }
-                                className={`rounded-lg p-2 theme-text-muted transition ${themeNeutralHover} hover:text-[var(--color-warning)]`}
+                                onClick={() => handleEdit(user)}
+                                className={`rounded-lg p-2 theme-text-muted transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
                               >
                                 <Pencil className="h-4 w-4" />
                               </button>
 
-
                               <button
                                 type="button"
                                 title={
-                                  active
-                                    ? "Nonaktifkan user"
-                                    : "Aktifkan user"
+                                  active ? "Nonaktifkan user" : "Aktifkan user"
                                 }
-                                onClick={() =>
-                                  handleToggleStatus(
-                                    user
-                                  )
-                                }
-                                disabled={
-                                  actionLoading
-                                }
+                                onClick={() => handleToggleStatus(user)}
+                                disabled={actionLoading}
                                 className={`rounded-lg p-2 theme-text-muted transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50 ${
                                   active
                                     ? "hover:text-[var(--color-warning)]"
@@ -923,12 +695,11 @@ export default function KelolaUserPage() {
                                 )}
                               </button>
 
-
                               <button
                                 type="button"
                                 title="Reset kata sandi"
                                 onClick={() => setUserToResetPassword(user)}
-                                className={`rounded-lg p-2 theme-text-muted transition ${themeNeutralHover} hover:text-amber-500`}
+                                className={`rounded-lg p-2 theme-text-muted transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
                               >
                                 <KeyRound className="h-4 w-4" />
                               </button>
@@ -936,32 +707,23 @@ export default function KelolaUserPage() {
                               <button
                                 type="button"
                                 title="Hapus user"
-                                onClick={() =>
-                                  openDeleteModal(
-                                    user
-                                  )
-                                }
+                                onClick={() => openDeleteModal(user)}
                                 className={`rounded-lg p-2 theme-text-muted transition ${themeNeutralHover} hover:text-[var(--color-text)]`}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </button>
-
                             </div>
                           </td>
-
                         </tr>
                       );
                     })}
                   </tbody>
-
                 </table>
               </div>
-
 
               <div
                 className={`flex flex-col gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-6 py-4 sm:flex-row sm:items-center sm:justify-between`}
               >
-
                 <p className="text-xs theme-text-muted">
                   Halaman{" "}
                   <span className="font-semibold theme-text-secondary">
@@ -969,18 +731,14 @@ export default function KelolaUserPage() {
                   </span>{" "}
                   dari{" "}
                   <span className="font-semibold theme-text-secondary">
-                    {pagination.totalPages ||
-                      1}
+                    {pagination.totalPages || 1}
                   </span>
                 </p>
 
                 <div className="flex items-center gap-2">
-
                   <button
                     type="button"
-                    onClick={
-                      handlePrevious
-                    }
+                    onClick={handlePrevious}
                     disabled={page <= 1}
                     className={`inline-flex h-9 items-center gap-1 rounded-lg border theme-border theme-card px-3 text-sm font-medium theme-text-secondary transition hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)] hover:text-[var(--color-primary)] ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
                   >
@@ -991,25 +749,18 @@ export default function KelolaUserPage() {
                   <button
                     type="button"
                     onClick={handleNext}
-                    disabled={
-                      page >=
-                      (pagination.totalPages ||
-                        1)
-                    }
+                    disabled={page >= (pagination.totalPages || 1)}
                     className={`inline-flex h-9 items-center gap-1 rounded-lg border theme-border theme-card px-3 text-sm font-medium theme-text-secondary transition hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)] hover:text-[var(--color-primary)] ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
                   >
                     Berikutnya
                     <ChevronRight className="h-4 w-4" />
                   </button>
-
                 </div>
               </div>
             </>
           )}
-
         </section>
       </div>
-
 
       {showDeleteModal && (
         <ModalOverlay
@@ -1022,12 +773,10 @@ export default function KelolaUserPage() {
           <div
             className={`w-full max-w-md overflow-hidden rounded-3xl theme-card ${themeCardShadow}`}
           >
-
             <div
               className={`flex items-start justify-between border-b ${themeDivider} ${themeNeutralSurface} p-5`}
             >
               <div className="flex items-center gap-3">
-
                 <div
                   className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeDangerSurface} ${themeDangerBorder} border theme-text`}
                 >
@@ -1043,14 +792,11 @@ export default function KelolaUserPage() {
                     Konfirmasi penghapusan akun
                   </p>
                 </div>
-
               </div>
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowDeleteModal(false)
-                }
+                onClick={() => setShowDeleteModal(false)}
                 disabled={actionLoading}
                 className={`flex h-9 w-9 items-center justify-center rounded-xl theme-text-muted transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
               >
@@ -1059,14 +805,10 @@ export default function KelolaUserPage() {
             </div>
 
             <div className="p-5">
-
               <p className="text-sm leading-6 theme-text-secondary">
-                Apakah kamu yakin ingin
-                menghapus pengguna{" "}
+                Apakah kamu yakin ingin menghapus pengguna{" "}
                 <span className="font-bold theme-text">
-                  {getUserName(
-                    selectedUser
-                  )}
+                  {getUserName(selectedUser)}
                 </span>
                 ?
               </p>
@@ -1075,24 +817,18 @@ export default function KelolaUserPage() {
                 className={`mt-4 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-4`}
               >
                 <p className="text-xs leading-5 theme-text-secondary">
-                  Data pengguna yang
-                  sudah dihapus tidak
-                  dapat digunakan
+                  Data pengguna yang sudah dihapus tidak dapat digunakan
                   kembali.
                 </p>
               </div>
-
             </div>
 
             <div
               className={`flex flex-col-reverse gap-2 border-t ${themeDivider} ${themeNeutralSurface} p-4 sm:flex-row sm:justify-end`}
             >
-
               <button
                 type="button"
-                onClick={() =>
-                  setShowDeleteModal(false)
-                }
+                onClick={() => setShowDeleteModal(false)}
                 disabled={actionLoading}
                 className={`rounded-xl border theme-border theme-card px-5 py-2.5 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:opacity-50`}
               >
@@ -1105,13 +841,10 @@ export default function KelolaUserPage() {
                 disabled={actionLoading}
                 className={`inline-flex items-center justify-center gap-2 rounded-xl ${themeDangerSurface} border ${themeDangerBorder} px-5 py-2.5 text-sm font-bold theme-text transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60`}
               >
-                {actionLoading && (
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                )}
+                {actionLoading && <RefreshCw className="h-4 w-4 animate-spin" />}
 
                 Hapus Pengguna
               </button>
-
             </div>
           </div>
         </ModalOverlay>
@@ -1194,10 +927,10 @@ export default function KelolaUserPage() {
                   type="button"
                   onClick={confirmToggleStatus}
                   disabled={actionLoading}
-                  className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition ${
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90 ${
                     isActiveStatus(statusUserToToggle.status)
-                      ? "bg-amber-600 hover:bg-amber-700"
-                      : "bg-emerald-600 hover:bg-emerald-700"
+                      ? "bg-[var(--color-warning)]"
+                      : "bg-[var(--color-success)]"
                   } disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   {actionLoading ? "Memproses..." : "Ya, Lanjutkan"}
@@ -1228,11 +961,17 @@ export default function KelolaUserPage() {
           className="fixed bottom-5 right-5 z-[110] flex items-center gap-3 rounded-xl border theme-border theme-card p-4 shadow-xl max-w-md animate-in fade-in slide-in-from-bottom-2"
         >
           {toast.type === "warning" ? (
-            <AlertCircle size={18} className="text-[var(--color-warning)] shrink-0" />
+            <AlertCircle
+              size={18}
+              className="text-[var(--color-warning)] shrink-0"
+            />
           ) : toast.type === "error" ? (
-            <XCircle size={18} className="text-red-500 shrink-0" />
+            <XCircle size={18} className="text-[var(--color-danger)] shrink-0" />
           ) : (
-            <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+            <CheckCircle2
+              size={18}
+              className="text-[var(--color-success)] shrink-0"
+            />
           )}
           <p className="text-xs sm:text-sm theme-text flex-1">{toast.message}</p>
           <button
@@ -1249,20 +988,11 @@ export default function KelolaUserPage() {
   );
 }
 
-
-function TableHeader({
-  children,
-  center = false,
-  right = false,
-}) {
+function TableHeader({ children, center = false, right = false }) {
   return (
     <th
       className={`px-6 py-4 text-[11px] font-bold uppercase tracking-wider theme-text-muted ${
-        center
-          ? "text-center"
-          : right
-            ? "text-right"
-            : "text-left"
+        center ? "text-center" : right ? "text-right" : "text-left"
       }`}
     >
       {children}
@@ -1270,55 +1000,31 @@ function TableHeader({
   );
 }
 
-
-function StatCard({
-  label,
-  value,
-  description,
-  icon: Icon,
-  iconClass,
-  valueClass = "theme-text",
-}) {
+// Semua StatCard memakai warna primary yang sama, sama seperti halaman Log Aktivitas.
+function StatCard({ label, value, description, icon: Icon }) {
   return (
     <div
-      className={`group min-w-0 rounded-2xl border theme-border theme-card p-5 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_8%,transparent)]`}
+      className={`min-w-0 rounded-2xl border theme-border theme-card p-4 ${themeCardShadow}`}
     >
-      <div className="flex items-start justify-between gap-4">
-
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+        >
+          <Icon size={17} />
+        </div>
         <div className="min-w-0">
-
-          <p className="text-sm font-medium theme-text-secondary">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
             {label}
           </p>
-
-          <p
-            className={`mt-2 text-3xl font-bold tracking-tight ${valueClass}`}
-          >
-            {value}
-          </p>
-
-          <p className="mt-1 text-xs theme-text-muted">
-            {description}
-          </p>
-
+          <p className="truncate text-lg font-semibold theme-text">{value}</p>
+          <p className="truncate text-[11px] theme-text-muted">{description}</p>
         </div>
-
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${iconClass}`}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-
       </div>
     </div>
   );
 }
 
-
-function FilterChip({
-  label,
-  onRemove,
-}) {
+function FilterChip({ label, onRemove }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-1.5 text-xs font-medium ${themePrimaryText}`}
@@ -1336,36 +1042,21 @@ function FilterChip({
   );
 }
 
-
-function Avatar({
-  user,
-  large = false,
-}) {
-  const image =
-    user?.avatar ||
-    user?.fotoProfil ||
-    null;
+function Avatar({ user, large = false }) {
+  const image = user?.avatar || user?.fotoProfil || null;
 
   const name = getUserName(user);
 
-  const initial =
-    name?.trim()?.charAt(0)?.toUpperCase() ||
-    "U";
+  const initial = name?.trim()?.charAt(0)?.toUpperCase() || "U";
 
   return (
     <div
       className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl ${themePrimarySoft} ${themePrimaryText} font-bold ${
-        large
-          ? "h-16 w-16 text-xl"
-          : "h-10 w-10 text-sm"
+        large ? "h-16 w-16 text-xl" : "h-10 w-10 text-sm"
       }`}
     >
       {image ? (
-        <img
-          src={image}
-          alt={name}
-          className="h-full w-full object-cover"
-        />
+        <img src={image} alt={name} className="h-full w-full object-cover" />
       ) : (
         initial
       )}
@@ -1373,48 +1064,17 @@ function Avatar({
   );
 }
 
-
 function RoleBadge({ role }) {
-  const normalized = String(role || "")
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
-
-  let className = `${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary`;
-
-  if (normalized.includes("super_admin")) {
-    className = `${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText}`;
-  } else if (
-    normalized.includes("admin_sekolah")
-  ) {
-    className = `${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)]`;
-  } else if (
-    normalized.includes("guru")
-  ) {
-    className = `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`;
-  } else if (
-    normalized.includes("siswa")
-  ) {
-    className = `${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)]`;
-  } else if (
-    normalized.includes("yayasan")
-  ) {
-    className = `${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText}`;
-  }
-
   return (
     <span
-      className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold ${className}`}
+      className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText}`}
     >
       {formatRole(role)}
     </span>
   );
 }
 
-
-function StatusBadge({
-  active,
-  status,
-}) {
+function StatusBadge({ active, status }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold ${
@@ -1434,11 +1094,9 @@ function StatusBadge({
   );
 }
 
-
 function LoadingState() {
   return (
     <div className="flex min-h-[420px] flex-col items-center justify-center px-6">
-
       <div
         className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
       >
@@ -1450,22 +1108,15 @@ function LoadingState() {
       </p>
 
       <p className="mt-1 text-xs theme-text-muted">
-        Mengambil data dari server
-        SmartSchool.
+        Mengambil data dari server SmartSchool.
       </p>
-
     </div>
   );
 }
 
-
-function EmptyState({
-  search,
-  onReset,
-}) {
+function EmptyState({ search, onReset }) {
   return (
     <div className="flex min-h-[420px] flex-col items-center justify-center px-6 text-center">
-
       <div
         className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface} theme-text-muted`}
       >
@@ -1473,9 +1124,7 @@ function EmptyState({
       </div>
 
       <h3 className="text-base font-bold theme-text">
-        {search
-          ? "Pengguna tidak ditemukan"
-          : "Belum ada pengguna"}
+        {search ? "Pengguna tidak ditemukan" : "Belum ada pengguna"}
       </h3>
 
       <p className="mt-1 max-w-md text-sm theme-text-secondary">
@@ -1493,24 +1142,16 @@ function EmptyState({
           Reset Filter
         </button>
       )}
-
     </div>
   );
 }
 
-
-function ModalOverlay({
-  children,
-  onClose,
-}) {
+function ModalOverlay({ children, onClose }) {
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)] p-4 backdrop-blur-sm"
       onMouseDown={(e) => {
-        if (
-          e.target ===
-          e.currentTarget
-        ) {
+        if (e.target === e.currentTarget) {
           onClose();
         }
       }}
@@ -1519,7 +1160,6 @@ function ModalOverlay({
     </div>
   );
 }
-
 
 function getUserName(user) {
   if (!user) return "-";
@@ -1537,12 +1177,7 @@ function getUserName(user) {
 function getUsername(user) {
   if (!user) return "-";
 
-  return (
-    user.namaPengguna ||
-    user.username ||
-    user.email ||
-    "-"
-  );
+  return user.namaPengguna || user.username || user.email || "-";
 }
 
 function getRoleName(user) {
@@ -1575,17 +1210,9 @@ function getTenantName(user) {
 function isActiveStatus(status) {
   if (!status) return false;
 
-  const normalized = String(status)
-    .toLowerCase()
-    .trim();
+  const normalized = String(status).toLowerCase().trim();
 
-  return [
-    "aktif",
-    "active",
-    "true",
-    "1",
-    "enabled",
-  ].includes(normalized);
+  return ["aktif", "active", "true", "1", "enabled"].includes(normalized);
 }
 
 function formatStatus(status) {
@@ -1593,38 +1220,19 @@ function formatStatus(status) {
     return "Tidak diketahui";
   }
 
-  const normalized = String(status)
-    .toLowerCase()
-    .trim();
+  const normalized = String(status).toLowerCase().trim();
 
-  if (
-    [
-      "aktif",
-      "active",
-      "true",
-      "1",
-    ].includes(normalized)
-  ) {
+  if (["aktif", "active", "true", "1"].includes(normalized)) {
     return "Aktif";
   }
 
-  if (
-    [
-      "nonaktif",
-      "inactive",
-      "false",
-      "0",
-      "disabled",
-    ].includes(normalized)
-  ) {
+  if (["nonaktif", "inactive", "false", "0", "disabled"].includes(normalized)) {
     return "Nonaktif";
   }
 
   return String(status)
     .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) =>
-      char.toUpperCase()
-    );
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function formatRole(role) {
@@ -1635,7 +1243,5 @@ function formatRole(role) {
   return String(role)
     .replace(/_/g, " ")
     .replace(/-/g, " ")
-    .replace(/\b\w/g, (char) =>
-      char.toUpperCase()
-    );
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }

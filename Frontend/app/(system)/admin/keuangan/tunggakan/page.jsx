@@ -27,6 +27,7 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import {
   getTunggakan,
+  getRekapTunggakanSiswa,
   batalkanTagihan,
 } from "@/services/tagihan.service";
 
@@ -37,6 +38,7 @@ export default function TrackingTunggakanPage() {
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("semua");
+  const [activeTab, setActiveTab] = useState("tagihan");
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage] = useState(10);
 
@@ -47,6 +49,21 @@ export default function TrackingTunggakanPage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [rekapPage, setRekapPage] = useState(1);
+  const [rekapList, setRekapList] = useState([]);
+  const [rekapRingkasan, setRekapRingkasan] = useState({
+    totalSiswaMenunggak: 0,
+    totalTunggakan: 0,
+  });
+  const [rekapMeta, setRekapMeta] = useState({
+    page: 1,
+    limit: 15,
+    total: 0,
+    totalPages: 1,
+  });
+  const [rekapLoading, setRekapLoading] = useState(false);
+  const [rekapError, setRekapError] = useState("");
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -116,6 +133,55 @@ export default function TrackingTunggakanPage() {
     }, 0);
     return () => clearTimeout(timer);
   }, [loadData]);
+
+  const loadRekapSiswa = useCallback(async () => {
+    setRekapLoading(true);
+    setRekapError("");
+    try {
+      const response = await getRekapTunggakanSiswa({
+        page: rekapPage,
+        limit: 15,
+        search: search.trim() || undefined,
+      });
+      const rows = Array.isArray(response?.data) ? response.data : [];
+      setRekapList(rows);
+      if (response?.ringkasan) {
+        setRekapRingkasan({
+          totalSiswaMenunggak:
+            Number(response.ringkasan.totalSiswaMenunggak) || 0,
+          totalTunggakan: Number(response.ringkasan.totalTunggakan) || 0,
+        });
+      }
+      if (response?.meta) {
+        setRekapMeta({
+          page: Number(response.meta.page) || 1,
+          limit: Number(response.meta.limit) || 15,
+          total: Number(response.meta.total) || rows.length,
+          totalPages: Number(response.meta.totalPages) || 1,
+        });
+      }
+    } catch (err) {
+      console.error("[TrackingTunggakan] Gagal memuat rekap siswa:", err);
+      setRekapError(
+        err?.message || "Gagal memuat rekap tunggakan per siswa."
+      );
+    } finally {
+      setRekapLoading(false);
+    }
+  }, [rekapPage, search]);
+
+  useEffect(() => {
+    if (activeTab !== "rekap") return;
+    let active = true;
+    void Promise.resolve().then(() => {
+      if (active) {
+        loadRekapSiswa();
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [activeTab, loadRekapSiswa]);
 
   const totalMenunggak = tunggakan.filter(
     (t) => t.status === "Menunggak"
@@ -241,13 +307,16 @@ export default function TrackingTunggakanPage() {
 
                     <button
                       type="button"
-                      onClick={loadData}
-                      disabled={loading}
+                      onClick={() => {
+                        loadData();
+                        if (activeTab === "rekap") loadRekapSiswa();
+                      }}
+                      disabled={loading || rekapLoading}
                       className="inline-flex items-center gap-2 rounded-lg border theme-border theme-card px-4 py-2.5 text-sm font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] disabled:opacity-60"
                     >
                       <RefreshCw
                         size={16}
-                        className={loading ? "animate-spin" : ""}
+                        className={loading || rekapLoading ? "animate-spin" : ""}
                       />
                       Segarkan
                     </button>
@@ -319,6 +388,32 @@ export default function TrackingTunggakanPage() {
                 />
               </div>
 
+              {/* TAB VIEW */}
+              <div className="flex flex-wrap items-center gap-2 border-b theme-border pb-3">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("tagihan")}
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                    activeTab === "tagihan"
+                      ? "theme-primary text-white"
+                      : "theme-card border theme-border theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                  }`}
+                >
+                  Daftar Tagihan Menunggak
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("rekap")}
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                    activeTab === "rekap"
+                      ? "theme-primary text-white"
+                      : "theme-card border theme-border theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                  }`}
+                >
+                  Rekap Per Siswa
+                </button>
+              </div>
+
               {/* FILTER */}
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="relative flex-1">
@@ -332,26 +427,206 @@ export default function TrackingTunggakanPage() {
                     onChange={(e) => {
                       setSearch(e.target.value);
                       setCurrentPage(1);
+                      setRekapPage(1);
                     }}
-                    placeholder="Cari siswa, kelas, NISN, atau tagihan..."
+                    placeholder={
+                      activeTab === "rekap"
+                        ? "Cari nama siswa, NISN, atau NIS..."
+                        : "Cari siswa, kelas, NISN, atau tagihan..."
+                    }
                     className="w-full rounded-xl border theme-border theme-input py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:theme-text-placeholder focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
                   />
                 </div>
 
-                <select
-                  value={filter}
-                  onChange={(e) => {
-                    setFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="rounded-xl border theme-border theme-input px-4 py-2.5 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
-                >
-                  <option value="semua">Semua Status</option>
-                  <option value="menunggak">Menunggak</option>
-                  <option value="sebagian">Sebagian</option>
-                  <option value="lunas">Lunas</option>
-                </select>
+                {activeTab === "tagihan" && (
+                  <select
+                    value={filter}
+                    onChange={(e) => {
+                      setFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="rounded-xl border theme-border theme-input px-4 py-2.5 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
+                  >
+                    <option value="semua">Semua Status</option>
+                    <option value="menunggak">Menunggak</option>
+                    <option value="sebagian">Sebagian</option>
+                    <option value="lunas">Lunas</option>
+                  </select>
+                )}
               </div>
+
+              {activeTab === "rekap" ? (
+                <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] px-5 py-3.5 text-sm">
+                    <span className="font-medium theme-text-secondary">
+                      Siswa Menunggak:{" "}
+                      <strong className="theme-text">
+                        {rekapRingkasan.totalSiswaMenunggak}
+                      </strong>
+                    </span>
+                    <span className="font-medium theme-text-secondary">
+                      Total Sisa Tunggakan:{" "}
+                      <strong className="theme-danger">
+                        Rp{" "}
+                        {Number(
+                          rekapRingkasan.totalTunggakan || 0
+                        ).toLocaleString("id-ID")}
+                      </strong>
+                    </span>
+                  </div>
+
+                  <div className="w-full overflow-x-auto">
+                    <table className="w-full min-w-[880px] text-sm">
+                      <thead>
+                        <tr className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                          <TableHead>Siswa</TableHead>
+                          <TableHead>Kelas</TableHead>
+                          <TableHead align="center">Jumlah Tagihan</TableHead>
+                          <TableHead align="right">Total Tunggakan</TableHead>
+                          <TableHead>Jatuh Tempo Tertua</TableHead>
+                          <TableHead align="center">Terlambat Maks</TableHead>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y theme-border-soft">
+                        {rekapLoading ? (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="px-4 py-12 text-center theme-text-muted"
+                            >
+                              <div className="flex flex-col items-center justify-center gap-2">
+                                <Loader2
+                                  size={28}
+                                  className="animate-spin text-[var(--color-primary)]"
+                                />
+                                <p className="text-sm">
+                                  Memuat rekap tunggakan per siswa...
+                                </p>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : rekapError ? (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="px-4 py-12 text-center theme-text-muted"
+                            >
+                              <div className="flex flex-col items-center justify-center gap-2">
+                                <AlertCircle
+                                  size={28}
+                                  className="text-[var(--color-danger)]"
+                                />
+                                <p className="text-sm font-medium text-[var(--color-danger)]">
+                                  {rekapError}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={loadRekapSiswa}
+                                  className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)] hover:underline"
+                                >
+                                  <RefreshCw size={12} /> Coba lagi
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : rekapList.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="px-4 py-12 text-center theme-text-muted"
+                            >
+                              <div className="flex flex-col items-center gap-2">
+                                <Users
+                                  size={32}
+                                  className="theme-text-placeholder"
+                                />
+                                <p className="text-sm font-medium">
+                                  Tidak ada rekap tunggakan siswa
+                                </p>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : (
+                          rekapList.map((row, idx) => (
+                            <tr
+                              key={row.siswa?.id || idx}
+                              className="transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                            >
+                              <td className="px-4 py-3.5">
+                                <p className="font-medium theme-text">
+                                  {row.siswa?.namaLengkap || "-"}
+                                </p>
+                                <p className="text-xs theme-text-muted">
+                                  NISN/NIS: {row.siswa?.nisn || row.siswa?.nis || "-"}
+                                </p>
+                              </td>
+                              <td className="px-4 py-3.5 theme-text-secondary">
+                                {row.kelas?.nama || "-"}
+                              </td>
+                              <td className="px-4 py-3.5 text-center font-semibold theme-text">
+                                {row.jumlahTagihan ?? 0}
+                              </td>
+                              <td className="px-4 py-3.5 text-right font-bold theme-danger">
+                                Rp{" "}
+                                {Number(
+                                  row.totalTunggakan || 0
+                                ).toLocaleString("id-ID")}
+                              </td>
+                              <td className="px-4 py-3.5 theme-text-secondary">
+                                {row.jatuhTempoTertua
+                                  ? String(row.jatuhTempoTertua).slice(0, 10)
+                                  : "-"}
+                              </td>
+                              <td className="px-4 py-3.5 text-center">
+                                {Number(row.hariTerlambatTerlama) > 0 ? (
+                                  <span className="rounded-full theme-danger bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-2.5 py-0.5 text-xs font-semibold">
+                                    +{row.hariTerlambatTerlama} hari
+                                  </span>
+                                ) : (
+                                  <span className="text-xs theme-text-muted">
+                                    Belum jatuh tempo
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {rekapMeta.totalPages > 1 && (
+                    <div className="flex flex-col items-start justify-between gap-3 border-t theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] px-4 py-3 sm:flex-row sm:items-center">
+                      <p className="text-sm theme-text-muted">
+                        Halaman {rekapMeta.page} dari {rekapMeta.totalPages} ({rekapMeta.total} siswa)
+                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setRekapPage((p) => Math.max(1, p - 1))}
+                          disabled={rekapMeta.page <= 1}
+                          className="rounded-lg border theme-border theme-card p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-40"
+                        >
+                          <ChevronLeft size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRekapPage((p) =>
+                              Math.min(rekapMeta.totalPages, p + 1)
+                            )
+                          }
+                          disabled={rekapMeta.page >= rekapMeta.totalPages}
+                          className="rounded-lg border theme-border theme-card p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-40"
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
 
               {/* TABEL */}
               <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
@@ -598,6 +873,8 @@ export default function TrackingTunggakanPage() {
                   </div>
                 )}
               </div>
+                </>
+              )}
 
               <footer className="border-t theme-border-soft pt-6 text-center text-xs theme-text-muted">
                 © 2026 SmartSchool • Tracking Tunggakan
@@ -682,17 +959,16 @@ function ActionButton({
 }
 
 function StatCard({ icon, label, value, color, subtext }) {
+  const primaryStyle =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
+
   const colors = {
-    emerald:
-      "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]",
-    red: "bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-[var(--color-danger)]",
-    blue: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]",
-    purple:
-      "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]",
-    amber:
-      "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]",
-    slate:
-      "bg-[color-mix(in_srgb,var(--color-text-muted)_10%,transparent)] text-[var(--color-text-muted)]",
+    emerald: primaryStyle,
+    red: primaryStyle,
+    blue: primaryStyle,
+    purple: primaryStyle,
+    amber: primaryStyle,
+    slate: primaryStyle,
   };
 
   return (

@@ -697,7 +697,7 @@ export default function PeminjamanSiswaPage() {
           <div className={`w-full space-y-6 p-4 transition-all duration-700 sm:p-6 lg:p-8 ${mounted ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}>
             <section className={`relative overflow-hidden rounded-[28px] border ${themePrimaryBorder} ${themeCardShadow} bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))]`}>
               <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] blur-3xl" />
-              <div className="absolute -bottom-36 left-[35%] h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] blur-3xl" />
+              <div className="absolute -bottom-36 left-[35%] h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] blur-3xl" />
 
               <div className="relative px-5 py-7 sm:px-7 sm:py-8 lg:px-10 lg:py-9">
                 <Link
@@ -786,16 +786,16 @@ export default function PeminjamanSiswaPage() {
                   value: overdueLoans.length,
                   description: "Melewati tanggal jatuh tempo",
                   icon: CalendarClock,
-                  color: "warning",
-                  soft: themeWarningSoft,
+                  color: "primary",
+                  soft: themePrimarySoft,
                 },
                 {
                   label: "Dikembalikan",
                   value: returnedLoans.length,
                   description: "Transaksi yang sudah selesai",
                   icon: CheckCircle2,
-                  color: "success",
-                  soft: themeSuccessSoft,
+                  color: "primary",
+                  soft: themePrimarySoft,
                 },
               ].map((item) => {
                 const Icon = item.icon;
@@ -1011,7 +1011,7 @@ export default function PeminjamanSiswaPage() {
                                   type="button"
                                   onClick={() => handleReturn(loan)}
                                   disabled={returningId === String(loan.id)}
-                                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-xs font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   {returningId === String(loan.id) ? (
                                     <Loader2 size={14} className="animate-spin" />

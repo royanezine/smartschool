@@ -11,12 +11,19 @@ function EditRedirectContent() {
   const id = searchParams.get("id");
 
   useEffect(() => {
+    const extraParams = new URLSearchParams(searchParams);
+    extraParams.delete("id");
+    const extraQs = extraParams.toString();
+    const query = extraQs ? `?${extraQs}` : "";
+
     if (id) {
-      router.replace(`/super-admin/yayasan/${id}/edit`);
+      router.replace(
+        `/super-admin/yayasan/${encodeURIComponent(String(id))}/edit${query}`
+      );
     } else {
-      router.replace("/super-admin/yayasan");
+      router.replace(`/super-admin/yayasan${query}`);
     }
-  }, [id, router]);
+  }, [id, router, searchParams]);
 
   return (
     <div className="theme-page theme-text min-h-full flex items-center justify-center p-8">
@@ -30,11 +37,13 @@ function EditRedirectContent() {
 
 export default function EditYayasanRedirectPage() {
   return (
-    <Suspense fallback={
-      <div className="theme-page theme-text min-h-full flex items-center justify-center p-8">
-        <Loader2 size={32} className="animate-spin text-[var(--color-primary)]" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="theme-page theme-text min-h-full flex items-center justify-center p-8">
+          <Loader2 size={32} className="animate-spin text-[var(--color-primary)]" />
+        </div>
+      }
+    >
       <EditRedirectContent />
     </Suspense>
   );

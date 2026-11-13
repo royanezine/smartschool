@@ -75,7 +75,7 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const inputClass = `
   h-10
@@ -410,7 +410,7 @@ export default function SuperAdminYayasanPage() {
               className={`pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full ${themePrimarySoft} opacity-70 blur-3xl`}
             />
             <div
-              className={`pointer-events-none absolute bottom-0 right-24 h-40 w-40 rounded-full ${themeInfoSoft} opacity-60 blur-3xl`}
+              className={`pointer-events-none absolute bottom-0 right-24 h-40 w-40 rounded-full ${themePrimarySoft} opacity-60 blur-3xl`}
             />
 
             <div className="relative p-5 sm:p-6 lg:p-7">
@@ -418,7 +418,7 @@ export default function SuperAdminYayasanPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[var(--color-card)] sm:h-12 sm:w-12 ${themePrimaryGradient} ${themeSmallShadow}`}
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white sm:h-12 sm:w-12 ${themePrimaryGradient} ${themeSmallShadow}`}
                     >
                       <Landmark size={22} strokeWidth={1.8} />
                     </div>
@@ -446,7 +446,7 @@ export default function SuperAdminYayasanPage() {
                 <div className="flex items-center gap-2">
                   <Link
                     href="/super-admin/yayasan/tambah"
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themeSmallShadow} transition-all hover:opacity-90`}
+                    className={`inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white ${themeSmallShadow} transition-all hover:opacity-90`}
                   >
                     <Plus size={16} strokeWidth={2} />
                     <span>Tambah Yayasan</span>
@@ -962,20 +962,20 @@ function StatCard({ label, value, icon: Icon, color }) {
       accent: "bg-[var(--color-primary)]",
     },
     success: {
-      icon: `${themeSuccessSoft} text-[var(--color-success)]`,
-      accent: "bg-[var(--color-success)]",
+      icon: `${themePrimarySoft} text-[var(--color-primary)]`,
+      accent: "bg-[var(--color-primary)]",
     },
     warning: {
-      icon: `${themeWarningSoft} text-[var(--color-warning)]`,
-      accent: "bg-[var(--color-warning)]",
+      icon: `${themePrimarySoft} text-[var(--color-primary)]`,
+      accent: "bg-[var(--color-primary)]",
     },
     danger: {
-      icon: `${themeDangerSoft} text-red-500`,
-      accent: "bg-red-500",
+      icon: `${themePrimarySoft} text-[var(--color-primary)]`,
+      accent: "bg-[var(--color-primary)]",
     },
     info: {
-      icon: `${themeInfoSoft} text-[var(--color-info)]`,
-      accent: "bg-[var(--color-info)]",
+      icon: `${themePrimarySoft} text-[var(--color-primary)]`,
+      accent: "bg-[var(--color-primary)]",
     },
   };
 

@@ -411,7 +411,7 @@ function TarikFormContent() {
         </button>
 
         <div className="flex min-w-0 flex-1 items-start gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]">
             <ArrowUpCircle size={23} />
           </div>
 
@@ -431,7 +431,7 @@ function TarikFormContent() {
 
       {/* INFO BANNER */}
       <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
           <Info size={18} />
         </div>
 
@@ -577,7 +577,7 @@ function TarikFormContent() {
                               onClick={() => pilihSiswa(siswa)}
                               className="flex w-full items-start gap-3 border-b theme-border px-4 py-3 text-left last:border-b-0 hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
                             >
-                              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                                 <UserRound size={17} />
                               </div>
 
@@ -717,7 +717,7 @@ function TarikFormContent() {
                             onClick={() => pilihAkunKas(akun)}
                             className="flex w-full items-start gap-3 border-b theme-border px-4 py-3 text-left last:border-b-0 hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
                           >
-                            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]">
                               <Wallet size={17} />
                             </div>
 

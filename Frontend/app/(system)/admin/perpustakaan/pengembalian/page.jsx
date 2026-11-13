@@ -403,7 +403,7 @@ const handlePengembalian = async () => {
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-amber-50 p-3 text-amber-700">
+                  <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-3 theme-primary-text">
                     <Clock3 size={24} />
                   </div>
                 </div>

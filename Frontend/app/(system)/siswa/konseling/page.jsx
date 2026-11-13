@@ -34,7 +34,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -544,7 +544,7 @@ export default function BookingKonselingPage() {
               h-72
               w-72
               rounded-full
-              bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]
+              bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
               blur-3xl
             "
           />
@@ -614,7 +614,7 @@ export default function BookingKonselingPage() {
                     className="
                       mt-1
                       block
-                      bg-[linear-gradient(90deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_70%,var(--color-info)))]
+                      bg-[linear-gradient(90deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]
                       bg-clip-text
                       text-transparent
                     "
@@ -663,7 +663,7 @@ export default function BookingKonselingPage() {
               left-0
               h-1
               w-full
-              bg-[linear-gradient(90deg,var(--color-primary),var(--color-info))]
+              bg-[linear-gradient(90deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]
             "
           />
         </section>
@@ -692,7 +692,7 @@ export default function BookingKonselingPage() {
                   {isLoadingHistory ? "—" : stats.diajukan}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeWarningSurface} ${themeWarningText}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
                 <Clock3 size={17} />
               </div>
             </div>
@@ -706,7 +706,7 @@ export default function BookingKonselingPage() {
                   {isLoadingHistory ? "—" : stats.dijadwalkan}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSurface} ${themeSuccessText}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
                 <CheckCircle2 size={17} />
               </div>
             </div>
@@ -720,7 +720,7 @@ export default function BookingKonselingPage() {
                   {isLoadingHistory ? "—" : stats.ditolak}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeDangerSurface} ${themeDangerText}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
                 <XOctagon size={17} />
               </div>
             </div>
@@ -734,7 +734,7 @@ export default function BookingKonselingPage() {
                   {isLoadingHistory ? "—" : stats.dibatalkan}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
                 <CircleAlert size={17} />
               </div>
             </div>
@@ -1789,7 +1789,7 @@ export default function BookingKonselingPage() {
         )}
 
         {cancelModalSesi && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
             <div
               className={`
                 theme-card

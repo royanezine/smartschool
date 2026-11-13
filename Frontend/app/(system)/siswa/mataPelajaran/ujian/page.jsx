@@ -20,7 +20,7 @@ import { getUjianByKelasMapel } from "@/services/ujian.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySurface =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -80,7 +80,7 @@ const themeWarningText =
   "text-[var(--color-warning)]";
 
 const themeTextOnPrimary =
-  "text-[var(--color-card)]";
+  "text-white";
 
 const themeCard =
   "theme-card";
@@ -375,7 +375,7 @@ function UjianPageInner() {
             className={`flex items-center gap-3.5 rounded-2xl border ${themeNeutralBorder} ${themeCard} ${themeCardShadow} p-4`}
           >
             <div
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} ${themeInfoText}`}
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySurface} ${themePrimaryText}`}
             >
               <CalendarClock size={20} />
             </div>

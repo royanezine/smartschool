@@ -17,7 +17,7 @@ import {
 import { getMonitoringAkademik } from "@/services/yayasan.service";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -134,7 +134,6 @@ export default function MonitoringAkademikPage() {
           label: "Rata-rata Nilai Global",
           value: ringkasan.rataNilaiGlobal ?? "-",
           icon: TrendingUp,
-          color: "primary",
         },
         {
           label: "Rata-rata Kehadiran",
@@ -143,42 +142,20 @@ export default function MonitoringAkademikPage() {
               ? `${ringkasan.rataKehadiranGlobal}%`
               : "-",
           icon: ClipboardCheck,
-          color: "info",
         },
         {
           label: "Total Siswa",
           value: ringkasan.totalSiswa ?? "-",
           icon: Users,
-          color: "success",
         },
         {
           label: "Tuntas KKM",
           value:
             ringkasan.tuntasKKM != null ? `${ringkasan.tuntasKKM}%` : "-",
           icon: CheckCircle,
-          color: "warning",
         },
       ]
     : [];
-
-  const colorMap = {
-    primary: {
-      bg: "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
-      text: "text-[var(--color-primary)]",
-    },
-    info: {
-      bg: "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]",
-      text: "text-[var(--color-info)]",
-    },
-    success: {
-      bg: "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
-      text: "text-[var(--color-success)]",
-    },
-    warning: {
-      bg: "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]",
-      text: "text-[var(--color-warning)]",
-    },
-  };
 
   return (
     <div className="theme-page theme-text min-h-full">
@@ -187,20 +164,20 @@ export default function MonitoringAkademikPage() {
         <section
           className={`relative overflow-hidden rounded-2xl border ${themePrimarySoftBorder} ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
-          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
           <div className="relative p-5 sm:p-6 md:p-8">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--color-card)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] text-[var(--color-card)] shadow-[0_4px_16px_color-mix(in_srgb,var(--color-text)_12%,transparent)] backdrop-blur-md sm:h-14 sm:w-14">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--color-text)_12%,transparent)] backdrop-blur-md sm:h-14 sm:w-14">
                 <ClipboardCheck className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
               <div className="min-w-0">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] sm:text-xs">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 sm:text-xs">
                   Pusat Kendali
                 </p>
-                <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl lg:text-4xl">
+                <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
                   Monitoring Akademik
                 </h1>
-                <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] sm:text-sm">
+                <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-white/80 sm:text-sm">
                   Pantau performa akademik, kehadiran, dan aktivitas pembelajaran di seluruh sekolah naungan yayasan.
                 </p>
               </div>
@@ -210,7 +187,7 @@ export default function MonitoringAkademikPage() {
 
         {/* Ringkasan Cards */}
         {loading ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
@@ -248,20 +225,17 @@ export default function MonitoringAkademikPage() {
             </div>
           </div>
         ) : ringkasan ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {summaryCards.map((card) => {
               const Icon = card.icon;
-              const colors = colorMap[card.color] || colorMap.primary;
               return (
                 <div
                   key={card.label}
                   className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${colors.bg} ${colors.text}`}
-                    >
-                      <Icon size={18} />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                      <Icon size={18} className="theme-primary-text" />
                     </div>
                     <div>
                       <p className="theme-text-secondary text-sm">{card.label}</p>
@@ -324,7 +298,7 @@ export default function MonitoringAkademikPage() {
           <h2 className="theme-text mb-4 text-base font-bold sm:text-lg">
             Pilih Modul Monitoring
           </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {subModules.map((mod) => {
               const Icon = mod.icon;
               return (
@@ -336,9 +310,9 @@ export default function MonitoringAkademikPage() {
                   <div>
                     <div className="mb-3 flex items-center justify-between">
                       <div
-                        className={`flex h-11 w-11 items-center justify-center rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)]`}
+                        className={`flex h-11 w-11 items-center justify-center rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft}`}
                       >
-                        <Icon className="h-5 w-5" />
+                        <Icon className="theme-primary-text h-5 w-5" />
                       </div>
                       <span
                         className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${mod.badgeColor}`}

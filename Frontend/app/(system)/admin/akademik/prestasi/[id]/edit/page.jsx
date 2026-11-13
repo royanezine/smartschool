@@ -837,7 +837,7 @@ export default function EditPrestasiPage() {
                         className={`mt-4 rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
                       >
                         <div className="flex items-start gap-2.5">
-                          <Info size={15} className="theme-info mt-0.5 shrink-0" />
+                          <Info size={15} className="theme-primary-text mt-0.5 shrink-0" />
                           <p className="theme-text-secondary text-[11px] leading-5">
                             Perubahan akan langsung disimpan setelah menekan tombol
                             Simpan Perubahan.

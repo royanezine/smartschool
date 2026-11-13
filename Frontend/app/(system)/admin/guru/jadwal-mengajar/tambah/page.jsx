@@ -711,18 +711,18 @@ export default function TambahJadwalMengajarPage() {
               {/* LOADING */}
 
               {(loadingData || loadingRuangan) && (
-                <div className="flex items-center gap-3 rounded-xl border p-4 theme-info theme-border">
+                <div className="flex items-center gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4">
                   <Loader2
                     size={18}
-                    className="animate-spin text-[var(--color-info)]"
+                    className="animate-spin theme-primary-text"
                   />
 
                   <div>
-                    <p className="text-sm font-semibold text-[var(--color-info)]">
+                    <p className="text-sm font-semibold theme-primary-text">
                       Mengambil data...
                     </p>
 
-                    <p className="mt-1 text-xs text-[var(--color-info)]">
+                    <p className="mt-1 text-xs theme-primary-text">
                       {loadingData &&
                         "Memuat kelas, mata pelajaran, dan guru. "}
                       {loadingRuangan &&
@@ -798,7 +798,7 @@ export default function TambahJadwalMengajarPage() {
 
                   <div className="border-b px-5 py-5 sm:px-6 theme-border-soft">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <School
                           size={17}
                           className="text-[var(--color-primary)]"
@@ -836,7 +836,7 @@ export default function TambahJadwalMengajarPage() {
                       disabled={saving || loadingData}
                       renderOption={(item) => (
                         <div className="flex min-w-0 flex-1 items-center gap-3">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                             <BookMarked
                               size={15}
                               className="text-[var(--color-primary)]"
@@ -968,7 +968,7 @@ export default function TambahJadwalMengajarPage() {
                         optional
                         renderOption={(item) => (
                           <div className="flex min-w-0 flex-1 items-center gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                               <DoorOpen
                                 size={16}
                                 className="text-[var(--color-primary)]"
@@ -1233,7 +1233,7 @@ export default function TambahJadwalMengajarPage() {
                           </p>
                         </div>
 
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <CalendarClock
                             size={17}
                             className="text-[var(--color-primary)]"
@@ -1412,7 +1412,7 @@ export default function TambahJadwalMengajarPage() {
 
                   {/* INFORMASI */}
 
-                  <section className="rounded-xl border p-5 theme-info theme-border">
+                  <section className="rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-5">
                     <div className="flex items-start gap-3">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-card shadow-sm">
                         <Info

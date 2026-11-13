@@ -221,10 +221,10 @@ function StatusBadge({ status }) {
 
 function StatCard({ icon: Icon, label, value, tone = "primary" }) {
   const toneMap = {
-    primary: "theme-primary-soft",
-    warning: "theme-warning",
-    danger: "theme-danger",
-    success: "theme-success",
+    primary: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    warning: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    danger: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    success: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
   return (
     <div className="theme-card rounded-xl border theme-border p-4 shadow-sm sm:p-5">

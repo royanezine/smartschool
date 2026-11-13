@@ -30,7 +30,7 @@ const kondisiStyle = {
     label: "Baik",
     text: "theme-success",
     background:
-      "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
     border:
       "border-[color-mix(in_srgb,var(--color-success)_25%,transparent)]",
   },
@@ -38,7 +38,7 @@ const kondisiStyle = {
     label: "Rusak Ringan",
     text: "theme-warning",
     background:
-      "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
+      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
     border:
       "border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)]",
   },
@@ -46,7 +46,7 @@ const kondisiStyle = {
     label: "Rusak Berat",
     text: "theme-danger",
     background:
-      "bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]",
+      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
     border:
       "border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)]",
   },
@@ -107,6 +107,38 @@ function getKondisi(value) {
       border:
         "border-[color-mix(in_srgb,var(--color-text)_15%,transparent)]",
     }
+  );
+}
+
+function Stat({ label, value, subtitle, icon: Icon }) {
+  const toneClass =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
+
+  return (
+    <div className="theme-card h-full rounded-2xl border theme-border p-5 shadow-xl transition hover:shadow-lg">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider theme-text-muted">
+            {label}
+          </p>
+          <p className="mt-2 text-3xl font-bold tracking-tight theme-text">
+            {value}
+          </p>
+        </div>
+
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ${toneClass}`}
+        >
+          <Icon size={20} />
+        </div>
+      </div>
+
+      {subtitle && (
+        <p className="mt-3 text-xs font-medium theme-text-muted">
+          {subtitle}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -333,104 +365,42 @@ export default function FasilitasPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
-                <div
-                  className={`theme-card theme-border rounded-2xl border p-5 ${themeCardShadow}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="theme-text-secondary text-sm">
-                        Total Fasilitas
-                      </p>
-                      <p className="theme-text mt-2 text-2xl font-bold">
-                        {loading ? "..." : statistik.total}
-                      </p>
-                    </div>
+              {/* FIX: grid hanya sampai 4 kolom, card seragam mengikuti warna tema */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Stat
+                  label="Total Fasilitas"
+                  value={loading ? "..." : statistik.total}
+                  subtitle="Seluruh fasilitas terdaftar"
+                  icon={LayoutGrid}
+                />
 
-                    <div className={`rounded-xl p-3 ${themePrimarySoft}`}>
-                      <LayoutGrid size={23} className="theme-primary" />
-                    </div>
-                  </div>
-                  <p className="theme-text-muted mt-3 text-xs">
-                    Seluruh fasilitas terdaftar
-                  </p>
-                </div>
+                <Stat
+                  label="Kondisi Baik"
+                  value={loading ? "..." : statistik.baik}
+                  subtitle="Fasilitas dalam kondisi baik"
+                  icon={CheckCircle2}
+                />
 
-                <div
-                  className={`theme-card theme-border rounded-2xl border p-5 ${themeCardShadow}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="theme-text-secondary text-sm">
-                        Kondisi Baik
-                      </p>
-                      <p className="theme-text mt-2 text-2xl font-bold">
-                        {loading ? "..." : statistik.baik}
-                      </p>
-                    </div>
+                <Stat
+                  label="Rusak Ringan"
+                  value={loading ? "..." : statistik.rusakRingan}
+                  subtitle="Membutuhkan perbaikan ringan"
+                  icon={Wrench}
+                />
 
-                    <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] p-3">
-                      <CheckCircle2
-                        size={23}
-                        className="theme-success"
-                      />
-                    </div>
-                  </div>
-                  <p className="theme-text-muted mt-3 text-xs">
-                    Fasilitas dalam kondisi baik
-                  </p>
-                </div>
-
-                <div
-                  className={`theme-card theme-border rounded-2xl border p-5 ${themeCardShadow}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="theme-text-secondary text-sm">
-                        Rusak Ringan
-                      </p>
-                      <p className="theme-text mt-2 text-2xl font-bold">
-                        {loading ? "..." : statistik.rusakRingan}
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-3">
-                      <Wrench size={23} className="theme-warning" />
-                    </div>
-                  </div>
-                  <p className="theme-text-muted mt-3 text-xs">
-                    Membutuhkan perbaikan ringan
-                  </p>
-                </div>
-
-                <div
-                  className={`theme-card theme-border rounded-2xl border p-5 ${themeCardShadow}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="theme-text-secondary text-sm">
-                        Rusak Berat
-                      </p>
-                      <p className="theme-text mt-2 text-2xl font-bold">
-                        {loading ? "..." : statistik.rusakBerat}
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] p-3">
-                      <XCircle size={23} className="theme-danger" />
-                    </div>
-                  </div>
-                  <p className="theme-text-muted mt-3 text-xs">
-                    Membutuhkan penanganan lebih lanjut
-                  </p>
-                </div>
+                <Stat
+                  label="Rusak Berat"
+                  value={loading ? "..." : statistik.rusakBerat}
+                  subtitle="Membutuhkan penanganan lebih lanjut"
+                  icon={XCircle}
+                />
               </div>
 
               <div
                 className={`theme-card theme-border rounded-2xl border p-4 sm:p-5 ${themeCardShadow}`}
               >
                 <div className="mb-4 flex items-center gap-2">
-                  <Filter size={17} className="theme-primary" />
+                  <Filter size={17} className="theme-primary-text" />
                   <h2 className="theme-text text-sm font-semibold">
                     Pencarian dan Filter
                   </h2>
@@ -542,7 +512,7 @@ export default function FasilitasPage() {
                   <div className="theme-card theme-border flex min-h-[280px] flex-col items-center justify-center rounded-2xl border">
                     <Loader2
                       size={34}
-                      className="theme-primary animate-spin"
+                      className="theme-primary-text animate-spin"
                     />
                     <p className="theme-text-secondary mt-3 text-sm">
                       Mengambil data fasilitas...
@@ -575,7 +545,7 @@ export default function FasilitasPage() {
                               <div className="rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] p-4">
                                 <Building2
                                   size={36}
-                                  className="theme-primary"
+                                  className="theme-primary-text"
                                 />
                               </div>
                             )}
@@ -628,7 +598,7 @@ export default function FasilitasPage() {
                     >
                       <Building2
                         size={32}
-                        className="theme-primary"
+                        className="theme-primary-text"
                       />
                     </div>
 
@@ -665,7 +635,7 @@ export default function FasilitasPage() {
                           setKategoriFilter("Semua");
                           setKondisiFilter("Semua");
                         }}
-                        className="theme-primary mt-4 text-sm font-semibold"
+                        className="theme-primary-text mt-4 text-sm font-semibold"
                       >
                         Reset Filter
                       </button>

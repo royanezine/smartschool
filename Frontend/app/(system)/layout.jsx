@@ -2,12 +2,8 @@
 
 import { useEffect } from "react";
 
-import { getToken } from "@/lib/auth";
+import { getToken, getBackendOrigin } from "@/lib/auth";
 import ThemeProvider from "@/app/components/ThemeProvider";
-
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
 
 
 function applyTheme(tema) {
@@ -103,7 +99,7 @@ async function loadSchoolTheme() {
 
   try {
     const response = await fetch(
-      `${API_URL}/api/cms/tema`,
+      `${getBackendOrigin()}/api/cms/tema`,
       {
         method: "GET",
         headers: {

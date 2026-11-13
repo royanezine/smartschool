@@ -281,7 +281,7 @@ export default function PinjamBukuGuruPage() {
                       <button 
                         type="submit" 
                         disabled={submitting || !tanggalJatuhTempo} 
-                        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {submitting ? <Loader2 size={17} className="animate-spin" /> : <BookOpenCheck size={17} />}
                         {submitting ? "Memproses..." : "Konfirmasi Pinjam"}
@@ -332,7 +332,7 @@ export default function PinjamBukuGuruPage() {
                         <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${themeNeutralSurface} text-[10px] font-bold theme-text-muted`}>3</div>
                         <div>
                           <p className="theme-text text-xs font-semibold">Pengembalian</p>
-                          <p className="theme-text-muted mt-0.5 text-[11px]">Kembalikan buku tepat waktu melalui menu "Peminjaman" di halaman katalog.</p>
+                          <p className="theme-text-muted mt-0.5 text-[11px]">Kembalikan buku tepat waktu melalui menu &quot;Peminjaman&quot; di halaman katalog.</p>
                         </div>
                       </div>
                     </div>

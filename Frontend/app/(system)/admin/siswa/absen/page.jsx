@@ -1,6 +1,6 @@
 "use client";
 
-import { getToken } from "@/lib/auth";
+import { getToken, getCleanApiBase } from "@/lib/auth";
 import {
   useCallback,
   useEffect,
@@ -48,14 +48,7 @@ function normalizeArray(response) {
   return [];
 }
 
-const RAW_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-const API_URL = RAW_API_URL.replace(/\/+$/, "");
-
-const API_BASE = API_URL.endsWith("/api")
-  ? API_URL
-  : `${API_URL}/api`;
+const API_BASE = getCleanApiBase();
 
 const STATUS_OPTIONS = [
   "Semua Status",
@@ -537,10 +530,12 @@ function StatCard({
 }) {
   return (
     <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
-      <div className="flex items-center gap-2">
-        <Icon size={15} className={iconClass} />
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+          <Icon size={15} />
+        </div>
 
-        <p className="text-[11px] font-medium theme-text-muted tracking-wide">
+        <p className="text-[11px] font-medium theme-text-muted tracking-wide truncate">
           {title}
         </p>
       </div>
@@ -575,8 +570,8 @@ function ShiftBadge({ shift }) {
       <span
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${
           isPagi
-            ? "theme-info theme-border"
-            : "theme-warning theme-border"
+            ? "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
+            : "theme-card-soft theme-text-secondary border theme-border"
         }`}
       >
         <AlarmClock size={12} />
@@ -1053,7 +1048,7 @@ export default function AbsenSiswaPage() {
             {/* HEADER */}
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl theme-primary shadow-lg">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                   <ClipboardCheck size={20} />
                 </div>
 
@@ -1073,7 +1068,7 @@ export default function AbsenSiswaPage() {
                   type="button"
                   onClick={handleExport}
                   disabled={exporting || loading}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl theme-success text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
                 >
                   {exporting ? (
                     <RefreshCw
@@ -1161,14 +1156,12 @@ export default function AbsenSiswaPage() {
                 title="Total Data"
                 value={statistik.total}
                 icon={Users}
-                iconClass="text-[var(--color-primary)]"
               />
 
               <StatCard
                 title="Hadir"
                 value={totalHadir}
                 icon={CheckCircle2}
-                iconClass="text-[var(--color-success)]"
               />
 
               <StatCard
@@ -1182,28 +1175,24 @@ export default function AbsenSiswaPage() {
                     : undefined
                 }
                 icon={AlarmClock}
-                iconClass="text-[var(--color-warning)]"
               />
 
               <StatCard
                 title="Izin"
                 value={totalIzin}
                 icon={AlertCircle}
-                iconClass="text-[var(--color-info)]"
               />
 
               <StatCard
                 title="Sakit"
                 value={totalSakit}
                 icon={AlertCircle}
-                iconClass="text-[var(--color-warning)]"
               />
 
               <StatCard
                 title="Alpa"
                 value={totalAlpa}
                 icon={XCircle}
-                iconClass="text-[var(--color-danger)]"
               />
             </div>
 
@@ -1415,7 +1404,7 @@ export default function AbsenSiswaPage() {
                           className="border-b theme-border-soft last:border-0 transition-colors theme-table-hover"
                         >
                           <td className="px-4 py-3 text-center">
-                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg theme-info border theme-border text-xs font-bold">
+                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] text-xs font-bold">
                               {(page - 1) * limit + index + 1}
                             </span>
                           </td>
@@ -1437,7 +1426,7 @@ export default function AbsenSiswaPage() {
                           </td>
 
                           <td className="px-4 py-3">
-                            <span className="inline-flex items-center justify-center min-w-[48px] px-2.5 py-1 rounded-lg text-xs font-bold theme-info border theme-border">
+                            <span className="inline-flex items-center justify-center min-w-[48px] px-2.5 py-1 rounded-lg text-xs font-bold bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]">
                               {item.kelas}
                             </span>
                           </td>
@@ -1584,7 +1573,7 @@ export default function AbsenSiswaPage() {
                               <button
                                 type="button"
                                 onClick={() => handleDetail(item)}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md theme-info border theme-border text-xs font-medium transition-colors"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border theme-border theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] text-xs font-medium transition-colors"
                               >
                                 <Eye size={13} />
                                 Detail
@@ -1600,7 +1589,7 @@ export default function AbsenSiswaPage() {
                           className="px-4 py-12 text-center"
                         >
                           <div className="flex flex-col items-center">
-                            <div className="w-12 h-12 rounded-full theme-info flex items-center justify-center mb-3">
+                            <div className="w-12 h-12 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center mb-3">
                               <Search size={20} />
                             </div>
 

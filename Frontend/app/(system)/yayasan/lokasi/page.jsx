@@ -19,7 +19,7 @@ import {
 } from "@/services/yayasan.service";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -47,12 +47,6 @@ const themeNeutralHover =
 
 const themeNeutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
-
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
 
 const themeWarningSurface =
   "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
@@ -216,7 +210,7 @@ export default function LokasiSekolahPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <div
-              className={`flex shrink-0 items-center justify-center rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+              className={`flex shrink-0 items-center justify-center rounded-lg p-2 ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
             >
               <MapPin size={18} />
             </div>
@@ -244,15 +238,13 @@ export default function LokasiSekolahPage() {
         )}
 
         {/* Statistik Atas */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div
             className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
           >
             <div className="flex items-center gap-3">
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
-              >
-                <Building2 size={18} />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                <Building2 size={18} className="theme-primary-text" />
               </div>
 
               <div className="min-w-0">
@@ -268,13 +260,13 @@ export default function LokasiSekolahPage() {
             className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)] text-[var(--color-info)]">
-                <Users size={18} />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                <Users size={18} className="theme-primary-text" />
               </div>
 
               <div className="min-w-0">
                 <p className="theme-text-secondary text-sm">Total Siswa</p>
-                <p className="mt-0.5 text-2xl font-bold text-[var(--color-info)]">
+                <p className="theme-text mt-0.5 text-2xl font-bold">
                   {loading ? "-" : totalSiswa}
                 </p>
               </div>
@@ -285,13 +277,13 @@ export default function LokasiSekolahPage() {
             className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-[var(--color-success)]">
-                <GraduationCap size={18} />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                <GraduationCap size={18} className="theme-primary-text" />
               </div>
 
               <div className="min-w-0">
                 <p className="theme-text-secondary text-sm">Total Guru</p>
-                <p className="mt-0.5 text-2xl font-bold text-[var(--color-success)]">
+                <p className="theme-text mt-0.5 text-2xl font-bold">
                   {loading ? "-" : totalGuru}
                 </p>
               </div>
@@ -352,7 +344,7 @@ export default function LokasiSekolahPage() {
                         <div
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
                             isActive
-                              ? `${themePrimaryGradient} text-[var(--color-card)]`
+                              ? `${themePrimaryGradient} text-white`
                               : `${themeNeutralSurface} theme-text-muted`
                           }`}
                         >
@@ -525,7 +517,7 @@ export default function LokasiSekolahPage() {
                     >
                       <Users
                         size={16}
-                        className="shrink-0 text-[var(--color-info)]"
+                        className="theme-primary-text shrink-0"
                       />
 
                       <div className="min-w-0">
@@ -543,7 +535,7 @@ export default function LokasiSekolahPage() {
                     >
                       <GraduationCap
                         size={16}
-                        className="shrink-0 text-[var(--color-success)]"
+                        className="theme-primary-text shrink-0"
                       />
 
                       <div className="min-w-0">
@@ -558,11 +550,11 @@ export default function LokasiSekolahPage() {
                   </div>
 
                   <div
-                    className={`mt-4 flex items-start gap-2 rounded-lg border ${themeInfoBorder} ${themeInfoSurface} p-3`}
+                    className={`mt-4 flex items-start gap-2 rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} p-3`}
                   >
                     <Info
                       size={14}
-                      className="mt-0.5 shrink-0 text-[var(--color-info)]"
+                      className="theme-primary-text mt-0.5 shrink-0"
                     />
 
                     <p className="theme-text-secondary text-xs">

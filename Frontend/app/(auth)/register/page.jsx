@@ -423,11 +423,12 @@ export default function RegisterPage() {
 
                   <button
                     type="button"
-                    disabled={loading}
-                    className="w-full flex items-center justify-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 disabled:bg-gray-50 disabled:cursor-not-allowed text-slate-700 text-sm font-semibold py-2.5 rounded-xl transition-all duration-300"
+                    disabled
+                    title="Pendaftaran via Google belum tersedia"
+                    className="w-full flex items-center justify-center gap-2 border border-gray-200 bg-gray-50 text-slate-400 text-sm font-semibold py-2.5 rounded-xl cursor-not-allowed opacity-75"
                   >
                     <GoogleIcon />
-                    Daftar dengan Google
+                    Daftar dengan Google (Belum Tersedia)
                   </button>
                 </form>
               </div>

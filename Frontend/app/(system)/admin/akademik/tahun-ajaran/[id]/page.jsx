@@ -603,7 +603,7 @@ export default function DetailTahunAjaranPage() {
 
                     <div className="theme-card-soft theme-border-soft flex flex-col gap-4 border-b px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
                           <Layers3 size={21} />
                         </div>
 
@@ -732,7 +732,7 @@ export default function DetailTahunAjaranPage() {
 
                                     <td className="px-4 py-4">
                                       <div className="flex items-center gap-3">
-                                        <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                                           <GraduationCap
                                             size={17}
                                           />

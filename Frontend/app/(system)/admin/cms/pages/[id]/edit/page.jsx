@@ -660,7 +660,7 @@ export default function EditPageCms() {
 
           <main className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto p-6">
             <div className="flex flex-col items-center text-center">
-              <div className="theme-info mb-4 flex h-14 w-14 items-center justify-center rounded-2xl">
+              <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text mb-4 flex h-14 w-14 items-center justify-center rounded-2xl">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
 
@@ -713,7 +713,7 @@ export default function EditPageCms() {
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl">
+                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl">
                   <FileText className="h-5 w-5" />
                 </div>
 
@@ -734,7 +734,7 @@ export default function EditPageCms() {
 
             <section className="theme-card theme-border mb-6 overflow-hidden rounded-2xl border shadow-sm">
               <div className="theme-card-soft theme-border flex items-start gap-3 border-b px-5 py-4 sm:px-6">
-                <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                   <Lightbulb className="h-5 w-5" />
                 </div>
 
@@ -847,7 +847,7 @@ export default function EditPageCms() {
                   <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-card-soft theme-border border-b px-5 py-4 sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-xl">
                           <FileText className="h-4 w-4" />
                         </div>
 
@@ -921,7 +921,7 @@ export default function EditPageCms() {
                   <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-card-soft theme-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                           <Layers3 className="h-5 w-5" />
                         </div>
 
@@ -1568,7 +1568,7 @@ export default function EditPageCms() {
 
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-start gap-3">
-                      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                         <Save className="h-4 w-4" />
                       </div>
 

@@ -45,19 +45,13 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 const themePrimaryButton =
-  "bg-[var(--color-primary)] text-[var(--color-card)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))]";
+  "theme-primary hover:opacity-90";
 
 const themeSuccessSurface =
   "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
 
 const themeSuccessBorder =
   "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
-
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_24%,transparent)]";
 
 const statusTheme = {
   aktif: {
@@ -210,9 +204,9 @@ export default function LaporanGuruPage() {
 
             <div className="flex items-center gap-2.5">
               <div
-                className={`shrink-0 rounded-lg border ${themePrimarySoft} p-2 text-[var(--color-primary)] ${themePrimarySoftBorder} ${themeSmallShadow}`}
+                className={`shrink-0 rounded-lg border ${themePrimarySoft} p-2 ${themePrimarySoftBorder} ${themeSmallShadow}`}
               >
-                <GraduationCap size={18} />
+                <GraduationCap size={18} className="theme-primary-text" />
               </div>
               <h1 className="theme-text truncate text-xl font-semibold sm:text-2xl">
                 Laporan Guru
@@ -280,14 +274,14 @@ export default function LaporanGuruPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div
             className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
           >
             <div
-              className={`shrink-0 rounded-lg border ${themePrimarySoft} p-2 text-[var(--color-primary)] ${themePrimarySoftBorder}`}
+              className={`shrink-0 rounded-lg border ${themePrimarySoft} p-2 ${themePrimarySoftBorder}`}
             >
-              <Users size={16} />
+              <Users size={16} className="theme-primary-text" />
             </div>
             <div className="min-w-0">
               <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
@@ -303,12 +297,13 @@ export default function LaporanGuruPage() {
             className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
           >
             <div
-              className={`shrink-0 rounded-lg border ${themeSuccessSurface} p-2 text-[var(--color-success)] ${themeSuccessBorder}`}
+              className={`shrink-0 rounded-lg border ${themePrimarySoft} p-2 ${themePrimarySoftBorder}`}
             >
-              <UserCheck size={16} />
+              <UserCheck size={16} className="theme-primary-text" />
             </div>
             <div className="min-w-0">
-              <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
+              <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider theme-text-muted">
+                <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
                 Guru Aktif
               </p>
               <p className="theme-text text-lg font-bold">
@@ -321,9 +316,9 @@ export default function LaporanGuruPage() {
             className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
           >
             <div
-              className={`shrink-0 rounded-lg border ${themeInfoSurface} p-2 text-[var(--color-info)] ${themeInfoBorder}`}
+              className={`shrink-0 rounded-lg border ${themePrimarySoft} p-2 ${themePrimarySoftBorder}`}
             >
-              <Building2 size={16} />
+              <Building2 size={16} className="theme-primary-text" />
             </div>
             <div className="min-w-0">
               <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">

@@ -127,6 +127,9 @@ export default function AjukanIzinPage() {
   const themePrimarySoft =
     "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]";
 
+  const themePrimarySoftBorder =
+    "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
   const themeCard =
     "bg-[var(--color-card)] border border-[var(--color-border)]";
 
@@ -361,9 +364,9 @@ export default function AjukanIzinPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft}`}
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border theme-primary-text`}
                     >
-                      <FileText size={20} />
+                      <FileText size={20} className="theme-primary-text shrink-0" />
                     </div>
 
                     <div>
@@ -438,9 +441,9 @@ export default function AjukanIzinPage() {
                 <div className="border-b border-[var(--color-border)] px-5 py-5 sm:px-6">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft}`}
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border theme-primary-text`}
                     >
-                      <FileText size={20} />
+                      <FileText size={20} className="theme-primary-text shrink-0" />
                     </div>
 
                     <div>

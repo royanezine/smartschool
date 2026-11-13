@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -153,6 +154,7 @@ function ProgressStep({ number, title, description, active, completed }) {
 }
 
 export default function SchoolOnboardingPage() {
+  const router = useRouter();
   const [paket, setPaket] = useState(null);
   const [loadingPaket, setLoadingPaket] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -648,7 +650,7 @@ export default function SchoolOnboardingPage() {
                     placeholder="nama-sekolah"
                     icon={Globe}
                     required
-                    suffix=".smartschool.id"
+                    suffix=".smartschool.citrasolusi.id"
                     hint="Gunakan huruf kecil, angka, dan tanda hubung."
                   />
 
@@ -658,7 +660,7 @@ export default function SchoolOnboardingPage() {
                         Pratinjau alamat website
                       </p>
                       <p className="mt-1 break-all text-sm font-medium text-blue-600">
-                        https://{form.subdomain}.smartschool.id
+                        https://{form.subdomain}.smartschool.citrasolusi.id
                       </p>
                     </div>
                   )}

@@ -45,7 +45,10 @@ import {
   deleteAdminYayasan,
   getDetailYayasanLangganan,
 } from "@/services/yayasan.service";
-import { getPlatformSekolah } from "@/services/platform.service";
+import {
+  getPlatformSekolah,
+  getPlatformYayasanDetail,
+} from "@/services/platform.service";
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -222,15 +225,56 @@ export default function DetailYayasanSuperAdminPage() {
       setLoading(true);
       setError("");
 
-      // 1. Fetch Yayasan Detail
-      const yysRes = await getYayasanById(yayasanId);
-      const yysData = yysRes?.data || yysRes;
+      // 1. Fetch Yayasan Detail (gabungkan detail inti + direktori platform untuk status sekolah efektif & _count)
+      const [yysRes, platRes] = await Promise.allSettled([
+        getYayasanById(yayasanId),
+        getPlatformYayasanDetail(yayasanId),
+      ]);
+      const baseData =
+        yysRes.status === "fulfilled"
+          ? yysRes.value?.data || yysRes.value
+          : null;
+      const platData =
+        platRes.status === "fulfilled"
+          ? platRes.value?.data || platRes.value
+          : null;
+
+      if (!baseData && !platData) {
+        throw yysRes.status === "rejected"
+          ? yysRes.reason
+          : new Error("Detail yayasan tidak ditemukan.");
+      }
+
+      const yysData = {
+        ...(baseData || {}),
+        ...(platData || {}),
+        diperbaruiPada: baseData?.diperbaruiPada || platData?.diperbaruiPada,
+      };
       setYayasan(yysData);
+
+      const effectiveStatusById = new Map(
+        (Array.isArray(platData?.sekolah) ? platData.sekolah : []).map((s) => [
+          s.id,
+          s.status,
+        ])
+      );
 
       // 2. Fetch Sekolah Naungan
       try {
         const schRes = await getSekolahYayasan(yayasanId);
-        setSekolahList(Array.isArray(schRes?.data) ? schRes.data : Array.isArray(schRes) ? schRes : []);
+        const rawSekolah = Array.isArray(schRes?.data)
+          ? schRes.data
+          : Array.isArray(schRes)
+            ? schRes
+            : [];
+        setSekolahList(
+          rawSekolah.map((sch) => ({
+            ...sch,
+            status: effectiveStatusById.has(sch.id)
+              ? effectiveStatusById.get(sch.id)
+              : sch.status,
+          }))
+        );
       } catch (err) {
         console.warn("Gagal memuat sekolah naungan:", err);
         setSekolahList(yysData?.sekolah || []);
@@ -520,7 +564,7 @@ export default function DetailYayasanSuperAdminPage() {
           <p className="mt-1 text-xs theme-text-secondary">{error || "Data yayasan tidak tersedia di server."}</p>
           <Link
             href="/super-admin/yayasan"
-            className={`mt-5 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow}`}
+            className={`mt-5 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-white ${themeSmallShadow}`}
           >
             <ArrowLeft size={14} />
             Kembali ke Daftar Yayasan
@@ -643,7 +687,7 @@ export default function DetailYayasanSuperAdminPage() {
                 onClick={() => setActiveTab("profil")}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
                   activeTab === "profil"
-                    ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                    ? "bg-[var(--color-primary)] text-white"
                     : `theme-text-secondary ${themeNeutralHover}`
                 }`}
               >
@@ -656,7 +700,7 @@ export default function DetailYayasanSuperAdminPage() {
                 onClick={() => setActiveTab("langganan")}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
                   activeTab === "langganan"
-                    ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                    ? "bg-[var(--color-primary)] text-white"
                     : `theme-text-secondary ${themeNeutralHover}`
                 }`}
               >
@@ -680,7 +724,7 @@ export default function DetailYayasanSuperAdminPage() {
                 onClick={() => setActiveTab("sekolah")}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
                   activeTab === "sekolah"
-                    ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                    ? "bg-[var(--color-primary)] text-white"
                     : `theme-text-secondary ${themeNeutralHover}`
                 }`}
               >
@@ -698,7 +742,7 @@ export default function DetailYayasanSuperAdminPage() {
                 onClick={() => setActiveTab("admin")}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
                   activeTab === "admin"
-                    ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                    ? "bg-[var(--color-primary)] text-white"
                     : `theme-text-secondary ${themeNeutralHover}`
                 }`}
               >
@@ -764,7 +808,7 @@ export default function DetailYayasanSuperAdminPage() {
               <div className={`rounded-2xl border theme-border theme-card p-5 sm:p-6 ${themeCardShadow}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-bold theme-text flex items-center gap-2">
-                    <Building2 size={16} className="text-[var(--color-info)]" />
+                    <Building2 size={16} className="theme-primary-text" />
                     Paket Langganan & Layanan
                   </h3>
                   <button
@@ -1066,7 +1110,7 @@ export default function DetailYayasanSuperAdminPage() {
                   type="button"
                   disabled={!selectedSchoolToLink || linkingSchool}
                   onClick={handleAssignSekolah}
-                  className={`inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow} transition-all hover:opacity-90 disabled:opacity-50`}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-semibold text-white ${themeSmallShadow} transition-all hover:opacity-90 disabled:opacity-50`}
                 >
                   {linkingSchool ? (
                     <>
@@ -1194,7 +1238,7 @@ export default function DetailYayasanSuperAdminPage() {
                 <button
                   type="button"
                   onClick={openCreateAdminModal}
-                  className={`inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow} transition-all hover:opacity-90`}
+                  className={`inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-white ${themeSmallShadow} transition-all hover:opacity-90`}
                 >
                   <UserPlus size={15} />
                   <span>Tambah Admin Yayasan</span>
@@ -1515,7 +1559,7 @@ export default function DetailYayasanSuperAdminPage() {
                 <button
                   type="submit"
                   disabled={adminSubmitting}
-                  className={`inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow} transition-all hover:opacity-90 disabled:opacity-60`}
+                  className={`inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 text-xs font-semibold text-white ${themeSmallShadow} transition-all hover:opacity-90 disabled:opacity-60`}
                 >
                   {adminSubmitting ? (
                     <>

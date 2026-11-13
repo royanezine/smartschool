@@ -104,17 +104,17 @@ function formatDate(date) {
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
-    <div className="flex gap-4 border-b border-slate-100 py-4 last:border-b-0">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+    <div className="flex gap-4 border-b theme-border py-4 last:border-b-0">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
         <Icon className="h-5 w-5" />
       </div>
 
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+        <p className="text-xs font-medium uppercase tracking-wide theme-text-muted">
           {label}
         </p>
 
-        <p className="mt-1 break-words text-sm font-semibold text-slate-800">
+        <p className="mt-1 break-words text-sm font-semibold theme-text">
           {value || "-"}
         </p>
       </div>
@@ -188,23 +188,23 @@ function DetailUserContent() {
 
   // Sidebar & Header sudah dirender oleh layout.js, jadi di sini hanya konten.
   return (
-    <div className="w-full min-w-0 px-4 py-2 sm:px-6 lg:px-8">
+    <div className="theme-page theme-text min-h-full w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <button
             type="button"
             onClick={() => router.push("/super-admin/kelola-user")}
-            className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-600"
+            className="mb-3 inline-flex items-center gap-2 text-sm font-medium theme-text-muted transition hover:text-[var(--color-primary)]"
           >
             <ArrowLeft className="h-4 w-4" />
             Kembali ke Kelola User
           </button>
 
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight theme-text">
             Detail Pengguna
           </h1>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm theme-text-muted">
             Informasi lengkap pengguna dan akun yang terdaftar.
           </p>
         </div>
@@ -214,7 +214,7 @@ function DetailUserContent() {
             <button
               type="button"
               onClick={() => setShowResetModal(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-700 shadow-sm transition hover:bg-amber-100"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border theme-border theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary shadow-sm transition hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] hover:text-[var(--color-primary)]"
             >
               <KeyRound className="h-4 w-4" />
               Reset Password
@@ -226,7 +226,7 @@ function DetailUserContent() {
                   `/super-admin/kelola-user/edit-user?id=${encodeURIComponent(user.id)}`
                 )
               }
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+              className="inline-flex items-center justify-center gap-2 rounded-lg theme-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition"
             >
               <Pencil className="h-4 w-4" />
               Edit Pengguna
@@ -236,7 +236,7 @@ function DetailUserContent() {
       </div>
 
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30 p-4 text-red-700 dark:text-red-300">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
 
           <div>
@@ -247,22 +247,22 @@ function DetailUserContent() {
       )}
 
       {loading ? (
-        <div className="flex min-h-[420px] items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col items-center gap-3 text-slate-500">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <div className="theme-card theme-border flex min-h-[420px] items-center justify-center rounded-xl border shadow-sm">
+          <div className="flex flex-col items-center gap-3 theme-text-muted">
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)]" />
             <p className="text-sm">Memuat detail pengguna...</p>
           </div>
         </div>
       ) : user ? (
         <div className="w-full">
           <div className="min-w-0 space-y-6">
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-3 border-b border-slate-100 pb-4">
-                <h2 className="text-lg font-bold text-slate-900">
+            <div className="theme-card theme-border rounded-xl border p-6 shadow-sm">
+              <div className="mb-3 border-b theme-border pb-4">
+                <h2 className="text-lg font-bold theme-text">
                   Informasi Akun
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm theme-text-muted">
                   Informasi dasar akun pengguna.
                 </p>
               </div>
@@ -290,13 +290,13 @@ function DetailUserContent() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-3 border-b border-slate-100 pb-4">
-                <h2 className="text-lg font-bold text-slate-900">
+            <div className="theme-card theme-border rounded-xl border p-6 shadow-sm">
+              <div className="mb-3 border-b theme-border pb-4">
+                <h2 className="text-lg font-bold theme-text">
                   Data Identitas
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm theme-text-muted">
                   Informasi identitas pengguna.
                 </p>
               </div>
@@ -326,13 +326,13 @@ function DetailUserContent() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-3 border-b border-slate-100 pb-4">
-                <h2 className="text-lg font-bold text-slate-900">
+            <div className="theme-card theme-border rounded-xl border p-6 shadow-sm">
+              <div className="mb-3 border-b theme-border pb-4">
+                <h2 className="text-lg font-bold theme-text">
                   Informasi Sekolah
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm theme-text-muted">
                   Informasi tenant yang terhubung dengan pengguna.
                 </p>
               </div>
@@ -364,9 +364,9 @@ function DetailUserContent() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-3 border-b border-slate-100 pb-4">
-                <h2 className="text-lg font-bold text-slate-900">
+            <div className="theme-card theme-border rounded-xl border p-6 shadow-sm">
+              <div className="mb-3 border-b theme-border pb-4">
+                <h2 className="text-lg font-bold theme-text">
                   Informasi Sistem
                 </h2>
               </div>
@@ -392,16 +392,18 @@ function DetailUserContent() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+            <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
               <div className="flex gap-3">
-                <KeyRound className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                  <KeyRound className="h-5 w-5" />
+                </div>
 
                 <div>
-                  <h3 className="font-semibold text-amber-900">
+                  <h3 className="font-semibold theme-text">
                     Password Pengguna
                   </h3>
 
-                  <p className="mt-1 text-sm leading-6 text-amber-800">
+                  <p className="mt-1 text-sm leading-6 theme-text-secondary">
                     Password tidak ditampilkan pada halaman detail demi keamanan. Anda dapat mereset kata sandi pengguna ini secara langsung untuk membuat kata sandi sementara baru.
                   </p>
 
@@ -409,7 +411,7 @@ function DetailUserContent() {
                     <button
                       type="button"
                       onClick={() => setShowResetModal(true)}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-amber-700 transition"
+                      className="inline-flex items-center gap-1.5 rounded-lg theme-primary px-3.5 py-2 text-xs font-semibold shadow-sm hover:opacity-90 transition"
                     >
                       <KeyRound className="h-3.5 w-3.5" />
                       Reset Kata Sandi Pengguna Ini
@@ -422,7 +424,7 @@ function DetailUserContent() {
         </div>
       ) : (
         !error && (
-          <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+          <div className="theme-card theme-border rounded-xl border p-8 text-center text-sm theme-text-muted">
             Data pengguna tidak ditemukan.
           </div>
         )
@@ -444,8 +446,8 @@ export default function DetailUserPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[60vh] w-full items-center justify-center">
-          <div className="flex flex-col items-center gap-3 text-slate-500">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <div className="flex flex-col items-center gap-3 theme-text-muted">
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)]" />
             <p className="text-sm">Memuat halaman detail pengguna...</p>
           </div>
         </div>

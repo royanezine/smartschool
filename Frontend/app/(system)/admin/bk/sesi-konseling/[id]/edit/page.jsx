@@ -7,7 +7,7 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
 import {
-  getSesiKonseling,
+  getSesiKonselingById,
   updateSesiKonseling,
 } from "@/services/bk.service";
 
@@ -278,20 +278,15 @@ export default function EditSesiKonselingPage() {
         setLoading(true);
         setError("");
 
-        const [sesiResult, siswaResult, guruResult] =
+        const [item, siswaResult, guruResult] =
           await Promise.all([
-            getSesiKonseling(),
+            getSesiKonselingById(String(id)),
             getSemuaSiswa({ page: 1, limit: 1000 }),
             getUsers({ page: 1, limit: 100, role: "guru" }),
           ]);
 
-        const sesiList = extractArray(sesiResult);
         const siswaData = extractArray(siswaResult);
         const guruData = extractArray(guruResult);
-
-        const item = sesiList.find(
-          (x) => String(x.id) === String(id)
-        );
 
         if (!item) {
           throw new Error("Data sesi konseling tidak ditemukan.");

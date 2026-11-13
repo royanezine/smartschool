@@ -552,8 +552,8 @@ export default function TambahGudangPage() {
                     className={`rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] p-5`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-info)_14%,transparent)] theme-info">
-                        <Info size={17} />
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-info)_14%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                        <Info size={17} className="theme-primary-text" />
                       </div>
 
                       <div>

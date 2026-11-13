@@ -327,7 +327,7 @@ export default function EditRuanganPage() {
                   </button>
 
                   <div className="mt-3 flex items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] text-[var(--color-warning)]">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] theme-primary-text">
                       <Building2 size={24} />
                     </div>
 
@@ -584,7 +584,7 @@ export default function EditRuanganPage() {
                 {/* Panel informasi */}
                 <aside className="flex min-w-0 flex-col gap-5">
 
-                  <div className="theme-info flex items-start gap-3 rounded-2xl border p-4">
+                  <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-start gap-3 rounded-2xl border p-4">
                     <Info size={17} className="mt-0.5 shrink-0" />
                     <div>
                       <p className="text-sm font-semibold">Perhatian</p>
@@ -647,7 +647,7 @@ export default function EditRuanganPage() {
                     <div className="mb-3 flex items-center gap-2">
                       <Lightbulb
                         size={17}
-                        className="text-[var(--color-warning)]"
+                        className="theme-primary-text"
                       />
                       <h2 className="text-sm font-bold">
                         Panduan Edit

@@ -44,10 +44,9 @@ import {
   BadgeCheck,
 } from "lucide-react";
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000"
-).replace(/\/$/, "");
+import { getCleanApiBase } from "@/lib/auth";
+
+const API_URL = getCleanApiBase();
 
 const extractUsers = (response) => {
   if (Array.isArray(response)) return response;
@@ -952,7 +951,7 @@ export default function PenggunaPage() {
                 value={statistics.siswa}
                 description="Pengguna dengan role Siswa"
                 icon={UserRound}
-                iconClass="theme-info"
+                iconClass="theme-primary-text"
                 loading={loading}
               />
 
@@ -961,7 +960,7 @@ export default function PenggunaPage() {
                 value={statistics.staff}
                 description="Pengguna dengan role Staff"
                 icon={BriefcaseBusiness}
-                iconClass="theme-warning"
+                iconClass="theme-primary-text"
                 loading={loading}
               />
             </div>

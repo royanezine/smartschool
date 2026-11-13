@@ -35,7 +35,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -573,7 +573,7 @@ export default function EditTugasPage() {
               <button
                 type="button"
                 onClick={() => router.push("/guru/tugas")}
-                className={`mt-6 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow}`}
+                className={`mt-6 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition ${themePrimaryGradient} ${themePrimaryShadow}`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Tugas
@@ -627,7 +627,7 @@ export default function EditTugasPage() {
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
                 <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                 >
                   <Pencil size={20} />
                 </div>
@@ -980,7 +980,7 @@ export default function EditTugasPage() {
                       <button
                         type="submit"
                         disabled={saving}
-                        className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow} disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
+                        className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold text-white transition ${themePrimaryGradient} ${themePrimaryShadow} disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                       >
                         {saving ? (
                           <>
@@ -1013,7 +1013,7 @@ export default function EditTugasPage() {
                       className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full blur-3xl"
                       style={{
                         background:
-                          "color-mix(in srgb, var(--color-card) 12%, transparent)",
+                          "rgba(255, 255, 255, 0.15)",
                       }}
                     />
 
@@ -1028,24 +1028,24 @@ export default function EditTugasPage() {
                     <div className="relative">
                       <div className="flex items-center justify-between gap-3">
                         <div
-                          className="flex h-10 w-10 items-center justify-center rounded-xl border text-[var(--color-card)]"
+                          className="flex h-10 w-10 items-center justify-center rounded-xl border text-white"
                           style={{
                             borderColor:
-                              "color-mix(in srgb, var(--color-card) 18%, transparent)",
+                              "rgba(255, 255, 255, 0.15)",
                             background:
-                              "color-mix(in srgb, var(--color-card) 12%, transparent)",
+                              "rgba(255, 255, 255, 0.15)",
                           }}
                         >
                           <ClipboardList size={19} />
                         </div>
 
                         <span
-                          className="rounded-full border px-2.5 py-1 text-[10px] font-semibold text-[var(--color-card)]"
+                          className="rounded-full border px-2.5 py-1 text-[10px] font-semibold text-white"
                           style={{
                             borderColor:
-                              "color-mix(in srgb, var(--color-card) 18%, transparent)",
+                              "rgba(255, 255, 255, 0.15)",
                             background:
-                              "color-mix(in srgb, var(--color-card) 10%, transparent)",
+                              "rgba(255, 255, 255, 0.15)",
                           }}
                         >
                           PREVIEW
@@ -1056,13 +1056,13 @@ export default function EditTugasPage() {
                         className="mt-5 text-[11px] font-medium uppercase tracking-wider"
                         style={{
                           color:
-                            "color-mix(in srgb, var(--color-card) 68%, transparent)",
+                            "rgba(255, 255, 255, 0.15)",
                         }}
                       >
                         Judul Tugas
                       </p>
 
-                      <h3 className="mt-1 break-words text-lg font-bold leading-6 text-[var(--color-card)]">
+                      <h3 className="mt-1 break-words text-lg font-bold leading-6 text-white">
                         {form.judul || "Judul tugas"}
                       </h3>
 
@@ -1070,7 +1070,7 @@ export default function EditTugasPage() {
                         className="mt-3 line-clamp-4 min-h-[80px] text-xs leading-5"
                         style={{
                           color:
-                            "color-mix(in srgb, var(--color-card) 76%, transparent)",
+                            "rgba(255, 255, 255, 0.15)",
                         }}
                       >
                         {form.deskripsi ||

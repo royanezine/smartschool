@@ -37,7 +37,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -147,12 +147,13 @@ function StatCard({
   label,
   value,
   description,
-  iconClass,
-  bgClass,
+  iconClass = "theme-primary-text",
+  bgClass = "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
 }) {
   return (
     <div
-      className={`theme-card group rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 sm:p-4`}
+      className={`theme-card group rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 sm:p-5`}
+
     >
       <div className="flex items-start justify-between gap-2.5">
         <div className="min-w-0">
@@ -167,9 +168,10 @@ function StatCard({
           </p>
         </div>
         <div
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${bgClass}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${bgClass} theme-primary-text`}
         >
-          <Icon size={15} className={iconClass} />
+          <Icon size={18} className="theme-primary-text shrink-0" />
+
         </div>
       </div>
     </div>
@@ -406,6 +408,7 @@ export default function GuruUjianPage() {
               <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
 
+
               <div className="relative z-10">
                 <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
@@ -432,10 +435,14 @@ export default function GuruUjianPage() {
                           <GraduationCap size={14} />
                           {selectedData?.kelas?.nama || "Kelas"}
                         </div>
-                        <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
-                          <BookOpen size={14} />
-                          {selectedData?.mataPelajaran?.nama || "Mata Pelajaran"}
-                        </div>
+
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} px-2.5 py-1.5 text-xs font-semibold`}
+                        >
+                          <BookOpen size={13} />
+                          {selectedData?.mataPelajaran?.nama ||
+                            "Mata Pelajaran"}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -444,13 +451,14 @@ export default function GuruUjianPage() {
                     <button
                       type="button"
                       onClick={() => router.push("/guru/ujian/tambah")}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 active:scale-[0.98]"
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-[var(--color-primary)] shadow-sm transition-all hover:bg-white/90 active:scale-[0.98]"
                     >
                       <Plus size={17} />
                       Tambah Ujian
                     </button>
                   </div>
                 </div>
+
               </div>
             </section>
 
@@ -582,7 +590,7 @@ export default function GuruUjianPage() {
                           {selectedData?.kelas?.nama || "Kelas"}
                         </span>
                         <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)] px-3 py-1.5 text-xs font-semibold`}
+                          className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} px-3 py-1.5 text-xs font-semibold`}
                         >
                           <BookOpen size={13} />
                           {selectedData?.mataPelajaran?.nama ||
@@ -620,24 +628,24 @@ export default function GuruUjianPage() {
                   label="Dipublikasikan"
                   value={stats.published}
                   description="Ujian aktif"
-                  iconClass="text-[var(--color-success)]"
-                  bgClass={themeSuccessSurface}
+                  iconClass={themePrimaryText}
+                  bgClass={themePrimarySoft}
                 />
                 <StatCard
                   icon={XCircle}
                   label="Draft"
                   value={stats.draft}
                   description="Belum dipublikasi"
-                  iconClass="text-[var(--color-warning)]"
-                  bgClass={themeWarningSurface}
+                  iconClass={themePrimaryText}
+                  bgClass={themePrimarySoft}
                 />
                 <StatCard
                   icon={FileQuestion}
                   label="Total Soal"
                   value={stats.totalQuestions}
                   description="Semua soal ujian"
-                  iconClass="text-[var(--color-info)]"
-                  bgClass={themeInfoSurface}
+                  iconClass={themePrimaryText}
+                  bgClass={themePrimarySoft}
                 />
                 <StatCard
                   icon={Users}
@@ -862,7 +870,7 @@ export default function GuruUjianPage() {
                               {item?.token ? (
                                 <div className="flex max-w-[240px] items-center gap-2">
                                   <code
-                                    className={`min-w-0 flex-1 truncate rounded-lg border ${themeInfoBorder} ${themeInfoSurface} px-2.5 py-2 font-mono text-xs font-bold tracking-wide text-[var(--color-info)]`}
+                                    className={`min-w-0 flex-1 truncate rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-2 font-mono text-xs font-bold tracking-wide ${themePrimaryText}`}
                                     title={String(item.token)}
                                   >
                                     {item.token}
@@ -961,7 +969,7 @@ export default function GuruUjianPage() {
                                   item?._count?.percobaanAsesmen || 0
                                 ) > 0 ? (
                                   <span
-                                    className={`inline-flex items-center gap-1.5 rounded-full border ${themeInfoBorder} ${themeInfoSurface} px-2.5 py-1 text-[10px] font-semibold text-[var(--color-info)]`}
+                                    className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-1 text-[10px] font-semibold ${themePrimaryText}`}
                                   >
                                     <Users size={12} />
                                     {Number(item?._count?.percobaanAsesmen || 0)}{" "}
@@ -982,7 +990,7 @@ export default function GuruUjianPage() {
                               <span
                                 className={`inline-flex min-w-9 items-center justify-center rounded-lg px-2.5 py-1.5 text-xs font-bold ${
                                   jumlahSoal > 0
-                                    ? `${themeInfoBorder} ${themeInfoSurface} border text-[var(--color-info)]`
+                                    ? `${themePrimarySoftBorder} ${themePrimarySoft} border ${themePrimaryText}`
                                     : `${themeNeutralSurface} theme-text-muted`
                                 }`}
                               >
@@ -1047,7 +1055,7 @@ export default function GuruUjianPage() {
                                     router.push(`/guru/ujian/${item.id}`)
                                   }
                                   title="Lihat detail"
-                                  className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)] transition hover:brightness-95`}
+                                  className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} transition hover:brightness-95`}
                                 >
                                   <Eye size={15} />
                                 </button>
@@ -1113,7 +1121,7 @@ export default function GuruUjianPage() {
                                 onClick={() =>
                                   router.push("/guru/ujian/tambah")
                                 }
-                                className={`mt-4 inline-flex items-center gap-2 rounded-lg ${themePrimaryGradient} px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90`}
+                                className={`mt-4 inline-flex items-center gap-2 rounded-lg ${themePrimaryGradient} px-4 py-2.5 text-xs font-semibold text-white ${themePrimaryShadow} transition hover:opacity-90`}
                               >
                                 <Plus size={14} />
                                 Buat Ujian

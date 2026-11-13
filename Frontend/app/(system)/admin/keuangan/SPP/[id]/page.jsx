@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   AlertCircle,
+  Ban,
   CheckCircle2,
   Clock,
   CreditCard,
@@ -14,12 +15,17 @@ import {
   Receipt,
   RefreshCw,
   Wallet,
+  X,
   XCircle,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { getDetailTagihan } from "@/services/tagihan.service";
+import {
+  batalkanPembayaran,
+  getDetailPembayaran,
+  getDetailTagihan,
+} from "@/services/tagihan.service";
 
 const NAMA_BULAN = [
   "Januari",
@@ -84,6 +90,20 @@ export default function DetailTagihanPage() {
   const [tagihan, setTagihan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [detailModal, setDetailModal] = useState({
+    open: false,
+    loading: false,
+    error: "",
+    data: null,
+  });
+  const [batalBayarModal, setBatalBayarModal] = useState({
+    open: false,
+    bayar: null,
+    alasan: "",
+    loading: false,
+    error: "",
+  });
 
   const loadData = useCallback(async () => {
     if (!id) {
@@ -124,6 +144,79 @@ export default function DetailTagihanPage() {
   const canBatal =
     tagihan?.status === "belum_bayar" &&
     Number(tagihan?.totalDibayar || 0) === 0;
+
+  const handleOpenDetailBayar = async (bayar) => {
+    setDetailModal({
+      open: true,
+      loading: true,
+      error: "",
+      data: bayar,
+    });
+    try {
+      const res = await getDetailPembayaran(bayar.id);
+      const detail = unwrapItem(res) || bayar;
+      setDetailModal({
+        open: true,
+        loading: false,
+        error: "",
+        data: detail,
+      });
+    } catch (err) {
+      setDetailModal({
+        open: true,
+        loading: false,
+        error: err?.message || "Gagal mengambil detail pembayaran.",
+        data: bayar,
+      });
+    }
+  };
+
+  const handleOpenBatalBayar = (bayar) => {
+    setNotice("");
+    setBatalBayarModal({
+      open: true,
+      bayar,
+      alasan: "",
+      loading: false,
+      error: "",
+    });
+  };
+
+  const handleSubmitBatalBayar = async (e) => {
+    e.preventDefault();
+    const target = batalBayarModal.bayar;
+    const alasan = batalBayarModal.alasan.trim();
+    if (!target?.id) return;
+    if (!alasan) {
+      setBatalBayarModal((prev) => ({
+        ...prev,
+        error: "Alasan pembatalan wajib diisi.",
+      }));
+      return;
+    }
+
+    setBatalBayarModal((prev) => ({ ...prev, loading: true, error: "" }));
+    try {
+      await batalkanPembayaran(target.id, alasan);
+      setBatalBayarModal({
+        open: false,
+        bayar: null,
+        alasan: "",
+        loading: false,
+        error: "",
+      });
+      setNotice(
+        `Pembayaran ${target.nomorPembayaran || ""} berhasil dibatalkan.`
+      );
+      await loadData();
+    } catch (err) {
+      setBatalBayarModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: err?.message || "Gagal membatalkan pembayaran.",
+      }));
+    }
+  };
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -169,6 +262,13 @@ export default function DetailTagihanPage() {
                   </div>
                 </div>
               </div>
+
+              {notice && (
+                <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300">
+                  <CheckCircle2 size={19} className="mt-0.5 shrink-0" />
+                  <p className="flex-1">{notice}</p>
+                </div>
+              )}
 
               {error && (
                 <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
@@ -326,6 +426,9 @@ export default function DetailTagihanPage() {
                               <th className="theme-text-muted px-3 py-2 text-left font-semibold">
                                 Status
                               </th>
+                              <th className="theme-text-muted px-3 py-2 text-center font-semibold">
+                                Aksi
+                              </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[var(--color-border-soft)]">
@@ -347,6 +450,28 @@ export default function DetailTagihanPage() {
                                 </td>
                                 <td className="theme-text-secondary px-3 py-2 capitalize">
                                   {bayar.status}
+                                </td>
+                                <td className="px-3 py-2 text-center">
+                                  <div className="inline-flex items-center gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenDetailBayar(bayar)}
+                                      className="inline-flex items-center gap-1 rounded-lg border theme-border px-2.5 py-1 text-xs font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                                    >
+                                      <Eye size={13} />
+                                      Detail
+                                    </button>
+                                    {bayar.status === "berhasil" && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenBatalBayar(bayar)}
+                                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 transition hover:bg-red-100 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
+                                      >
+                                        <Ban size={13} />
+                                        Batalkan
+                                      </button>
+                                    )}
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -407,6 +532,201 @@ export default function DetailTagihanPage() {
               )}
             </div>
           </div>
+
+          {detailModal.open && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="detail-bayar-title"
+            >
+              <div className="theme-card theme-border w-full max-w-lg rounded-2xl border p-6 shadow-xl">
+                <div className="mb-4 flex items-center justify-between border-b theme-border pb-3">
+                  <h3 id="detail-bayar-title" className="text-base font-bold theme-text">
+                    Detail Pembayaran
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDetailModal({ open: false, loading: false, error: "", data: null })
+                    }
+                    className="rounded-lg p-1 theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                    aria-label="Tutup modal detail pembayaran"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {detailModal.loading ? (
+                  <div className="flex items-center justify-center gap-2 py-8 text-sm theme-text-muted">
+                    <Loader2 size={18} className="animate-spin theme-primary-text" />
+                    Memuat detail pembayaran...
+                  </div>
+                ) : (
+                  <div className="space-y-3 text-sm">
+                    {detailModal.error && (
+                      <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+                        {detailModal.error}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <DetailField
+                        label="Nomor Pembayaran"
+                        value={detailModal.data?.nomorPembayaran}
+                      />
+                      <DetailField
+                        label="Tanggal Bayar"
+                        value={formatDate(detailModal.data?.tanggalBayar)}
+                      />
+                      <DetailField
+                        label="Metode"
+                        value={detailModal.data?.metode}
+                      />
+                      <DetailField
+                        label="Jumlah"
+                        value={formatRupiah(detailModal.data?.jumlah)}
+                      />
+                      <DetailField
+                        label="Status"
+                        value={detailModal.data?.status}
+                      />
+                      <DetailField
+                        label="Referensi"
+                        value={detailModal.data?.referensi || "-"}
+                      />
+                    </div>
+                    {detailModal.data?.catatan && (
+                      <DetailField
+                        label="Catatan"
+                        value={detailModal.data.catatan}
+                      />
+                    )}
+                    {detailModal.data?.alasanBatal && (
+                      <DetailField
+                        label="Alasan Pembatalan"
+                        value={detailModal.data.alasanBatal}
+                      />
+                    )}
+                  </div>
+                )}
+
+                <div className="mt-6 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDetailModal({ open: false, loading: false, error: "", data: null })
+                    }
+                    className="rounded-xl border theme-border px-4 py-2 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {batalBayarModal.open && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="batal-bayar-title"
+            >
+              <form
+                onSubmit={handleSubmitBatalBayar}
+                className="theme-card theme-border w-full max-w-md rounded-2xl border p-6 shadow-xl"
+              >
+                <div className="mb-4 flex items-center justify-between border-b theme-border pb-3">
+                  <h3 id="batal-bayar-title" className="text-base font-bold theme-text">
+                    Batalkan Pembayaran
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setBatalBayarModal({
+                        open: false,
+                        bayar: null,
+                        alasan: "",
+                        loading: false,
+                        error: "",
+                      })
+                    }
+                    className="rounded-lg p-1 theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                    aria-label="Tutup modal pembatalan"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <p className="text-sm theme-text-secondary">
+                  Pembayaran{" "}
+                  <span className="font-semibold theme-text">
+                    {batalBayarModal.bayar?.nomorPembayaran}
+                  </span>{" "}
+                  sebesar{" "}
+                  <span className="font-semibold theme-text">
+                    {formatRupiah(batalBayarModal.bayar?.jumlah)}
+                  </span>{" "}
+                  akan dibatalkan dan saldo tagihan akan diperbarui.
+                </p>
+
+                <div className="mt-4">
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide theme-text-muted">
+                    Alasan Pembatalan <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={batalBayarModal.alasan}
+                    onChange={(e) =>
+                      setBatalBayarModal((prev) => ({
+                        ...prev,
+                        alasan: e.target.value,
+                        error: "",
+                      }))
+                    }
+                    placeholder="Contoh: Salah input nominal atau duplikasi transaksi..."
+                    className="theme-input theme-border w-full rounded-xl border px-3 py-2 text-sm outline-none focus:border-[var(--color-primary)]"
+                    required
+                  />
+                </div>
+
+                {batalBayarModal.error && (
+                  <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                    {batalBayarModal.error}
+                  </p>
+                )}
+
+                <div className="mt-5 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    disabled={batalBayarModal.loading}
+                    onClick={() =>
+                      setBatalBayarModal({
+                        open: false,
+                        bayar: null,
+                        alasan: "",
+                        loading: false,
+                        error: "",
+                      })
+                    }
+                    className="rounded-xl border theme-border px-4 py-2 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={batalBayarModal.loading}
+                    className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+                  >
+                    {batalBayarModal.loading && (
+                      <Loader2 size={15} className="animate-spin" />
+                    )}
+                    Konfirmasi Batalkan
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </main>
       </div>
     </div>

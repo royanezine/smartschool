@@ -1141,7 +1141,7 @@ export default function BukuDetailSiswaPage() {
           >
             <div className="absolute -right-24 -top-32 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] blur-3xl" />
 
-            <div className="absolute -bottom-32 left-[30%] h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] blur-3xl" />
+            <div className="absolute -bottom-32 left-[30%] h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] blur-3xl" />
 
             <div className="relative grid gap-8 p-5 sm:p-7 lg:grid-cols-[300px_1fr] lg:p-10">
 

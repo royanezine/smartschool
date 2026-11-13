@@ -1,19 +1,7 @@
 import { apiFetch } from "../lib/api";
-import { getToken } from "../lib/auth";
+import { getToken, getCleanApiBase } from "../lib/auth";
 
-const RAW_API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000";
-
-const API_BASE = (() => {
-  const base = RAW_API_BASE.replace(/\/+$/, "");
-
-  if (base.endsWith("/api")) {
-    return base;
-  }
-
-  return `${base}/api`;
-})();
+const API_BASE = getCleanApiBase();
 
 
 export interface ExportRekapNilaiParams {
@@ -239,7 +227,7 @@ export async function exportRekapNilai(
     );
 
     throw new Error(
-      "Tidak dapat terhubung ke backend. Pastikan server berjalan di http://localhost:5000."
+      "Tidak dapat terhubung ke server backend. Periksa koneksi backend dan konfigurasi API."
     );
   }
 

@@ -73,7 +73,7 @@ export function deteksiPrefixTenant(pathname) {
   return `/${segmen[0]}`;
 }
 
-// Subdomain lokal (mis. smart.localhost:3000) atau produksi (mis. smart.smartschool.id)
+// Subdomain lokal (mis. smart.localhost:3000) atau produksi (mis. smart.smartschool.citrasolusi.id)
 // membawa tenant di host, bukan di path.
 export function deteksiTenantDariHost(hostname) {
   const namaHost = String(hostname || "")

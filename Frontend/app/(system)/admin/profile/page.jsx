@@ -144,7 +144,7 @@ function ProfileLoading() {
   return (
     <div className="theme-page flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-3">
-        <LoaderCircle size={32} className="animate-spin text-blue-600" />
+        <LoaderCircle size={32} className="animate-spin theme-primary-text" />
         <p className="theme-text-secondary text-sm font-medium">Memuat data profil...</p>
       </div>
     </div>
@@ -234,7 +234,7 @@ function ReviewSection() {
         icon={MessageSquare} 
         title="Review SmartSchool" 
         action={
-          <button type="button" onClick={loadReview} disabled={loadingReview || savingReview} className="theme-text-secondary flex items-center gap-1.5 text-xs hover:text-blue-600 disabled:opacity-50">
+          <button type="button" onClick={loadReview} disabled={loadingReview || savingReview} className="theme-text-secondary flex items-center gap-1.5 text-xs hover:text-[var(--color-primary)] disabled:opacity-50">
             <RefreshCw size={14} className={loadingReview ? "animate-spin" : ""} /> Muat Ulang
           </button>
         }
@@ -454,7 +454,7 @@ export default function AdminProfilePage() {
                         <h2 className="theme-text text-lg font-bold">{nama}</h2>
                         <p className="theme-text-secondary text-sm">{displayValue(profile.jabatan)}</p>
                         <div className="mt-3 flex flex-wrap justify-center gap-2">
-                          <span className="theme-primary inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold">
+                          <span className="theme-primary inline-flex items-center gap-1 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-3 py-1 text-xs font-semibold theme-primary-text">
                             <Shield size={12} /> {roleName}
                           </span>
                           <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">

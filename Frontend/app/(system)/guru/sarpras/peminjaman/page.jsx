@@ -33,7 +33,7 @@ import { getDaftarPeminjaman } from "@/services/sarpras.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -66,7 +66,7 @@ const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
 const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+  "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
 
 const themeInfoBorder =
   "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
@@ -124,10 +124,10 @@ const statusConfig = {
   dipinjam: {
     label: "Berlangsung",
     icon: Clock,
-    pill: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
-    dot: "bg-[var(--color-info)]",
+    pill: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
+    dot: "bg-[var(--color-primary)]",
     accent:
-      "before:bg-[linear-gradient(to_bottom,var(--color-info),color-mix(in_srgb,var(--color-info)_70%,var(--color-primary)))]",
+      "before:bg-[linear-gradient(to_bottom,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]",
   },
 
   ditolak: {
@@ -300,9 +300,9 @@ function getAssetTheme(nama = "") {
     value.includes("sound")
   ) {
     return {
-      surface: themeInfoSurface,
-      border: themeInfoBorder,
-      icon: "text-[var(--color-info)]",
+      surface: themePrimarySoft,
+      border: themePrimarySoftBorder,
+      icon: themePrimaryText,
     };
   }
 
@@ -323,9 +323,9 @@ function getAssetTheme(nama = "") {
     value.includes("lab")
   ) {
     return {
-      surface: themeInfoSurface,
-      border: themeInfoBorder,
-      icon: "text-[var(--color-info)]",
+      surface: themePrimarySoft,
+      border: themePrimarySoftBorder,
+      icon: themePrimaryText,
     };
   }
 
@@ -514,7 +514,7 @@ export default function GuruSarprasPeminjamanPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-start gap-4">
                 <div
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                 >
                   <ClipboardList size={22} />
                 </div>
@@ -616,7 +616,7 @@ export default function GuruSarprasPeminjamanPage() {
                         }}
                         className={`inline-flex h-10 items-center gap-1.5 whitespace-nowrap rounded-xl border px-3.5 text-xs font-semibold transition-all ${
                           aktif
-                            ? `${themePrimaryGradient} border-transparent text-[var(--color-card)] ${themePrimaryShadow}`
+                            ? `${themePrimaryGradient} border-transparent text-white ${themePrimaryShadow}`
                             : `theme-card ${themeNeutralBorder} theme-text-secondary hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]`
                         }`}
                       >
@@ -627,7 +627,7 @@ export default function GuruSarprasPeminjamanPage() {
                           <span
                             className={`ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
                               aktif
-                                ? "bg-[color-mix(in_srgb,var(--color-card)_20%,transparent)] text-[var(--color-card)]"
+                                ? "bg-white/10 text-white"
                                 : `${themeNeutralSurface} theme-text-muted`
                             }`}
                           >
@@ -777,7 +777,7 @@ export default function GuruSarprasPeminjamanPage() {
 
 
                           <div
-                            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border ${assetTheme.border || themePrimarySoftBorder} ${assetTheme.surface} ${assetTheme.icon || "text-[var(--color-card)]"} ${assetTheme.shadow || ""}`}
+                            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border ${assetTheme.border || themePrimarySoftBorder} ${assetTheme.surface} ${assetTheme.icon || "text-white"} ${assetTheme.shadow || ""}`}
                           >
                             <ItemIcon size={18} />
                           </div>

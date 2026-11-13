@@ -530,7 +530,7 @@ export default function PengaturanPresensiPage() {
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
               <div>
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                   <Settings2 size={25} />
                 </div>
 
@@ -585,7 +585,7 @@ export default function PengaturanPresensiPage() {
                           {form.lintang !== "" ? form.lintang : "Belum diatur"}
                         </p>
                       </div>
-                      <MapPin className="text-blue-600" size={22} />
+                      <MapPin className="theme-primary-text" size={22} />
                     </div>
                   </div>
 
@@ -597,7 +597,7 @@ export default function PengaturanPresensiPage() {
                           {form.bujur !== "" ? form.bujur : "Belum diatur"}
                         </p>
                       </div>
-                      <MapPinned className="text-indigo-600" size={22} />
+                      <MapPinned className="theme-primary-text" size={22} />
                     </div>
                   </div>
 
@@ -611,7 +611,7 @@ export default function PengaturanPresensiPage() {
                             : "Belum diatur"}
                         </p>
                       </div>
-                      <LocateFixed className="text-emerald-600" size={22} />
+                      <LocateFixed className="theme-primary-text" size={22} />
                     </div>
                   </div>
 
@@ -625,7 +625,7 @@ export default function PengaturanPresensiPage() {
                             : `${hariAktifList.length} Hari / Pekan`}
                         </p>
                       </div>
-                      <CalendarDays className="text-amber-600" size={22} />
+                      <CalendarDays className="theme-primary-text" size={22} />
                     </div>
                   </div>
                 </div>
@@ -670,13 +670,13 @@ export default function PengaturanPresensiPage() {
                         </p>
                       </div>
 
-                      <div className="mt-5 flex flex-col gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-blue-900/60 dark:bg-blue-950/30 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="mt-5 flex flex-col gap-3 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-start gap-2.5">
                           <Info
                             size={18}
-                            className="mt-0.5 shrink-0 text-blue-700 dark:text-blue-400"
+                            className="mt-0.5 shrink-0 theme-primary-text"
                           />
-                          <p className="text-sm leading-6 text-blue-900 dark:text-blue-200">
+                          <p className="text-sm leading-6 theme-text-secondary">
                             Koordinat harus menunjuk ke lokasi sekolah. 
                             Gunakan GPS ketika berada di
                             sekolah atau masukkan koordinat sekolah secara manual.
@@ -687,7 +687,7 @@ export default function PengaturanPresensiPage() {
                           type="button"
                           onClick={handleUseCurrentLocation}
                           disabled={saving}
-                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-blue-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-50 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/80"
+                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[var(--color-card)] px-3.5 py-2.5 text-sm font-semibold theme-primary-text transition hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] disabled:opacity-50"
                         >
                           <LocateFixed size={16} />
                           Ambil Koordinat
@@ -714,14 +714,14 @@ export default function PengaturanPresensiPage() {
                               aria-pressed={active}
                               className={`flex w-full items-start gap-4 rounded-xl border p-4 text-left transition ${
                                 active
-                                  ? "border-blue-300 bg-blue-50/70 dark:border-blue-700 dark:bg-blue-950/50"
+                                  ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
                                   : "theme-border theme-card hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
                               } disabled:cursor-not-allowed disabled:opacity-60`}
                             >
                               <div
                                 className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${
                                   active
-                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300"
+                                    ? "bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] theme-primary-text"
                                     : "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted"
                                 }`}
                               >
@@ -750,20 +750,20 @@ export default function PengaturanPresensiPage() {
                                 </p>
 
                                 {value === "barcode" && active && (
-                                  <p className="mt-2 text-xs leading-5 text-blue-700 dark:text-blue-400">
+                                  <p className="mt-2 text-xs leading-5 theme-primary-text">
                                     Membutuhkan QR Code identitas siswa yang sesuai dengan NISN.
                                   </p>
                                 )}
 
                                 {value === "face" && active && (
-                                  <p className="mt-2 text-xs leading-5 text-blue-700 dark:text-blue-400">
+                                  <p className="mt-2 text-xs leading-5 theme-primary-text">
                                     Membutuhkan kamera, foto wajah, dan data
                                     Face ID yang telah didaftarkan.
                                   </p>
                                 )}
 
                                 {value === "lokasi" && active && (
-                                  <p className="mt-2 text-xs leading-5 text-blue-700 dark:text-blue-400">
+                                  <p className="mt-2 text-xs leading-5 theme-primary-text">
                                     Membutuhkan izin GPS serta koordinat sekolah
                                     dan radius yang valid.
                                   </p>
@@ -773,7 +773,7 @@ export default function PengaturanPresensiPage() {
                               <div
                                 className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
                                   active
-                                    ? "border-blue-600 bg-blue-600 text-white"
+                                    ? "border-[var(--color-primary)] theme-primary"
                                     : "border-[color-mix(in_srgb,var(--color-text)_20%,transparent)] bg-[var(--color-surface)]"
                                 }`}
                               >
@@ -853,7 +853,7 @@ export default function PengaturanPresensiPage() {
                                 aria-pressed={active}
                                 className={`flex items-center justify-between gap-3 rounded-xl border p-3.5 text-left transition ${
                                   active
-                                    ? "border-blue-400 bg-blue-50/70 dark:border-blue-700 dark:bg-blue-950/50"
+                                    ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
                                     : "theme-border theme-card hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
                                 } disabled:cursor-not-allowed disabled:opacity-60`}
                               >
@@ -861,7 +861,7 @@ export default function PengaturanPresensiPage() {
                                   <div
                                     className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold ${
                                       active
-                                        ? "bg-blue-600 text-white"
+                                        ? "theme-primary"
                                         : "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted"
                                     }`}
                                   >
@@ -886,7 +886,7 @@ export default function PengaturanPresensiPage() {
                                 <div
                                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
                                     active
-                                      ? "border-blue-600 bg-blue-600 text-white"
+                                      ? "border-[var(--color-primary)] theme-primary"
                                       : "border-[color-mix(in_srgb,var(--color-text)_20%,transparent)] bg-[var(--color-surface)]"
                                   }`}
                                 >
@@ -967,7 +967,7 @@ export default function PengaturanPresensiPage() {
 
                   <aside className="space-y-6">
                     <div className="theme-card rounded-xl border theme-border p-5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <CalendarDays size={21} />
                       </div>
 
@@ -997,7 +997,7 @@ export default function PengaturanPresensiPage() {
                                 key={id}
                                 className={`rounded-md px-2 py-1 text-xs font-medium ${
                                   active
-                                    ? "bg-blue-100 font-semibold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+                                    ? "bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] font-semibold theme-primary-text"
                                     : "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted"
                                 }`}
                               >
@@ -1010,7 +1010,7 @@ export default function PengaturanPresensiPage() {
                     </div>
 
                     <div className="theme-card rounded-xl border theme-border p-5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <ShieldCheck size={21} />
                       </div>
 
@@ -1027,7 +1027,7 @@ export default function PengaturanPresensiPage() {
                         <div className="flex items-start gap-2.5 text-sm theme-text-secondary">
                           <CircleCheck
                             size={17}
-                            className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                            className="mt-0.5 shrink-0 theme-primary-text"
                           />
                           <span>Koordinat sekolah dapat diedit.</span>
                         </div>
@@ -1035,7 +1035,7 @@ export default function PengaturanPresensiPage() {
                         <div className="flex items-start gap-2.5 text-sm theme-text-secondary">
                           <CircleCheck
                             size={17}
-                            className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                            className="mt-0.5 shrink-0 theme-primary-text"
                           />
                           <span>Radius maksimal dapat diubah.</span>
                         </div>
@@ -1043,7 +1043,7 @@ export default function PengaturanPresensiPage() {
                         <div className="flex items-start gap-2.5 text-sm theme-text-secondary">
                           <CircleCheck
                             size={17}
-                            className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                            className="mt-0.5 shrink-0 theme-primary-text"
                           />
                           <span>Metode Barcode, Face, dan GPS dapat dipilih.</span>
                         </div>
@@ -1052,7 +1052,7 @@ export default function PengaturanPresensiPage() {
 
                     <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-900/60 dark:bg-amber-950/30">
                       <div className="flex items-center gap-2">
-                        <Info size={19} className="text-amber-700 dark:text-amber-400" />
+                        <Info size={19} className="theme-primary-text" />
                         <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
                           Catatan Validasi
                         </h2>
@@ -1099,7 +1099,7 @@ export default function PengaturanPresensiPage() {
                               {active ? (
                                 <CheckCircle2
                                   size={18}
-                                  className="text-emerald-600 dark:text-emerald-400"
+                                  className="theme-primary-text"
                                 />
                               ) : (
                                 <CircleX

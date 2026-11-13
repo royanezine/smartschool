@@ -47,7 +47,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -662,7 +662,7 @@ export default function ManajemenAksesPage() {
               w-80
               h-80
               rounded-full
-              bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
+              bg-white/10
               blur-3xl
               pointer-events-none
             "
@@ -676,7 +676,7 @@ export default function ManajemenAksesPage() {
               w-96
               h-96
               rounded-full
-              bg-[color-mix(in_srgb,var(--color-info)_16%,transparent)]
+              bg-white/8
               blur-3xl
               pointer-events-none
             "
@@ -692,7 +692,7 @@ export default function ManajemenAksesPage() {
             "
             style={{
               backgroundImage:
-                "linear-gradient(color-mix(in srgb, var(--color-card) 80%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-card) 80%, transparent) 1px, transparent 1px)",
+                "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
               backgroundSize:
                 "36px 36px",
             }}
@@ -712,15 +712,15 @@ export default function ManajemenAksesPage() {
                       gap-2
                       rounded-full
                       border
-                      border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]
-                      bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]
+                      border-white/20
+                      bg-white/10
                       px-3
                       py-1.5
                       text-[10px]
                       font-semibold
                       uppercase
                       tracking-[0.14em]
-                      text-[var(--color-card)]
+                      text-white
                     "
                   >
                     <ShieldCheck size={13} />
@@ -735,13 +735,13 @@ export default function ManajemenAksesPage() {
                       gap-1.5
                       rounded-full
                       border
-                      border-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
-                      bg-[color-mix(in_srgb,var(--color-card)_6%,transparent)]
+                      border-white/15
+                      bg-white/6
                       px-3
                       py-1.5
                       text-[10px]
                       font-medium
-                      text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]
+                      text-white/80
                     "
                   >
                     <Activity size={12} />
@@ -760,12 +760,12 @@ export default function ManajemenAksesPage() {
                       h-14
                       shrink-0
                       rounded-2xl
-                      bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
+                      bg-white/10
                       border
-                      border-[color-mix(in_srgb,var(--color-card)_20%,transparent)]
+                      border-white/20
                       items-center
                       justify-center
-                      text-[var(--color-card)]
+                      text-white
                     "
                   >
                     <Shield
@@ -783,7 +783,7 @@ export default function ManajemenAksesPage() {
                         lg:text-[34px]
                         font-semibold
                         tracking-tight
-                        text-[var(--color-card)]
+                        text-white
                       "
                     >
                       Manajemen Akses
@@ -795,7 +795,7 @@ export default function ManajemenAksesPage() {
                         max-w-2xl
                         text-sm
                         leading-6
-                        text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]
+                        text-white/80
                       "
                     >
                       Kelola role, pengguna, dan
@@ -812,7 +812,7 @@ export default function ManajemenAksesPage() {
                           items-center
                           gap-2
                           text-xs
-                          text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]
+                          text-white/80
                         "
                       >
                         <div
@@ -820,7 +820,7 @@ export default function ManajemenAksesPage() {
                             w-6
                             h-6
                             rounded-md
-                            bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]
+                            bg-white/10
                             flex
                             items-center
                             justify-center
@@ -837,7 +837,7 @@ export default function ManajemenAksesPage() {
                           w-1
                           h-1
                           rounded-full
-                          bg-[color-mix(in_srgb,var(--color-card)_45%,transparent)]
+                          bg-white/30
                         "
                       />
 
@@ -847,7 +847,7 @@ export default function ManajemenAksesPage() {
                           items-center
                           gap-2
                           text-xs
-                          text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]
+                          text-white/80
                         "
                       >
                         <div
@@ -855,7 +855,7 @@ export default function ManajemenAksesPage() {
                             w-6
                             h-6
                             rounded-md
-                            bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]
+                            bg-white/10
                             flex
                             items-center
                             justify-center
@@ -892,14 +892,13 @@ export default function ManajemenAksesPage() {
                     px-4
                     rounded-xl
                     border
-                    border-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
-                    bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]
-                    text-[color-mix(in_srgb,var(--color-card)_88%,transparent)]
+                    border-white/20
+                    bg-white/10
+                    text-white
                     text-sm
                     font-medium
                     backdrop-blur-sm
-                    hover:bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
-                    hover:border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]
+                    hover:bg-white/20
                     transition-all
                     disabled:opacity-40
                     disabled:cursor-not-allowed
@@ -924,12 +923,13 @@ export default function ManajemenAksesPage() {
                     h-11
                     px-4
                     rounded-xl
-                    bg-[var(--color-card)]
+                    bg-white
                     text-[var(--color-primary)]
                     text-sm
                     font-semibold
                     shadow-lg
                     hover:-translate-y-0.5
+                    hover:bg-white/90
                     transition-all
                   "
                 >
@@ -1393,7 +1393,7 @@ export default function ManajemenAksesPage() {
                     h-8
                     rounded-lg
                     ${themePrimaryGradient}
-                    text-[var(--color-card)]
+                    text-white
                     flex
                     items-center
                     justify-center
@@ -1725,17 +1725,18 @@ export default function ManajemenAksesPage() {
                               <div className="inline-flex items-center gap-2">
 
                                 <div
-                                  className={`
+                                  className="
                                     w-8
                                     h-8
                                     rounded-lg
-                                    ${themeInfoSurface}
-                                    ${themeInfoBorder}
-                                    text-[var(--color-info)]
+                                    bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                                    border
+                                    border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                                    theme-primary-text
                                     flex
                                     items-center
                                     justify-center
-                                  `}
+                                  "
                                 >
                                   <Users size={13} />
                                 </div>
@@ -2064,7 +2065,7 @@ export default function ManajemenAksesPage() {
                           ${
                             currentPage ===
                             page
-                              ? `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`
+                              ? `${themePrimaryGradient} text-white ${themePrimaryShadow}`
                               : `theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] hover:text-[var(--color-primary)]`
                           }
                         `}
@@ -2129,7 +2130,7 @@ export default function ManajemenAksesPage() {
                 h-5
                 rounded-md
                 ${themePrimaryGradient}
-                text-[var(--color-card)]
+                text-white
                 flex
                 items-center
                 justify-center
@@ -2237,51 +2238,7 @@ function PremiumStatCard({
   value,
   description,
   icon: Icon,
-  accent = "primary",
 }) {
-  const styles = {
-    primary: {
-      icon: `
-        bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]
-        text-[var(--color-primary)]
-        border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-      `,
-      line: "bg-[var(--color-primary)]",
-    },
-
-    success: {
-      icon: `
-        bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]
-        text-[var(--color-success)]
-        border-[color-mix(in_srgb,var(--color-success)_20%,transparent)]
-      `,
-      line: "bg-[var(--color-success)]",
-    },
-
-    info: {
-      icon: `
-        bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]
-        text-[var(--color-info)]
-        border-[color-mix(in_srgb,var(--color-info)_20%,transparent)]
-      `,
-      line: "bg-[var(--color-info)]",
-    },
-
-    neutral: {
-      icon: `
-        bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-        theme-text-secondary
-        border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
-      `,
-      line:
-        "bg-[var(--color-text-muted)]",
-    },
-  };
-
-  const style =
-    styles[accent] ||
-    styles.primary;
-
   return (
     <div
       className="
@@ -2302,21 +2259,21 @@ function PremiumStatCard({
     >
 
       <div
-        className={`
+        className="
           absolute
           left-0
           top-0
           w-1
           h-full
-          ${style.line}
+          bg-[var(--color-primary)]
           opacity-80
-        `}
+        "
       />
 
       <div className="flex items-center gap-3">
 
         <div
-          className={`
+          className="
             w-11
             h-11
             sm:w-12
@@ -2324,13 +2281,15 @@ function PremiumStatCard({
             shrink-0
             rounded-xl
             border
+            border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+            bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+            theme-primary-text
             flex
             items-center
             justify-center
-            ${style.icon}
             group-hover:scale-105
             transition-transform
-          `}
+          "
         >
           <Icon
             size={19}
@@ -2348,7 +2307,7 @@ function PremiumStatCard({
             {value}
           </p>
 
-          <p className="hidden sm:block text-[10px] theme-text-muted mt-0.5 truncate">
+          <p className="text-[11px] theme-text-muted truncate mt-0.5">
             {description}
           </p>
 
@@ -2503,19 +2462,20 @@ function MobileRoleList({
                   </span>
 
                   <span
-                    className={`
+                    className="
                       inline-flex
                       items-center
                       gap-1.5
                       px-2.5
                       py-1.5
                       rounded-lg
-                      ${themeInfoSurface}
-                      ${themeInfoBorder}
-                      text-[var(--color-info)]
+                      bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                      border
+                      border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                      theme-primary-text
                       text-[10px]
                       font-semibold
-                    `}
+                    "
                   >
                     <Users size={11} />
 

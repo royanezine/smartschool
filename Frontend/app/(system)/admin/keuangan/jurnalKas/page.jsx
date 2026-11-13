@@ -667,7 +667,6 @@ export default function JurnalKasPage() {
                   value={formatCurrency(totalMasuk)}
                   description={`${totalPemasukan} transaksi masuk di halaman ini`}
                   icon={<TrendingUp size={19} />}
-                  tone="success"
                 />
 
                 <FinanceCard
@@ -675,7 +674,6 @@ export default function JurnalKasPage() {
                   value={formatCurrency(totalKeluar)}
                   description={`${totalPengeluaran} transaksi keluar di halaman ini`}
                   icon={<TrendingDown size={19} />}
-                  tone="danger"
                 />
 
                 <FinanceCard
@@ -683,7 +681,6 @@ export default function JurnalKasPage() {
                   value={formatCurrency(selisih)}
                   description="Masuk dikurangi keluar"
                   icon={<Scale size={19} />}
-                  tone="primary"
                 />
 
                 <FinanceCard
@@ -691,7 +688,6 @@ export default function JurnalKasPage() {
                   value={formatCurrency(totalSaldoAkun)}
                   description={`${akunKas.length} akun kas/bank aktif`}
                   icon={<Wallet size={19} />}
-                  tone="info"
                 />
               </section>
 
@@ -1208,7 +1204,6 @@ export default function JurnalKasPage() {
                   value={formatCurrency(bukuKasRingkasan.saldoAwal)}
                   description="Saldo kas sebelum periode yang dipilih"
                   icon={<Wallet size={19} />}
-                  tone="primary"
                 />
 
                 <FinanceCard
@@ -1216,7 +1211,6 @@ export default function JurnalKasPage() {
                   value={formatCurrency(bukuKasTotalDebit)}
                   description="Total mutasi kas masuk pada periode ini"
                   icon={<TrendingUp size={19} />}
-                  tone="success"
                 />
 
                 <FinanceCard
@@ -1224,7 +1218,6 @@ export default function JurnalKasPage() {
                   value={formatCurrency(bukuKasTotalKredit)}
                   description="Total mutasi kas keluar pada periode ini"
                   icon={<TrendingDown size={19} />}
-                  tone="danger"
                 />
 
                 <FinanceCard
@@ -1232,7 +1225,6 @@ export default function JurnalKasPage() {
                   value={formatCurrency(bukuKasRingkasan.saldoAkhir)}
                   description="Saldo akhir setelah mutasi periode ini"
                   icon={<Scale size={19} />}
-                  tone="info"
                 />
               </section>
 
@@ -1551,35 +1543,10 @@ export default function JurnalKasPage() {
 }
 
 
-function FinanceCard({ label, value, description, icon, tone = "primary" }) {
-  const toneMap = {
-    success: {
-      surface: "bg-[color-mix(in_srgb,var(--color-success)_8%,transparent)]",
-      text: "text-[var(--color-success)]",
-      accent: "bg-[color-mix(in_srgb,var(--color-success)_55%,transparent)]",
-    },
-    danger: {
-      surface: "bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]",
-      text: "text-[var(--color-danger)]",
-      accent: "bg-[color-mix(in_srgb,var(--color-danger)_55%,transparent)]",
-    },
-    primary: {
-      surface: "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]",
-      text: "text-[var(--color-primary)]",
-      accent: "bg-[color-mix(in_srgb,var(--color-primary)_55%,transparent)]",
-    },
-    info: {
-      surface: "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]",
-      text: "text-[var(--color-info)]",
-      accent: "bg-[color-mix(in_srgb,var(--color-info)_55%,transparent)]",
-    },
-  };
-
-  const current = toneMap[tone] || toneMap.primary;
-
+function FinanceCard({ label, value, description, icon }) {
   return (
     <div className="theme-card relative overflow-hidden rounded-2xl border shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className={`absolute left-0 top-0 h-full w-[3px] ${current.accent}`} />
+      <div className="absolute left-0 top-0 h-full w-[3px] bg-[color-mix(in_srgb,var(--color-primary)_55%,transparent)]" />
 
       <div className="flex items-start justify-between gap-4 p-5">
         <div className="min-w-0">
@@ -1594,9 +1561,7 @@ function FinanceCard({ label, value, description, icon, tone = "primary" }) {
           </p>
         </div>
 
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${current.surface} ${current.text}`}
-        >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
           {icon}
         </div>
       </div>

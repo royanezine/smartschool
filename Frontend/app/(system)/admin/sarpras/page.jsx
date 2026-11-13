@@ -245,7 +245,7 @@ export default function SarprasPage() {
       icon: Building2,
       href: "/admin/sarpras/gedung",
       stat: `${totalGedung} Gedung`,
-      iconClass: `${themeInfoSurface} text-[var(--color-info)]`,
+      iconClass: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
     },
     {
       title: "Inventaris",
@@ -261,7 +261,7 @@ export default function SarprasPage() {
       icon: Boxes,
       href: "/admin/sarpras/fasilitas",
       stat: "Kelola Fasilitas",
-      iconClass: `${themeSuccessSurface} text-[var(--color-success)]`,
+      iconClass: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
     },
     {
       title: "Peminjaman",
@@ -269,7 +269,7 @@ export default function SarprasPage() {
       icon: ClipboardList,
       href: "/admin/sarpras/peminjaman",
       stat: `${totalPeminjamanCount} Transaksi`,
-      iconClass: `${themeWarningSurface} text-[var(--color-warning)]`,
+      iconClass: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
     },
     {
       title: "Pengembalian",
@@ -277,7 +277,7 @@ export default function SarprasPage() {
       icon: RefreshCw,
       href: "/admin/sarpras/pengembalian",
       stat: `${totalPengembalianCount} Dipinjam`,
-      iconClass: `${themeInfoSurface} text-[var(--color-info)]`,
+      iconClass: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
     },
     {
       title: "Riwayat Peminjaman",
@@ -285,7 +285,7 @@ export default function SarprasPage() {
       icon: History,
       href: "/admin/sarpras/riwayat",
       stat: "Riwayat",
-      iconClass: `${themeSuccessSurface} text-[var(--color-success)]`,
+      iconClass: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
     },
   ];
 
@@ -376,6 +376,7 @@ export default function SarprasPage() {
                 icon={Building2}
                 iconBg={themeInfoSurface}
                 iconColor="text-[var(--color-info)]"
+
               />
               <StatCard
                 title="Gedung Aktif"
@@ -385,6 +386,7 @@ export default function SarprasPage() {
                 iconBg={themeSuccessSurface}
                 iconColor="text-[var(--color-success)]"
               />
+
               <StatCard
                 title="Peminjaman"
                 value={isLoading ? "..." : totalPeminjamanCount}
@@ -400,6 +402,7 @@ export default function SarprasPage() {
                 icon={RefreshCw}
                 iconBg={themeNeutralSurface}
                 iconColor="text-[var(--color-text-muted)]"
+
               />
             </div>
 
@@ -505,6 +508,7 @@ export default function SarprasPage() {
                         </button>
                       );
                     })}
+
                   </div>
                 </section>
               </div>
@@ -625,6 +629,7 @@ export default function SarprasPage() {
             </div>
 
             <div className={`mt-6 flex flex-col gap-2 border-t ${themeDivider} py-4 text-[11px] theme-text-muted sm:flex-row sm:items-center sm:justify-between`}>
+
               <div className="flex items-center gap-2">
                 <FileText size={13} />
                 <span>SmartSchool • Manajemen Sarana & Prasarana</span>
@@ -645,8 +650,9 @@ function StatCard({ title, value, description, icon: Icon, iconBg, iconColor }) 
   return (
     <div className={`rounded-xl border ${themeNeutralBorder} bg-white p-4 ${themeCardShadow}`}>
       <div className="flex items-start justify-between gap-3">
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconBg} ${iconColor}`}>
-          <Icon size={18} />
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+          <Icon size={20} className="theme-primary-text shrink-0" />
+
         </div>
       </div>
       <div className="mt-3">

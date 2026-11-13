@@ -1017,7 +1017,7 @@ export default function EditPenggunaPage() {
                   <aside className="flex min-w-0 flex-col gap-6">
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                        <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                           <Eye className="h-4 w-4" />
                         </div>
                         <h2 className="theme-text text-sm font-bold">Preview Data</h2>
@@ -1062,7 +1062,7 @@ export default function EditPenggunaPage() {
 
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                        <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                           <Clock className="h-4 w-4" />
                         </div>
                         <h2 className="theme-text text-sm font-bold">Data Kepegawaian</h2>
@@ -1074,14 +1074,14 @@ export default function EditPenggunaPage() {
                         <div className="mt-3 flex flex-col gap-2">
                           <button
                             type="button"
-                            onClick={() => router.push("/admin/kategori-jabatan")}
+                            onClick={() => router.push("/admin/presensi/kategori-jabatan")}
                             className="theme-info inline-flex w-full items-center justify-center rounded-lg border px-3 py-2 text-[11px] font-semibold transition hover:opacity-80"
                           >
                             Buka Master Kategori Jabatan
                           </button>
                           <button
                             type="button"
-                            onClick={() => router.push("/admin/shift-kerja")}
+                            onClick={() => router.push("/admin/presensi/master-shift")}
                             className="theme-info inline-flex w-full items-center justify-center rounded-lg border px-3 py-2 text-[11px] font-semibold transition hover:opacity-80"
                           >
                             Buka Master Shift Kerja
@@ -1092,7 +1092,7 @@ export default function EditPenggunaPage() {
 
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                        <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <Lightbulb className="h-4 w-4" />
                         </div>
                         <h2 className="theme-text text-sm font-bold">Panduan</h2>

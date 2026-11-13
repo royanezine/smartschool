@@ -1,254 +1,236 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { X, Save, Building2, Package, Calendar, CreditCard } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
-export default function LanggananForm({ initialData = null, isEdit = false }) {
-  const router = useRouter();
-  const [formData, setFormData] = useState(
-    initialData || {
-      sekolahId: "",
-      paketId: "",
-      statusPembayaran: "pending",
-      statusLangganan: "trial",
-      tanggalMulai: "",
-      tanggalBerakhir: "",
-      hargaSaatBerlangganan: 0,
-      siklusPenagihan: "bulan",
-      fiturAktif: [],
+import { getPlatformSekolah } from "@/services/platform.service";
+import { getPaket } from "@/services/paket.service";
+
+export default function LanggananForm({
+  mode = "create",
+  initialData = null,
+  onSubmit = null,
+}) {
+  const [sekolahList, setSekolahList] = useState([]);
+  const [paketList, setPaketList] = useState([]);
+  const [loadingMaster, setLoadingMaster] = useState(true);
+  const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState({
+    sekolahId: initialData?.sekolahId || initialData?.sekolah?.id || "",
+    paketId: initialData?.paketId || initialData?.paket?.id || "",
+    statusLangganan: initialData?.statusLangganan || "aktif",
+    tanggalMulai: initialData?.tanggalMulai
+      ? String(initialData.tanggalMulai).slice(0, 10)
+      : "",
+    tanggalBerakhir: initialData?.tanggalBerakhir
+      ? String(initialData.tanggalBerakhir).slice(0, 10)
+      : "",
+  });
+
+  useEffect(() => {
+    let active = true;
+    async function loadMaster() {
+      try {
+        setLoadingMaster(true);
+        const [sekolahRes, paketRes] = await Promise.allSettled([
+          getPlatformSekolah({ page: 1, limit: 100 }),
+          getPaket(),
+        ]);
+
+        if (!active) return;
+
+        if (sekolahRes.status === "fulfilled") {
+          const list = Array.isArray(sekolahRes.value?.data)
+            ? sekolahRes.value.data
+            : [];
+          setSekolahList(list);
+        }
+
+        if (paketRes.status === "fulfilled") {
+          const raw = paketRes.value;
+          const list = Array.isArray(raw?.data)
+            ? raw.data
+            : Array.isArray(raw)
+            ? raw
+            : [];
+          setPaketList(list);
+        }
+      } finally {
+        if (active) setLoadingMaster(false);
+      }
     }
-  );
+
+    loadMaster();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submit data:", formData);
-    router.push("/super-admin/langgananSekolah");
+    setNotice("");
+    setError("");
+
+    if (typeof onSubmit === "function") {
+      try {
+        await onSubmit(formData);
+        setNotice("Data langganan berhasil diproses.");
+      } catch (err) {
+        setError(err?.message || "Gagal memproses data langganan.");
+      }
+      return;
+    }
+
+    setError(
+      mode === "edit"
+        ? "Endpoint pembaruan langganan sekolah oleh Super Admin belum tersedia di Backend (PUT /api/langganan/sekolah/:id)."
+        : "Pembuatan langganan sekolah dilakukan melalui alur upgrade/perpanjang paket tenant pada Backend (/api/langganan/upgrade atau /api/langganan/renew)."
+    );
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex items-center justify-between border-b border-slate-200/80 pb-4 mb-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex items-start gap-2.5 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_32%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-4 text-xs">
+        <AlertCircle
+          size={16}
+          className="mt-0.5 shrink-0 text-[var(--color-warning)]"
+        />
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-slate-800 flex items-center gap-2.5">
-            <span className="p-2 rounded-lg bg-blue-600 text-white shadow-sm">
-              <Package size={18} />
-            </span>
-            {isEdit ? "Edit Langganan" : "Tambah Langganan"}
-          </h1>
-          <p className="text-sm text-slate-500 ml-[52px] mt-0.5">
-            {isEdit ? "Perbarui data langganan sekolah" : "Buat langganan baru untuk sekolah"}
+          <p className="theme-text font-semibold">
+            {mode === "edit"
+              ? "Pembaruan Langganan Terbatas di Backend"
+              : "Data Referensi Langsung dari API Platform"}
+          </p>
+          <p className="theme-text-muted mt-0.5 leading-relaxed">
+            Daftar sekolah dan paket di bawah dimuat dari server. Endpoint update langsung
+            langganan sekolah oleh Super Admin belum tersedia pada API Backend.
           </p>
         </div>
-        <button
-          onClick={() => router.push("/super-admin/langgananSekolah")}
-          className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          <X size={20} />
-        </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-7">
-        <section>
-          <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2.5">
-            <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
-              <Building2 size={16} />
-            </span>
-            Informasi Langganan
-          </h3>
-          <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-sm space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Sekolah <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  name="sekolahId"
-                  value={formData.sekolahId}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition cursor-pointer text-slate-600"
-                  required
-                >
-                  <option value="">Pilih Sekolah</option>
-                  <option value="sklh-01">SMA Negeri 1 Jakarta</option>
-                  <option value="sklh-02">SMA Al-Azhar Kelapa Gading</option>
-                  <option value="sklh-03">SMP BPK Penabur</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Paket <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  name="paketId"
-                  value={formData.paketId}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition cursor-pointer text-slate-600"
-                  required
-                >
-                  <option value="">Pilih Paket</option>
-                  <option value="pkt-01">Professional (Rp550.000/bulan)</option>
-                  <option value="pkt-02">Enterprise (Rp1.200.000/bulan)</option>
-                  <option value="pkt-03">Starter (Rp250.000/bulan)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Tanggal Mulai
-                </label>
-                <input
-                  type="date"
-                  name="tanggalMulai"
-                  value={formData.tanggalMulai}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Tanggal Berakhir
-                </label>
-                <input
-                  type="date"
-                  name="tanggalBerakhir"
-                  value={formData.tanggalBerakhir}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+      {notice && (
+        <div className="flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] px-4 py-3 text-xs text-[var(--color-success)]">
+          <CheckCircle2 size={15} />
+          <span>{notice}</span>
+        </div>
+      )}
 
-        <section>
-          <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2.5">
-            <span className="p-1.5 rounded-lg bg-amber-50 text-amber-600">
-              <CreditCard size={16} />
-            </span>
-            Status & Pembayaran
-          </h3>
-          <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-sm space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Status Langganan
-                </label>
-                <select
-                  name="statusLangganan"
-                  value={formData.statusLangganan}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition cursor-pointer text-slate-600"
-                >
-                  <option value="aktif">Aktif</option>
-                  <option value="trial">Trial</option>
-                  <option value="nonaktif">Nonaktif</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Status Pembayaran
-                </label>
-                <select
-                  name="statusPembayaran"
-                  value={formData.statusPembayaran}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition cursor-pointer text-slate-600"
-                >
-                  <option value="lunas">Lunas</option>
-                  <option value="pending">Pending</option>
-                  <option value="gagal">Gagal</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Harga Saat Berlangganan (Rp)
-                </label>
-                <input
-                  type="number"
-                  name="hargaSaatBerlangganan"
-                  value={formData.hargaSaatBerlangganan}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition"
-                  placeholder="550000"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Siklus Penagihan
-                </label>
-                <select
-                  name="siklusPenagihan"
-                  value={formData.siklusPenagihan}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition cursor-pointer text-slate-600"
-                >
-                  <option value="bulan">Bulanan</option>
-                  <option value="tahun">Tahunan</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </section>
+      {error && (
+        <div className="flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-4 py-3 text-xs text-[var(--color-danger)]">
+          <AlertCircle size={15} />
+          <span>{error}</span>
+        </div>
+      )}
 
-        <section>
-          <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2.5">
-            <span className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
-              <Package size={16} />
-            </span>
-            Fitur Aktif (Opsional)
-          </h3>
-          <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-sm">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {["akademik", "presensi", "keuangan", "perpustakaan", "kepegawaian", "komunikasi"].map((fitur) => (
-                <label key={fitur} className="flex items-center gap-2 text-sm text-slate-600">
-                  <input
-                    type="checkbox"
-                    name="fiturAktif"
-                    value={fitur}
-                    checked={formData.fiturAktif.includes(fitur)}
-                    onChange={(e) => {
-                      const { value, checked } = e.target;
-                      setFormData((prev) => ({
-                        ...prev,
-                        fiturAktif: checked
-                          ? [...prev.fiturAktif, value]
-                          : prev.fiturAktif.filter((f) => f !== value),
-                      }));
-                    }}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  {fitur.charAt(0).toUpperCase() + fitur.slice(1)}
-                </label>
+      {loadingMaster ? (
+        <div className="flex items-center gap-2 py-6 text-xs theme-text-muted">
+          <Loader2 size={16} className="animate-spin" />
+          Memuat daftar sekolah dan paket langganan...
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 text-xs">
+          <div>
+            <label className="theme-text mb-1.5 block font-semibold">
+              Sekolah
+            </label>
+            <select
+              name="sekolahId"
+              value={formData.sekolahId}
+              onChange={handleChange}
+              className="theme-input theme-text w-full rounded-lg border px-3 py-2.5"
+            >
+              <option value="">-- Pilih Sekolah --</option>
+              {sekolahList.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.nama} {s.subdomain ? `(${s.subdomain})` : ""}
+                </option>
               ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="theme-text mb-1.5 block font-semibold">
+              Paket Langganan
+            </label>
+            <select
+              name="paketId"
+              value={formData.paketId}
+              onChange={handleChange}
+              className="theme-input theme-text w-full rounded-lg border px-3 py-2.5"
+            >
+              <option value="">-- Pilih Paket --</option>
+              {paketList.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nama}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="theme-text mb-1.5 block font-semibold">
+              Status Langganan
+            </label>
+            <select
+              name="statusLangganan"
+              value={formData.statusLangganan}
+              onChange={handleChange}
+              className="theme-input theme-text w-full rounded-lg border px-3 py-2.5"
+            >
+              <option value="aktif">Aktif</option>
+              <option value="trial">Trial</option>
+              <option value="menunggu_pembayaran">Menunggu Pembayaran</option>
+              <option value="kedaluwarsa">Kedaluwarsa</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="theme-text mb-1.5 block font-semibold">
+                Tanggal Mulai
+              </label>
+              <input
+                type="date"
+                name="tanggalMulai"
+                value={formData.tanggalMulai}
+                onChange={handleChange}
+                className="theme-input theme-text w-full rounded-lg border px-3 py-2.5"
+              />
+            </div>
+
+            <div>
+              <label className="theme-text mb-1.5 block font-semibold">
+                Tanggal Berakhir
+              </label>
+              <input
+                type="date"
+                name="tanggalBerakhir"
+                value={formData.tanggalBerakhir}
+                onChange={handleChange}
+                className="theme-input theme-text w-full rounded-lg border px-3 py-2.5"
+              />
             </div>
           </div>
-        </section>
+        </div>
+      )}
 
-        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-slate-200/80">
-          <button
-            type="button"
-            onClick={() => router.push("/super-admin/langgananSekolah")}
-            className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            Batal
-          </button>
+      {typeof onSubmit === "function" && (
+        <div className="flex justify-end">
           <button
             type="submit"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow"
+            className="rounded-lg bg-[var(--color-primary)] px-5 py-2.5 text-xs font-semibold text-white transition hover:brightness-95"
           >
-            <Save size={16} />
-            {isEdit ? "Update Langganan" : "Simpan Langganan"}
+            {mode === "edit" ? "Simpan Perubahan" : "Simpan Langganan"}
           </button>
         </div>
-      </form>
-    </div>
+      )}
+    </form>
   );
 }

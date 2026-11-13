@@ -601,7 +601,7 @@ function StatCard({ icon, label, value, highlight = false }) {
   return (
     <div className="theme-card rounded-xl border theme-border p-4 shadow-sm transition-colors hover:border-[var(--color-primary)]">
       <div className="flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg border theme-info">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
           {icon}
         </div>
         <p className="text-[10px] font-bold uppercase tracking-wider theme-text-muted">

@@ -316,7 +316,7 @@ export default function DetailJurnalKasPage() {
 
             <div className="flex items-center gap-3">
 
-              <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
+              <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 items-center justify-center rounded-xl">
                 <Wallet size={19} />
               </div>
 
@@ -366,7 +366,7 @@ export default function DetailJurnalKasPage() {
 
               <div className="flex items-center gap-3">
 
-                <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
+                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-lg">
                   <ReceiptText size={18} />
                 </div>
 

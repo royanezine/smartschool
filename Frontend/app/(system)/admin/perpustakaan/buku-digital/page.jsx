@@ -69,10 +69,10 @@ const formatStatus = (status) =>
 
 function StatCard({ icon: Icon, label, value, type = "blue" }) {
   const styles = {
-    blue: "theme-primary-soft",
-    green: "theme-success",
-    orange: "theme-warning",
-    purple: "theme-primary-soft",
+    blue: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    green: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    orange: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    purple: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
   return (
     <div

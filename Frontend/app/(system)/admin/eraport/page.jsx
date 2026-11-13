@@ -58,24 +58,24 @@ const QUICK_MODULES = [
 
 const toneMap = {
   blue: {
-    iconBg: "theme-info",
-    iconText: "text-[var(--color-info)]",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
   },
   violet: {
-    iconBg: "theme-card-soft",
-    iconText: "text-[var(--color-primary)]",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
   },
   indigo: {
-    iconBg: "theme-card-soft",
-    iconText: "text-[var(--color-primary)]",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
   },
   emerald: {
-    iconBg: "theme-success",
-    iconText: "text-[var(--color-success)]",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
   },
   amber: {
-    iconBg: "theme-warning",
-    iconText: "text-[var(--color-warning)]",
+    iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    iconText: "theme-primary-text",
   },
 };
 
@@ -554,7 +554,7 @@ export default function ERaportPage() {
                       </p>
                     </div>
 
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl theme-info">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                       <CalendarDays size={20} />
                     </div>
                   </div>
@@ -813,7 +813,7 @@ export default function ERaportPage() {
                           >
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold">
+                                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold">
                                   <GraduationCap size={17} />
                                 </div>
 
@@ -871,7 +871,7 @@ export default function ERaportPage() {
                 {activeView === "detail" && (
                   <div className="theme-card-soft border-t theme-border px-5 py-4 sm:px-6">
                     <div className="flex items-start gap-3">
-                      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                         <BarChart3 size={17} />
                       </div>
 
@@ -911,7 +911,7 @@ export default function ERaportPage() {
                     </p>
                   </div>
 
-                  <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
+                  <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 items-center justify-center rounded-xl">
                     <FileText size={19} />
                   </div>
                 </div>

@@ -821,7 +821,7 @@ export default function AturShiftPegawaiPage() {
                         )}
                       </Field>
 
-                      <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
+                      <div className="flex items-start gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4 text-sm theme-primary-text">
                         <Info size={18} className="mt-0.5 shrink-0" />
                         <p>
                           Pastikan shift yang dipilih sesuai jadwal kerja

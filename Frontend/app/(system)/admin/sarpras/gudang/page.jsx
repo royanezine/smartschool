@@ -73,22 +73,10 @@ function formatNumber(value) {
 }
 
 function StatCard({ icon: Icon, label, value, description, tone }) {
-  const styles = {
-    primary: {
-      bg: primarySoft,
-      color: "text-[var(--color-primary)]",
-    },
-    info: {
-      bg: "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]",
-      color: "text-[var(--color-info)]",
-    },
-    success: {
-      bg: "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
-      color: "text-[var(--color-success)]",
-    },
+  const style = {
+    bg: "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
+    color: "theme-primary-text",
   };
-
-  const style = styles[tone] || styles.primary;
 
   return (
     <div

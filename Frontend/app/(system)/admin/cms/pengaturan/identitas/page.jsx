@@ -1,327 +1,418 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Globe,
+  Image as ImageIcon,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  RefreshCw,
+  Save,
+} from "lucide-react";
+
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import {
-  Save,
-  Globe,
-  UploadCloud,
-  X,
-  ChevronRight,
-  Building2,
-} from "lucide-react";
+  getPengaturan,
+  upsertPengaturan,
+} from "@/services/pengaturan.service";
 
-export default function IdentitasPage() {
-  const [active, setActive] = useState("pengaturan");
-  const [collapsed, setCollapsed] = useState(false);
-  const [loading, setLoading] = useState(false);
+const IDENTITAS_KUNCI = "cms_identitas_website";
+const IDENTITAS_KELOMPOK = "cms_identitas";
 
-  const [form, setForm] = useState({
-    name: "SmartSchool CMS",
-    description: "Sistem manajemen sekolah berbasis web terintegrasi.",
-    email: "admin@sekolah.sch.id",
-    phone: "+62 812 3456 7890",
-    address: "Jl. Pendidikan No. 1, Kota Smart, Indonesia",
-  });
+const EMPTY_FORM = {
+  siteTitle: "",
+  tagline: "",
+  description: "",
+  email: "",
+  phone: "",
+  address: "",
+  logoUrl: "",
+  faviconUrl: "",
+};
 
-  const [logoPreview, setLogoPreview] = useState(
-    "https://placehold.co/150x150/1e3a5f/white?text=Logo"
+function getErrorMessage(err, fallback) {
+  return (
+    err?.response?.data?.message ||
+    err?.data?.message ||
+    err?.message ||
+    fallback
   );
+}
 
-  const [faviconPreview, setFaviconPreview] = useState(
-    "https://placehold.co/32x32/1e3a5f/white?text=F"
-  );
+function parseIdentitasNilai(raw) {
+  if (!raw) return null;
+  if (typeof raw === "object") return raw;
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+export default function IdentitasWebsitePage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [lastUpdated, setLastUpdated] = useState("");
+
+  const loadIdentitas = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await getPengaturan();
+      const list = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res)
+        ? res
+        : [];
+
+      const record = list.find((item) => item?.kunci === IDENTITAS_KUNCI);
+      const parsed = parseIdentitasNilai(record?.nilai);
+
+      if (parsed) {
+        setForm({
+          siteTitle: parsed.siteTitle || "",
+          tagline: parsed.tagline || "",
+          description: parsed.description || "",
+          email: parsed.email || "",
+          phone: parsed.phone || "",
+          address: parsed.address || "",
+          logoUrl: parsed.logoUrl || "",
+          faviconUrl: parsed.faviconUrl || "",
+        });
+        setLastUpdated(record?.diperbaruiPada || record?.dibuatPada || "");
+      } else {
+        setForm(EMPTY_FORM);
+        setLastUpdated("");
+      }
+    } catch (err) {
+      setError(
+        getErrorMessage(err, "Gagal memuat konfigurasi identitas website.")
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      loadIdentitas();
+    });
+  }, [loadIdentitas]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e, type) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
 
-    const url = URL.createObjectURL(file);
+    if (!form.siteTitle.trim()) {
+      setError("Judul situs wajib diisi.");
+      return;
+    }
 
-    if (type === "logo") {
-      setLogoPreview(url);
-    } else {
-      setFaviconPreview(url);
+    try {
+      setSaving(true);
+
+      const payloadNilai = {
+        siteTitle: form.siteTitle.trim(),
+        tagline: form.tagline.trim(),
+        description: form.description.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+        logoUrl: form.logoUrl.trim(),
+        faviconUrl: form.faviconUrl.trim(),
+      };
+
+      const res = await upsertPengaturan({
+        kunci: IDENTITAS_KUNCI,
+        nilai: payloadNilai,
+        tipeData: "json",
+        kelompok: IDENTITAS_KELOMPOK,
+        keterangan: "Identitas & metadata website publik CMS sekolah",
+      });
+
+      const saved = res?.data;
+      setLastUpdated(saved?.diperbaruiPada || new Date().toISOString());
+      setSuccess("Identitas website berhasil disimpan ke server backend.");
+    } catch (err) {
+      setError(
+        getErrorMessage(err, "Gagal menyimpan identitas website ke backend.")
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      alert("Identitas website berhasil disimpan!");
-    }, 1500);
-  };
-
   return (
-    // ROOT: flex h-screen overflow-hidden
-    <div className="theme-page flex h-screen w-full overflow-hidden">
+    <div className="theme-page theme-text flex h-screen overflow-hidden">
       <Sidebar
-        active={active}
-        setActive={setActive}
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        role="admin"
       />
 
-      {/* BODY: min-h-0 flex-1 */}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        
-        {/* HEADER: shrink-0 */}
-        <div className="shrink-0 border-b theme-border">
-          <Header
-            title="Identitas Website"
-            user={{
-              name: "CMS Admin",
-              email: "cms@smartschool.com",
-              avatar: "CA",
-            }}
-            notifications={[]}
-          />
-        </div>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <Header
+          onMenuClick={() => setSidebarOpen(true)}
+          title="Pengaturan Identitas Website"
+        />
 
-        {/* MAIN: min-w-0 flex-1 overflow-y-auto */}
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          
-          {/* KONTEN: w-full tanpa max-w */}
-          <div className="w-full px-4 py-6 md:px-6 lg:px-8 space-y-6">
-            
-            {/* BREADCRUMB */}
-            <nav className="flex items-center gap-2 text-sm">
-              <a
-                href="/cmsAdmin"
-                className="theme-text-muted hover:text-[var(--color-primary)] transition"
-              >
-                Dashboard
-              </a>
-              <ChevronRight className="w-4 h-4 theme-text-placeholder" />
-              <a
-                href="/admin/cms/pengaturan"
-                className="theme-text-muted hover:text-[var(--color-primary)] transition"
-              >
-                Pengaturan
-              </a>
-              <ChevronRight className="w-4 h-4 theme-text-placeholder" />
-              <span className="theme-text font-semibold">Identitas</span>
-            </nav>
-
-            {/* HEADER PAGE */}
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 p-3 rounded-xl theme-info border">
-                <Globe className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold theme-text">
-                  Identitas Website
-                </h1>
-                <p className="text-sm theme-text-muted mt-1 max-w-2xl">
-                  Atur informasi dasar, logo, dan profil website sekolah Anda.
-                </p>
-              </div>
+        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="theme-text flex items-center gap-2 text-xl font-bold sm:text-2xl">
+                <Globe className="text-[var(--color-primary)]" size={22} />
+                Identitas Website CMS
+              </h1>
+              <p className="theme-text-muted mt-1 text-sm">
+                Konfigurasi judul situs, deskripsi SEO, kontak resmi, dan URL aset branding website sekolah.
+              </p>
             </div>
 
+            <button
+              type="button"
+              onClick={loadIdentitas}
+              disabled={loading}
+              className="theme-card theme-border theme-text inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold transition hover:opacity-85 disabled:opacity-50"
+            >
+              <RefreshCw
+                size={14}
+                className={loading ? "animate-spin" : ""}
+              />
+              Muat Ulang
+            </button>
+          </div>
+
+          {error && (
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-4 py-3 text-xs text-[var(--color-danger)]">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" />
+              <div className="flex-1">{error}</div>
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] px-4 py-3 text-xs text-[var(--color-success)]">
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
+              <div className="flex-1">{success}</div>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="theme-card theme-border flex min-h-[260px] flex-col items-center justify-center rounded-2xl border p-8">
+              <Loader2
+                size={28}
+                className="animate-spin text-[var(--color-primary)]"
+              />
+              <p className="theme-text-muted mt-2 text-xs">
+                Mengambil konfigurasi identitas website dari backend...
+              </p>
+            </div>
+          ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
-              
-              {/* CARD: BRANDING (Logo & Favicon) */}
-              <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b theme-border flex items-center justify-between">
+              <div className="theme-card theme-border rounded-2xl border p-5">
+                <h2 className="theme-text mb-4 text-sm font-bold">
+                  Informasi Umum & SEO
+                </h2>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <h3 className="text-sm font-bold theme-text flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-[var(--color-primary)]" />
-                      Branding Website
-                    </h3>
-                    <p className="text-xs theme-text-muted mt-1">
-                      Upload logo utama dan favicon
-                    </p>
-                  </div>
-                  <span className="text-[10px] font-bold theme-text-muted theme-card-soft px-3 py-1.5 rounded-lg border theme-border">
-                    PNG / JPG / SVG
-                  </span>
-                </div>
-
-                {/* Grid Responsif untuk Upload Gambar */}
-                <div className="p-6 grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-4">
-                  
-                  <div className="theme-card-soft border theme-border rounded-xl p-5">
-                    <label className="text-xs font-bold theme-text-secondary uppercase tracking-wider block mb-3">
-                      Logo Utama
-                    </label>
-                    <div className="relative aspect-square max-w-[200px] mx-auto border-2 border-dashed theme-border rounded-xl overflow-hidden theme-card group">
-                      <img
-                        src={logoPreview}
-                        alt="Logo"
-                        className="w-full h-full object-contain p-4 transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-slate-950/40 opacity-0 group-hover:opacity-100 transition cursor-pointer">
-                        <span className="theme-card px-4 py-2 rounded-lg text-xs font-bold theme-text shadow-sm flex items-center gap-2 border theme-border">
-                          <UploadCloud className="w-4 h-4" /> Ganti Logo
-                        </span>
-                      </div>
-                      <input
-                        type="file"
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        accept="image/*"
-                        onChange={(e) => handleFileChange(e, "logo")}
-                      />
-                    </div>
-                    <p className="text-[11px] theme-text-muted mt-3 text-center">
-                      Rekomendasi: 150×150px atau rasio 1:1
-                    </p>
-                  </div>
-
-                  <div className="theme-card-soft border theme-border rounded-xl p-5">
-                    <label className="text-xs font-bold theme-text-secondary uppercase tracking-wider block mb-3">
-                      Favicon
-                    </label>
-                    <div className="relative w-32 h-32 mx-auto border-2 border-dashed theme-border rounded-xl overflow-hidden theme-card group">
-                      <img
-                        src={faviconPreview}
-                        alt="Favicon"
-                        className="w-full h-full object-contain p-3 transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-slate-950/40 opacity-0 group-hover:opacity-100 transition cursor-pointer">
-                        <span className="theme-card px-3 py-1.5 rounded-lg text-[11px] font-bold theme-text shadow-sm flex items-center gap-1.5 border theme-border">
-                          <UploadCloud className="w-3.5 h-3.5" /> Ganti
-                        </span>
-                      </div>
-                      <input
-                        type="file"
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        accept="image/*"
-                        onChange={(e) => handleFileChange(e, "favicon")}
-                      />
-                    </div>
-                    <p className="text-[11px] theme-text-muted mt-3 text-center">
-                      Rekomendasi: 32×32px
-                    </p>
-                  </div>
-
-                  {/* Info Tambahan (Mengisi Grid agar seimbang di layar besar) */}
-                  <div className="hidden 2xl:col-span-2 2xl:flex flex-col justify-center rounded-xl border theme-border p-6 bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]">
-                    <h4 className="text-sm font-bold theme-text mb-2">Tips Branding</h4>
-                    <p className="text-xs leading-relaxed theme-text-muted">
-                      Gunakan logo dengan latar belakang transparan (PNG) agar terlihat menyatu dengan warna header website. Pastikan resolusi gambar cukup tajam untuk ditampilkan di layar beresolusi tinggi.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* CARD: INFORMASI DASAR */}
-              <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b theme-border">
-                  <h3 className="text-sm font-bold theme-text">Informasi Dasar</h3>
-                  <p className="text-xs theme-text-muted mt-1">
-                    Informasi ini akan digunakan sebagai identitas utama website.
-                  </p>
-                </div>
-
-                {/* Grid Responsif untuk Form */}
-                <div className="p-6 grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
-                  
-                  <div>
-                    <label className="text-xs font-bold theme-text-secondary block mb-2">
-                      Nama Website <span className="text-[var(--color-danger)]">*</span>
+                    <label className="theme-text mb-1.5 block text-xs font-semibold">
+                      Judul Website *
                     </label>
                     <input
-                      required
-                      name="name"
-                      value={form.name}
+                      type="text"
+                      name="siteTitle"
+                      value={form.siteTitle}
                       onChange={handleChange}
-                      className="theme-input w-full h-11 px-4 rounded-xl border text-sm font-medium outline-none transition focus:border-[var(--color-primary)]"
+                      placeholder="Masukkan nama atau judul resmi website sekolah"
+                      required
+                      className="theme-input theme-text w-full rounded-lg border px-3 py-2 text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold theme-text-secondary block mb-2">
-                      Email Kontak
+                    <label className="theme-text mb-1.5 block text-xs font-semibold">
+                      Tagline / Slogan
+                    </label>
+                    <input
+                      type="text"
+                      name="tagline"
+                      value={form.tagline}
+                      onChange={handleChange}
+                      placeholder="Contoh: Unggul dalam Prestasi, Berkarakter Mulia"
+                      className="theme-input theme-text w-full rounded-lg border px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="theme-text mb-1.5 block text-xs font-semibold">
+                    Deskripsi Meta / Tentang Website
+                  </label>
+                  <textarea
+                    rows={3}
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                    placeholder="Ringkasan profil sekolah untuk metadata mesin pencari"
+                    className="theme-input theme-text w-full rounded-lg border px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="theme-card theme-border rounded-2xl border p-5">
+                <h2 className="theme-text mb-4 text-sm font-bold">
+                  Kontak Publik Website
+                </h2>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="theme-text mb-1.5 flex items-center gap-1.5 text-xs font-semibold">
+                      <Mail size={13} />
+                      Email Kontak Resmi
                     </label>
                     <input
                       type="email"
                       name="email"
                       value={form.email}
                       onChange={handleChange}
-                      className="theme-input w-full h-11 px-4 rounded-xl border text-sm font-medium outline-none transition focus:border-[var(--color-primary)]"
+                      placeholder="info@sekolah.sch.id"
+                      className="theme-input theme-text w-full rounded-lg border px-3 py-2 text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold theme-text-secondary block mb-2">
-                      Telepon
+                    <label className="theme-text mb-1.5 flex items-center gap-1.5 text-xs font-semibold">
+                      <Phone size={13} />
+                      Nomor Telepon
                     </label>
                     <input
+                      type="text"
                       name="phone"
                       value={form.phone}
                       onChange={handleChange}
-                      className="theme-input w-full h-11 px-4 rounded-xl border text-sm font-medium outline-none transition focus:border-[var(--color-primary)]"
+                      placeholder="(021) 000-0000"
+                      className="theme-input theme-text w-full rounded-lg border px-3 py-2 text-sm"
                     />
                   </div>
+                </div>
 
-                  <div className="md:col-span-2 2xl:col-span-3">
-                    <label className="text-xs font-bold theme-text-secondary block mb-2">
-                      Deskripsi Singkat
-                    </label>
-                    <textarea
-                      name="description"
-                      rows={3}
-                      value={form.description}
-                      onChange={handleChange}
-                      className="theme-input w-full px-4 py-3 rounded-xl border text-sm font-medium outline-none transition focus:border-[var(--color-primary)] resize-y"
-                    />
-                  </div>
+                <div className="mt-4">
+                  <label className="theme-text mb-1.5 flex items-center gap-1.5 text-xs font-semibold">
+                    <MapPin size={13} />
+                    Alamat Lengkap
+                  </label>
+                  <textarea
+                    rows={2}
+                    name="address"
+                    value={form.address}
+                    onChange={handleChange}
+                    placeholder="Alamat fisik sekolah"
+                    className="theme-input theme-text w-full rounded-lg border px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
 
-                  <div className="md:col-span-2 2xl:col-span-3">
-                    <label className="text-xs font-bold theme-text-secondary block mb-2">
-                      Alamat Lengkap
+              <div className="theme-card theme-border rounded-2xl border p-5">
+                <h2 className="theme-text mb-2 flex items-center gap-1.5 text-sm font-bold">
+                  <ImageIcon size={15} className="text-[var(--color-primary)]" />
+                  Logo & Favicon (URL)
+                </h2>
+                <p className="theme-text-muted mb-4 text-xs">
+                  Endpoint unggah file biner CMS identitas belum tersedia pada backend; gunakan URL gambar langsung atau unggah logo utama melalui Pengaturan Tema / Profil Sekolah.
+                </p>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="theme-text mb-1.5 block text-xs font-semibold">
+                      URL Logo Website
                     </label>
                     <input
-                      name="address"
-                      value={form.address}
+                      type="url"
+                      name="logoUrl"
+                      value={form.logoUrl}
                       onChange={handleChange}
-                      className="theme-input w-full h-11 px-4 rounded-xl border text-sm font-medium outline-none transition focus:border-[var(--color-primary)]"
+                      placeholder="https://..."
+                      className="theme-input theme-text w-full rounded-lg border px-3 py-2 text-sm"
                     />
+                    {form.logoUrl && (
+                      <div className="theme-border mt-2 inline-flex rounded-lg border p-2">
+                        <img
+                          src={form.logoUrl}
+                          alt="Pratinjau logo website"
+                          className="h-12 w-auto object-contain"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="theme-text mb-1.5 block text-xs font-semibold">
+                      URL Favicon
+                    </label>
+                    <input
+                      type="url"
+                      name="faviconUrl"
+                      value={form.faviconUrl}
+                      onChange={handleChange}
+                      placeholder="https://..."
+                      className="theme-input theme-text w-full rounded-lg border px-3 py-2 text-sm"
+                    />
+                    {form.faviconUrl && (
+                      <div className="theme-border mt-2 inline-flex rounded-lg border p-2">
+                        <img
+                          src={form.faviconUrl}
+                          alt="Pratinjau favicon"
+                          className="h-8 w-8 object-contain"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* FOOTER ACTION (Tombol Simpan) */}
-              <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  onClick={() => window.history.back()}
-                  className="inline-flex h-11 items-center justify-center gap-2 px-6 w-full sm:w-auto theme-card theme-text-secondary text-sm font-semibold rounded-xl border theme-border hover:opacity-80 transition"
-                >
-                  <X className="w-4 h-4" />
-                  Batal
-                </button>
+              <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                <p className="theme-text-muted text-xs">
+                  {lastUpdated
+                    ? `Terakhir diperbarui: ${new Date(lastUpdated).toLocaleString("id-ID")}`
+                    : "Belum ada data tersimpan sebelumnya untuk tenant ini."}
+                </p>
 
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="inline-flex h-11 items-center justify-center gap-2 px-8 w-full sm:w-auto theme-primary text-sm font-bold rounded-xl shadow-md disabled:opacity-60 transition hover:opacity-90"
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)] px-5 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 disabled:opacity-60"
                 >
-                  {loading ? (
-                    <span className="animate-pulse">Menyimpan...</span>
+                  {saving ? (
+                    <Loader2 size={15} className="animate-spin" />
                   ) : (
-                    <>
-                      <Save className="w-4 h-4" />
-                      Simpan Perubahan
-                    </>
+                    <Save size={15} />
                   )}
+                  {saving ? "Menyimpan..." : "Simpan Identitas"}
                 </button>
               </div>
             </form>
-
-            {/* FOOTER */}
-            <footer className="pt-6 border-t theme-border text-center text-xs theme-text-muted">
-              © 2026 SmartSchool CMS • Identitas Website
-            </footer>
-          </div>
+          )}
         </main>
       </div>
     </div>

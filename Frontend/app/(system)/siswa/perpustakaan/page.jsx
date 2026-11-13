@@ -390,7 +390,7 @@ export default function PerpustakaanSiswaPage() {
         
         <section className={`relative overflow-hidden rounded-[28px] border ${themePrimaryBorder} ${themeCardShadow} bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))]`}>
           <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] blur-3xl" />
-          <div className="absolute -bottom-36 left-[35%] h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] blur-3xl" />
+          <div className="absolute -bottom-36 left-[35%] h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] blur-3xl" />
           <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(color-mix(in srgb, var(--color-text) 35%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-text) 35%, transparent) 1px, transparent 1px)", backgroundSize: "34px 34px" }} />
           
           <div className="relative grid gap-8 px-5 py-7 sm:px-7 sm:py-8 lg:grid-cols-[1fr_380px] lg:px-10 lg:py-10">
@@ -405,7 +405,7 @@ export default function PerpustakaanSiswaPage() {
                 Hai, {username}. Cari koleksi buku sekolah, baca e-book, lihat buku yang sedang kamu pinjam, dan pantau tanggal pengembaliannya.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="#katalog" className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110">
+                <Link href="#katalog" className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110">
                   <Library size={17} /> Jelajahi Katalog
                 </Link>
                 <Link href="#peminjaman" className={`inline-flex items-center gap-2 rounded-xl border ${themePrimaryBorder} ${themePrimarySoft} px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] transition ${themePrimarySoftHover}`}>
@@ -421,7 +421,7 @@ export default function PerpustakaanSiswaPage() {
                   <p className="theme-text mt-1 text-lg font-bold">{books.length} koleksi</p>
                   <p className="theme-text-muted mt-1 text-xs">Data mengikuti katalog sekolah.</p>
                 </div>
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${themeSuccessSoft} text-[var(--color-success)]`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}>
                   <CheckCircle2 size={20} />
                 </div>
               </div>
@@ -480,7 +480,7 @@ export default function PerpustakaanSiswaPage() {
                 <p className="text-xs theme-text-muted">Buku tersedia</p>
                 <p className="mt-1 text-xl font-bold theme-text">{loading ? "—" : availablePhysicalBooks}</p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSoft} text-[var(--color-success)]`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}>
                 <BookCopy size={17} />
               </div>
             </div>
@@ -491,7 +491,7 @@ export default function PerpustakaanSiswaPage() {
                 <p className="text-xs theme-text-muted">E-Book</p>
                 <p className="mt-1 text-xl font-bold theme-text">{loading ? "—" : digitalBooks}</p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeInfoSoft} text-[var(--color-info)]`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}>
                 <MonitorPlay size={17} />
               </div>
             </div>
@@ -513,7 +513,7 @@ export default function PerpustakaanSiswaPage() {
                 <p className="text-xs theme-text-muted">Jatuh tempo</p>
                 <p className="mt-1 text-xl font-bold theme-text">{loading ? "—" : overdueLoans.length}</p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${overdueLoans.length > 0 ? `${themeDangerSoft} text-red-500` : `${themeWarningSoft} text-[var(--color-warning)]`}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${overdueLoans.length > 0 ? `${themeDangerSoft} text-red-500` : `${themePrimarySoft} text-[var(--color-primary)]`}`}>
                 <AlertTriangle size={17} />
               </div>
             </div>
@@ -524,7 +524,7 @@ export default function PerpustakaanSiswaPage() {
                 <p className="text-xs theme-text-muted">Kategori</p>
                 <p className="mt-1 text-xl font-bold theme-text">{loading ? "—" : totalCategories}</p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeInfoSoft} text-[var(--color-info)]`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}>
                 <BookHeart size={17} />
               </div>
             </div>
@@ -593,7 +593,7 @@ export default function PerpustakaanSiswaPage() {
                           <img src={book.coverUrl} alt={`Cover ${book.judul}`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
                         ) : (
                           <div className={`flex h-full w-full items-center justify-center ${themePrimarySoft}`}>
-                            {isEbook ? <MonitorPlay size={40} className="text-[var(--color-info)]" /> : <BookOpen size={40} className="text-[var(--color-primary)]" />}
+                            {isEbook ? <MonitorPlay size={40} className="text-[var(--color-primary)]" /> : <BookOpen size={40} className="text-[var(--color-primary)]" />}
                           </div>
                         )}
                       </div>
@@ -617,14 +617,14 @@ export default function PerpustakaanSiswaPage() {
                         <div className="mt-3">
                           {isEbook ? (
                             book.urlEbook ? (
-                              <a href={book.urlEbook} target="_blank" rel="noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-110">
+                              <a href={book.urlEbook} target="_blank" rel="noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white transition hover:brightness-110">
                                 <MonitorPlay size={14} /> Baca Buku
                               </a>
                             ) : (
                               <button type="button" disabled className="inline-flex w-full items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] px-3 py-2 text-xs font-semibold theme-text-muted">E-Book belum memiliki URL</button>
                             )
                           ) : (
-                            <button type="button" onClick={() => goToDetailBook(book.id)} disabled={!available || book.status !== "aktif"} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
+                            <button type="button" onClick={() => goToDetailBook(book.id)} disabled={!available || book.status !== "aktif"} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
                               <BookOpenCheck size={14} /> {book.status !== "aktif" ? "Tidak aktif" : available ? "Lihat & Pinjam" : "Stok habis"}
                             </button>
                           )}
@@ -694,8 +694,7 @@ export default function PerpustakaanSiswaPage() {
                 </div>
               ) : (
                 categoryData.map((item) => {
-                  const barMap = { blue: "var(--color-primary)", violet: "var(--color-info)", emerald: "var(--color-success)", indigo: "var(--color-primary)", amber: "var(--color-warning)" };
-                  const bar = barMap[item.tone] || "var(--color-primary)";
+                  const bar = "var(--color-primary)";
                   return (
                     <div key={item.label}>
                       <div className="flex items-center justify-between gap-3">
@@ -792,7 +791,7 @@ export default function PerpustakaanSiswaPage() {
                               <CalendarClock size={13} /> Lewat jatuh tempo
                             </span>
                           )}
-                          <button type="button" onClick={() => handleReturn(loan)} disabled={returningId === String(loan.id)} className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+                          <button type="button" onClick={() => handleReturn(loan)} disabled={returningId === String(loan.id)} className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-xs font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
                             {returningId === String(loan.id) ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
                             {returningId === String(loan.id) ? "Memproses..." : "Kembalikan"}
                           </button>
@@ -859,7 +858,7 @@ export default function PerpustakaanSiswaPage() {
               </div>
               <div className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}>
                 <div className="flex items-center gap-3">
-                  <MonitorPlay size={16} className="text-[var(--color-info)]" />
+                  <MonitorPlay size={16} className="text-[var(--color-primary)]" />
                   <div>
                     <p className="theme-text text-xs font-semibold">Buku digital</p>
                     <p className="theme-text-muted mt-0.5 text-[10px]">E-Book dibuka melalui URL yang disediakan pada data buku.</p>

@@ -48,7 +48,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -102,13 +102,13 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 const themeHeroSecondary =
-  "text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]";
+  "text-white/80";
 
 const themeHeroSoft =
-  "bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]";
+  "bg-white/12";
 
 const themeHeroSoftBorder =
-  "border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]";
+  "border-white/20";
 
 
 const ICON_MAP = {
@@ -126,22 +126,17 @@ const ICON_MAP = {
 const PACKAGE_THEMES = {
   primary: {
     card: themePrimaryGradient,
-    button:
-      "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))]",
+    button: "theme-primary",
   },
 
   info: {
-    card:
-      "bg-[linear-gradient(135deg,var(--color-info),color-mix(in_srgb,var(--color-info)_72%,var(--color-primary)))]",
-    button:
-      "bg-[var(--color-info)] hover:bg-[color-mix(in_srgb,var(--color-info)_88%,var(--color-text))]",
+    card: themePrimaryGradient,
+    button: "theme-primary",
   },
 
   neutral: {
-    card:
-      "bg-[linear-gradient(135deg,var(--color-text),color-mix(in_srgb,var(--color-text)_78%,var(--color-text-muted)))]",
-    button:
-      "bg-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-text)_88%,var(--color-text-muted))]",
+    card: themePrimaryGradient,
+    button: "theme-primary",
   },
 };
 
@@ -859,7 +854,7 @@ export default function PaketModulPage() {
             >
               <Loader2
                 size={24}
-                className="animate-spin text-[var(--color-card)]"
+                className="animate-spin text-white"
               />
             </div>
 
@@ -904,7 +899,7 @@ export default function PaketModulPage() {
                 >
                   <Package
                     size={21}
-                    className="text-[var(--color-card)]"
+                    className="text-white"
                   />
                 </div>
 
@@ -915,7 +910,7 @@ export default function PaketModulPage() {
                     Product Management
                   </p>
 
-                  <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-card)] tracking-tight">
+                  <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
                     Paket Langganan
                   </h1>
                 </div>
@@ -936,7 +931,7 @@ export default function PaketModulPage() {
                   loadData(false)
                 }
                 disabled={refreshing}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl ${themeHeroSoft} hover:bg-[color-mix(in_srgb,var(--color-card)_18%,transparent)] border ${themeHeroSoftBorder} text-[var(--color-card)] text-sm font-medium backdrop-blur-sm transition disabled:opacity-50`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl ${themeHeroSoft} hover:bg-white/20 border ${themeHeroSoftBorder} text-white text-sm font-medium backdrop-blur-sm transition disabled:opacity-50`}
               >
                 <RefreshCw
                   size={15}
@@ -954,7 +949,7 @@ export default function PaketModulPage() {
                 onClick={
                   navigateToTambah
                 }
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-card)] hover:bg-[color-mix(in_srgb,var(--color-card)_92%,var(--color-primary))] ${themePrimaryText} text-sm font-semibold ${themeCardShadow} transition`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-white/90 ${themePrimaryText} text-sm font-semibold ${themeCardShadow} transition`}
               >
                 <Plus size={16} />
 
@@ -1186,40 +1181,14 @@ function StatCard({
   label,
   value,
   description,
-  theme,
 }) {
-  const themes = {
-    primary: {
-      icon: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
-      glow: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-    },
-
-    success: {
-      icon: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
-      glow: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-    },
-
-    neutral: {
-      icon: `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`,
-      glow: "bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]",
-    },
-  };
-
-  const t =
-    themes[theme] ||
-    themes.primary;
-
   return (
     <div
       className={`relative overflow-hidden rounded-2xl border theme-border theme-card p-5 ${themeCardShadow}`}
     >
-      <div
-        className={`absolute right-0 top-0 w-24 h-24 rounded-full blur-2xl ${t.glow}`}
-      />
-
       <div className="relative flex items-center gap-4">
         <div
-          className={`w-11 h-11 rounded-xl border flex items-center justify-center ${t.icon}`}
+          className="w-11 h-11 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center"
         >
           <Icon size={19} />
         </div>
@@ -1289,7 +1258,7 @@ function PaketCard({
           >
             <Icon
               size={21}
-              className="text-[var(--color-card)]"
+              className="text-white"
             />
           </div>
 
@@ -1303,7 +1272,7 @@ function PaketCard({
                 )
               }
               aria-label="Menu Opsi Paket"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center ${themeHeroSecondary} hover:text-[var(--color-card)] hover:bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] transition`}
+              className={`w-9 h-9 rounded-lg flex items-center justify-center ${themeHeroSecondary} hover:text-white hover:bg-white/10 transition`}
             >
               <MoreVertical size={18} />
             </button>
@@ -1436,11 +1405,7 @@ function PaketCard({
             </span>
 
             <span
-              className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                paket.tipe === "YAYASAN"
-                  ? "bg-purple-100 text-purple-800 border border-purple-300"
-                  : "bg-blue-100 text-blue-800 border border-blue-300"
-              }`}
+              className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
             >
               {paket.tipe === "YAYASAN" ? "Paket Yayasan" : "Paket Sekolah"}
             </span>
@@ -1583,7 +1548,7 @@ function PaketCard({
 
         <button
           onClick={onEdit}
-          className={`group/btn mt-5 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-card)] ${theme.button} ${themeSmallShadow} transition`}
+          className={`group/btn mt-5 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white ${theme.button} ${themeSmallShadow} transition`}
         >
           Kelola Paket
 

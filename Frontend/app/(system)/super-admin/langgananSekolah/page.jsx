@@ -11,7 +11,6 @@ import {
   RefreshCw,
   AlertCircle,
   WalletCards,
-  FileText,
   ShieldCheck,
   ArrowUpDown,
   ChevronLeft,
@@ -20,16 +19,27 @@ import {
 
 import { getAllLangganan } from "@/services/langganan.service";
 
-const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+/* ------------------------------------------------------------------ */
+/* Token tema — semua warna mengikuti --color-* (bisa diubah dari CMS) */
+/* ------------------------------------------------------------------ */
+
+// Biru solid yang sama dengan dashboard (tombol, kalender, banner).
+// Tanpa campuran hitam supaya warnanya identik dan ikut tema CMS.
+const themePrimaryGradient = "bg-[var(--color-primary)]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
 const themePrimaryText = "text-[var(--color-primary)]";
 
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeBannerShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -45,12 +55,6 @@ const themeNeutralBorder =
 
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
-
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
 
 const themeSuccessSurface =
   "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
@@ -69,6 +73,10 @@ const themeDangerSurface =
 
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+/* ------------------------------------------------------------------ */
+/* Helpers                                                             */
+/* ------------------------------------------------------------------ */
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -108,6 +116,10 @@ function getPaymentStatus(status) {
   if (["failed", "gagal"].includes(normalized)) return "Gagal";
   return status || "-";
 }
+
+/* ------------------------------------------------------------------ */
+/* Komponen                                                            */
+/* ------------------------------------------------------------------ */
 
 function StatusBadge({ status }) {
   if (status === "Aktif") {
@@ -180,25 +192,26 @@ function PaymentBadge({ status }) {
   );
 }
 
-function StatCard({ icon: Icon, label, value, description, iconClass, valueClass }) {
+// Gaya kartu statistik sama seperti halaman Paket & Modul.
+function StatCard({ icon: Icon, label, value, description }) {
   return (
     <div
-      className={`min-w-[210px] flex-1 rounded-2xl border theme-border theme-card p-5 ${themeCardShadow}`}
+      className={`min-w-0 rounded-2xl border theme-border theme-card p-5 ${themeCardShadow}`}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-center gap-4">
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+        >
+          <Icon size={20} />
+        </div>
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wider theme-text-muted">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
             {label}
           </p>
-          <p className={`mt-2 text-2xl font-bold ${valueClass || "theme-text"}`}>
+          <p className="mt-0.5 truncate text-2xl font-bold tracking-tight theme-text">
             {value}
           </p>
-          <p className="mt-1 text-xs theme-text-placeholder">{description}</p>
-        </div>
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${iconClass}`}
-        >
-          <Icon size={21} />
+          <p className="truncate text-[11px] theme-text-muted">{description}</p>
         </div>
       </div>
     </div>
@@ -213,6 +226,10 @@ const SORT_OPTIONS = [
   { key: "harga", label: "Harga" },
   { key: "berakhir", label: "Tanggal Berakhir" },
 ];
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
 
 export default function LanggananSekolahPage() {
   const [subscriptions, setSubscriptions] = useState([]);
@@ -314,46 +331,68 @@ export default function LanggananSekolahPage() {
   return (
     <div className="theme-page theme-text min-h-full w-full min-w-0">
       <main className="w-full min-w-0 overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
-        <div className="w-full min-w-0">
-
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-center gap-4">
-              <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
-              >
-                <CreditCard size={23} />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
-                  Data Langganan Sekolah
-                </h1>
-                <p className="mt-1 text-sm theme-text-muted">
-                  Kelola dan pantau seluruh langganan sekolah
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={fetchSubscriptions}
-              disabled={loading}
-              className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-4 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover} hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60`}
-            >
-              <RefreshCw size={17} className={loading ? "animate-spin" : ""} />
-              Refresh
-            </button>
-          </div>
-
-          <div
-            className={`mb-6 flex items-start gap-3 rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+        <div className="w-full min-w-0 space-y-6">
+          {/* ================= BANNER HEADER ================= */}
+          <section
+            className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} text-white ${themeBannerShadow}`}
           >
             <div
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} text-[var(--color-info)]`}
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/10"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute right-24 -bottom-20 h-44 w-44 rounded-full bg-white/[0.07]"
+            />
+
+            <div className="relative flex flex-col gap-5 p-6 sm:px-7 sm:py-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/15 backdrop-blur-sm">
+                    <CreditCard size={22} />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/75">
+                      Subscription Management
+                    </p>
+                    <h1 className="mt-0.5 text-2xl font-bold tracking-tight sm:text-3xl">
+                      Langganan Sekolah
+                    </h1>
+                  </div>
+                </div>
+
+                <p className="mt-4 max-w-2xl text-sm text-white/85">
+                  Kelola dan pantau seluruh langganan sekolah beserta status
+                  pembayarannya.
+                </p>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-3">
+                <button
+                  type="button"
+                  onClick={fetchSubscriptions}
+                  disabled={loading}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+                  Refresh
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* ================= INFO ================= */}
+          <div
+            className={`flex items-start gap-3 rounded-2xl border ${themePrimarySoftBorder} bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)] p-4`}
+          >
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
             >
               <ShieldCheck size={18} />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[var(--color-info)]">
+              <p className={`text-sm font-semibold ${themePrimaryText}`}>
                 Data Langganan Sekolah
               </p>
               <p className="mt-1 text-sm leading-relaxed theme-text-secondary">
@@ -365,7 +404,8 @@ export default function LanggananSekolahPage() {
 
           {error && (
             <div
-              className={`mb-6 flex items-start gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} p-4`}
+              role="alert"
+              className={`flex items-start gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} p-4`}
             >
               <div
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themeNeutralSurface}`}
@@ -381,50 +421,41 @@ export default function LanggananSekolahPage() {
             </div>
           )}
 
-          <section className="mb-6">
-            <div className="flex flex-wrap gap-4">
-              <StatCard
-                icon={CreditCard}
-                label="Total Data"
-                value={loading ? "..." : statistics.total}
-                description="Total langganan sekolah"
-                iconClass={`${themePrimarySoft} ${themePrimaryText}`}
-              />
-              <StatCard
-                icon={CheckCircle2}
-                label="Aktif"
-                value={loading ? "..." : statistics.active}
-                description="Langganan aktif"
-                iconClass={`${themeSuccessSurface} text-[var(--color-success)]`}
-                valueClass="text-[var(--color-success)]"
-              />
-              <StatCard
-                icon={Clock3}
-                label="Pending"
-                value={loading ? "..." : statistics.pending}
-                description="Pembayaran pending"
-                iconClass={`${themeWarningSurface} text-[var(--color-warning)]`}
-                valueClass="text-[var(--color-warning)]"
-              />
-              <StatCard
-                icon={XCircle}
-                label="Expired"
-                value={loading ? "..." : statistics.expired}
-                description="Langganan berakhir"
-                iconClass={`${themeDangerSurface} theme-text-secondary`}
-                valueClass="theme-text-secondary"
-              />
-              <StatCard
-                icon={WalletCards}
-                label="Nilai Pembayaran"
-                value={loading ? "..." : formatRupiah(statistics.totalValue)}
-                description="Total pembayaran lunas"
-                iconClass={`${themeInfoSurface} text-[var(--color-info)]`}
-                valueClass="text-xl text-[var(--color-info)]"
-              />
-            </div>
+          {/* ================= STATISTIK ================= */}
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <StatCard
+              icon={CreditCard}
+              label="Total Data"
+              value={loading ? "..." : statistics.total}
+              description="Total langganan sekolah"
+            />
+            <StatCard
+              icon={CheckCircle2}
+              label="Aktif"
+              value={loading ? "..." : statistics.active}
+              description="Langganan aktif"
+            />
+            <StatCard
+              icon={Clock3}
+              label="Pending"
+              value={loading ? "..." : statistics.pending}
+              description="Pembayaran pending"
+            />
+            <StatCard
+              icon={XCircle}
+              label="Expired"
+              value={loading ? "..." : statistics.expired}
+              description="Langganan berakhir"
+            />
+            <StatCard
+              icon={WalletCards}
+              label="Nilai Pembayaran"
+              value={loading ? "..." : formatRupiah(statistics.totalValue)}
+              description="Total pembayaran lunas"
+            />
           </section>
 
+          {/* ================= TABEL ================= */}
           <section
             className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
           >
@@ -492,7 +523,7 @@ export default function LanggananSekolahPage() {
               <table className="w-full min-w-[1100px] border-collapse">
                 <thead>
                   <tr
-                    className={`${themePrimaryGradient} text-left text-xs font-bold uppercase tracking-wider text-[var(--color-card)]`}
+                    className={`${themePrimaryGradient} text-left text-xs font-bold uppercase tracking-wider text-white`}
                   >
                     <th className="w-[60px] px-4 py-4 text-center">No.</th>
                     <th className="min-w-[220px] px-4 py-4">Sekolah</th>
@@ -536,7 +567,7 @@ export default function LanggananSekolahPage() {
                           <button
                             type="button"
                             onClick={fetchSubscriptions}
-                            className={`mt-4 rounded-lg ${themePrimaryGradient} px-4 py-2 text-xs font-semibold text-[var(--color-card)] transition ${themePrimaryShadow} hover:brightness-95`}
+                            className={`mt-4 rounded-lg ${themePrimaryGradient} px-4 py-2 text-xs font-semibold text-white transition ${themePrimaryShadow} hover:brightness-95`}
                           >
                             Coba Lagi
                           </button>
@@ -560,7 +591,7 @@ export default function LanggananSekolahPage() {
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-3">
                               <div
-                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} text-[var(--color-info)]`}
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
                               >
                                 <ShieldCheck size={18} />
                               </div>
@@ -568,7 +599,7 @@ export default function LanggananSekolahPage() {
                                 <p className="truncate text-sm font-bold theme-text">
                                   {item.sekolah}
                                 </p>
-                                <p className="mt-1 text-xs theme-text-placeholder">
+                                <p className="mt-1 text-xs theme-text-muted">
                                   {item.kodeSekolah}
                                 </p>
                               </div>
@@ -637,7 +668,7 @@ export default function LanggananSekolahPage() {
                           <button
                             type="button"
                             onClick={fetchSubscriptions}
-                            className={`mt-4 inline-flex items-center gap-2 rounded-lg ${themePrimaryGradient} px-4 py-2 text-xs font-semibold text-[var(--color-card)] transition ${themePrimaryShadow} hover:brightness-95`}
+                            className={`mt-4 inline-flex items-center gap-2 rounded-lg ${themePrimaryGradient} px-4 py-2 text-xs font-semibold text-white transition ${themePrimaryShadow} hover:brightness-95`}
                           >
                             <RefreshCw size={14} />
                             Refresh
@@ -672,6 +703,7 @@ export default function LanggananSekolahPage() {
                     type="button"
                     onClick={goPrev}
                     disabled={currentPage <= 1}
+                    aria-label="Halaman sebelumnya"
                     className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
                   >
                     <ChevronLeft size={15} />
@@ -680,6 +712,7 @@ export default function LanggananSekolahPage() {
                     type="button"
                     onClick={goNext}
                     disabled={currentPage >= totalPages}
+                    aria-label="Halaman berikutnya"
                     className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
                   >
                     <ChevronRight size={15} />

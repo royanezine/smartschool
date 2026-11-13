@@ -21,7 +21,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
@@ -97,7 +97,7 @@ function JenisKelaminBadge({ jenisKelamin }) {
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
         isPria
           ? `${themePrimarySurface} text-[var(--color-primary)] border ${themePrimaryBorder}`
-          : `${themeInfoSurface} text-[var(--color-info)] border ${themeInfoBorder}`
+          : `bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]`
       }`}
     >
       {isPria ? "Laki-laki" : "Perempuan"}
@@ -139,7 +139,7 @@ function Avatar({ nama, size = "md" }) {
 
   return (
     <div
-      className={`${dims} rounded-full ${themePrimaryGradient} text-[var(--color-card)] flex items-center justify-center font-bold flex-shrink-0 ${themeSmallShadow}`}
+      className={`${dims} rounded-full ${themePrimaryGradient} text-white flex items-center justify-center font-bold flex-shrink-0 ${themeSmallShadow}`}
     >
       {getInitials(nama)}
     </div>
@@ -348,7 +348,7 @@ export default function KartuIdentitasSiswaPage() {
               <div className="flex items-center gap-3">
 
                 <div
-                  className={`p-2.5 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  className={`p-2.5 rounded-xl ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                 >
                   <IdCard size={20} />
                 </div>
@@ -373,7 +373,7 @@ export default function KartuIdentitasSiswaPage() {
                     "/admin/siswa/kartu-identitas/tambah"
                   )
                 }
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-110 transition-all`}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow} hover:brightness-110 transition-all`}
               >
                 <Plus size={16} />
                 Tambah Siswa
@@ -441,7 +441,7 @@ export default function KartuIdentitasSiswaPage() {
 
                   <CheckCircle2
                     size={14}
-                    className="text-[var(--color-success)]"
+                    className="text-[var(--color-primary)]"
                   />
 
                   <p className="text-[11px] font-medium theme-text-muted tracking-wide">
@@ -570,7 +570,7 @@ export default function KartuIdentitasSiswaPage() {
                   <thead>
 
                     <tr
-                      className={`${themePrimaryGradient} text-[var(--color-card)]`}
+                      className={`${themePrimaryGradient} text-white`}
                     >
 
 
@@ -736,7 +736,7 @@ export default function KartuIdentitasSiswaPage() {
                                 handleIdCard(s)
                               }
                               title="Lihat ID Card"
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md ${themePrimaryGradient} text-[var(--color-card)] hover:brightness-110 text-xs font-medium transition-all ${themeSmallShadow}`}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md ${themePrimaryGradient} text-white hover:brightness-110 text-xs font-medium transition-all ${themeSmallShadow}`}
                             >
 
                               <CreditCard

@@ -7,6 +7,7 @@ import {
   markAllNotifikasiAsRead,
   kirimBroadcastPengumuman,
 } from "@/services/notifikasi.service";
+import TemplateNotifikasiTab from "@/app/components/super-admin/TemplateNotifikasiTab";
 import { useRouter } from "next/navigation";
 import {
   Bell,
@@ -27,11 +28,12 @@ import {
   AlertTriangle,
   Info,
   Save,
+  FileText,
 } from "lucide-react";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -421,7 +423,7 @@ export default function NotifikasiPengumumanPage() {
             <div>
               <div className="flex items-center gap-2.5">
                 <div
-                  className={`p-2 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  className={`p-2 rounded-lg ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                 >
                   <Bell size={18} />
                 </div>
@@ -465,7 +467,7 @@ export default function NotifikasiPengumumanPage() {
                 onClick={() =>
                   router.push("/super-admin/notifikasiPengumuman/tambah")
                 }
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg transition-all ${themePrimaryShadow}`}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-white ${themePrimaryGradient} rounded-lg transition-all ${themePrimaryShadow}`}
               >
                 <Plus size={16} />
                 Buat Pengumuman
@@ -540,10 +542,35 @@ export default function NotifikasiPengumumanPage() {
                   </span>
                 )}
               </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab("template");
+                  setCurrentPage(1);
+                }}
+                className={`
+                  flex items-center gap-2 px-4 py-2.5 text-sm font-medium
+                  rounded-t-lg border-b-2 transition-colors
+                  ${
+                    activeTab === "template"
+                      ? `border-[var(--color-primary)] ${themePrimaryText} ${themePrimarySoft}`
+                      : `border-transparent theme-text-secondary ${themeNeutralHover}`
+                  }
+                `}
+              >
+                <FileText size={16} />
+
+                Template Notifikasi
+              </button>
             </nav>
           </div>
 
-
+          {activeTab === "template" ? (
+            <TemplateNotifikasiTab
+              onToast={(message, type = "success") => setToast({ message, type })}
+            />
+          ) : (
+            <>
           <div
             className={`theme-card rounded-xl border theme-border p-4 ${themeCardShadow}`}
           >
@@ -836,7 +863,7 @@ export default function NotifikasiPengumumanPage() {
                             w-8 h-8 text-sm rounded-lg transition-colors
                             ${
                               currentPage === i + 1
-                                ? `${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow}`
+                                ? `${themePrimaryGradient} text-white ${themeSmallShadow}`
                                 : `theme-text-secondary ${themeNeutralHover}`
                             }
                           `}
@@ -862,7 +889,7 @@ export default function NotifikasiPengumumanPage() {
                               ${
                                 currentPage ===
                                 totalPagesNotif
-                                  ? `${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow}`
+                                  ? `${themePrimaryGradient} text-white ${themeSmallShadow}`
                                   : `theme-text-secondary ${themeNeutralHover}`
                               }
                             `}
@@ -914,7 +941,7 @@ export default function NotifikasiPengumumanPage() {
                       onClick={() =>
                         router.push("/super-admin/notifikasiPengumuman/tambah")
                       }
-                      className={`mt-3 px-4 py-2 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg ${themePrimaryShadow} transition-all`}
+                      className={`mt-3 px-4 py-2 text-sm font-medium text-white ${themePrimaryGradient} rounded-lg ${themePrimaryShadow} transition-all`}
                     >
                       <Plus
                         size={16}
@@ -1068,6 +1095,8 @@ export default function NotifikasiPengumumanPage() {
               </>
             )}
           </div>
+            </>
+          )}
 
 
           <div
@@ -1076,6 +1105,8 @@ export default function NotifikasiPengumumanPage() {
             © 2026 SmartSchool •{" "}
             {activeTab === "notifikasi"
               ? "Notifikasi"
+              : activeTab === "template"
+              ? "Template Notifikasi"
               : "Pengumuman"}{" "}
             terakhir diperbarui hari ini
           </div>

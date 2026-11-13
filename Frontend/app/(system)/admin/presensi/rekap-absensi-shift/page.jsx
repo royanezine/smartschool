@@ -836,7 +836,7 @@ export default function RekapAbsensiShiftPage() {
                   Sudah absen: {stats.sudahAbsen}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-blue-500" />
+                  <span className="h-2 w-2 rounded-full bg-[var(--color-primary)]" />
                   Belum pulang: {stats.belumPulang}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
@@ -927,7 +927,7 @@ export default function RekapAbsensiShiftPage() {
                           <MiniStat
                             label="Belum pulang"
                             value={shift.belumPulang}
-                            valueClass="text-blue-700 dark:text-blue-300"
+                            valueClass="theme-primary-text"
                           />
                         </div>
 
@@ -1193,13 +1193,10 @@ export default function RekapAbsensiShiftPage() {
 
 function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const toneClasses = {
-    blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
-    emerald:
-      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
-    slate:
-      "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-muted",
-    amber:
-      "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+    blue: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    emerald: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    slate: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    amber: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   return (

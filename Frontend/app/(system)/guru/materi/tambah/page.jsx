@@ -34,7 +34,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -1201,7 +1201,7 @@ export default function UploadMateriPage() {
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                               form.sumber ===
                               "file"
-                                ? `${themePrimaryGradient} text-[var(--color-card)]`
+                                ? `${themePrimaryGradient} text-white`
                                 : `${themeNeutralSurface} theme-text-secondary`
                             }`}
                           >
@@ -1246,7 +1246,7 @@ export default function UploadMateriPage() {
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                               form.sumber ===
                               "link"
-                                ? `${themePrimaryGradient} text-[var(--color-card)]`
+                                ? `${themePrimaryGradient} text-white`
                                 : `${themeNeutralSurface} theme-text-secondary`
                             }`}
                           >
@@ -1309,7 +1309,7 @@ export default function UploadMateriPage() {
                               </p>
 
                               <span
-                                className={`mt-4 inline-flex items-center rounded-lg px-4 py-2 text-xs font-semibold transition ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} group-hover:opacity-90`}
+                                className={`mt-4 inline-flex items-center rounded-lg px-4 py-2 text-xs font-semibold transition ${themePrimaryGradient} text-white ${themePrimaryShadow} group-hover:opacity-90`}
                               >
                                 Pilih File
                               </span>
@@ -1762,7 +1762,7 @@ export default function UploadMateriPage() {
                       kelasMapelList.length ===
                         0
                     }
-                    className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold transition sm:w-auto ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold transition sm:w-auto ${themePrimaryGradient} text-white ${themePrimaryShadow} hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     {saving ? (
                       <>

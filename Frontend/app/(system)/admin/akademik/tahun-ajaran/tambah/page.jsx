@@ -281,7 +281,7 @@ export default function TambahTahunAjaranPage() {
 
                     <div className="flex items-center gap-3">
 
-                      <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                         <CalendarDays size={19} />
                       </div>
 
@@ -565,7 +565,7 @@ export default function TambahTahunAjaranPage() {
 
                       <div className="flex items-center gap-3">
 
-                        <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-lg">
                           <CalendarDays size={17} />
                         </div>
 
@@ -647,7 +647,7 @@ export default function TambahTahunAjaranPage() {
 
                   <div className="flex items-start gap-3">
 
-                    <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                       <Layers3 size={16} />
                     </div>
 

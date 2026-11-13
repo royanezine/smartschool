@@ -466,19 +466,12 @@ function StatCard({
   description,
   type = "blue",
 }) {
-  const iconClass =
-    type === "green"
-      ? "theme-success"
-      : type === "amber"
-        ? "theme-warning"
-        : type === "purple"
-          ? "theme-info"
-          : "theme-info";
+  const iconClass = "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
 
   return (
-    <div className="theme-card rounded-xl border p-4 shadow-sm">
+    <div className="theme-card min-w-0 rounded-xl border p-4 shadow-sm">
       <div className="flex items-center justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="theme-text-muted text-xs font-medium">
             {label}
           </p>
@@ -1548,7 +1541,7 @@ export default function CetakRaportPage() {
 
                 <div>
                   <div className="flex items-center gap-2">
-                    <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 items-center justify-center rounded-xl">
                       <Printer
                         size={21}
                       />
@@ -1670,7 +1663,8 @@ export default function CetakRaportPage() {
             </div>
 
 
-            <div className="print:hidden grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
+            {/* 4 kartu: 1 kolom -> 2 kolom (sm) -> 4 kolom (xl ke atas, penuh) */}
+            <div className="print:hidden grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 icon={Users}
                 label="Total Siswa"

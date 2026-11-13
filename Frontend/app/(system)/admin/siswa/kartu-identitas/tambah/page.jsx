@@ -170,7 +170,7 @@ export default function TambahSiswaPage() {
 
             <div className="w-full theme-card rounded-2xl border theme-border shadow-sm p-6">
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="theme-info flex items-start gap-3 rounded-xl px-4 py-3">
+                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-start gap-3 rounded-xl px-4 py-3">
                   <Info size={17} className="mt-0.5 shrink-0" />
 
                   <p className="text-xs leading-5 theme-text-muted">

@@ -288,7 +288,7 @@ export default function DetailBukuGuruPage() {
                         href={safeExternalUrl(book.urlEbook)}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110"
+                        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-white transition hover:brightness-110"
                       >
                         <MonitorPlay size={17} /> Baca E-Book
                       </a>
@@ -297,7 +297,7 @@ export default function DetailBukuGuruPage() {
                         type="button"
                         onClick={openBorrowModal}
                         disabled={getBookStock(book) <= 0 || String(book.status).toLowerCase() !== "aktif"}
-                        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-8 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         <BookOpenCheck size={17} />
                         {getBookStock(book) > 0 ? "Pinjam Buku" : "Stok Habis"}
@@ -382,7 +382,7 @@ export default function DetailBukuGuruPage() {
               </div>
               <div className={`flex flex-col-reverse gap-2 border-t ${themeDivider} bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-4 sm:flex-row sm:justify-end`}>
                 <button type="button" onClick={() => setShowBorrowModal(false)} disabled={submitting} className={`h-9 w-full rounded-lg px-4 text-xs font-semibold theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50 sm:w-auto`}>Batal</button>
-                <button type="submit" disabled={submitting || !tanggalJatuhTempo} className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg theme-primary px-4 text-xs font-semibold text-[var(--color-card)] disabled:opacity-50 sm:w-auto">
+                <button type="submit" disabled={submitting || !tanggalJatuhTempo} className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg theme-primary px-4 text-xs font-semibold text-white disabled:opacity-50 sm:w-auto">
                   {submitting && <Loader2 className="animate-spin" size={14} />} Konfirmasi Pinjam
                 </button>
               </div>

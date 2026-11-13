@@ -615,7 +615,7 @@ export default function EditUserPage() {
 
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="flex items-center gap-3 border-b theme-border px-5 py-4 sm:px-6">
-                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                       <BriefcaseBusiness size={18} />
                     </div>
                     <div>
@@ -730,7 +730,7 @@ export default function EditUserPage() {
 
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="flex items-center gap-3 border-b theme-border px-5 py-4 sm:px-6">
-                    <div className="theme-success flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                       <MapPin size={18} />
                     </div>
                     <div>

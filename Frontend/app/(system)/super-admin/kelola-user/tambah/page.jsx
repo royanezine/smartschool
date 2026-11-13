@@ -27,7 +27,7 @@ import { createUser } from "@/services/user.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -220,26 +220,18 @@ export default function TambahUserPage() {
           className={`relative mb-6 w-full overflow-hidden rounded-3xl ${themePrimaryGradient} p-6 ${themePrimaryShadow} md:p-8`}
         >
           <div
-            className="absolute -right-20 -top-28 h-72 w-72 rounded-full blur-2xl"
-            style={{
-              background:
-                "color-mix(in srgb, var(--color-card) 12%, transparent)",
-            }}
+            className="absolute -right-20 -top-28 h-72 w-72 rounded-full blur-2xl bg-white/10"
           />
 
           <div
-            className="absolute -bottom-32 left-1/3 h-80 w-80 rounded-full blur-3xl"
-            style={{
-              background:
-                "color-mix(in srgb, var(--color-info) 20%, transparent)",
-            }}
+            className="absolute -bottom-32 left-1/3 h-80 w-80 rounded-full blur-3xl bg-white/8"
           />
 
           <div
             className="absolute inset-0 opacity-[0.07]"
             style={{
               backgroundImage:
-                "linear-gradient(color-mix(in srgb, var(--color-card) 80%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-card) 80%, transparent) 1px, transparent 1px)",
+                "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
               backgroundSize: "32px 32px",
             }}
           />
@@ -248,22 +240,22 @@ export default function TambahUserPage() {
             <div className="flex items-start gap-4">
               <Link
                 href="/super-admin/kelola-user"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-card)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] text-[var(--color-card)] backdrop-blur-sm transition hover:bg-[color-mix(in_srgb,var(--color-card)_20%,transparent)]"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Link>
 
               <div>
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-card)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-3 py-1.5 text-xs font-semibold text-[color-mix(in_srgb,var(--color-card)_92%,transparent)] backdrop-blur-sm">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm">
                   <UserPlus className="h-3.5 w-3.5" />
                   MANAJEMEN PENGGUNA
                 </div>
 
-                <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] md:text-3xl">
+                <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
                   Tambah User Baru
                 </h1>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-white/80">
                   Lengkapi informasi di bawah untuk membuat akun
                   pengguna baru di sistem SmartSchool.
                 </p>
@@ -272,7 +264,7 @@ export default function TambahUserPage() {
 
             <Link
               href="/super-admin/kelola-user"
-              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-card)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-5 text-sm font-semibold text-[var(--color-card)] backdrop-blur-md transition hover:bg-[color-mix(in_srgb,var(--color-card)_20%,transparent)]"
+              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
             >
               <ArrowLeft className="h-4 w-4" />
               Kembali
@@ -600,16 +592,16 @@ export default function TambahUserPage() {
                   className={`overflow-hidden rounded-2xl ${themePrimaryGradient} p-5 ${themePrimaryShadow}`}
                 >
                   <div className="mb-4 flex items-center gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-card)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] text-[var(--color-card)] backdrop-blur-sm">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/20 bg-white/12 text-white backdrop-blur-sm">
                       <Save className="h-4 w-4" />
                     </div>
 
-                    <h3 className="text-sm font-bold text-[var(--color-card)]">
+                    <h3 className="text-sm font-bold text-white">
                       Simpan Perubahan
                     </h3>
                   </div>
 
-                  <p className="mb-4 text-xs leading-5 text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
+                  <p className="mb-4 text-xs leading-5 text-white/80">
                     Pastikan seluruh data sudah benar sebelum
                     menyimpan.
                   </p>
@@ -618,7 +610,7 @@ export default function TambahUserPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-card)] px-5 text-sm font-bold text-[var(--color-primary)] shadow-sm transition hover:bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-bold text-[var(--color-primary)] shadow-sm transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {loading ? (
                         <>
@@ -638,7 +630,7 @@ export default function TambahUserPage() {
 
                     <Link
                       href="/super-admin/kelola-user"
-                      className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-card)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-5 text-sm font-semibold text-[var(--color-card)] backdrop-blur-sm transition hover:bg-[color-mix(in_srgb,var(--color-card)_20%,transparent)]"
+                      className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-white/20 bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
                     >
                       Batal
                     </Link>
@@ -874,7 +866,7 @@ function PreviewCard({ form }) {
       <div className="p-5">
         <div className="flex items-center gap-4">
           <div
-            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-lg font-bold text-[var(--color-card)] ${themePrimaryShadow}`}
+            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-lg font-bold text-white ${themePrimaryShadow}`}
           >
             {initial}
           </div>

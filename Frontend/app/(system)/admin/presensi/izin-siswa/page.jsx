@@ -22,6 +22,7 @@ import {
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { getBackendOrigin } from "@/lib/auth";
 
 import {
   formatIzinErrorMessage,
@@ -302,12 +303,7 @@ function getUploadUrl(value) {
     return value;
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-  const cleanBaseUrl = baseUrl
-    .replace(/\/+$/, "")
-    .replace(/\/api$/i, "");
+  const cleanBaseUrl = getBackendOrigin();
   const cleanPath = value.replace(/^\/+/, "");
 
   return `${cleanBaseUrl}/${cleanPath}`;
@@ -322,10 +318,10 @@ function StatCard({
   type = "info",
 }) {
   const iconClass = {
-    success: "theme-success",
-    warning: "theme-warning",
-    danger: "theme-danger",
-    info: "theme-info",
+    success: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    warning: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    danger: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    info: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   return (

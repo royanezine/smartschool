@@ -95,26 +95,24 @@ function typeLabel(tipe) {
 function StatCard({ icon: Icon, label, value, type = "blue" }) {
   const styles = {
     blue: {
-      iconBg: themePrimarySoft,
-      iconText: "text-[var(--color-primary)]",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      iconText: "theme-primary-text",
       value: "theme-text",
     },
     green: {
-      iconBg:
-        "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-      iconText: "text-[var(--color-success)]",
-      value: "text-[var(--color-success)]",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      iconText: "theme-primary-text",
+      value: "theme-text",
     },
     orange: {
-      iconBg:
-        "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
-      iconText: "text-[var(--color-warning)]",
-      value: "text-[var(--color-warning)]",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      iconText: "theme-primary-text",
+      value: "theme-text",
     },
     purple: {
-      iconBg: themePrimarySoft,
-      iconText: "text-[var(--color-primary)]",
-      value: "text-[var(--color-primary)]",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      iconText: "theme-primary-text",
+      value: "theme-text",
     },
   };
 

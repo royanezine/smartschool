@@ -878,41 +878,11 @@ function SummaryCard({
   value,
   tone = "primary",
 }) {
-  const tones = {
-    primary: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
-      border:
-        "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]",
-      text: "text-[var(--color-primary)]",
-    },
-
-    warning: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-      border:
-        "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]",
-      text: "text-[var(--color-warning)]",
-    },
-
-    info: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-      border:
-        "border-[color-mix(in_srgb,var(--color-info)_24%,transparent)]",
-      text: "text-[var(--color-info)]",
-    },
-
-    success: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-      border:
-        "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]",
-      text: "text-[var(--color-success)]",
-    },
+  const current = {
+    surface: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]",
+    text: "theme-primary-text",
   };
-
-  const current = tones[tone] || tones.primary;
 
   return (
     <div

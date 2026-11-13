@@ -109,12 +109,6 @@ export default function ArticleDetailPage() {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  useEffect(() => {
-    if (!articleId) return;
-
-    loadArticle();
-  }, [articleId]);
-
   async function loadArticle() {
     try {
       setLoading(true);
@@ -152,6 +146,12 @@ export default function ArticleDetailPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (!articleId) return;
+
+    loadArticle();
+  }, [articleId]);
 
   async function handleDelete() {
     if (!article) return;
@@ -499,7 +499,7 @@ export default function ArticleDetailPage() {
               <div className="p-5 sm:p-7 lg:p-9">
 
                 <div className="mb-4 flex flex-wrap items-center gap-2">
-                  <span className="theme-info inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold">
+                  <span className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold">
                     <Tag size={13} />
 
                     {categoryName}
@@ -635,7 +635,7 @@ export default function ArticleDetailPage() {
 
               <div className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
+                  <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 items-center justify-center rounded-xl">
                     <FileText size={18} />
                   </div>
 

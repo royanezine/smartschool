@@ -31,7 +31,7 @@ import { createUjian } from "@/services/ujian.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -646,7 +646,7 @@ export default function TambahUjianPage() {
                               </span>
 
                               <span
-                                className={`inline-flex items-center gap-1.5 rounded-full border ${themeInfoBorder} ${themeInfoSurface} px-3 py-1.5 text-xs font-semibold text-[var(--color-info)]`}
+                                className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-3 py-1.5 text-xs font-semibold ${themePrimaryText}`}
                               >
                                 <CheckCircle2 size={13} />
                                 {selectedMapelName}
@@ -882,7 +882,7 @@ export default function TambahUjianPage() {
                     <div className={`border-b ${themeDivider} px-4 py-4 sm:px-6`}>
                       <div className="flex items-center gap-3">
                         <div
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} text-[var(--color-info)]`}
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
                         >
                           <ShieldCheck size={19} />
                         </div>
@@ -979,7 +979,7 @@ export default function TambahUjianPage() {
                         loadingKelasMapel ||
                         kelasMapel.length === 0
                       }
-                      className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
+                      className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-3 text-sm font-semibold text-white ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
                     >
                       {saving ? (
                         <>
@@ -1002,29 +1002,29 @@ export default function TambahUjianPage() {
                   className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                 >
                   <div className={`relative overflow-hidden ${themePrimaryGradient} p-5`}>
-                    <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-2xl" />
-                    <div className="absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)] blur-2xl" />
+                    <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+                    <div className="absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
 
                     <div className="relative">
                       <div className="mb-4 flex items-center justify-between">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-card)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] text-[var(--color-card)]">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white">
                           <ClipboardList size={19} />
                         </div>
 
-                        <span className="rounded-full border border-[color-mix(in_srgb,var(--color-card)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] px-3 py-1.5 text-[11px] font-semibold text-[color-mix(in_srgb,var(--color-card)_88%,transparent)]">
+                        <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white/80">
                           Draf · {form.jenis || "Ujian"}
                         </span>
                       </div>
 
-                      <p className="text-xs font-medium text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
+                      <p className="text-xs font-medium text-white/80">
                         Preview Ujian
                       </p>
 
-                      <h2 className="mt-1.5 break-words text-lg font-bold leading-7 text-[var(--color-card)]">
+                      <h2 className="mt-1.5 break-words text-lg font-bold leading-7 text-white">
                         {form.judul.trim() || "Judul ujian belum diisi"}
                       </h2>
 
-                      <p className="mt-2 line-clamp-3 text-xs leading-5 text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                      <p className="mt-2 line-clamp-3 text-xs leading-5 text-white/80">
                         {form.deskripsi.trim() ||
                           "Deskripsi dan ketentuan ujian akan ditampilkan di sini."}
                       </p>
@@ -1043,7 +1043,7 @@ export default function TambahUjianPage() {
                       icon={<BookOpen size={17} />}
                       label="Mata Pelajaran"
                       value={selectedMapelName}
-                      iconClass={`${themeInfoSurface} text-[var(--color-info)]`}
+                      iconClass={`${themePrimarySoft} ${themePrimaryText}`}
                     />
 
                     <SummaryItem
@@ -1255,7 +1255,7 @@ function ChecklistItem({ active, text }) {
       <div
         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
           active
-            ? `${themePrimaryGradient} text-[var(--color-card)]`
+            ? `${themePrimaryGradient} text-white`
             : `border ${themeNeutralBorder} theme-card`
         }`}
       >

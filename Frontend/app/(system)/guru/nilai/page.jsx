@@ -84,7 +84,7 @@ const subHalaman = [
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -141,24 +141,17 @@ const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 
+const primaryColorItem = {
+  icon: `${themePrimarySoft} theme-primary-text ${themePrimarySoftBorder}`,
+  line: "bg-[var(--color-primary)]",
+  badge: `${themePrimarySoft} theme-primary-text ${themePrimarySoftBorder}`,
+};
+
 const colorConfig = {
-  blue: {
-    icon: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
-    line: "bg-[var(--color-info)]",
-    badge: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
-  },
-
-  amber: {
-    icon: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
-    line: "bg-[var(--color-warning)]",
-    badge: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
-  },
-
-  emerald: {
-    icon: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
-    line: "bg-[var(--color-success)]",
-    badge: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
-  },
+  blue: primaryColorItem,
+  amber: primaryColorItem,
+  emerald: primaryColorItem,
+  primary: primaryColorItem,
 };
 
 
@@ -246,7 +239,7 @@ export default function GuruNilaiIndexPage() {
                     pointer-events-none absolute
                     -right-20 -top-24
                     h-72 w-72 rounded-full
-                    bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
+                    bg-white/10
                     blur-3xl
                   "
                 />
@@ -274,11 +267,11 @@ export default function GuruNilaiIndexPage() {
                           className="
                             inline-flex items-center gap-2
                             rounded-full
-                            border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)]
-                            bg-[color-mix(in_srgb,var(--color-card)_8%,transparent)]
+                            border border-white/20
+                            bg-white/10
                             px-3 py-1.5
                             text-[10px] font-semibold
-                            text-[var(--color-card)]
+                            text-white
                           "
                         >
                           <NotebookPen size={12} />
@@ -312,7 +305,7 @@ export default function GuruNilaiIndexPage() {
                         className="
                           mt-4
                           text-2xl font-bold tracking-tight
-                          text-[var(--color-card)]
+                          text-white
                           sm:text-3xl lg:text-[36px]
                         "
                       >
@@ -323,7 +316,7 @@ export default function GuruNilaiIndexPage() {
                         className="
                           mt-2 max-w-2xl
                           text-sm leading-6
-                          text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]
+                          text-white/80
                         "
                       >
                         Pusat pengelolaan penilaian siswa.
@@ -347,7 +340,7 @@ export default function GuruNilaiIndexPage() {
                             text-[var(--color-primary)]
                             shadow-[0_8px_18px_color-mix(in_srgb,var(--color-text)_12%,transparent)]
                             transition
-                            hover:bg-[color-mix(in_srgb,var(--color-card)_92%,var(--color-primary))]
+                            hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
                             disabled:cursor-not-allowed
                             disabled:opacity-60
                           "
@@ -376,11 +369,11 @@ export default function GuruNilaiIndexPage() {
                             inline-flex items-center gap-2
                             rounded-xl
                             border
-                            border-[color-mix(in_srgb,var(--color-card)_16%,transparent)]
-                            bg-[color-mix(in_srgb,var(--color-card)_6%,transparent)]
+                            border-white/20
+                            bg-white/10
                             px-4 py-2.5
                             text-xs font-medium
-                            text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]
+                            text-white/80
                           "
                         >
                           <Users size={14} />
@@ -399,8 +392,8 @@ export default function GuruNilaiIndexPage() {
                         className="
                           rounded-2xl
                           border
-                          border-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
-                          bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]
+                          border-white/20
+                          bg-white/10
                           p-4 backdrop-blur-sm
                         "
                       >
@@ -409,8 +402,8 @@ export default function GuruNilaiIndexPage() {
                           className="
                             flex h-9 w-9 items-center
                             justify-center rounded-xl
-                            bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)]
-                            text-[var(--color-info)]
+                            bg-white/15
+                            text-white
                           "
                         >
                           <BarChart3 size={17} />
@@ -419,7 +412,7 @@ export default function GuruNilaiIndexPage() {
                         <p
                           className="
                             mt-4 text-[10px] font-medium
-                            text-[color-mix(in_srgb,var(--color-card)_48%,transparent)]
+                            text-white/80
                           "
                         >
                           Rekap
@@ -428,7 +421,7 @@ export default function GuruNilaiIndexPage() {
                         <p
                           className="
                             mt-1 text-xl font-bold
-                            text-[var(--color-card)]
+                            text-white
                           "
                         >
                           Excel
@@ -441,8 +434,8 @@ export default function GuruNilaiIndexPage() {
                         className="
                           rounded-2xl
                           border
-                          border-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
-                          bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]
+                          border-white/20
+                          bg-white/10
                           p-4 backdrop-blur-sm
                         "
                       >
@@ -451,8 +444,8 @@ export default function GuruNilaiIndexPage() {
                           className="
                             flex h-9 w-9 items-center
                             justify-center rounded-xl
-                            bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)]
-                            text-[var(--color-success)]
+                            bg-white/15
+                            text-white
                           "
                         >
                           <NotebookPen size={17} />
@@ -461,7 +454,7 @@ export default function GuruNilaiIndexPage() {
                         <p
                           className="
                             mt-4 text-[10px] font-medium
-                            text-[color-mix(in_srgb,var(--color-card)_48%,transparent)]
+                            text-white/80
                           "
                         >
                           Sumber
@@ -470,7 +463,7 @@ export default function GuruNilaiIndexPage() {
                         <p
                           className="
                             mt-1 text-xl font-bold
-                            text-[var(--color-card)]
+                            text-white
                           "
                         >
                           BE
@@ -483,8 +476,8 @@ export default function GuruNilaiIndexPage() {
                         className="
                           col-span-2 rounded-2xl
                           border
-                          border-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
-                          bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]
+                          border-white/20
+                          bg-white/10
                           p-4 backdrop-blur-sm
                           sm:col-span-1
                         "
@@ -494,8 +487,8 @@ export default function GuruNilaiIndexPage() {
                           className="
                             flex h-9 w-9 items-center
                             justify-center rounded-xl
-                            bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]
-                            text-[var(--color-warning)]
+                            bg-white/15
+                            text-white
                           "
                         >
                           <LockKeyhole size={17} />
@@ -504,7 +497,7 @@ export default function GuruNilaiIndexPage() {
                         <p
                           className="
                             mt-4 text-[10px] font-medium
-                            text-[color-mix(in_srgb,var(--color-card)_48%,transparent)]
+                            text-white/80
                           "
                         >
                           Modul
@@ -513,7 +506,7 @@ export default function GuruNilaiIndexPage() {
                         <p
                           className="
                             mt-1 text-xl font-bold
-                            text-[var(--color-card)]
+                            text-white
                           "
                         >
                           Aktif
@@ -790,12 +783,12 @@ export default function GuruNilaiIndexPage() {
                         flex h-10 w-10
                         items-center justify-center
                         rounded-xl border
-                        ${themeInfoBorder}
-                        ${themeInfoSurface}
-                        text-[var(--color-info)]
+                        ${themePrimarySoftBorder}
+                        ${themePrimarySoft}
+                        theme-primary-text
                       `}
                     >
-                      <NotebookPen size={18} />
+                      <NotebookPen size={18} className="theme-primary-text shrink-0" />
                     </div>
 
                     <div>
@@ -820,8 +813,8 @@ export default function GuruNilaiIndexPage() {
                   <div
                     className={`
                       rounded-2xl border
-                      ${themeSuccessBorder}
-                      ${themeSuccessSurface}
+                      ${themePrimarySoftBorder}
+                      ${themePrimarySoft}
                       p-4
                     `}
                   >
@@ -833,12 +826,12 @@ export default function GuruNilaiIndexPage() {
                           flex h-9 w-9 shrink-0
                           items-center justify-center
                           rounded-xl border
-                          ${themeSuccessBorder}
-                          bg-[color-mix(in_srgb,var(--color-success)_13%,transparent)]
-                          text-[var(--color-success)]
+                          ${themePrimarySoftBorder}
+                          bg-[color-mix(in_srgb,var(--color-primary)_13%,transparent)]
+                          theme-primary-text
                         `}
                       >
-                        <Download size={16} />
+                        <Download size={16} className="theme-primary-text shrink-0" />
                       </div>
 
                       <div className="min-w-0">
@@ -885,8 +878,8 @@ export default function GuruNilaiIndexPage() {
                   <div
                     className={`
                       rounded-2xl border
-                      ${themeInfoBorder}
-                      ${themeInfoSurface}
+                      ${themePrimarySoftBorder}
+                      ${themePrimarySoft}
                       p-4
                     `}
                   >
@@ -898,12 +891,12 @@ export default function GuruNilaiIndexPage() {
                           flex h-9 w-9 shrink-0
                           items-center justify-center
                           rounded-xl border
-                          ${themeInfoBorder}
-                          bg-[color-mix(in_srgb,var(--color-info)_13%,transparent)]
-                          text-[var(--color-info)]
+                          ${themePrimarySoftBorder}
+                          bg-[color-mix(in_srgb,var(--color-primary)_13%,transparent)]
+                          theme-primary-text
                         `}
                       >
-                        <BarChart3 size={16} />
+                        <BarChart3 size={16} className="theme-primary-text shrink-0" />
                       </div>
 
                       <div className="min-w-0">
@@ -920,7 +913,7 @@ export default function GuruNilaiIndexPage() {
                             theme-card
                             px-3 py-2
                             text-[10px] font-medium
-                            text-[var(--color-info)]
+                            theme-primary-text
                           `}
                         >
                           GET /api/nilai/kelas-saya<br />
@@ -968,7 +961,7 @@ export default function GuruNilaiIndexPage() {
                         items-center justify-center
                         rounded-xl
                         ${themePrimaryGradient}
-                        text-[var(--color-card)]
+                        text-white
                         ${themePrimaryShadow}
                       `}
                     >
@@ -1029,7 +1022,7 @@ export default function GuruNilaiIndexPage() {
                         ${themePrimaryGradient}
                         px-4 py-2.5
                         text-xs font-bold
-                        text-[var(--color-card)]
+                        text-white
                         ${themePrimaryShadow}
                         transition-all
                         hover:opacity-90
@@ -1043,7 +1036,7 @@ export default function GuruNilaiIndexPage() {
                             h-4 w-4 animate-spin
                             rounded-full
                             border-2
-                            border-[color-mix(in_srgb,var(--color-card)_35%,transparent)]
+                            border-white/20
                             border-t-[var(--color-card)]
                           "
                         />

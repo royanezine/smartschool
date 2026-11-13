@@ -218,7 +218,7 @@ export default function CmsMenuPage() {
           <div className="w-full flex-1 px-3 py-5 sm:px-6 lg:px-9">
             <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-4">
               <div className="flex items-center gap-3 lg:col-span-2">
-                <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border">
+                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border">
                   <Menu className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
@@ -374,7 +374,7 @@ export default function CmsMenuPage() {
                                   <img src={item.gambarUrl} alt="" className="h-full w-full object-cover" />
                                 </div>
                               ) : (
-                                <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border">
+                                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border">
                                   <ImageIcon className="h-4 w-4" />
                                 </div>
                               )}
@@ -482,7 +482,7 @@ export default function CmsMenuPage() {
               <h3 className="theme-text mt-4 text-lg font-bold">Nonaktifkan konfigurasi?</h3>
               <p className="theme-text-secondary mt-2 text-sm leading-6">
                 Konfigurasi{" "}
-                <strong className="theme-text">"{deleteTarget.judul || "Tanpa Judul"}"</strong>{" "}
+                <strong className="theme-text">&quot;{deleteTarget.judul || "Tanpa Judul"}&quot;</strong>{" "}
                 akan dinonaktifkan melalui endpoint backend.
               </p>
             </div>

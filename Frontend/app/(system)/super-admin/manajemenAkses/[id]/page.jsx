@@ -33,7 +33,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -473,7 +473,7 @@ export default function DetailRolePage() {
                     "/super-admin/manajemenAkses"
                   )
                 }
-                className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:-translate-y-0.5 transition-all`}
+                className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow} hover:-translate-y-0.5 transition-all`}
               >
                 Kembali
               </button>
@@ -530,11 +530,11 @@ export default function DetailRolePage() {
 
 
             <div
-              className="absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)] blur-3xl pointer-events-none"
+              className="absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full bg-white/10 blur-3xl pointer-events-none"
             />
 
             <div
-              className="absolute -bottom-40 left-1/3 w-[420px] h-[420px] rounded-full bg-[color-mix(in_srgb,var(--color-card)_8%,transparent)] blur-3xl pointer-events-none"
+              className="absolute -bottom-40 left-1/3 w-[420px] h-[420px] rounded-full bg-white/8 blur-3xl pointer-events-none"
             />
 
 
@@ -542,7 +542,7 @@ export default function DetailRolePage() {
               className="absolute inset-0 opacity-[0.045] pointer-events-none"
               style={{
                 backgroundImage:
-                  "linear-gradient(color-mix(in srgb,var(--color-card) 80%,transparent) 1px, transparent 1px), linear-gradient(90deg,color-mix(in srgb,var(--color-card) 80%,transparent) 1px, transparent 1px)",
+                  "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg,rgba(255,255,255,0.8) 1px, transparent 1px)",
                 backgroundSize: "36px 36px",
               }}
             />
@@ -555,7 +555,7 @@ export default function DetailRolePage() {
                 <div className="flex items-start gap-4 min-w-0">
 
                   <div
-                    className="hidden sm:flex relative w-16 h-16 shrink-0 rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] border border-[color-mix(in_srgb,var(--color-card)_20%,transparent)] text-[color-mix(in_srgb,var(--color-card)_82%,transparent)] items-center justify-center"
+                    className="hidden sm:flex relative w-16 h-16 shrink-0 rounded-2xl bg-white/10 border border-white/20 text-white items-center justify-center"
                   >
 
                     <ShieldCheck
@@ -574,14 +574,14 @@ export default function DetailRolePage() {
                     <div className="flex flex-wrap items-center gap-2 mb-3">
 
                       <span
-                        className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--color-card)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color-mix(in_srgb,var(--color-card)_84%,transparent)]"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white"
                       >
                         <Lock size={11} />
                         Role Access
                       </span>
 
                       <span
-                        className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--color-card)_10%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_5%,transparent)] px-3 py-1.5 text-[10px] font-medium text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/6 px-3 py-1.5 text-[10px] font-medium text-white/80"
                       >
                         <Activity size={11} />
                         SmartSchool
@@ -591,7 +591,7 @@ export default function DetailRolePage() {
 
                     <div className="flex flex-wrap items-center gap-3">
 
-                      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--color-card)]">
+                      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
                         {role.nama || "-"}
                       </h1>
 
@@ -608,22 +608,22 @@ export default function DetailRolePage() {
                     </div>
 
                     {role.namaTampilan && (
-                      <p className="text-sm text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] mt-1">
+                      <p className="text-sm text-white/80 mt-1">
                         {role.namaTampilan}
                       </p>
                     )}
 
-                    <p className="text-sm leading-6 text-[color-mix(in_srgb,var(--color-card)_72%,transparent)] mt-3 max-w-2xl">
+                    <p className="text-sm leading-6 text-white/80 mt-3 max-w-2xl">
                       {role.deskripsi ||
                         "Tidak ada deskripsi role."}
                     </p>
 
                     <div className="flex flex-wrap items-center gap-4 mt-4">
 
-                      <div className="flex items-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                      <div className="flex items-center gap-2 text-xs text-white/80">
                         <Users
                           size={14}
-                          className="text-[color-mix(in_srgb,var(--color-card)_82%,transparent)]"
+                          className="text-white"
                         />
 
                         <span>
@@ -632,12 +632,12 @@ export default function DetailRolePage() {
                         </span>
                       </div>
 
-                      <div className="hidden sm:block w-1 h-1 rounded-full bg-[color-mix(in_srgb,var(--color-card)_30%,transparent)]" />
+                      <div className="hidden sm:block w-1 h-1 rounded-full bg-white/30" />
 
-                      <div className="flex items-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                      <div className="flex items-center gap-2 text-xs text-white/80">
                         <KeyRound
                           size={14}
-                          className="text-[color-mix(in_srgb,var(--color-card)_82%,transparent)]"
+                          className="text-white"
                         />
 
                         <span>
@@ -648,12 +648,12 @@ export default function DetailRolePage() {
 
                       {role.sekolah && (
                         <>
-                          <div className="hidden sm:block w-1 h-1 rounded-full bg-[color-mix(in_srgb,var(--color-card)_30%,transparent)]" />
+                          <div className="hidden sm:block w-1 h-1 rounded-full bg-white/30" />
 
-                          <div className="flex items-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                          <div className="flex items-center gap-2 text-xs text-white/80">
                             <Database
                               size={14}
-                              className="text-[color-mix(in_srgb,var(--color-card)_82%,transparent)]"
+                              className="text-white"
                             />
 
                             <span>
@@ -679,7 +679,7 @@ export default function DetailRolePage() {
                         "/super-admin/manajemenAkses"
                       )
                     }
-                    className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_6%,transparent)] text-[color-mix(in_srgb,var(--color-card)_86%,transparent)] text-sm font-medium hover:bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] hover:border-[color-mix(in_srgb,var(--color-card)_22%,transparent)] transition-all"
+                    className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl border border-white/20 bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-all"
                   >
                     <ArrowLeft size={15} />
                     Kembali
@@ -692,7 +692,7 @@ export default function DetailRolePage() {
                         `/super-admin/manajemenAkses/edit-role?id=${role.id}`
                       )
                     }
-                    className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-[var(--color-card)] text-[var(--color-primary)] text-sm font-semibold shadow-lg hover:-translate-y-0.5 transition-all"
+                    className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-white text-[var(--color-primary)] text-sm font-semibold shadow-lg hover:-translate-y-0.5 hover:bg-white/90 transition-all"
                   >
                     <Edit3 size={15} />
                     Edit Role
@@ -1149,7 +1149,7 @@ export default function DetailRolePage() {
                   <div className="flex items-start gap-3">
 
                     <div
-                      className={`w-10 h-10 rounded-xl ${themeInfoSurface} ${themeInfoBorder} text-[var(--color-info)] flex items-center justify-center`}
+                      className="w-10 h-10 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] theme-primary-text flex items-center justify-center"
                     >
                       <Users size={18} />
                     </div>
@@ -1251,7 +1251,7 @@ export default function DetailRolePage() {
                 <div className="flex items-start gap-3">
 
                   <div
-                    className={`w-10 h-10 rounded-xl ${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)] flex items-center justify-center`}
+                    className="w-10 h-10 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] theme-primary-text flex items-center justify-center"
                   >
                     <ShieldCheck size={18} />
                   </div>
@@ -1426,7 +1426,7 @@ export default function DetailRolePage() {
             <div className="flex items-center gap-2">
 
               <div
-                className={`w-5 h-5 rounded-md ${themePrimaryGradient} text-[var(--color-card)] flex items-center justify-center`}
+                className={`w-5 h-5 rounded-md ${themePrimaryGradient} text-white flex items-center justify-center`}
               >
                 <Shield size={11} />
               </div>
@@ -1461,46 +1461,20 @@ function OverviewCard({
   label,
   value,
   description,
-  accent = "primary",
 }) {
-  const styles = {
-    primary: {
-      icon: `${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`,
-      line: "bg-[var(--color-primary)]",
-    },
-
-    info: {
-      icon: `${themeInfoSurface} ${themeInfoBorder} text-[var(--color-info)]`,
-      line: "bg-[var(--color-info)]",
-    },
-
-    success: {
-      icon: `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`,
-      line: "bg-[var(--color-success)]",
-    },
-
-    neutral: {
-      icon: `${themeNeutralSurface} ${themeNeutralBorder} ${themeTextSecondary}`,
-      line: "bg-[var(--color-text-muted)]",
-    },
-  };
-
-  const style =
-    styles[accent] || styles.primary;
-
   return (
     <div
       className={`group relative overflow-hidden ${themeCard} ${themeNeutralBorder} rounded-2xl p-4 sm:p-5 ${themeCardShadow} hover:-translate-y-0.5 hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_8%,transparent)] transition-all duration-300`}
     >
 
       <div
-        className={`absolute left-0 top-0 w-1 h-full ${style.line}`}
+        className="absolute left-0 top-0 w-1 h-full bg-[var(--color-primary)]"
       />
 
       <div className="flex items-center gap-3">
 
         <div
-          className={`w-11 h-11 shrink-0 rounded-xl border flex items-center justify-center ${style.icon} group-hover:scale-105 transition-transform`}
+          className="w-11 h-11 shrink-0 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center group-hover:scale-105 transition-transform"
         >
           <Icon
             size={18}

@@ -27,7 +27,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -273,7 +273,7 @@ function AjukanPeminjamanContent() {
               className="absolute -left-40 top-1/3 h-[280px] w-[280px] rounded-full blur-3xl"
               style={{
                 background:
-                  "color-mix(in srgb, var(--color-info) 6%, transparent)",
+                  "color-mix(in srgb, var(--color-primary) 6%, transparent)",
               }}
             />
           </div>
@@ -298,7 +298,7 @@ function AjukanPeminjamanContent() {
 
             <div className="flex min-w-0 items-start gap-4">
               <div
-                className={`${themePrimaryGradient} ${themePrimaryShadow} flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-[var(--color-card)]`}
+                className={`${themePrimaryGradient} ${themePrimaryShadow} flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white`}
               >
                 <ClipboardList size={22} />
               </div>
@@ -365,16 +365,16 @@ function AjukanPeminjamanContent() {
             ) : berhasilKirim ? (
 
               <div
-                className={`theme-card overflow-hidden rounded-2xl border ${themeSuccessBorder} ${themeCardShadow}`}
+                className={`theme-card overflow-hidden rounded-2xl border ${themePrimarySoftBorder} ${themeCardShadow}`}
               >
                 <div
-                  className={`${themePrimaryGradient} relative overflow-hidden p-8 text-[var(--color-card)]`}
+                  className={`${themePrimaryGradient} relative overflow-hidden p-8 text-white`}
                 >
                   <div
                     className="absolute -right-10 -top-10 h-40 w-40 rounded-full"
                     style={{
                       background:
-                        "color-mix(in srgb, var(--color-card) 10%, transparent)",
+                        "rgba(255, 255, 255, 0.15)",
                     }}
                   />
 
@@ -382,7 +382,7 @@ function AjukanPeminjamanContent() {
                     className="absolute -bottom-20 right-12 h-32 w-32 rounded-full"
                     style={{
                       background:
-                        "color-mix(in srgb, var(--color-card) 10%, transparent)",
+                        "rgba(255, 255, 255, 0.15)",
                     }}
                   />
 
@@ -391,9 +391,9 @@ function AjukanPeminjamanContent() {
                       className="rounded-2xl border p-3 backdrop-blur-sm"
                       style={{
                         background:
-                          "color-mix(in srgb, var(--color-card) 15%, transparent)",
+                          "rgba(255, 255, 255, 0.15)",
                         borderColor:
-                          "color-mix(in srgb, var(--color-card) 20%, transparent)",
+                          "rgba(255, 255, 255, 0.15)",
                       }}
                     >
                       <CheckCircle2 size={32} />
@@ -408,7 +408,7 @@ function AjukanPeminjamanContent() {
                         className="mt-1 text-xs"
                         style={{
                           color:
-                            "color-mix(in srgb, var(--color-card) 82%, transparent)",
+                            "rgba(255, 255, 255, 0.15)",
                         }}
                       >
                         Pengajuan kamu sudah tercatat dan menunggu persetujuan
@@ -450,14 +450,14 @@ function AjukanPeminjamanContent() {
                   </div>
 
                   <div
-                    className={`flex items-start gap-3 rounded-xl border p-4 ${themeInfoSurface} ${themeInfoBorder}`}
+                    className={`flex items-start gap-3 rounded-xl border p-4 ${themePrimarySoft} ${themePrimarySoftBorder}`}
                   >
                     <Info
                       size={16}
-                      className="mt-0.5 flex-shrink-0 text-[var(--color-info)]"
+                      className="mt-0.5 flex-shrink-0 theme-primary-text"
                     />
 
-                    <p className="text-xs leading-relaxed text-[var(--color-info)]">
+                    <p className="text-xs leading-relaxed theme-primary-text">
                       Kamu dapat memantau status peminjaman di halaman riwayat
                       peminjaman. Pastikan aset dikembalikan sesuai tanggal yang
                       ditentukan.
@@ -478,7 +478,7 @@ function AjukanPeminjamanContent() {
                       onClick={() =>
                         router.push("/guru/sarpras/riwayat")
                       }
-                      className={`${themePrimaryGradient} h-11 flex-1 rounded-xl text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:-translate-y-0.5`}
+                      className={`${themePrimaryGradient} h-11 flex-1 rounded-xl text-sm font-semibold text-white ${themePrimaryShadow} transition-all hover:-translate-y-0.5`}
                     >
                       Lihat Riwayat Peminjaman
                     </button>
@@ -673,7 +673,7 @@ function AjukanPeminjamanContent() {
                     <button
                       type="submit"
                       disabled={submitting}
-                      className={`${themePrimaryGradient} ${themePrimaryShadow} inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-[var(--color-card)] transition-all hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60 sm:w-auto`}
+                      className={`${themePrimaryGradient} ${themePrimaryShadow} inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60 sm:w-auto`}
                     >
                       {submitting ? (
                         <>
@@ -701,13 +701,13 @@ function AjukanPeminjamanContent() {
                     className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                   >
                     <div
-                      className={`${themePrimaryGradient} relative overflow-hidden p-5 text-[var(--color-card)]`}
+                      className={`${themePrimaryGradient} relative overflow-hidden p-5 text-white`}
                     >
                       <div
                         className="absolute -right-8 -top-8 h-24 w-24 rounded-full"
                         style={{
                           background:
-                            "color-mix(in srgb, var(--color-card) 10%, transparent)",
+                            "rgba(255, 255, 255, 0.15)",
                         }}
                       />
 
@@ -715,7 +715,7 @@ function AjukanPeminjamanContent() {
                         className="absolute -bottom-12 right-6 h-20 w-20 rounded-full"
                         style={{
                           background:
-                            "color-mix(in srgb, var(--color-card) 10%, transparent)",
+                            "rgba(255, 255, 255, 0.15)",
                         }}
                       />
 
@@ -724,9 +724,9 @@ function AjukanPeminjamanContent() {
                           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border"
                           style={{
                             background:
-                              "color-mix(in srgb, var(--color-card) 15%, transparent)",
+                              "rgba(255, 255, 255, 0.15)",
                             borderColor:
-                              "color-mix(in srgb, var(--color-card) 20%, transparent)",
+                              "rgba(255, 255, 255, 0.15)",
                           }}
                         >
                           <Package size={18} />
@@ -737,7 +737,7 @@ function AjukanPeminjamanContent() {
                             className="text-[10px] font-bold uppercase tracking-wider"
                             style={{
                               color:
-                                "color-mix(in srgb, var(--color-card) 82%, transparent)",
+                                "rgba(255, 255, 255, 0.15)",
                             }}
                           >
                             Aset yang Dipinjam
@@ -752,7 +752,7 @@ function AjukanPeminjamanContent() {
                               className="mt-0.5 text-[11px] font-mono"
                               style={{
                                 color:
-                                  "color-mix(in srgb, var(--color-card) 82%, transparent)",
+                                  "rgba(255, 255, 255, 0.15)",
                               }}
                             >
                               {itemDipilih.kode}
@@ -841,21 +841,21 @@ function AjukanPeminjamanContent() {
 
 
                   <div
-                    className={`rounded-2xl border p-4 ${themeInfoSurface} ${themeInfoBorder}`}
+                    className={`rounded-2xl border p-4 ${themePrimarySoftBorder} ${themePrimarySoft}`}
                   >
                     <div className="flex items-start gap-3">
                       <div
-                        className={`theme-card flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${themeInfoBorder} text-[var(--color-info)]`}
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                       >
-                        <Info size={14} />
+                        <Info size={14} className="theme-primary-text shrink-0" />
                       </div>
 
                       <div>
-                        <p className="text-xs font-bold text-[var(--color-info)]">
+                        <p className="text-xs font-bold theme-primary-text">
                           Perhatian
                         </p>
 
-                        <p className="mt-1 text-[11px] leading-relaxed text-[var(--color-info)]">
+                        <p className="mt-1 text-[11px] leading-relaxed theme-primary-text">
                           Pastikan aset dikembalikan tepat waktu. Keterlambatan
                           pengembalian dapat mempengaruhi peminjaman berikutnya.
                         </p>

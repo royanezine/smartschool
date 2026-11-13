@@ -100,6 +100,31 @@ function PembayaranContent() {
     }
   };
 
+  const getAllowedMidtransHosts = () => {
+    const hosts = new Set();
+    const isProdFlag = process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION;
+
+    if (isProdFlag === "true") {
+      hosts.add("app.midtrans.com");
+    } else if (isProdFlag === "false") {
+      hosts.add("app.sandbox.midtrans.com");
+    } else {
+      hosts.add("app.midtrans.com");
+      hosts.add("app.sandbox.midtrans.com");
+    }
+
+    const customSnapUrl = process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL?.trim();
+    if (customSnapUrl) {
+      try {
+        hosts.add(new URL(customSnapUrl).hostname);
+      } catch {
+        // Abaikan URL kustom yang tidak valid
+      }
+    }
+
+    return hosts;
+  };
+
   const handlePay = () => {
     const redirectUrl = payment?.redirect_url;
 
@@ -112,10 +137,11 @@ function PembayaranContent() {
 
     try {
       const parsedUrl = new URL(redirectUrl);
+      const allowedHosts = getAllowedMidtransHosts();
 
       if (
         parsedUrl.protocol !== "https:" ||
-        parsedUrl.hostname !== "app.sandbox.midtrans.com"
+        !allowedHosts.has(parsedUrl.hostname)
       ) {
         setError("Tautan checkout Midtrans tidak valid.");
         return;

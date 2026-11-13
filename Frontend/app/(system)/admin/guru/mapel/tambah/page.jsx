@@ -676,7 +676,7 @@ export default function TambahMapelPage() {
 
 
               {loadingData && (
-                <div className="flex items-center gap-3 p-4 rounded-xl border theme-info">
+                <div className="flex items-center gap-3 p-4 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]">
 
                   <Loader2
                     size={19}
@@ -724,7 +724,7 @@ export default function TambahMapelPage() {
 
                     <div className="flex items-center gap-3">
 
-                      <div className="w-9 h-9 rounded-lg theme-info flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
 
                         <BookMarked
                           size={18}
@@ -996,7 +996,7 @@ export default function TambahMapelPage() {
 
                           <div className="flex items-center gap-3 min-w-0">
 
-                            <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center shrink-0">
 
                               <UserRound
                                 size={15}
@@ -1509,9 +1509,10 @@ export default function TambahMapelPage() {
                                   px-2.5
                                   py-1.5
                                   rounded-lg
-                                  theme-info
+                                  bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                                  theme-primary-text
                                   border
-                                  theme-border
+                                  border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
                                   text-xs
                                   font-medium
                                 "
@@ -1664,7 +1665,7 @@ export default function TambahMapelPage() {
 
                         <div className="flex flex-wrap items-center gap-2">
 
-                          <span className="font-mono text-xs font-semibold theme-info border theme-border px-2.5 py-1 rounded-lg">
+                          <span className="font-mono text-xs font-semibold bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] px-2.5 py-1 rounded-lg">
 
                             {form.kode.trim()
                               ? form.kode
@@ -1783,7 +1784,7 @@ export default function TambahMapelPage() {
                   </div>
 
 
-                  <div className="theme-info rounded-2xl border theme-border p-5">
+                  <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-5">
 
                     <div className="flex items-center gap-2 mb-3">
 
@@ -1865,12 +1866,8 @@ export default function TambahMapelPage() {
 
                     <div className="flex items-start gap-3">
 
-                      <div className="w-9 h-9 rounded-lg theme-success flex items-center justify-center shrink-0">
-
-                        <Info
-                          size={18}
-                          className="text-[var(--color-success)]"
-                        />
+                      <div className="w-9 h-9 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center shrink-0">
+                        <Info size={18} />
 
                       </div>
 

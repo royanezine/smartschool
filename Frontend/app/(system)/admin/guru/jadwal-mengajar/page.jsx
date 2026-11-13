@@ -159,52 +159,10 @@ function normalizeJadwalData(data) {
 
 const MAPEL_COLOR = [
   {
-    bg: "theme-info",
-    border: "theme-border",
-    text: "text-[var(--color-info)]",
-    icon: "theme-info",
-    line: "bg-[var(--color-info)]",
-  },
-  {
-    bg: "theme-sidebar-active",
-    border: "theme-border",
-    text: "text-[var(--color-primary)]",
-    icon: "theme-sidebar-active text-[var(--color-primary)]",
-    line: "bg-[var(--color-primary)]",
-  },
-  {
-    bg: "theme-success",
-    border: "theme-border",
-    text: "text-[var(--color-success)]",
-    icon: "theme-success",
-    line: "bg-[var(--color-success)]",
-  },
-  {
-    bg: "theme-warning",
-    border: "theme-border",
-    text: "text-[var(--color-warning)]",
-    icon: "theme-warning",
-    line: "bg-[var(--color-warning)]",
-  },
-  {
-    bg: "theme-danger",
-    border: "theme-border",
-    text: "text-[var(--color-danger)]",
-    icon: "theme-danger",
-    line: "bg-[var(--color-danger)]",
-  },
-  {
-    bg: "theme-info",
-    border: "theme-border",
-    text: "text-[var(--color-info)]",
-    icon: "theme-info",
-    line: "bg-[var(--color-info)]",
-  },
-  {
-    bg: "theme-sidebar-active",
-    border: "theme-border",
-    text: "text-[var(--color-primary)]",
-    icon: "theme-sidebar-active text-[var(--color-primary)]",
+    bg: "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]",
+    border: "border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]",
+    text: "theme-primary-text",
+    icon: "bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] theme-primary-text",
     line: "bg-[var(--color-primary)]",
   },
 ];
@@ -421,12 +379,12 @@ export default function JadwalMengajarPage() {
               <section className="theme-card theme-border relative overflow-hidden rounded-[24px] border shadow-sm">
                 <div className="absolute -right-16 -top-20 h-72 w-72 rounded-full bg-[var(--color-primary)]/5 blur-sm" />
                 <div className="absolute -bottom-24 right-24 h-64 w-64 rounded-full bg-[var(--color-primary)]/5" />
-                <div className="absolute left-1/2 top-0 h-40 w-40 rounded-full bg-[var(--color-info)]/5 blur-2xl" />
+                <div className="absolute left-1/2 top-0 h-40 w-40 rounded-full bg-[var(--color-primary)]/5 blur-2xl" />
 
                 <div className="relative p-5 sm:p-7 lg:p-8">
                   <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
                     <div className="max-w-2xl">
-                      <div className="theme-info theme-border-soft mb-4 inline-flex items-center gap-2 rounded-lg border px-2.5 py-1.5">
+                      <div className="border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] theme-primary-text mb-4 inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5">
                         <CalendarClock size={14} />
                         <span className="theme-text-secondary text-[10px] font-bold uppercase tracking-[0.12em]">
                           Akademik
@@ -489,14 +447,15 @@ export default function JadwalMengajarPage() {
                 </div>
               </section>
 
-              <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+              {/* 4 kartu: 1 kolom (mobile) -> 2 kolom (sm) -> 4 kolom (lg ke atas, penuh) */}
+              <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <PremiumStat
                   icon={Users}
                   title="Guru Mengajar"
                   value={totalGuru}
                   description="Guru terjadwal"
                   numberClass="text-[var(--color-primary)]"
-                  iconClass="theme-info text-[var(--color-primary)]"
+                  iconClass="theme-primary-text"
                 />
 
                 <PremiumStat
@@ -513,8 +472,8 @@ export default function JadwalMengajarPage() {
                   title="Kelas"
                   value={totalKelas}
                   description="Kelas memiliki jadwal"
-                  numberClass="text-[var(--color-success)]"
-                  iconClass="theme-success"
+                  numberClass="theme-text"
+                  iconClass="theme-primary-text"
                 />
 
                 <PremiumStat
@@ -522,8 +481,8 @@ export default function JadwalMengajarPage() {
                   title="Slot Mingguan"
                   value={totalSlot}
                   description="Total jadwal"
-                  numberClass="text-[var(--color-warning)]"
-                  iconClass="theme-warning"
+                  numberClass="theme-text"
+                  iconClass="theme-primary-text"
                 />
               </section>
 
@@ -579,7 +538,7 @@ export default function JadwalMengajarPage() {
                       onClick={() => setViewMode("timeline")}
                       className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all sm:flex-none ${
                         viewMode === "timeline"
-                          ? "theme-card theme-text-primary shadow-sm"
+                          ? "theme-card text-[var(--color-primary)] shadow-sm"
                           : "theme-text-muted theme-sidebar-hover"
                       }`}
                     >
@@ -626,7 +585,7 @@ export default function JadwalMengajarPage() {
                   <button
                     type="button"
                     onClick={fetchJadwal}
-                    className="theme-card theme-border theme-sidebar-hover inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold text-[var(--color-danger)]"
+                    className="theme-card theme-border theme-sidebar-hover inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold theme-text-secondary hover:text-[var(--color-primary)]"
                   >
                     <RefreshCw size={13} />
                     Coba Lagi
@@ -700,7 +659,7 @@ export default function JadwalMengajarPage() {
                     <div className="theme-border-soft flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                       <div>
                         <div className="flex items-center gap-2">
-                          <div className="theme-info flex h-8 w-8 items-center justify-center rounded-lg">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                             <CalendarDays
                               size={15}
                               className="text-[var(--color-primary)]"
@@ -819,7 +778,7 @@ export default function JadwalMengajarPage() {
 
                               <td className="px-5 py-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[var(--color-primary)]">
+                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                                     <UserRound size={15} />
                                   </div>
 
@@ -893,7 +852,7 @@ export default function JadwalMengajarPage() {
                                   <button
                                     type="button"
                                     onClick={() => handleEdit(item)}
-                                    className="theme-warning flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:opacity-80"
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] transition-colors"
                                     title="Edit"
                                   >
                                     <Pencil size={14} />
@@ -936,7 +895,7 @@ export default function JadwalMengajarPage() {
                     <div className="absolute right-0 top-0 h-40 w-40 -translate-y-1/2 translate-x-1/2 rounded-full bg-[var(--color-primary)]/5" />
 
                     <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
-                      <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <Sparkles
                           size={18}
                           className="text-[var(--color-primary)]"
@@ -960,11 +919,8 @@ export default function JadwalMengajarPage() {
                   </div>
 
                   <div className="theme-card theme-border flex items-center gap-3 rounded-2xl border px-5 py-4">
-                    <div className="theme-success flex h-9 w-9 items-center justify-center rounded-xl">
-                      <CheckCircle2
-                        size={17}
-                        className="text-[var(--color-success)]"
-                      />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                      <CheckCircle2 size={17} />
                     </div>
 
                     <div>
@@ -1010,9 +966,9 @@ function PremiumStat({
   numberClass,
 }) {
   return (
-    <div className="theme-card theme-border group rounded-2xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-5">
+    <div className="theme-card theme-border group min-w-0 rounded-2xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="theme-text-placeholder text-[10px] font-semibold sm:text-[11px]">
             {title}
           </p>
@@ -1025,7 +981,7 @@ function PremiumStat({
         </div>
 
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${iconClass}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${iconClass}`}
         >
           <Icon size={19} />
         </div>
@@ -1150,7 +1106,7 @@ function TimelineItem({ item, index, onEdit, onDelete, deletingId }) {
 function EmptyState({ onTambah }) {
   return (
     <div className="px-5 py-16 text-center">
-      <div className="theme-info mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
+      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
         <CalendarClock size={25} className="text-[var(--color-primary)]" />
       </div>
 
@@ -1178,7 +1134,7 @@ function LoadingState() {
   return (
     <div className="theme-card theme-border rounded-2xl border p-8 shadow-sm">
       <div className="flex flex-col items-center justify-center">
-        <div className="theme-info flex h-12 w-12 items-center justify-center rounded-2xl">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
           <RefreshCw
             size={22}
             className="animate-spin text-[var(--color-primary)]"

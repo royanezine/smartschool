@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getBackendOrigin } from "@/lib/auth";
 
 import {
   ArrowLeft,
@@ -19,9 +20,17 @@ import {
   AlertCircle,
   ImageOff,
   ExternalLink,
+  Pencil,
+  X,
+  Check,
 } from "lucide-react";
 
-import { getAbsensiKelas } from "@/services/absensi.service";
+import CanAccess from "@/app/components/auth/CanAccess";
+import { getAuthRole } from "@/lib/auth";
+import {
+  getAbsensiKelas,
+  updateAbsensi,
+} from "@/services/absensi.service";
 import { getKelas } from "@/services/kelas.service";
 
 
@@ -159,15 +168,8 @@ function resolveFotoUrl(foto) {
     return value;
   }
 
-  const configuredBase =
-    process.env.NEXT_PUBLIC_API_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    "http://localhost:5000";
-
   try {
-    const base = configuredBase.replace(/\/+$/, "");
-    const origin = base.replace(/\/api$/i, "");
+    const origin = getBackendOrigin();
 
     if (/^https?:\/\//i.test(value)) {
       const url = new URL(value);
@@ -217,7 +219,11 @@ function mapAbsensi(item, kelas) {
     item?.menitTerlambat ??
     0;
 
-  if (status === "Hadir" && Number(terlambatValue) > 0) {
+  const isTerlambatShift = String(item?.statusShift || "")
+    .toLowerCase()
+    .includes("terlambat");
+
+  if (status === "Hadir" && (Number(terlambatValue) > 0 || isTerlambatShift)) {
     status = "Terlambat";
   }
 
@@ -390,6 +396,61 @@ export default function DetailAbsenSiswaPage() {
   const [absensi, setAbsensi] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
+  const [editStatus, setEditStatus] = useState("hadir");
+  const [editKeterangan, setEditKeterangan] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState("");
+
+  const isAdminSekolah = getAuthRole() === "admin_sekolah";
+
+  const toBackendStatus = (label) => {
+    const clean = String(label || "").toLowerCase().trim();
+    if (clean === "terlambat") return "terlambat";
+    if (clean === "izin") return "izin";
+    if (clean === "sakit") return "sakit";
+    if (clean === "alpa" || clean === "alpha") return "alpha";
+    return "hadir";
+  };
+
+  const openEditModal = () => {
+    if (!absensi) return;
+    setEditStatus(toBackendStatus(absensi.status));
+    setEditKeterangan(
+      absensi.keterangan && absensi.keterangan !== "-" ? absensi.keterangan : ""
+    );
+    setEditError("");
+    setEditOpen(true);
+  };
+
+  const handleSaveEdit = async (event) => {
+    event.preventDefault();
+    if (!absensi?.id) return;
+
+    try {
+      setSavingEdit(true);
+      setEditError("");
+      setSaveSuccess("");
+
+      const trimmedKeterangan = editKeterangan.trim();
+
+      await updateAbsensi(String(absensi.id), {
+        status: editStatus,
+        keterangan: trimmedKeterangan ? trimmedKeterangan : null,
+      });
+
+      setEditOpen(false);
+      setSaveSuccess("Status absensi berhasil diperbarui.");
+      await loadDetail();
+    } catch (err) {
+      setEditError(
+        err?.message || "Gagal memperbarui status absensi siswa."
+      );
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   const loadDetail = useCallback(async () => {
     if (!absenId) {
@@ -529,19 +590,50 @@ export default function DetailAbsenSiswaPage() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={loadDetail}
-                disabled={loading}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary text-sm font-semibold hover:theme-card-soft transition-colors disabled:opacity-60"
-              >
-                <RefreshCw
-                  size={15}
-                  className={loading ? "animate-spin" : ""}
-                />
-                Refresh
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                {!loading && absensi && isAdminSekolah && (
+                  <CanAccess menu="monitoring absensi" action="update">
+                    <button
+                      type="button"
+                      onClick={openEditModal}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl theme-primary text-white text-sm font-semibold hover:brightness-95 transition"
+                    >
+                      <Pencil size={15} />
+                      Ubah Status
+                    </button>
+                  </CanAccess>
+                )}
+
+                <button
+                  type="button"
+                  onClick={loadDetail}
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary text-sm font-semibold hover:theme-card-soft transition-colors disabled:opacity-60"
+                >
+                  <RefreshCw
+                    size={15}
+                    className={loading ? "animate-spin" : ""}
+                  />
+                  Refresh
+                </button>
+              </div>
             </div>
+
+            {saveSuccess && (
+              <div className="flex items-center justify-between gap-3 rounded-xl border theme-success px-4 py-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Check size={16} className="shrink-0" />
+                  <span>{saveSuccess}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSaveSuccess("")}
+                  aria-label="Tutup notifikasi"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            )}
 
             {error && !loading && (
               <div className="flex items-start gap-3 rounded-xl border theme-danger p-4">
@@ -651,7 +743,7 @@ export default function DetailAbsenSiswaPage() {
                             href={`https://www.google.com/maps?q=${absensi.latitude},${absensi.longitude}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="h-32 rounded-lg theme-info flex items-center justify-center relative overflow-hidden hover:opacity-80 transition-opacity"
+                            className="h-32 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center relative overflow-hidden hover:opacity-80 transition-opacity"
                             title="Buka lokasi di Google Maps"
                           >
                             <div className="absolute inset-0 opacity-10">
@@ -686,7 +778,7 @@ export default function DetailAbsenSiswaPage() {
                             </div>
 
                             {Number.isFinite(absensi.akurasi) && (
-                              <div className="flex items-center gap-2 text-[11px] theme-success">
+                              <div className="flex items-center gap-2 text-[11px] theme-primary-text">
                                 <Navigation size={12} />
                                 Akurasi GPS ±{absensi.akurasi} meter
                               </div>
@@ -723,6 +815,93 @@ export default function DetailAbsenSiswaPage() {
                     {absensi.keterangan}
                   </p>
                 </div>
+
+                {editOpen && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="theme-card border theme-border rounded-2xl shadow-xl w-full max-w-md p-5 space-y-4">
+                      <div className="flex items-center justify-between border-b theme-border pb-3">
+                        <div>
+                          <h3 className="text-base font-bold theme-text">
+                            Ubah Status Absensi
+                          </h3>
+                          <p className="text-xs theme-text-muted mt-0.5">
+                            {absensi.nama} • {absensi.tanggalLabel}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setEditOpen(false)}
+                          disabled={savingEdit}
+                          className="p-1.5 rounded-lg theme-text-muted hover:theme-card-soft"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      {editError && (
+                        <div className="rounded-xl border theme-danger p-3 text-xs">
+                          {editError}
+                        </div>
+                      )}
+
+                      <form onSubmit={handleSaveEdit} className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                            Status Kehadiran
+                          </label>
+                          <select
+                            value={editStatus}
+                            onChange={(e) => setEditStatus(e.target.value)}
+                            disabled={savingEdit}
+                            className="theme-input w-full rounded-xl border theme-border px-3.5 py-2.5 text-sm outline-none focus:border-[var(--color-primary)]"
+                          >
+                            <option value="hadir">Hadir</option>
+                            <option value="terlambat">Terlambat</option>
+                            <option value="izin">Izin</option>
+                            <option value="sakit">Sakit</option>
+                            <option value="alpha">Alpa</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                            Keterangan
+                          </label>
+                          <textarea
+                            rows={3}
+                            maxLength={500}
+                            value={editKeterangan}
+                            onChange={(e) => setEditKeterangan(e.target.value)}
+                            disabled={savingEdit}
+                            placeholder="Catatan atau alasan perubahan status absensi..."
+                            className="theme-input w-full rounded-xl border theme-border px-3.5 py-2.5 text-sm outline-none focus:border-[var(--color-primary)]"
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => setEditOpen(false)}
+                            disabled={savingEdit}
+                            className="px-4 py-2 rounded-xl border theme-border theme-text-secondary text-sm font-semibold hover:theme-card-soft"
+                          >
+                            Batal
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={savingEdit}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl theme-primary text-white text-sm font-semibold hover:brightness-95 disabled:opacity-60"
+                          >
+                            {savingEdit && (
+                              <RefreshCw size={14} className="animate-spin" />
+                            )}
+                            Simpan Perubahan
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>

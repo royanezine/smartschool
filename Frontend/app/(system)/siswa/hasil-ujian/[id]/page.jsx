@@ -30,7 +30,7 @@ const themePrimaryText =
   "text-[var(--color-primary)]";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimaryShadow =
   "shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
@@ -968,7 +968,7 @@ export default function HasilUjianPage() {
             <button
               type="button"
               onClick={loadHasil}
-              className={`rounded-xl ${themePrimaryGradient} px-4 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95`}
+              className={`rounded-xl ${themePrimaryGradient} px-4 py-3 text-sm font-semibold text-white ${themePrimaryShadow} transition hover:brightness-95`}
             >
               Coba Lagi
             </button>
@@ -1244,21 +1244,21 @@ export default function HasilUjianPage() {
                         ?.kelas
                         ?.nama || "-"
                     }
-                    tone="info"
+                    tone="primary"
                   />
 
                   <InfoCard
                     icon={<FileText size={17} />}
                     label="Jumlah Soal"
                     value={`${totalSoal} soal`}
-                    tone="success"
+                    tone="primary"
                   />
 
                   <InfoCard
                     icon={<Clock3 size={17} />}
                     label="Durasi"
                     value={`${ujian?.durasi || 0} menit`}
-                    tone="warning"
+                    tone="primary"
                   />
                 </div>
               </section>
@@ -1475,7 +1475,7 @@ export default function HasilUjianPage() {
                     "/siswa/ujian"
                   )
                 }
-                className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl ${themePrimaryGradient} px-6 py-3.5 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 sm:w-auto`}
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl ${themePrimaryGradient} px-6 py-3.5 text-sm font-bold text-white ${themePrimaryShadow} transition hover:brightness-95 sm:w-auto`}
               >
                 <ArrowLeft size={17} />
                 Kembali ke Daftar Ujian

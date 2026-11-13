@@ -297,8 +297,8 @@ function FaceIdPageContent() {
 
             <div className="mb-4 grid shrink-0 grid-cols-2 gap-3 xl:grid-cols-4">
               <StatCard title="Total Pengguna" value={isLoading ? "..." : totalUsers} description="Seluruh pengguna" icon={Users} iconBg={themePrimarySoft} />
-              <StatCard title="Face ID Terdaftar" value={isLoading ? "..." : registeredUsers} description="Sudah memiliki Face ID" icon={CheckCircle2} iconBg="theme-success" />
-              <StatCard title="Belum Terdaftar" value={isLoading ? "..." : notRegisteredUsers} description="Perlu registrasi" icon={XCircle} iconBg="theme-warning" />
+              <StatCard title="Face ID Terdaftar" value={isLoading ? "..." : registeredUsers} description="Sudah memiliki Face ID" icon={CheckCircle2} iconBg={themePrimarySoft} />
+              <StatCard title="Belum Terdaftar" value={isLoading ? "..." : notRegisteredUsers} description="Perlu registrasi" icon={XCircle} iconBg={themePrimarySoft} />
               <StatCard title="Pengguna Aktif" value={isLoading ? "..." : activeUsers} description="Akun berstatus aktif" icon={UserRound} iconBg={themePrimarySoft} />
             </div>
 

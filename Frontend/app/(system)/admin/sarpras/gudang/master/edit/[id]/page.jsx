@@ -422,8 +422,8 @@ export default function EditGudangPage() {
 
                       <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--color-info)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_5%,transparent)] p-4">
                         <div className="flex items-start gap-3">
-                          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-card)] text-[var(--color-info)] shadow-sm">
-                            <Info size={16} />
+<div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text shadow-sm">
+                            <Info size={16} className="theme-primary-text" />
                           </div>
                           <div>
                             <p className="theme-text text-sm font-semibold">Informasi Pengelolaan</p>

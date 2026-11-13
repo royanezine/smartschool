@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { getToken, getStoredUser, getSessionUser } from "@/lib/auth";
+import { getToken, getStoredUser, getSessionUser, getBackendOrigin } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -54,7 +54,7 @@ const themePrimaryBorderStrong =
 const themePrimaryText = "text-[var(--color-primary)]";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimaryShadow =
   "shadow-[0_10px_28px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
@@ -311,11 +311,7 @@ function getBackendFileUrl(url) {
     return url;
   }
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:5000/api";
-
-  const backendOrigin = apiUrl.replace(/\/api\/?$/, "");
+  const backendOrigin = getBackendOrigin();
 
   if (url.startsWith("/")) {
     return `${backendOrigin}${url}`;
@@ -690,168 +686,168 @@ function MateriPageInner() {
   }
 
 
-async function handleDownload(item) {
-  const url = item?.urlFile
-    ? getBackendFileUrl(item.urlFile)
-    : null;
+  async function handleDownload(item) {
+    const url = item?.urlFile
+      ? getBackendFileUrl(item.urlFile)
+      : null;
 
-  if (!url) {
-    alert("File materi belum tersedia.");
-    return;
-  }
-
-  try {
-    const token =
-      typeof window !== "undefined"
-        ? getToken()
-        : null;
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {},
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Gagal mengunduh file. Status: ${response.status}`
-      );
+    if (!url) {
+      alert("File materi belum tersedia.");
+      return;
     }
-
-    const blob = await response.blob();
-
-    if (blob.size === 0) {
-      throw new Error("File yang diterima kosong.");
-    }
-
-    const namaAsli =
-      item?.namaFileAsli ||
-      item?.namaFile ||
-      item?.fileName ||
-      item?.originalName ||
-      item?.originalFilename ||
-      item?.nama_file ||
-      item?.nama_file_asli ||
-      item?.judulFile ||
-      "";
-
-    const disposition =
-      response.headers.get("Content-Disposition") || "";
-
-    const utf8Match = disposition.match(
-      /filename\*=UTF-8''([^;]+)/i
-    );
-
-    const normalMatch = disposition.match(
-      /filename="?([^";]+)"?/i
-    );
-
-    let namaHeader = "";
-
-    if (utf8Match?.[1]) {
-      try {
-        namaHeader = decodeURIComponent(
-          utf8Match[1].trim()
-        );
-      } catch {
-        namaHeader = utf8Match[1].trim();
-      }
-    } else if (normalMatch?.[1]) {
-      namaHeader = normalMatch[1].trim();
-    }
-
-    let namaUrl = "";
 
     try {
-      const pathname = new URL(url).pathname;
-      namaUrl = decodeURIComponent(
-        pathname.split("/").filter(Boolean).pop() || ""
+      const token =
+        typeof window !== "undefined"
+          ? getToken()
+          : null;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {},
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Gagal mengunduh file. Status: ${response.status}`
+        );
+      }
+
+      const blob = await response.blob();
+
+      if (blob.size === 0) {
+        throw new Error("File yang diterima kosong.");
+      }
+
+      const namaAsli =
+        item?.namaFileAsli ||
+        item?.namaFile ||
+        item?.fileName ||
+        item?.originalName ||
+        item?.originalFilename ||
+        item?.nama_file ||
+        item?.nama_file_asli ||
+        item?.judulFile ||
+        "";
+
+      const disposition =
+        response.headers.get("Content-Disposition") || "";
+
+      const utf8Match = disposition.match(
+        /filename\*=UTF-8''([^;]+)/i
       );
-    } catch {
-      namaUrl = "";
-    }
 
-    let filename = String(
-      namaAsli || namaHeader || namaUrl || "materi"
-    ).trim();
-
-    filename = filename
-      .replace(/^["']|["']$/g, "")
-      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
-      .trim();
-
-    if (!filename) {
-      filename = "materi";
-    }
-
-    if (!/\.[a-z0-9]{1,10}$/i.test(filename)) {
-      const extensionMatch = namaUrl.match(
-        /\.([a-z0-9]{1,10})$/i
+      const normalMatch = disposition.match(
+        /filename="?([^";]+)"?/i
       );
 
-      if (extensionMatch) {
-        filename += `.${extensionMatch[1]}`;
-      } else {
-        const contentType = blob.type.toLowerCase();
+      let namaHeader = "";
 
-        if (contentType.includes("pdf")) {
-          filename += ".pdf";
-        } else if (
-          contentType.includes(
-            "officedocument.presentationml"
-          )
-        ) {
-          filename += ".pptx";
-        } else if (
-          contentType.includes("presentation")
-        ) {
-          filename += ".ppt";
-        } else if (
-          contentType.includes(
-            "officedocument.wordprocessingml"
-          )
-        ) {
-          filename += ".docx";
-        } else if (contentType.includes("msword")) {
-          filename += ".doc";
-        } else if (contentType.includes("image/png")) {
-          filename += ".png";
-        } else if (
-          contentType.includes("image/jpeg")
-        ) {
-          filename += ".jpg";
+      if (utf8Match?.[1]) {
+        try {
+          namaHeader = decodeURIComponent(
+            utf8Match[1].trim()
+          );
+        } catch {
+          namaHeader = utf8Match[1].trim();
+        }
+      } else if (normalMatch?.[1]) {
+        namaHeader = normalMatch[1].trim();
+      }
+
+      let namaUrl = "";
+
+      try {
+        const pathname = new URL(url).pathname;
+        namaUrl = decodeURIComponent(
+          pathname.split("/").filter(Boolean).pop() || ""
+        );
+      } catch {
+        namaUrl = "";
+      }
+
+      let filename = String(
+        namaAsli || namaHeader || namaUrl || "materi"
+      ).trim();
+
+      filename = filename
+        .replace(/^["']|["']$/g, "")
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+        .trim();
+
+      if (!filename) {
+        filename = "materi";
+      }
+
+      if (!/\.[a-z0-9]{1,10}$/i.test(filename)) {
+        const extensionMatch = namaUrl.match(
+          /\.([a-z0-9]{1,10})$/i
+        );
+
+        if (extensionMatch) {
+          filename += `.${extensionMatch[1]}`;
+        } else {
+          const contentType = blob.type.toLowerCase();
+
+          if (contentType.includes("pdf")) {
+            filename += ".pdf";
+          } else if (
+            contentType.includes(
+              "officedocument.presentationml"
+            )
+          ) {
+            filename += ".pptx";
+          } else if (
+            contentType.includes("presentation")
+          ) {
+            filename += ".ppt";
+          } else if (
+            contentType.includes(
+              "officedocument.wordprocessingml"
+            )
+          ) {
+            filename += ".docx";
+          } else if (contentType.includes("msword")) {
+            filename += ".doc";
+          } else if (contentType.includes("image/png")) {
+            filename += ".png";
+          } else if (
+            contentType.includes("image/jpeg")
+          ) {
+            filename += ".jpg";
+          }
         }
       }
+
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = blobUrl;
+      link.download = filename;
+      link.style.display = "none";
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 2000);
+    } catch (error) {
+      console.error(
+        "[SISWA MATERI] Gagal mengunduh file:",
+        error
+      );
+
+      alert(
+        "File gagal diunduh. Periksa URL file, koneksi, dan izin akses server."
+      );
     }
-
-    const blobUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = blobUrl;
-    link.download = filename;
-    link.style.display = "none";
-
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    setTimeout(() => {
-      URL.revokeObjectURL(blobUrl);
-    }, 2000);
-  } catch (error) {
-    console.error(
-      "[SISWA MATERI] Gagal mengunduh file:",
-      error
-    );
-
-    alert(
-      "File gagal diunduh. Periksa URL file, koneksi, dan izin akses server."
-    );
   }
-}
 
 
 
@@ -861,7 +857,7 @@ async function handleDownload(item) {
     <div className="flex h-screen overflow-hidden theme-page theme-text">
       {/* BODY: flex min-h-0 flex-1 */}
       <div className="flex min-h-0 flex-1 flex-col">
-        
+
         {/* MAIN: min-w-0 flex-1 overflow-y-auto */}
         <main className="min-w-0 flex-1 overflow-y-auto">
           {/* KONTEN: w-full (tanpa max-w) */}
@@ -870,42 +866,42 @@ async function handleDownload(item) {
             <section
               className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-5 sm:p-6 lg:p-7 ${themePrimaryShadow} mb-6`}
             >
-              <div className="absolute -right-16 -top-20 w-56 h-56 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]" />
+              <div className="absolute -right-16 -top-20 w-56 h-56 rounded-full bg-white/10" />
 
-              <div className="absolute right-20 -bottom-24 w-44 h-44 rounded-full bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]" />
+              <div className="absolute right-20 -bottom-24 w-44 h-44 rounded-full bg-white/5" />
 
-              <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[linear-gradient(to_left,color-mix(in_srgb,var(--color-card)_6%,transparent),transparent)] pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[linear-gradient(to_left,rgba(255,255,255,0.06),transparent)] pointer-events-none" />
 
               <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div className="max-w-2xl">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] border border-[color-mix(in_srgb,var(--color-card)_15%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--color-card)] mb-4">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3 py-1.5 text-xs font-medium text-white mb-4">
                     <BookMarked size={13} />
                     Ruang belajar siswa
                   </div>
 
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-card)]">
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
                     Materi Pembelajaran
                   </h1>
 
-                  <p className="text-sm sm:text-[15px] leading-6 text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] mt-2 max-w-xl">
+                  <p className="text-sm sm:text-[15px] leading-6 text-white/80 mt-2 max-w-xl">
                     Akses materi yang dibagikan guru untuk membantu kamu
                     belajar dengan lebih terarah.
                   </p>
 
                   {selectedMapel && SelectedMapelIcon && (
                     <div className="flex items-center gap-2 mt-5">
-                      <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
                         <SelectedMapelIcon
                           size={16}
-                          className="text-[var(--color-card)]"
+                          className="text-white"
                         />
                       </div>
 
                       <div>
-                        <p className="text-[11px] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                        <p className="text-[11px] text-white/75">
                           Mata pelajaran aktif
                         </p>
-                        <p className="text-sm font-semibold text-[var(--color-card)]">
+                        <p className="text-sm font-semibold text-white">
                           {selectedMapel.nama}
                         </p>
                       </div>
@@ -914,31 +910,31 @@ async function handleDownload(item) {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5 min-w-0 lg:min-w-[280px]">
-                  <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] border border-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-4 py-3.5">
-                    <p className="text-[11px] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                  <div className="rounded-xl bg-white/10 border border-white/15 px-4 py-3.5">
+                    <p className="text-[11px] text-white/75">
                       Total materi
                     </p>
-                    <p className="text-2xl font-bold text-[var(--color-card)] mt-1">
+                    <p className="text-2xl font-bold text-white mt-1">
                       {loading ? "—" : totalMateri}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] border border-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-4 py-3.5">
-                    <p className="text-[11px] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                  <div className="rounded-xl bg-white/10 border border-white/15 px-4 py-3.5">
+                    <p className="text-[11px] text-white/75">
                       File tersedia
                     </p>
-                    <p className="text-2xl font-bold text-[var(--color-card)] mt-1">
+                    <p className="text-2xl font-bold text-white mt-1">
                       {loading ? "—" : totalFile}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] border border-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-4 py-3.5 col-span-2 sm:col-span-1 lg:col-span-2">
-                    <p className="text-[11px] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                  <div className="rounded-xl bg-white/10 border border-white/15 px-4 py-3.5 col-span-2 sm:col-span-1 lg:col-span-2">
+                    <p className="text-[11px] text-white/75">
                       Sumber belajar
                     </p>
                     <div className="flex items-center gap-3 mt-1">
                       <div>
-                        <p className="text-sm font-semibold text-[var(--color-card)]">
+                        <p className="text-sm font-semibold text-white">
                           {loading
                             ? "Memuat..."
                             : `${totalMapel} mata pelajaran`}
@@ -947,7 +943,7 @@ async function handleDownload(item) {
                       <div className="ml-auto">
                         <Sparkles
                           size={17}
-                          className="text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]"
+                          className="text-white/75"
                         />
                       </div>
                     </div>
@@ -957,7 +953,8 @@ async function handleDownload(item) {
             </section>
 
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-6 gap-3 mb-6">
+            {/* 4 kartu statistik: 2 kolom di HP, 4 kolom penuh di layar lebar */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
               <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -980,7 +977,7 @@ async function handleDownload(item) {
                       {loading ? "—" : totalFile}
                     </p>
                   </div>
-                  <div className={`w-9 h-9 rounded-lg ${themeSuccessSurface} ${themeSuccessText} flex items-center justify-center`}>
+                  <div className={`w-9 h-9 rounded-lg ${themePrimarySurface} ${themePrimaryText} flex items-center justify-center`}>
                     <FileText size={17} />
                   </div>
                 </div>
@@ -994,7 +991,7 @@ async function handleDownload(item) {
                       {loading ? "—" : totalLink}
                     </p>
                   </div>
-                  <div className={`w-9 h-9 rounded-lg ${themeInfoSurface} ${themeInfoText} flex items-center justify-center`}>
+                  <div className={`w-9 h-9 rounded-lg ${themePrimarySurface} ${themePrimaryText} flex items-center justify-center`}>
                     <ExternalLink size={17} />
                   </div>
                 </div>
@@ -1008,7 +1005,7 @@ async function handleDownload(item) {
                       {loading ? "—" : totalMapel}
                     </p>
                   </div>
-                  <div className={`w-9 h-9 rounded-lg ${themeWarningSurface} ${themeWarningText} flex items-center justify-center`}>
+                  <div className={`w-9 h-9 rounded-lg ${themePrimarySurface} ${themePrimaryText} flex items-center justify-center`}>
                     <BookOpen size={17} />
                   </div>
                 </div>
@@ -1061,7 +1058,7 @@ async function handleDownload(item) {
                     onClick={() => setActiveMapel("semua")}
                     className={`flex-shrink-0 h-9 px-4 rounded-lg text-xs font-semibold border transition-all ${
                       activeMapel === "semua"
-                        ? `${themePrimaryGradient} ${themePrimaryBorderStrong} text-[var(--color-card)] ${themeSmallShadow}`
+                        ? `${themePrimaryGradient} ${themePrimaryBorderStrong} text-white ${themeSmallShadow}`
                         : `theme-card ${themeNeutralBorder} theme-text-secondary hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] hover:text-[var(--color-primary)]`
                     }`}
                   >
@@ -1292,7 +1289,7 @@ async function handleDownload(item) {
                                 {item?.urlFile && (
                                   <button
                                     onClick={() => handleDownload(item)}
-                                    className={`h-9 px-3 rounded-lg bg-[var(--color-primary)] text-[var(--color-card)] hover:opacity-90 transition-all inline-flex items-center justify-center gap-1.5 text-xs font-semibold ${themeSmallShadow}`}
+                                    className={`h-9 px-3 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition-all inline-flex items-center justify-center gap-1.5 text-xs font-semibold ${themeSmallShadow}`}
                                   >
                                     <Download size={14} />
                                     <span className="hidden sm:inline">Unduh</span>

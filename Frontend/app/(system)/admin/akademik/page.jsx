@@ -25,6 +25,17 @@ import {
 import { getUsers } from "@/services/user.service";
 import { getKelas, getKelasById } from "@/services/kelas.service";
 
+/* ------------------------------------------------------------------ */
+/* Style tokens: semua warna memakai CSS variable tema (--color-primary)
+   sehingga otomatis ikut berubah saat tema/warna diganti.             */
+/* ------------------------------------------------------------------ */
+const ICON_BOX =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
+
+const PRIMARY_BADGE =
+  "border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
+
+const CARD = "theme-card rounded-xl border theme-border shadow-sm";
 
 const getInitials = (nama = "") => {
   const parts = nama.trim().split(" ");
@@ -36,19 +47,9 @@ const getInitials = (nama = "") => {
   return nama.substring(0, 2).toUpperCase();
 };
 
-const getAvatarColor = (nama = "") => {
-  const colors = [
-    "bg-blue-600",
-    "bg-slate-600",
-    "bg-cyan-600",
-    "bg-indigo-600",
-    "bg-sky-600",
-    "bg-teal-600",
-  ];
-
-  return colors[nama.length % colors.length];
+const getAvatarColor = () => {
+  return "bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
 };
-
 
 export default function AkademikPage() {
   const router = useRouter();
@@ -227,7 +228,6 @@ export default function AkademikPage() {
     );
   }, [siswaList, search]);
 
-
   const quickLinks = [
     {
       label: "Tahun Ajaran",
@@ -251,6 +251,36 @@ export default function AkademikPage() {
     },
   ];
 
+  const statCards = [
+    {
+      key: "siswa",
+      label: "Total Siswa",
+      value: loading ? "—" : totalSiswa,
+      note: "Siswa terdata",
+      icon: Users,
+    },
+    {
+      key: "nilai",
+      label: "Rata-rata Nilai",
+      value: "—",
+      note: "Nilai akademik",
+      icon: TrendingUp,
+    },
+    {
+      key: "prestasi",
+      label: "Prestasi",
+      value: "—",
+      note: "Total capaian",
+      icon: Award,
+    },
+    {
+      key: "perhatian",
+      label: "Perlu Perhatian",
+      value: "—",
+      note: "Siswa perlu ditinjau",
+      icon: AlertCircle,
+    },
+  ];
 
   return (
     <div className="flex h-screen overflow-hidden theme-page theme-text">
@@ -282,22 +312,21 @@ export default function AkademikPage() {
               <section>
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                   <div className="flex min-w-0 items-start gap-3">
-
                     <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm">
                       <GraduationCap size={21} />
                     </div>
 
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-
                         <h1 className="theme-text text-xl font-bold tracking-tight sm:text-2xl">
                           Akademik
                         </h1>
 
-                        <span className="theme-info inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold ${PRIMARY_BADGE}`}
+                        >
                           Tahun Aktif
                         </span>
-
                       </div>
 
                       <p className="theme-text-muted mt-1 max-w-2xl text-xs leading-5 sm:text-sm">
@@ -306,7 +335,6 @@ export default function AkademikPage() {
                       </p>
                     </div>
                   </div>
-
 
                   <div className="flex items-center gap-2">
                     <button
@@ -322,167 +350,84 @@ export default function AkademikPage() {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        router.push(
-                          "/admin/siswa"
-                        )
-                      }
+                      onClick={() => router.push("/admin/siswa")}
                       className="theme-primary inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg px-4 text-xs font-semibold shadow-sm transition xl:self-center"
                     >
                       <ClipboardList size={15} />
-
                       Data Siswa
-
                       <ArrowUpRight size={14} />
                     </button>
                   </div>
                 </div>
               </section>
 
+              {/* Kartu statistik: 5 kartu, simetris di semua ukuran layar.
+                  Mobile: 2 kolom (kartu ke-5 melebar penuh). Desktop: 5 kolom sama lebar. */}
+              <section className="grid grid-cols-2 gap-3 lg:grid-cols-5 lg:gap-4">
+                {statCards.map((card) => {
+                  const Icon = card.icon;
 
-              <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
-                <div className="grid grid-cols-2 divide-x divide-[var(--color-border)] sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6">
-
-
-                  <div className="min-w-0 p-4 sm:p-5">
-                    <div className="flex items-start gap-3">
-
-                      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                        <Users size={17} />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
-                          Total Siswa
-                        </p>
-
-                        <p className="theme-text mt-1 text-xl font-bold">
-                          {totalSiswa}
-                        </p>
-
-                        <p className="theme-text-muted mt-0.5 text-[10px]">
-                          Siswa terdata
-                        </p>
-                      </div>
-
-                    </div>
-                  </div>
-
-
-                  <div className="min-w-0 p-4 sm:p-5">
-                    <div className="flex items-start gap-3">
-
-                      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                        <TrendingUp size={17} />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
-                          Rata-rata Nilai
-                        </p>
-
-                        <p className="theme-text mt-1 text-xl font-bold">
-                          —
-                        </p>
-
-                        <p className="theme-text-muted mt-0.5 text-[10px]">
-                          Nilai akademik
-                        </p>
-                      </div>
-
-                    </div>
-                  </div>
-
-
-                  <div className="min-w-0 p-4 sm:p-5">
-                    <div className="flex items-start gap-3">
-
-                      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                        <Award size={17} />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
-                          Prestasi
-                        </p>
-
-                        <p className="theme-text mt-1 text-xl font-bold">
-                          —
-                        </p>
-
-                        <p className="theme-text-muted mt-0.5 text-[10px]">
-                          Total capaian
-                        </p>
-                      </div>
-
-                    </div>
-                  </div>
-
-
-                  <div className="min-w-0 p-4 sm:p-5">
-                    <div className="flex items-start gap-3">
-
-                      <div className="theme-danger flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                        <AlertCircle size={17} />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
-                          Perlu Perhatian
-                        </p>
-
-                        <p className="theme-text mt-1 text-xl font-bold">
-                          —
-                        </p>
-
-                        <p className="theme-text-muted mt-0.5 text-[10px]">
-                          Siswa perlu ditinjau
-                        </p>
-                      </div>
-
-                    </div>
-                  </div>
-
-
-                  <div className="col-span-2 min-w-0 p-4 sm:col-span-1 sm:p-5 2xl:col-span-2">
-                    <div className="flex items-start gap-3">
-
-                      <div className="theme-success flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                        <FileSpreadsheet size={17} />
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-
-                          <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
-                            Rapor Selesai
-                          </p>
-
-                          <p className="theme-text text-sm font-bold">
-                            —
-                          </p>
-
+                  return (
+                    <div
+                      key={card.key}
+                      className={`${CARD} flex h-full min-w-0 flex-col justify-between p-4`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${ICON_BOX}`}
+                        >
+                          <Icon size={16} />
                         </div>
 
-                        <div className="theme-card-soft mt-2 h-1.5 overflow-hidden rounded-full">
-                          <div
-                            className="theme-primary h-full rounded-full transition-all"
-                            style={{
-                              width: "0%",
-                            }}
-                          />
-                        </div>
-
-                        <p className="theme-text-muted mt-1.5 text-[10px]">
-                          — dari {totalSiswa} siswa
+                        <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
+                          {card.label}
                         </p>
                       </div>
 
+                      <div className="mt-2">
+                        <p className="theme-text text-2xl font-bold">
+                          {card.value}
+                        </p>
+
+                        <p className="theme-text-muted mt-1 text-[10px]">
+                          {card.note}
+                        </p>
+                      </div>
                     </div>
+                  );
+                })}
+
+                <div
+                  className={`${CARD} col-span-2 flex h-full min-w-0 flex-col justify-between p-4 lg:col-span-1`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${ICON_BOX}`}
+                    >
+                      <FileSpreadsheet size={16} />
+                    </div>
+
+                    <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
+                      Rapor Selesai
+                    </p>
+                  </div>
+
+                  <div className="mt-2">
+                    <p className="theme-text text-2xl font-bold">—</p>
+
+                    <div className="theme-card-soft mt-2 h-1.5 overflow-hidden rounded-full">
+                      <div
+                        className="theme-primary h-full rounded-full transition-all"
+                        style={{ width: "0%" }}
+                      />
+                    </div>
+
+                    <p className="theme-text-muted mt-1 text-[10px]">
+                      — dari {totalSiswa} siswa
+                    </p>
                   </div>
                 </div>
               </section>
-
 
               {error && (
                 <div className="theme-danger flex items-center justify-between rounded-xl border p-4 text-xs font-medium shadow-sm">
@@ -502,16 +447,15 @@ export default function AkademikPage() {
 
               <section className="flex flex-col gap-3">
                 <div>
-                  <p className="theme-text text-sm font-bold">
-                    Modul Akademik
-                  </p>
+                  <p className="theme-text text-sm font-bold">Modul Akademik</p>
 
                   <p className="theme-text-muted mt-1 text-xs">
                     Akses cepat ke pengelolaan akademik.
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                {/* Grid penuh: 2 kolom di mobile, 4 kolom sama lebar di desktop */}
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
                   {quickLinks.map((item) => {
                     const Icon = item.icon;
 
@@ -519,14 +463,12 @@ export default function AkademikPage() {
                       <button
                         key={item.path}
                         type="button"
-                        onClick={() =>
-                          router.push(item.path)
-                        }
-                        className="theme-card theme-border theme-text-secondary theme-header-hover group inline-flex items-center gap-2 rounded-lg border px-3.5 py-2.5 text-xs font-semibold shadow-sm transition"
+                        onClick={() => router.push(item.path)}
+                        className="theme-card theme-border theme-text-secondary theme-header-hover group flex items-center justify-center gap-2 rounded-lg border px-3.5 py-3 text-xs font-semibold shadow-sm transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
                       >
                         <Icon
                           size={14}
-                          className="theme-text-muted transition group-hover:theme-sidebar-text-active"
+                          className="theme-text-muted transition group-hover:text-[var(--color-primary)]"
                         />
 
                         {item.label}
@@ -536,12 +478,9 @@ export default function AkademikPage() {
                 </div>
               </section>
 
-
-              <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
-
+              <section className={`${CARD} overflow-hidden`}>
                 <div className="theme-border-soft border-b px-4 py-4 sm:px-5">
                   <div className="flex flex-col gap-1">
-
                     <h2 className="theme-text text-sm font-bold">
                       Ringkasan Per Kelas
                     </h2>
@@ -549,17 +488,13 @@ export default function AkademikPage() {
                     <p className="theme-text-muted text-xs">
                       Perbandingan capaian akademik setiap kelas.
                     </p>
-
                   </div>
                 </div>
 
                 <div className="overflow-x-auto">
-
                   <table className="w-full min-w-[780px] border-collapse">
-
                     <thead>
                       <tr className="theme-table-header">
-
                         <th className="theme-border-soft border-b px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                           Kelas
                         </th>
@@ -583,29 +518,26 @@ export default function AkademikPage() {
                         <th className="theme-border-soft border-b px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                           Rapor
                         </th>
-
                       </tr>
                     </thead>
 
                     <tbody>
-
                       {ringkasanKelas.map((item) => (
                         <tr
                           key={item.kelas}
                           className="theme-table-hover transition"
                         >
-
                           <td className="theme-border-soft border-b px-5 py-3.5">
                             <div className="flex items-center gap-2.5">
-
-                              <div className="theme-info flex h-8 w-8 items-center justify-center rounded-lg">
+                              <div
+                                className={`flex h-8 w-8 items-center justify-center rounded-lg ${ICON_BOX}`}
+                              >
                                 <GraduationCap size={15} />
                               </div>
 
                               <span className="theme-text-secondary text-xs font-bold">
                                 {item.kelas}
                               </span>
-
                             </div>
                           </td>
 
@@ -636,7 +568,6 @@ export default function AkademikPage() {
                               </span>
                             </div>
                           </td>
-
                         </tr>
                       ))}
 
@@ -652,10 +583,7 @@ export default function AkademikPage() {
 
                       {!loading && ringkasanKelas.length === 0 && (
                         <tr>
-                          <td
-                            colSpan={6}
-                            className="px-5 py-12 text-center"
-                          >
+                          <td colSpan={6} className="px-5 py-12 text-center">
                             <p className="theme-text-secondary text-sm font-semibold">
                               Belum ada data kelas
                             </p>
@@ -666,20 +594,14 @@ export default function AkademikPage() {
                           </td>
                         </tr>
                       )}
-
                     </tbody>
                   </table>
                 </div>
               </section>
 
-
-              <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
-
-
+              <section className={`${CARD} overflow-hidden`}>
                 <div className="theme-border-soft border-b px-4 py-4 sm:px-5">
-
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-
                     <div>
                       <h2 className="theme-text text-sm font-bold">
                         Data Akademik Siswa
@@ -691,9 +613,7 @@ export default function AkademikPage() {
                     </div>
 
                     <div className="w-full lg:w-[320px]">
-
                       <div className="relative">
-
                         <Search
                           size={16}
                           className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
@@ -702,27 +622,19 @@ export default function AkademikPage() {
                         <input
                           type="text"
                           value={search}
-                          onChange={(e) =>
-                            setSearch(e.target.value)
-                          }
+                          onChange={(e) => setSearch(e.target.value)}
                           placeholder="Cari nama atau kelas..."
-                          className="theme-input h-10 w-full rounded-lg border pl-9 pr-3 text-xs outline-none transition"
+                          className="theme-input h-10 w-full rounded-lg border pl-9 pr-3 text-xs outline-none transition focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)]"
                         />
-
                       </div>
                     </div>
-
                   </div>
                 </div>
 
-
                 <div className="overflow-x-auto">
-
                   <table className="w-full min-w-[900px] border-collapse">
-
                     <thead>
                       <tr className="theme-table-header">
-
                         <th className="theme-border-soft border-b px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                           Siswa
                         </th>
@@ -746,33 +658,24 @@ export default function AkademikPage() {
                         <th className="theme-border-soft border-b px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                           Rapor
                         </th>
-
                       </tr>
                     </thead>
 
                     <tbody>
-
                       {filtered.map((student) => (
                         <tr
                           key={student.id}
                           className="theme-table-hover transition"
                         >
-
-
                           <td className="theme-border-soft border-b px-5 py-4">
-
                             <div className="flex items-center gap-3">
-
                               <div
-                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${getAvatarColor(
-                                  student.nama
-                                )} text-[11px] font-bold text-white`}
+                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${getAvatarColor()} text-[11px] font-bold`}
                               >
                                 {getInitials(student.nama)}
                               </div>
 
                               <div className="min-w-0">
-
                                 <p className="theme-text-secondary truncate text-xs font-bold sm:text-sm">
                                   {student.nama}
                                 </p>
@@ -780,21 +683,17 @@ export default function AkademikPage() {
                                 <p className="theme-text-muted mt-0.5 text-[10px]">
                                   ID Siswa: {student.id}
                                 </p>
-
                               </div>
-
                             </div>
                           </td>
 
-
                           <td className="theme-border-soft border-b px-5 py-4">
-
-                            <span className="theme-info inline-flex rounded-md px-2.5 py-1 text-[10px] font-semibold">
+                            <span
+                              className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-semibold ${PRIMARY_BADGE}`}
+                            >
                               {student.kelas}
                             </span>
-
                           </td>
-
 
                           <td className="theme-border-soft border-b px-5 py-4 text-center">
                             <span className="theme-text-muted text-xs">—</span>
@@ -811,7 +710,6 @@ export default function AkademikPage() {
                           <td className="theme-border-soft border-b px-5 py-4">
                             <span className="theme-text-muted text-xs">—</span>
                           </td>
-
                         </tr>
                       ))}
 
@@ -827,13 +725,11 @@ export default function AkademikPage() {
 
                       {!loading && filtered.length === 0 && (
                         <tr>
-                          <td
-                            colSpan={6}
-                            className="px-5 py-14 text-center"
-                          >
+                          <td colSpan={6} className="px-5 py-14 text-center">
                             <div className="flex flex-col items-center">
-
-                              <div className="theme-card-soft theme-text-muted flex h-12 w-12 items-center justify-center rounded-xl">
+                              <div
+                                className={`flex h-12 w-12 items-center justify-center rounded-xl ${ICON_BOX}`}
+                              >
                                 <Search size={20} />
                               </div>
 
@@ -846,20 +742,16 @@ export default function AkademikPage() {
                                   ? "Tidak ada siswa yang sesuai dengan pencarian."
                                   : "Belum ada data siswa terdaftar."}
                               </p>
-
                             </div>
                           </td>
                         </tr>
                       )}
-
                     </tbody>
                   </table>
                 </div>
 
-
                 {filtered.length > 0 && (
                   <div className="theme-card-soft theme-border-soft flex items-center justify-between border-t px-4 py-3 sm:px-5">
-
                     <p className="theme-text-muted text-[10px] sm:text-xs">
                       Menampilkan{" "}
                       <span className="theme-text-secondary font-semibold">
@@ -876,23 +768,20 @@ export default function AkademikPage() {
                       <button
                         type="button"
                         onClick={() => setSearch("")}
-                        className="theme-sidebar-text-active text-[10px] font-semibold hover:underline sm:text-xs"
+                        className="theme-primary-text text-[10px] font-semibold hover:underline sm:text-xs"
                       >
                         Hapus pencarian
                       </button>
                     )}
-
                   </div>
                 )}
               </section>
-
 
               <footer className="pb-5 pt-1 text-center">
                 <p className="theme-text-muted text-[10px]">
                   © 2026 SmartSchool • Akademik
                 </p>
               </footer>
-
             </div>
           </div>
         </main>

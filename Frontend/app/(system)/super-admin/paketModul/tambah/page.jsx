@@ -27,7 +27,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -646,7 +646,7 @@ function TambahPaketPageContent() {
                       <span
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                           tipe === "SEKOLAH"
-                            ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                            ? "bg-[var(--color-primary)] text-white"
                             : `${themeNeutralSurface} theme-text-muted`
                         }`}
                       >
@@ -683,7 +683,7 @@ function TambahPaketPageContent() {
                       <span
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                           tipe === "YAYASAN"
-                            ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                            ? "bg-[var(--color-primary)] text-white"
                             : `${themeNeutralSurface} theme-text-muted`
                         }`}
                       >
@@ -870,7 +870,7 @@ function TambahPaketPageContent() {
                       <span
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                           status === "aktif"
-                            ? "bg-[var(--color-success)] text-[var(--color-card)]"
+                            ? "bg-[var(--color-success)] text-white"
                             : `${themeNeutralSurface} theme-text-muted`
                         }`}
                       >
@@ -910,7 +910,7 @@ function TambahPaketPageContent() {
                       <span
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                           status === "nonaktif"
-                            ? "bg-[var(--color-text)] text-[var(--color-card)]"
+                            ? "bg-slate-600 text-white"
                             : `${themeNeutralSurface} theme-text-muted`
                         }`}
                       >
@@ -1031,7 +1031,7 @@ function TambahPaketPageContent() {
                                 <Check
                                   size={12}
                                   strokeWidth={3}
-                                  className="text-[var(--color-card)]"
+                                  className="text-white"
                                 />
                               )}
                             </span>
@@ -1118,7 +1118,7 @@ function TambahPaketPageContent() {
                       saving ||
                       loadingFitur
                     }
-                    className={`w-full sm:w-auto min-w-[170px] flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={`w-full sm:w-auto min-w-[170px] flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-3 text-sm font-semibold text-white ${themePrimaryShadow} transition-all hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     {saving ? (
                       <>
@@ -1151,12 +1151,12 @@ function TambahPaketPageContent() {
 
 
               <div
-                className={`${themePrimaryGradient} px-5 py-5 text-[var(--color-card)]`}
+                className={`${themePrimaryGradient} px-5 py-5 text-white`}
               >
                 <div className="flex items-center justify-between">
 
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-white/80">
                       Preview
                     </p>
 
@@ -1165,13 +1165,13 @@ function TambahPaketPageContent() {
                     </h2>
                   </div>
 
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] backdrop-blur-sm">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
                     {tipe === "YAYASAN" ? <Package size={19} /> : <Layers size={19} />}
                   </div>
 
                 </div>
 
-                <p className="mt-3 text-xs leading-5 text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                <p className="mt-3 text-xs leading-5 text-white/80">
                   Tampilan ringkas paket berdasarkan data yang kamu masukkan.
                 </p>
               </div>
@@ -1199,11 +1199,7 @@ function TambahPaketPageContent() {
 
                     <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                       <span
-                        className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                          tipe === "YAYASAN"
-                            ? "bg-purple-100 text-purple-800 border border-purple-300"
-                            : "bg-blue-100 text-blue-800 border border-blue-300"
-                        }`}
+                        className="rounded-full px-2.5 py-1 text-[10px] font-bold bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
                       >
                         {tipe === "YAYASAN" ? "YAYASAN" : "SEKOLAH"}
                       </span>

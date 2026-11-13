@@ -32,7 +32,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -656,7 +656,7 @@ export default function EditUjianPage() {
                 <div>
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                     >
                       <BookOpen size={21} />
                     </div>
@@ -708,16 +708,16 @@ export default function EditUjianPage() {
                     value: "theme-text",
                   },
                   info: {
-                    icon: `${themeInfoSurface} ${themeInfoBorder} text-[var(--color-info)]`,
-                    value: "text-[var(--color-info)]",
+                    icon: `${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`,
+                    value: "theme-text",
                   },
                   success: {
-                    icon: `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`,
-                    value: "text-[var(--color-success)]",
+                    icon: `${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`,
+                    value: "theme-text",
                   },
                   warning: {
-                    icon: `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`,
-                    value: "text-[var(--color-warning)]",
+                    icon: `${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`,
+                    value: "theme-text",
                   },
                   neutral: {
                     icon: `${themeNeutralSurface} ${themeNeutralBorder} theme-text-muted`,
@@ -1112,7 +1112,7 @@ export default function EditUjianPage() {
 
 
               <div
-                className={`mt-5 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+                className={`mt-5 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4`}
               >
                 <div className="flex gap-3">
                   <CalendarDays
@@ -1159,7 +1159,7 @@ export default function EditUjianPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
+                  className={`${themePrimaryGradient} text-white ${themePrimaryShadow} flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                 >
                   {saving ? (
                     <>

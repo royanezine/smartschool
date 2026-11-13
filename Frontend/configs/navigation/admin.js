@@ -558,14 +558,14 @@ export const adminSidebarConfig = {
       icon: PackageCheck,
       label: "Peminjaman",
       path: "/admin/sarpras/peminjaman",
-      menuKey: "perpustakaan",
+      menuKey: "sarpras",
     },
     {
       key: "pengembalian",
       icon: Undo2,
       label: "Pengembalian",
       path: "/admin/sarpras/pengembalian",
-      menuKey: "perpustakaan",
+      menuKey: "sarpras",
     },
     {
       key: "laporanKerusakan",

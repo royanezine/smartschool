@@ -1,13 +1,7 @@
 
-import { getToken } from "../lib/auth";
+import { getToken, getCleanApiBase } from "../lib/auth";
 
-const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/+$/, "");
-
-const API_ROOT = /\/api$/i.test(API_BASE_URL)
-  ? API_BASE_URL
-  : `${API_BASE_URL}/api`;
+const API_ROOT = getCleanApiBase();
 
 const TABUNGAN_URL = `${API_ROOT}/keuangan/tabungan`;
 

@@ -29,7 +29,7 @@ const themeSmallShadow =
   "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -188,7 +188,7 @@ export default function DataSiswaPage() {
 
               <div className="flex items-center gap-2.5">
                 <div
-                  className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow}`}
+                  className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-white ${themeSmallShadow}`}
                 >
                   <Users size={18} />
                 </div>
@@ -200,7 +200,7 @@ export default function DataSiswaPage() {
               <p className="theme-text-secondary ml-[42px] mt-1 flex items-center gap-1.5 text-sm">
                 <Sparkles
                   size={14}
-                  className="shrink-0 text-[var(--color-primary)]"
+                  className="theme-primary-text shrink-0"
                 />
                 <span className="truncate">
                   Total siswa per unit sekolah — klik untuk lihat rincian.
@@ -212,7 +212,7 @@ export default function DataSiswaPage() {
               type="button"
               onClick={handleDownload}
               disabled={loading || filteredSekolah.length === 0}
-              className="inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] shadow-[0_4px_12px_color-mix(in_srgb,var(--color-primary)_16%,transparent)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] disabled:opacity-50"
+              className="theme-primary inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium shadow-[0_4px_12px_color-mix(in_srgb,var(--color-primary)_16%,transparent)] transition-colors disabled:opacity-50"
             >
               <Download size={16} /> Unduh Laporan
             </button>
@@ -257,14 +257,12 @@ export default function DataSiswaPage() {
           </div>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div
               className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeCardShadow}`}
             >
-              <div
-                className={`shrink-0 rounded-lg border p-2 ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)]`}
-              >
-                <Users size={16} />
+              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2">
+                <Users size={16} className="theme-primary-text" />
               </div>
               <div className="min-w-0">
                 <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
@@ -279,8 +277,8 @@ export default function DataSiswaPage() {
             <div
               className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeCardShadow}`}
             >
-              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-info)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)] p-2 text-[var(--color-info)]">
-                <School size={16} />
+              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2">
+                <School size={16} className="theme-primary-text" />
               </div>
               <div className="min-w-0">
                 <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
@@ -295,8 +293,8 @@ export default function DataSiswaPage() {
             <div
               className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeCardShadow}`}
             >
-              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-info)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)] p-2 text-[var(--color-info)]">
-                <Mars size={16} />
+              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2">
+                <Mars size={16} className="theme-primary-text" />
               </div>
               <div className="min-w-0">
                 <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
@@ -311,8 +309,8 @@ export default function DataSiswaPage() {
             <div
               className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeCardShadow}`}
             >
-              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-warning)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] p-2 text-[var(--color-warning)]">
-                <Venus size={16} />
+              <div className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2">
+                <Venus size={16} className="theme-primary-text" />
               </div>
               <div className="min-w-0">
                 <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
@@ -360,7 +358,7 @@ export default function DataSiswaPage() {
                 <button
                   type="button"
                   onClick={fetchSiswa}
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white"
+                  className="theme-primary mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold"
                 >
                   <RefreshCw size={12} /> Coba Lagi
                 </button>
@@ -396,9 +394,9 @@ export default function DataSiswaPage() {
                     >
                       <div className="flex min-w-0 items-center gap-3">
                         <div
-                          className={`shrink-0 rounded-lg border p-2.5 ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)]`}
+                          className={`shrink-0 rounded-lg border p-2.5 ${themePrimarySoft} ${themePrimarySoftBorder}`}
                         >
-                          <School size={17} />
+                          <School size={17} className="theme-primary-text" />
                         </div>
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
@@ -419,13 +417,13 @@ export default function DataSiswaPage() {
                       <div className="flex shrink-0 items-center gap-4">
                         <div className="theme-text-secondary hidden items-center gap-3 text-xs sm:flex">
                           <span className="flex items-center gap-1">
-                            <Mars size={12} className="text-[var(--color-info)]" />
+                            <Mars size={12} className="theme-primary-text" />
                             {lk}
                           </span>
                           <span className="flex items-center gap-1">
                             <Venus
                               size={12}
-                              className="text-[var(--color-warning)]"
+                              className="theme-primary-text"
                             />
                             {pr}
                           </span>
@@ -454,7 +452,7 @@ export default function DataSiswaPage() {
                         <div className="theme-text-muted flex flex-col gap-2 p-4 text-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
                           <div className="flex flex-wrap items-center gap-4">
                             <span className="flex items-center gap-1.5">
-                              <Mars size={13} className="text-[var(--color-info)]" />{" "}
+                              <Mars size={13} className="theme-primary-text" />{" "}
                               Laki-laki:{" "}
                               <strong className="theme-text">
                                 {lk.toLocaleString("id-ID")}
@@ -463,7 +461,7 @@ export default function DataSiswaPage() {
                             <span className="flex items-center gap-1.5">
                               <Venus
                                 size={13}
-                                className="text-[var(--color-warning)]"
+                                className="theme-primary-text"
                               />{" "}
                               Perempuan:{" "}
                               <strong className="theme-text">

@@ -1,21 +1,13 @@
-"use client";
+import TenantHomePage from "@/app/[tenant]/page";
 
-import { useParams } from "next/navigation";
-
-export default function SiteHomePage() {
-  const params = useParams();
+export default async function SiteHomePage({ params, searchParams }) {
+  const resolved = await params;
+  const subdomain = resolved?.subdomain || "";
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold">
-          Website Sekolah
-        </h1>
-
-        <p className="mt-3 text-slate-600">
-          Subdomain: {params?.subdomain}
-        </p>
-      </div>
-    </div>
+    <TenantHomePage
+      params={Promise.resolve({ tenant: subdomain })}
+      searchParams={searchParams}
+    />
   );
 }

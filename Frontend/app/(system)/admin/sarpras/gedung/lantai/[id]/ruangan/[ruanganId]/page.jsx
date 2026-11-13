@@ -26,6 +26,8 @@ import {
   getGedung,
   getLantaiByGedung,
 } from "@/services/infrastruktur.service";
+import { getRuangan, getAset } from "@/services/sarpras.service";
+import { getKelas } from "@/services/kelas.service";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -36,6 +38,13 @@ const themeCardShadow =
 const themeSoftSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
+function extractArray(res) {
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res?.data)) return res.data;
+  if (Array.isArray(res?.data?.data)) return res.data.data;
+  return [];
+}
+
 export default function DetailRuanganPage() {
   const router = useRouter();
   const params = useParams();
@@ -44,15 +53,25 @@ export default function DetailRuanganPage() {
 
   const [lantai, setLantai] = useState(null);
   const [gedung, setGedung] = useState(null);
+  const [ruanganData, setRuanganData] = useState(null);
+  const [roomAssets, setRoomAssets] = useState([]);
+  const [roomKelas, setRoomKelas] = useState(null);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const gedungResult = await getGedung();
-      if (!gedungResult?.success) return;
+      setError("");
+      const [gedungResult, ruanganResult, asetResult, kelasResult] =
+        await Promise.all([
+          getGedung(),
+          getRuangan(),
+          getAset().catch(() => ({ data: [] })),
+          getKelas({ limit: 200 }).catch(() => ({ data: [] })),
+        ]);
 
-      const gedungList = Array.isArray(gedungResult.data) ? gedungResult.data : [];
+      const gedungList = Array.isArray(gedungResult?.data) ? gedungResult.data : [];
       for (const item of gedungList) {
         const result = await getLantaiByGedung(item.id);
         if (!result?.success) continue;
@@ -65,27 +84,48 @@ export default function DetailRuanganPage() {
           break;
         }
       }
+
+      const rooms = extractArray(ruanganResult);
+      const foundRoom = rooms.find((r) => String(r.id) === String(ruanganId));
+      if (!foundRoom) {
+        setError("Data ruangan tidak ditemukan.");
+      } else {
+        setRuanganData(foundRoom);
+        const allAset = extractArray(asetResult);
+        setRoomAssets(allAset.filter((a) => String(a.ruanganId || "") === String(foundRoom.id)));
+        const allKelas = extractArray(kelasResult);
+        setRoomKelas(allKelas.find((k) => String(k.ruanganId || k.ruangan?.id || "") === String(foundRoom.id)) || null);
+      }
     } catch (err) {
       console.error(err);
+      setError(err?.message || "Gagal memuat detail ruangan.");
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, ruanganId]);
 
   useEffect(() => {
-    if (id) {
+    if (!id || !ruanganId) return;
+    const timer = setTimeout(() => {
       loadData();
-    }
-  }, [id, loadData]);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [id, ruanganId, loadData]);
 
-  // Data ruangan representasi arsitektural (Backend API belum ada)
+  const statusText = (() => {
+    const ket = String(ruanganData?.keterangan || "").toLowerCase();
+    if (ket.includes("perbaikan")) return "perbaikan";
+    if (ket.includes("nonaktif")) return "nonaktif";
+    return "aktif";
+  })();
+
   const ruangan = {
-    id: ruanganId,
-    nama: `Ruangan ${ruanganId || ""}`.trim(),
-    kode: "R-101",
-    kapasitas: 36,
-    status: "aktif",
-    kelas: null, // Opsional: null jika ruang umum/lab
+    id: ruanganData?.id || ruanganId,
+    nama: ruanganData?.nama || (loading ? "Memuat..." : "Ruangan tidak ditemukan"),
+    kode: ruanganData?.lokasi || "-",
+    kapasitas: ruanganData?.kapasitas ?? 0,
+    status: statusText,
+    kelas: roomKelas,
   };
 
   return (
@@ -225,12 +265,24 @@ export default function DetailRuanganPage() {
                   <p className="theme-text-muted text-xs font-semibold uppercase tracking-wider">
                     Total Asset / Sarana
                   </p>
-                  <Boxes size={18} className="text-[var(--color-warning)]" />
+                  <Boxes size={18} className="theme-primary-text" />
                 </div>
-                <p className="theme-text text-2xl font-bold mt-2">0 Unit</p>
-                <p className="theme-text-muted text-xs mt-0.5">Menunggu alokasi inventaris</p>
+                <p className="theme-text text-2xl font-bold mt-2">{roomAssets.length} Unit</p>
+                <p className="theme-text-muted text-xs mt-0.5">
+                  {roomAssets.length > 0 ? "Aset terdaftar di ruangan" : "Belum ada aset teralokasi"}
+                </p>
               </div>
             </div>
+
+            {error && (
+              <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)] p-4 text-sm theme-danger">
+                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Terjadi Kesalahan</p>
+                  <p className="text-xs opacity-90 mt-0.5">{error}</p>
+                </div>
+              </div>
+            )}
 
             {/* Section 1: Informasi Ruangan */}
             <div className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}>
@@ -324,7 +376,7 @@ export default function DetailRuanganPage() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themeSoftSurface} text-[var(--color-info)]`}>
+                    <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themeSoftSurface} theme-primary-text`}>
                       <School size={22} />
                     </div>
                     <h3 className="theme-text text-sm font-bold mt-3">
@@ -361,53 +413,98 @@ export default function DetailRuanganPage() {
 
               {/* Asset Category Breakdown Preview */}
               <div className="p-6 space-y-6">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
-                    <Armchair size={20} className="mx-auto text-[var(--color-primary)]" />
-                    <p className="theme-text text-lg font-bold mt-2">0</p>
-                    <p className="theme-text-muted text-xs font-medium">Meja Siswa/Guru</p>
-                  </div>
+                {(() => {
+                  const mejaCount = roomAssets.filter((a) =>
+                    String(a.nama || "").toLowerCase().includes("meja")
+                  ).length;
+                  const kursiCount = roomAssets.filter((a) =>
+                    String(a.nama || "").toLowerCase().includes("kursi")
+                  ).length;
+                  const papanCount = roomAssets.filter((a) => {
+                    const n = String(a.nama || "").toLowerCase();
+                    return n.includes("papan") || n.includes("screen") || n.includes("proyektor");
+                  }).length;
+                  const lainnyaCount = Math.max(
+                    0,
+                    roomAssets.length - mejaCount - kursiCount - papanCount
+                  );
 
-                  <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
-                    <Armchair size={20} className="mx-auto text-[var(--color-info)]" />
-                    <p className="theme-text text-lg font-bold mt-2">0</p>
-                    <p className="theme-text-muted text-xs font-medium">Kursi Siswa/Guru</p>
-                  </div>
+                  return (
+                    <>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
+                          <Armchair size={20} className="mx-auto text-[var(--color-primary)]" />
+                          <p className="theme-text text-lg font-bold mt-2">{mejaCount}</p>
+                          <p className="theme-text-muted text-xs font-medium">Meja Siswa/Guru</p>
+                        </div>
 
-                  <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
-                    <Boxes size={20} className="mx-auto text-[var(--color-warning)]" />
-                    <p className="theme-text text-lg font-bold mt-2">0</p>
-                    <p className="theme-text-muted text-xs font-medium">Papan Tulis / Screen</p>
-                  </div>
+                        <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
+                          <Armchair size={20} className="mx-auto theme-primary-text" />
+                          <p className="theme-text text-lg font-bold mt-2">{kursiCount}</p>
+                          <p className="theme-text-muted text-xs font-medium">Kursi Siswa/Guru</p>
+                        </div>
 
-                  <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
-                    <PackagePlus size={20} className="mx-auto text-[var(--color-success)]" />
-                    <p className="theme-text text-lg font-bold mt-2">0</p>
-                    <p className="theme-text-muted text-xs font-medium">Asset Lainnya</p>
-                  </div>
-                </div>
+                        <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
+                          <Boxes size={20} className="mx-auto theme-primary-text" />
+                          <p className="theme-text text-lg font-bold mt-2">{papanCount}</p>
+                          <p className="theme-text-muted text-xs font-medium">Papan Tulis / Screen</p>
+                        </div>
 
-                {/* Empty State for Assets */}
-                <div className="rounded-xl border border-dashed theme-border p-8 text-center bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]">
-                  <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themeSoftSurface} text-[var(--color-warning)]`}>
-                    <Boxes size={22} />
-                  </div>
-                  <h3 className="theme-text text-sm font-bold mt-3">
-                    Belum Ada Asset Terhubung ke Ruangan Ini
-                  </h3>
-                  <p className="theme-text-muted text-xs max-w-md mx-auto mt-1 leading-relaxed">
-                    Relasi spesifik `Ruangan → Aset` (foreign key `ruanganId` pada tabel Aset) belum tersedia pada skema Backend. Saat ini penempatan fisik aset diisi melalui kolom teks manual di modul Inventaris Sarpras.
-                  </p>
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      onClick={() => router.push("/admin/sarpras/iventaris")}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold theme-text border theme-border hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] transition"
-                    >
-                      Kelola Inventaris Sarpras
-                    </button>
-                  </div>
-                </div>
+                        <div className="p-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-center">
+                          <PackagePlus size={20} className="mx-auto theme-primary-text" />
+                          <p className="theme-text text-lg font-bold mt-2">{lainnyaCount}</p>
+                          <p className="theme-text-muted text-xs font-medium">Asset Lainnya</p>
+                        </div>
+                      </div>
+
+                      {roomAssets.length > 0 ? (
+                        <div className="overflow-x-auto rounded-xl border theme-border">
+                          <table className="w-full border-collapse text-left">
+                            <thead>
+                              <tr className={`theme-border border-b ${themeSoftSurface}`}>
+                                <th className="theme-text-muted px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider">Kode</th>
+                                <th className="theme-text-muted px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider">Nama Aset</th>
+                                <th className="theme-text-muted px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider">Kategori</th>
+                                <th className="theme-text-muted px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider">Kondisi</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_7%,transparent)]">
+                              {roomAssets.map((aset) => (
+                                <tr key={aset.id} className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]">
+                                  <td className="px-4 py-2.5 text-xs font-mono theme-text-secondary">{aset.kodeAset || aset.kode || "-"}</td>
+                                  <td className="px-4 py-2.5 text-sm font-medium theme-text">{aset.nama || "-"}</td>
+                                  <td className="px-4 py-2.5 text-xs theme-text-secondary">{aset.kategori?.nama || aset.kategori || "-"}</td>
+                                  <td className="px-4 py-2.5 text-xs theme-text-secondary capitalize">{aset.kondisi || "-"}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="rounded-xl border border-dashed theme-border p-8 text-center bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]">
+                          <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themeSoftSurface} theme-primary-text`}>
+                            <Boxes size={22} />
+                          </div>
+                          <h3 className="theme-text text-sm font-bold mt-3">
+                            Belum Ada Asset Terhubung ke Ruangan Ini
+                          </h3>
+                          <p className="theme-text-muted text-xs max-w-md mx-auto mt-1 leading-relaxed">
+                            Belum ada data aset yang ditetapkan ke ruangan ini. Anda dapat menetapkan ruangan saat menambahkan atau memperbarui aset di modul Inventaris Sarpras.
+                          </p>
+                          <div className="mt-4">
+                            <button
+                              type="button"
+                              onClick={() => router.push("/admin/sarpras/iventaris")}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold theme-text border theme-border hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] transition"
+                            >
+                              Kelola Inventaris Sarpras
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>

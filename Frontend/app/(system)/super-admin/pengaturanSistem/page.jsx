@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   AlertCircle,
   Filter,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -27,9 +28,10 @@ import {
 } from "@/services/pengaturan.service";
 import { getAuditLogs } from "@/services/auditLog.service";
 import { getSemuaSekolahPlatform } from "@/services/platform.service";
+import KonfigurasiTeknisTab from "@/app/components/super-admin/KonfigurasiTeknisTab";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -578,6 +580,11 @@ export default function PengaturanSistemPage() {
       label: "Riwayat Aktivitas",
       icon: Clock,
     },
+    {
+      key: "konfigurasi",
+      label: "Konfigurasi Teknis",
+      icon: ShieldCheck,
+    },
   ];
 
   return (
@@ -608,7 +615,7 @@ export default function PengaturanSistemPage() {
               type="button"
               onClick={handleSavePlatform}
               disabled={savingPlatform || loadingPlatform}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-medium transition ${themePrimaryShadow} hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed`}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-medium transition ${themePrimaryShadow} hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {savingPlatform ? (
                 <>
@@ -633,7 +640,7 @@ export default function PengaturanSistemPage() {
                 !selectedSchoolId ||
                 changedSchoolSettings.length === 0
               }
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-medium transition ${themePrimaryShadow} hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed`}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-medium transition ${themePrimaryShadow} hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {savingSchool ? (
                 <>
@@ -989,7 +996,7 @@ export default function PengaturanSistemPage() {
                             type="button"
                             onClick={handleSavePemeliharaan}
                             disabled={savingPemeliharaan}
-                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${themePrimaryGradient} text-[var(--color-card)] transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed`}
+                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${themePrimaryGradient} text-white transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed`}
                           >
                             {savingPemeliharaan ? (
                               <RefreshCw size={15} className="animate-spin" />
@@ -1206,7 +1213,7 @@ export default function PengaturanSistemPage() {
                             <button
                               type="submit"
                               disabled={savingPresensi || !selectedSchoolId}
-                              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${themePrimaryGradient} text-[var(--color-card)] transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed`}
+                              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${themePrimaryGradient} text-white transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed`}
                             >
                               {savingPresensi ? (
                                 <RefreshCw size={15} className="animate-spin" />
@@ -1562,6 +1569,8 @@ export default function PengaturanSistemPage() {
                 )}
               </div>
             )}
+
+            {activeTab === "konfigurasi" && <KonfigurasiTeknisTab />}
           </div>
         </div>
 

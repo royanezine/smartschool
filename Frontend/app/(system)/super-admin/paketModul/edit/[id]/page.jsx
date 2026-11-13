@@ -26,7 +26,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -80,7 +80,7 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 const themeCardText =
-  "text-[var(--color-card)]";
+  "text-white";
 
 
 const ICON_MAP = {
@@ -1022,7 +1022,7 @@ export default function EditPaketPage() {
                       <span
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                           tipe === "SEKOLAH"
-                            ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                            ? "bg-[var(--color-primary)] text-white"
                             : `${themeNeutralSurface} theme-text-muted`
                         }`}
                       >
@@ -1059,7 +1059,7 @@ export default function EditPaketPage() {
                       <span
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                           tipe === "YAYASAN"
-                            ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                            ? "bg-[var(--color-primary)] text-white"
                             : `${themeNeutralSurface} theme-text-muted`
                         }`}
                       >
@@ -1221,7 +1221,7 @@ export default function EditPaketPage() {
                       <span
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                           status === "aktif"
-                            ? "bg-[var(--color-success)] text-[var(--color-card)]"
+                            ? "bg-[var(--color-success)] text-white"
                             : `${themeNeutralSurface} theme-text-muted`
                         }`}
                       >
@@ -1272,7 +1272,7 @@ export default function EditPaketPage() {
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                           status ===
                           "nonaktif"
-                            ? "bg-[var(--color-text-muted)] text-[var(--color-card)]"
+                            ? "bg-slate-600 text-white"
                             : `${themeNeutralSurface} theme-text-muted`
                         }`}
                       >
@@ -1637,7 +1637,7 @@ export default function EditPaketPage() {
 
                   <div className="min-w-0">
 
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-white/80">
                       Preview
                     </p>
 
@@ -1647,7 +1647,7 @@ export default function EditPaketPage() {
 
                   </div>
 
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-card)_15%,transparent)]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15">
                     {tipe === "YAYASAN" ? <Package size={19} /> : <Layers size={19} />}
                   </div>
 
@@ -1678,11 +1678,7 @@ export default function EditPaketPage() {
 
                     <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                       <span
-                        className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                          tipe === "YAYASAN"
-                            ? "bg-purple-100 text-purple-800 border border-purple-300"
-                            : "bg-blue-100 text-blue-800 border border-blue-300"
-                        }`}
+                        className="rounded-full px-2.5 py-1 text-[10px] font-bold bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
                       >
                         {tipe === "YAYASAN" ? "YAYASAN" : "SEKOLAH"}
                       </span>

@@ -454,11 +454,11 @@ export default function EditPenggajianPage() {
                           icon={Wallet}
                         />
 
-                        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/60 dark:bg-blue-950/30">
-                          <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                        <div className="rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4">
+                          <p className="text-sm font-medium theme-primary-text">
                             Total Gaji
                           </p>
-                          <p className="mt-2 whitespace-nowrap text-xl font-bold tabular-nums text-blue-900 dark:text-blue-100 sm:text-2xl">
+                          <p className="mt-2 whitespace-nowrap text-xl font-bold tabular-nums theme-primary-text sm:text-2xl">
                             {formatCurrency(item.totalGaji)}
                           </p>
                         </div>

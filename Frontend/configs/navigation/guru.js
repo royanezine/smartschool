@@ -74,7 +74,7 @@ export const guruSidebarConfig = {
       label: "Materi",
       icon: BookOpen,
       path: "/guru/materi",
-      permission: "akademik.view",
+      permission: "lms.view",
     },
 
     {
@@ -83,7 +83,7 @@ export const guruSidebarConfig = {
       label: "Tugas",
       icon: ClipboardList,
       path: "/guru/tugas",
-      permission: "akademik.view",
+      permission: "tugas.view",
     },
 
     {
@@ -92,7 +92,7 @@ export const guruSidebarConfig = {
       label: "Ujian",
       icon: FileCheck2,
       path: "/guru/ujian",
-      permission: "akademik.view",
+      permission: "ujian.view",
     },
 
     
@@ -195,7 +195,7 @@ export const guruSidebarConfig = {
       label: "Sarpras",
       icon: Package,
       path: "/guru/sarpras",
-      permission: "akademik.view",
+      permission: ["manajemen_aset.view", "peminjaman_aset.view_own"],
     },
 
     {
@@ -204,7 +204,6 @@ export const guruSidebarConfig = {
       label: "Perpustakaan",
       icon: Library,
       path: "/guru/perpustakaan",
-      permission: "akademik.view",
     },
   ],
 };

@@ -188,15 +188,9 @@ export default function Header({ notifications = [], user: userProp = null }) {
     }[role] || "Pengguna";
 
   const roleBadgeColor =
-    {
-      "super-admin": "text-purple-600 bg-purple-100",
-      "cms-admin": "text-teal-600 bg-teal-100",
-      "admin-sekolah": "text-orange-600 bg-orange-100",
-      yayasan: "text-blue-600 bg-blue-100",
-      guru: "text-emerald-600 bg-emerald-100",
-      siswa: "text-cyan-600 bg-cyan-100",
-      user: "text-slate-600 bg-slate-100",
-    }[role] || "text-slate-600 bg-slate-100";
+    role === "user"
+      ? "theme-text-secondary bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]"
+      : "theme-primary-text bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
 
   const [notifList, setNotifList] = useState(
@@ -376,22 +370,22 @@ export default function Header({ notifications = [], user: userProp = null }) {
       label: "Profil Saya",
       icon: User,
       path: currentPathMap.profile,
-      iconBg: "bg-blue-50 dark:bg-blue-950/40",
-      iconColor: "text-blue-500",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] group-hover:bg-[color-mix(in_srgb,var(--color-primary)_16%,transparent)]",
+      iconColor: "theme-primary-text",
     },
     {
       label: "Pengaturan",
       icon: Settings,
       path: currentPathMap.pengaturan,
-      iconBg: "bg-purple-50 dark:bg-purple-950/40",
-      iconColor: "text-purple-500",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] group-hover:bg-[color-mix(in_srgb,var(--color-primary)_16%,transparent)]",
+      iconColor: "theme-primary-text",
     },
     {
       label: "Bantuan",
       icon: HelpCircle,
       path: currentPathMap.bantuan,
-      iconBg: "bg-emerald-50 dark:bg-emerald-950/40",
-      iconColor: "text-emerald-500",
+      iconBg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] group-hover:bg-[color-mix(in_srgb,var(--color-primary)_16%,transparent)]",
+      iconColor: "theme-primary-text",
     },
   ];
 
@@ -548,15 +542,15 @@ export default function Header({ notifications = [], user: userProp = null }) {
                 className="
                   absolute right-0 mt-2
                   w-[360px] max-w-[calc(100vw-24px)]
-                  bg-white dark:bg-slate-900
+                  bg-white dark:bg-[var(--color-card)]
                   rounded-2xl
                   shadow-2xl
-                  border border-slate-200/60 dark:border-slate-700
+                  border border-slate-200/60 dark:border-[var(--color-border)]
                   py-1 z-40
                   overflow-hidden
                 "
               >
-                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-[var(--color-border)] flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center">
                       <Bell size={15} className="text-blue-500" />
@@ -703,7 +697,7 @@ export default function Header({ notifications = [], user: userProp = null }) {
                   )}
                 </div>
 
-                <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                <div className="px-4 py-2.5 border-t border-slate-100 dark:border-[var(--color-border)] bg-slate-50/50 dark:bg-[var(--color-card-soft)]">
                   <button
                     type="button"
                     onClick={() => {
@@ -729,7 +723,7 @@ export default function Header({ notifications = [], user: userProp = null }) {
                 flex items-center gap-2.5
                 px-2.5 py-1.5
                 rounded-xl
-                hover:bg-slate-100 dark:hover:bg-slate-800
+                hover:bg-slate-100 dark:hover:bg-[var(--color-header-hover)]
                 transition-all duration-200
                 group
               "
@@ -770,12 +764,12 @@ export default function Header({ notifications = [], user: userProp = null }) {
             </button>
 
             {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-700 py-1 z-40 overflow-hidden">
-                <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center gap-1.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                  <Crown size={11} className="text-yellow-500" />
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[var(--color-card)] rounded-2xl shadow-2xl border border-slate-200/60 dark:border-[var(--color-border)] py-1 z-40 overflow-hidden">
+                <div className="px-4 py-2 border-b border-slate-100 dark:border-[var(--color-border)] flex items-center gap-1.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                  <Crown size={11} className="theme-primary-text shrink-0" />
                   <span>Role:</span>
                   <span
-                    className={`px-2 py-0.5 rounded-full ${roleBadgeColor}`}
+                    className={`px-2 py-0.5 rounded-full font-medium ${roleBadgeColor}`}
                   >
                     {roleLabel}
                   </span>
@@ -794,15 +788,15 @@ export default function Header({ notifications = [], user: userProp = null }) {
                           flex items-center gap-3 w-full
                           px-4 py-2.5
                           text-sm text-slate-600 dark:text-slate-300
-                          hover:bg-slate-50 dark:hover:bg-slate-800
+                          hover:bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)] hover:text-[var(--color-primary)] dark:hover:text-[var(--color-primary)]
                           transition-all duration-150
                           group
                         "
                       >
                         <div
-                          className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center ${item.iconColor} group-hover:scale-110 transition-transform`}
+                          className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center ${item.iconColor} group-hover:scale-110 transition-all`}
                         >
-                          <Icon size={16} />
+                          <Icon size={16} className="theme-primary-text shrink-0" />
                         </div>
                         <span>{item.label}</span>
                       </button>
@@ -810,7 +804,7 @@ export default function Header({ notifications = [], user: userProp = null }) {
                   })}
                 </div>
 
-                <div className="border-t border-slate-100 dark:border-slate-700 pt-1">
+                <div className="border-t border-slate-100 dark:border-[var(--color-border)] pt-1">
                   <button
                     type="button"
                     onClick={handleLogout}
@@ -830,7 +824,7 @@ export default function Header({ notifications = [], user: userProp = null }) {
                   </button>
                 </div>
 
-                <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                <div className="px-4 py-2 border-t border-slate-100 dark:border-[var(--color-border)] bg-slate-50/50 dark:bg-[var(--color-card-soft)]">
                   <p className="text-[10px] text-slate-400 text-center tracking-widest">
                     v2.0.0 • 2026
                   </p>

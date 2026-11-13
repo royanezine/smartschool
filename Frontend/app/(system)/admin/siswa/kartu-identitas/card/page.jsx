@@ -17,20 +17,22 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { getUserById } from "@/services/user.service";
+import { getSiswaById } from "@/services/siswa.service";
 
 
 const KARTU_IDENTITAS_URL = "/admin/siswa/kartu-identitas";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 
 const themePrimarySoftBorder =
   "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText = "text-[var(--color-primary)]";
 
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
@@ -156,7 +158,7 @@ function StudentCard({ siswa }) {
           className="absolute right-[25%] -top-20 w-44 h-44 rounded-full border-[22px]"
           style={{
             borderColor:
-              "color-mix(in srgb, var(--color-card) 10%, transparent)",
+              "rgba(255, 255, 255, 0.12)",
           }}
         />
 
@@ -164,7 +166,7 @@ function StudentCard({ siswa }) {
           className="absolute right-[5%] bottom-[-70px] w-48 h-48 rounded-full border-[28px]"
           style={{
             borderColor:
-              "color-mix(in srgb, var(--color-card) 10%, transparent)",
+              "rgba(255, 255, 255, 0.12)",
           }}
         />
       </div>
@@ -252,11 +254,11 @@ function StudentCard({ siswa }) {
         <div className="flex items-end justify-between">
           <div>
             <p className="text-[8px] theme-text-muted">
-              Tahun Ajaran
+              NIS / Jurusan
             </p>
 
             <p className="text-[10px] font-bold theme-text-secondary">
-              {siswa.tahunMasuk} / {Number(siswa.tahunMasuk) + 1}
+              {siswa.nis !== "-" ? siswa.nis : siswa.jurusan}
             </p>
           </div>
 
@@ -369,11 +371,11 @@ function StudentCardBack({ siswa }) {
 
           <div>
             <p className="text-[7px] theme-text-muted uppercase">
-              Agama
+              NIS
             </p>
 
             <p className="text-[9px] font-bold theme-text-secondary">
-              {siswa.agama}
+              {siswa.nis}
             </p>
           </div>
         </div>
@@ -445,7 +447,7 @@ function IDCardPageContent() {
   useEffect(() => {
     let isMounted = true;
 
-    const timer = setTimeout(async () => {
+    async function fetchDetail() {
       if (!id) {
         if (isMounted) setLoading(false);
         return;
@@ -453,33 +455,50 @@ function IDCardPageContent() {
 
       try {
         if (isMounted) setLoading(true);
-        const res = await getUserById(id);
-        const data = res?.data ?? res;
+        const res = await getSiswaById(String(id));
+        const data = res?.data?.data ?? res?.data ?? res;
 
-        if (data && isMounted) {
+        if (data?.id && isMounted) {
           const kelasNama =
             data.kelasSiswa?.[0]?.kelas?.nama ??
             data.kelas?.nama ??
             data.kelasNama ??
             "-";
 
+          const genderRaw = String(data.jenisKelamin || "").trim().toLowerCase();
+          const normalizedGender =
+            genderRaw === "l" || genderRaw === "laki-laki"
+              ? "Laki-laki"
+              : genderRaw === "p" || genderRaw === "perempuan"
+              ? "Perempuan"
+              : data.jenisKelamin || "-";
+
+          const rawStatus = String(data.status || "aktif").trim().toLowerCase();
+          const alamatParts = [
+            data.alamatDomisili || data.alamat || data.alamatKtp,
+            data.kelurahan,
+            data.kecamatan,
+            data.kotaKabupaten,
+            data.provinsi,
+            data.kodePos,
+          ].filter(Boolean);
+
           setSiswa({
             id: data.id,
             nama: data.namaLengkap || data.nama || "Tanpa Nama",
+            nis: data.nis || "-",
             nisn: data.nisn || "-",
             nik: data.nik || "-",
             kelas: kelasNama,
-            jenisKelamin: data.jenisKelamin || "-",
+            jurusan: data.jurusan?.nama || "-",
+            jenisKelamin: normalizedGender,
             tempatLahir: data.tempatLahir || "-",
             tanggalLahir: data.tanggalLahir
               ? new Date(data.tanggalLahir).toLocaleDateString("id-ID")
               : "-",
-            agama: data.agama || "-",
             noTelepon: data.noTelepon || "-",
-            alamat: data.alamat || data.alamatDomisili || "-",
-            status: data.status || "aktif",
-            avatar: data.avatar || null,
-            sekolahNama: data.sekolah?.nama || "SMARTSCHOOL",
+            alamat: alamatParts.length > 0 ? alamatParts.join(", ") : "-",
+            status: rawStatus === "nonaktif" ? "nonaktif" : "aktif",
           });
         }
       } catch (error) {
@@ -488,11 +507,12 @@ function IDCardPageContent() {
       } finally {
         if (isMounted) setLoading(false);
       }
-    }, 0);
+    }
+
+    fetchDetail();
 
     return () => {
       isMounted = false;
-      clearTimeout(timer);
     };
   }, [id]);
 
@@ -593,7 +613,7 @@ function IDCardPageContent() {
 
               <button
                 onClick={handleBackToKartuIdentitas}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Kartu Identitas
@@ -663,7 +683,7 @@ function IDCardPageContent() {
 
                 <button
                   onClick={handlePrint}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
                 >
                   <Download size={16} />
                   Cetak / Simpan
@@ -785,11 +805,7 @@ function IDCardPageContent() {
                 <InfoItem
                   icon={<User size={16} />}
                   label="Jenis Kelamin"
-                  value={
-                    siswa.jenisKelamin === "L"
-                      ? "Laki-laki"
-                      : "Perempuan"
-                  }
+                  value={siswa.jenisKelamin}
                 />
 
                 <InfoItem
@@ -815,7 +831,7 @@ function IDCardPageContent() {
 
               <button
                 onClick={handlePrint}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow}`}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${themePrimaryGradient} text-white text-sm font-semibold ${themePrimaryShadow}`}
               >
                 <Printer size={16} />
                 Cetak ID Card

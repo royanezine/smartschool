@@ -21,6 +21,7 @@ import {
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { getBackendOrigin } from "@/lib/auth";
 
 import {
   getMateriPembelajaranById,
@@ -28,15 +29,11 @@ import {
 } from "@/services/materiPembelajaran.service";
 
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
-).replace(/\/+$/, "");
-
-const FILE_BASE_URL = API_URL.replace(/\/api$/, "");
+const FILE_BASE_URL = getBackendOrigin();
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -591,7 +588,7 @@ export default function MateriDetailPage() {
                             href={materi.urlLink}
                             target="_blank"
                             rel="noreferrer"
-                            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90`}
+                            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${themePrimaryGradient} text-white ${themePrimaryShadow} hover:opacity-90`}
                           >
                             <LinkIcon size={16} />
 
@@ -605,7 +602,7 @@ export default function MateriDetailPage() {
                               href={getFileUrl(materi.urlFile)}
                               target="_blank"
                               rel="noreferrer"
-                              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90`}
+                              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${themePrimaryGradient} text-white ${themePrimaryShadow} hover:opacity-90`}
                             >
                               <FileText size={16} />
 

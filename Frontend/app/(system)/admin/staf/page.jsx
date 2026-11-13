@@ -1082,7 +1082,7 @@ export default function StafPage() {
                                   `/admin/staf/${item.id}`
                                 )
                               }
-                              className={`p-1.5 rounded-lg ${themePrimaryHover} ${themePrimaryText} hover:opacity-80 transition-colors`}
+                              className="p-1.5 rounded-lg theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] transition-colors"
                             >
                               <Eye size={15} />
                             </button>
@@ -1338,7 +1338,7 @@ export default function StafPage() {
                                           `/admin/staf/${item.id}`
                                         )
                                       }
-                                      className={`p-1.5 rounded-lg ${themePrimaryHover} ${themePrimaryText} hover:opacity-80 transition-colors`}
+                                      className="p-1.5 rounded-lg theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] transition-colors"
                                       title="Detail"
                                     >
                                       <Eye size={15} />
@@ -1351,7 +1351,7 @@ export default function StafPage() {
                                           `/admin/staf/edit/${item.id}`
                                         )
                                       }
-                                      className={`p-1.5 rounded-lg ${themeWarningSurface} text-[var(--color-warning)] hover:opacity-80 transition-colors`}
+                                      className="p-1.5 rounded-lg theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] transition-colors"
                                       title="Edit"
                                     >
                                       <Edit size={15} />
@@ -1577,34 +1577,11 @@ function StatCard({
   icon: Icon,
   color,
 }) {
-  const colorMap = {
-    primary: {
-      bg: themePrimarySoft,
-      text: themePrimaryText,
-      border: themePrimarySoftBorder,
-    },
-
-    success: {
-      bg: themeSuccessSurface,
-      text: "text-[var(--color-success)]",
-      border: themeSuccessBorder,
-    },
-
-    warning: {
-      bg: themeWarningSurface,
-      text: "text-[var(--color-warning)]",
-      border: themeWarningBorder,
-    },
-
-    neutral: {
-      bg: themeNeutralSurface,
-      text: "theme-text-secondary",
-      border: themeNeutralBorder,
-    },
+  const style = {
+    bg: themePrimarySoft,
+    text: themePrimaryText,
+    border: themePrimarySoftBorder,
   };
-
-  const style =
-    colorMap[color] || colorMap.primary;
 
   return (
     <div

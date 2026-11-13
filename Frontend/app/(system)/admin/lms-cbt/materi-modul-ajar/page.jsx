@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { getBackendOrigin } from "@/lib/auth";
 import {
   BookOpenCheck,
   Plus,
@@ -61,19 +62,11 @@ const themeCardShadow =
   "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
-).replace(/\/+$/, "");
-
-const FILE_BASE_URL = API_URL.endsWith("/api")
-  ? API_URL.slice(0, -4)
-  : API_URL;
-
 function getFileUrl(url) {
   if (!url) return "#";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   const clean = url.startsWith("/") ? url : `/${url}`;
-  return `${FILE_BASE_URL}${clean}`;
+  return `${getBackendOrigin()}${clean}`;
 }
 
 function formatTanggal(isoString) {
@@ -625,7 +618,7 @@ export default function MateriModulAjarPage() {
                     Berkas teks & modul PDF
                   </p>
                 </div>
-                <div className="w-11 h-11 rounded-xl theme-danger flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                   <FileText size={21} />
                 </div>
               </div>
@@ -651,7 +644,7 @@ export default function MateriModulAjarPage() {
                     Media video pembelajaran
                   </p>
                 </div>
-                <div className="w-11 h-11 rounded-xl theme-info flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                   <Video size={21} />
                 </div>
               </div>
@@ -677,7 +670,7 @@ export default function MateriModulAjarPage() {
                     Link sumber eksternal
                   </p>
                 </div>
-                <div className="w-11 h-11 rounded-xl theme-warning flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-center justify-center">
                   <LinkIcon size={21} />
                 </div>
               </div>

@@ -31,7 +31,7 @@ import { getKelas } from "@/services/kelas.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -616,7 +616,7 @@ export default function GuruAbsensiPage() {
                     !kelasId ||
                     loadingKelas
                   }
-                  className={`flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} border border-transparent rounded-lg ${themePrimaryShadow} hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+                  className={`flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white ${themePrimaryGradient} border border-transparent rounded-lg ${themePrimaryShadow} hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
                 >
                   <Plus size={16} />
                   Tambah Absensi

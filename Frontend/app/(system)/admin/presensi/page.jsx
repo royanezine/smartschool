@@ -213,66 +213,16 @@ export default function RangkumanPresensiPage() {
     },
   ];
 
-  const getColorStyles = (color) => {
-    switch (color) {
-      case "primary":
-        return {
-          iconBg:
-            "bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]",
-          iconText: "text-[var(--color-primary)]",
-          hoverBorder:
-            "hover:border-[color-mix(in_srgb,var(--color-primary)_40%,transparent)]",
-          badge:
-            "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]",
-        };
-      case "warning":
-        return {
-          iconBg:
-            "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
-          iconText: "text-[var(--color-warning)]",
-          hoverBorder:
-            "hover:border-[color-mix(in_srgb,var(--color-warning)_40%,transparent)]",
-          badge:
-            "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]",
-        };
-      case "info":
-        return {
-          iconBg:
-            "bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)]",
-          iconText: "text-[var(--color-info)]",
-          hoverBorder:
-            "hover:border-[color-mix(in_srgb,var(--color-info)_40%,transparent)]",
-          badge:
-            "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]",
-        };
-      case "success":
-        return {
-          iconBg:
-            "bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)]",
-          iconText: "text-[var(--color-success)]",
-          hoverBorder:
-            "hover:border-[color-mix(in_srgb,var(--color-success)_40%,transparent)]",
-          badge:
-            "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]",
-        };
-      case "purple":
-        return {
-          iconBg: "bg-purple-500/10",
-          iconText: "text-purple-500",
-          hoverBorder: "hover:border-purple-500/40",
-          badge: "bg-purple-500/10 text-purple-500",
-        };
-      default:
-        return {
-          iconBg:
-            "bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]",
-          iconText: "text-[var(--color-text-secondary)]",
-          hoverBorder:
-            "hover:border-[color-mix(in_srgb,var(--color-text)_20%,transparent)]",
-          badge:
-            "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] text-[var(--color-text-secondary)]",
-        };
-    }
+  const getColorStyles = () => {
+    return {
+      iconBg:
+        "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      iconText: "theme-primary-text",
+      hoverBorder:
+        "hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]",
+      badge:
+        "border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    };
   };
 
   return (
@@ -295,51 +245,75 @@ export default function RangkumanPresensiPage() {
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
             {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text)] sm:text-3xl">
-                  Pusat Kendali Presensi
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--color-text-muted)]">
-                  Akses cepat ke seluruh modul presensi, monitoring kehadiran
-                  real-time, dan pengaturan data master dalam satu dasbor
-                  terpadu.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={loadDashboard}
-                  disabled={loading}
-                  className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-3.5 py-2.5 text-xs font-semibold text-[var(--color-text-secondary)] transition hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:text-[var(--color-primary)] disabled:opacity-60"
-                >
-                  <RefreshCw
-                    size={14}
-                    className={loading ? "animate-spin" : ""}
-                  />
-                  Refresh
-                </button>
-
-                <div className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3 shadow-sm">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]">
-                    <ShieldCheck size={20} />
+            <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm sm:p-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-md">
+                    <ClipboardCheck size={23} />
                   </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
-                      Status Sistem
-                    </p>
-                    <p className="text-sm font-semibold text-[var(--color-text)]">
-                      {loading
-                        ? "Memuat..."
-                        : error
-                          ? "Gangguan"
-                          : "Terhubung & Normal"}
+                  <div className="min-w-0">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <span className="theme-primary-soft theme-primary-text rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                        Presensi
+                      </span>
+                      <span className="theme-card-soft theme-text-muted rounded-md px-2 py-0.5 text-[10px] font-semibold">
+                        Monitoring & Kontrol
+                      </span>
+                    </div>
+                    <h1 className="text-xl font-bold tracking-tight theme-text sm:text-2xl">
+                      Pusat Kendali Presensi
+                    </h1>
+                    <p className="mt-1 max-w-2xl text-sm theme-text-muted">
+                      Akses cepat ke seluruh modul presensi, monitoring kehadiran
+                      real-time, dan pengaturan data master dalam satu dasbor
+                      terpadu.
                     </p>
                   </div>
                 </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={loadDashboard}
+                    disabled={loading}
+                    className="theme-card theme-border theme-text-secondary inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold shadow-sm transition hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:text-[var(--color-primary)] disabled:opacity-60"
+                  >
+                    <RefreshCw
+                      size={14}
+                      className={loading ? "animate-spin theme-primary-text" : ""}
+                    />
+                    Refresh
+                  </button>
+
+                  <div className="theme-card theme-border flex items-center gap-3 rounded-xl border px-4 py-2.5 shadow-sm">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                      <ShieldCheck size={20} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider theme-text-muted">
+                        Status Sistem
+                      </p>
+                      <p className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold theme-text">
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            loading
+                              ? "bg-[var(--color-text-muted)]"
+                              : error
+                                ? "bg-[var(--color-danger)]"
+                                : "bg-[var(--color-success)]"
+                          }`}
+                        />
+                        {loading
+                          ? "Memuat..."
+                          : error
+                            ? "Gangguan"
+                            : "Terhubung & Normal"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            </section>
 
             {/* Error */}
             {error && (
@@ -349,10 +323,10 @@ export default function RangkumanPresensiPage() {
                   className="mt-0.5 shrink-0 text-[var(--color-danger)]"
                 />
                 <div>
-                  <p className="text-sm font-semibold text-[var(--color-text)]">
+                  <p className="text-sm font-semibold theme-text">
                     Gagal mengambil data
                   </p>
-                  <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                  <p className="mt-1 text-xs theme-text-muted">
                     {error}
                   </p>
                 </div>
@@ -360,68 +334,79 @@ export default function RangkumanPresensiPage() {
             )}
 
             {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4">
-              <div className="flex items-center gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
-                  <Users size={24} />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-[var(--color-text-muted)]">
-                    Total Pengguna
-                  </p>
-                  <p className="text-2xl font-bold text-[var(--color-text)]">
-                    {loading
-                      ? "—"
-                      : stats.totalPengguna.toLocaleString("id-ID")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]">
-                  <UserCheck size={24} />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-[var(--color-text-muted)]">
-                    Hadir Hari Ini
-                  </p>
-                  <p className="text-2xl font-bold text-[var(--color-text)]">
-                    {loading
-                      ? "—"
-                      : stats.hadirHariIni.toLocaleString("id-ID")}
-                  </p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="theme-card theme-border rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
+                      Total Pengguna
+                    </p>
+                    <p className="mt-2 text-2xl font-bold tracking-tight tabular-nums theme-text sm:text-3xl">
+                      {loading
+                        ? "—"
+                        : stats.totalPengguna.toLocaleString("id-ID")}
+                    </p>
+                  </div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <Users size={20} />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]">
-                  <Clock3 size={24} />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-[var(--color-text-muted)]">
-                    Terlambat
-                  </p>
-                  <p className="text-2xl font-bold text-[var(--color-text)]">
-                    {loading
-                      ? "—"
-                      : stats.terlambatHariIni.toLocaleString("id-ID")}
-                  </p>
+              <div className="theme-card theme-border rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
+                      <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
+                      Hadir Hari Ini
+                    </p>
+                    <p className="mt-2 text-2xl font-bold tracking-tight tabular-nums theme-text sm:text-3xl">
+                      {loading
+                        ? "—"
+                        : stats.hadirHariIni.toLocaleString("id-ID")}
+                    </p>
+                  </div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <UserCheck size={20} />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-[var(--color-danger)]">
-                  <AlertCircle size={24} />
+              <div className="theme-card theme-border rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
+                      <span className="h-2 w-2 rounded-full bg-[var(--color-warning)]" />
+                      Terlambat
+                    </p>
+                    <p className="mt-2 text-2xl font-bold tracking-tight tabular-nums theme-text sm:text-3xl">
+                      {loading
+                        ? "—"
+                        : stats.terlambatHariIni.toLocaleString("id-ID")}
+                    </p>
+                  </div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <Clock3 size={20} />
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-medium text-[var(--color-text-muted)]">
-                    Tidak Hadir
-                  </p>
-                  <p className="text-2xl font-bold text-[var(--color-text)]">
-                    {loading
-                      ? "—"
-                      : stats.tidakHadirHariIni.toLocaleString("id-ID")}
-                  </p>
+              </div>
+
+              <div className="theme-card theme-border rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
+                      <span className="h-2 w-2 rounded-full bg-[var(--color-danger)]" />
+                      Tidak Hadir
+                    </p>
+                    <p className="mt-2 text-2xl font-bold tracking-tight tabular-nums theme-text sm:text-3xl">
+                      {loading
+                        ? "—"
+                        : stats.tidakHadirHariIni.toLocaleString("id-ID")}
+                    </p>
+                  </div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <AlertCircle size={20} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -431,14 +416,14 @@ export default function RangkumanPresensiPage() {
               <div className="mb-4 flex items-center gap-2">
                 <FileBarChart
                   size={18}
-                  className="text-[var(--color-primary)]"
+                  className="theme-primary-text"
                 />
-                <h2 className="text-lg font-bold text-[var(--color-text)]">
+                <h2 className="text-lg font-bold theme-text">
                   Modul Presensi
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {menuItems.map((item) => {
                   const styles = getColorStyles(item.color);
 
@@ -446,37 +431,37 @@ export default function RangkumanPresensiPage() {
                     <button
                       key={item.title}
                       onClick={() => router.push(item.path)}
-                      className={`group flex flex-col justify-between overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${styles.hoverBorder}`}
+                      className={`group flex flex-col justify-between overflow-hidden rounded-2xl border theme-border theme-card p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${styles.hoverBorder}`}
                     >
                       <div>
                         <div className="flex items-start justify-between">
                           <div
-                            className={`flex h-12 w-12 items-center justify-center rounded-xl ${styles.iconBg} ${styles.iconText}`}
+                            className={`flex h-11 w-11 items-center justify-center rounded-xl ${styles.iconBg} ${styles.iconText}`}
                           >
-                            <item.icon size={22} />
+                            <item.icon size={21} />
                           </div>
                           <span
-                            className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${styles.badge}`}
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${styles.badge}`}
                           >
                             {item.stats}
                           </span>
                         </div>
 
-                        <h3 className="mt-4 text-base font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors">
+                        <h3 className="mt-4 text-base font-bold theme-text group-hover:text-[var(--color-primary)] transition-colors">
                           {item.title}
                         </h3>
-                        <p className="mt-1.5 text-xs leading-relaxed text-[var(--color-text-muted)] line-clamp-2">
+                        <p className="mt-1.5 text-xs leading-relaxed theme-text-muted line-clamp-2">
                           {item.description}
                         </p>
                       </div>
 
-                      <div className="mt-5 flex items-center justify-between border-t border-[var(--color-border)] pt-4">
-                        <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
+                      <div className="mt-5 flex items-center justify-between border-t theme-border pt-4">
+                        <span className="text-xs font-semibold theme-text-secondary group-hover:text-[var(--color-primary)] transition-colors">
                           Buka Modul
                         </span>
                         <ChevronRight
                           size={16}
-                          className="text-[var(--color-text-muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--color-primary)]"
+                          className="theme-text-muted transition-transform group-hover:translate-x-1 group-hover:text-[var(--color-primary)]"
                         />
                       </div>
                     </button>
@@ -486,16 +471,16 @@ export default function RangkumanPresensiPage() {
             </div>
 
             {/* Bottom Banner / Info */}
-            <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-5 sm:flex-row sm:items-center sm:p-6">
               <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-card)] text-[var(--color-info)] shadow-sm">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] theme-primary-text shadow-sm">
                   <TrendingUp size={20} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-[var(--color-info)]">
+                  <h4 className="text-sm font-bold theme-primary-text">
                     Persentase Kehadiran Hari Ini
                   </h4>
-                  <p className="mt-1 text-xs text-[color-mix(in_srgb,var(--color-info)_80%,var(--color-text))]">
+                  <p className="mt-1 text-xs theme-text-secondary">
                     {loading
                       ? "Menghitung data..."
                       : `${stats.persenHadir}% siswa hadir — ${stats.hadirHariIni} dari ${stats.hadirHariIni + stats.tidakHadirHariIni} siswa yang tercatat.`}
@@ -503,8 +488,9 @@ export default function RangkumanPresensiPage() {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => router.push("/admin/siswa/absen")}
-                className="shrink-0 rounded-lg bg-[var(--color-info)] px-4 py-2 text-xs font-bold text-white transition hover:opacity-90"
+                className="theme-primary shrink-0 rounded-xl px-4 py-2 text-xs font-semibold shadow-sm transition hover:opacity-90"
               >
                 Lihat Laporan
               </button>

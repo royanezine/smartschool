@@ -24,7 +24,7 @@ import { getUjianByKelasMapel } from "@/services/ujian.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -348,7 +348,7 @@ export default function GuruNilaiQuizPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2.5">
                   <div
-                    className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                    className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                   >
                     <HelpCircle size={18} />
                   </div>

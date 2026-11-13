@@ -743,7 +743,7 @@ export default function DetailKelasPage() {
                   
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
-                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                       <GraduationCap size={20} />
                     </div>
 
@@ -762,7 +762,7 @@ export default function DetailKelasPage() {
 
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
-                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                       <Calendar size={19} />
                     </div>
 
@@ -788,7 +788,7 @@ export default function DetailKelasPage() {
 
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
-                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                       <Users size={19} />
                     </div>
 
@@ -805,7 +805,7 @@ export default function DetailKelasPage() {
 
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
-                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                       <Users size={19} />
                     </div>
 
@@ -1048,7 +1048,7 @@ export default function DetailKelasPage() {
                         </p>
                       </div>
 
-                      <div className="theme-info inline-flex w-fit shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text inline-flex w-fit shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold">
                         <Users size={16} />
                         {jumlahSiswa} Siswa
                       </div>
@@ -1306,7 +1306,7 @@ export default function DetailKelasPage() {
 
                                       <td className="px-5 py-4">
                                         {isWali ? (
-                                          <span className="theme-info inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold">
+                                          <span className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold">
                                             <UserCheck size={13} />
                                             Wali Kelas
                                           </span>

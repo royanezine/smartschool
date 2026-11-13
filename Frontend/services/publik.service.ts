@@ -1,10 +1,24 @@
-const API_BASE = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/+$/, "");
+import { getCleanApiBase } from "../lib/auth";
 
-const cleanBase = API_BASE.endsWith("/api")
-  ? API_BASE.slice(0, -4)
-  : API_BASE;
+const API_ROOT = getCleanApiBase();
+
+const PUBLIC_API = `${API_ROOT}/publik`;
+
+const RESERVED_SUBDOMAINS = [
+  "www",
+  "api",
+  "admin",
+  "guru",
+  "siswa",
+  "yayasan",
+  "super-admin",
+  "login",
+  "register",
+  "forgot-password",
+  "onboarding",
+  "pin",
+  ".git",
+];
 
 export type PublicTemaResponse = {
   warna: {
@@ -91,9 +105,56 @@ export type PublicHalaman = {
   }>;
 };
 
+export type PublicPpdbPengumuman = {
+  success: boolean;
+  data: Array<{
+    id: string;
+    judul: string;
+    konten: string;
+    dipublikasikanPada: string | null;
+  }>;
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
 type ApiError = Error & {
   status?: number;
 };
+
+type FetchOptions = {
+  method?: string;
+  body?: any;
+  headers?: Record<string, string>;
+  noStore?: boolean;
+};
+
+function validateSubdomain(subdomain: string): string {
+  if (
+    typeof subdomain !== "string" ||
+    !subdomain.trim()
+  ) {
+    throw new Error(
+      "[PUBLIK API] Subdomain wajib disertakan."
+    );
+  }
+
+  const tenant = subdomain.trim().toLowerCase();
+
+  if (
+    RESERVED_SUBDOMAINS.includes(tenant) ||
+    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(tenant)
+  ) {
+    throw new Error(
+      `[PUBLIK API] Subdomain tidak valid: ${tenant}`
+    );
+  }
+
+  return tenant;
+}
 
 function unwrapResponse(value: any): any {
   let result = value;
@@ -151,42 +212,71 @@ function normalizeArticles(value: any): PublicArtikel[] {
 
 async function pubFetch<T>(
   path: string,
-  options: {
-    method?: string;
-    body?: any;
-    headers?: Record<string, string>;
-    noStore?: boolean;
-  } = {}
+  options: FetchOptions = {}
 ): Promise<T> {
-  const url = `${cleanBase}/api/publik${path}`;
+  const url = `${PUBLIC_API}${path}`;
 
-  const isJsonBody = options.body && typeof options.body === "object";
+  const isFormData =
+    typeof FormData !== "undefined" &&
+    options.body instanceof FormData;
+
+  const isJsonBody =
+    options.body !== undefined &&
+    options.body !== null &&
+    typeof options.body === "object" &&
+    !isFormData;
+
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    ...options.headers,
+  };
+
+  if (isJsonBody) {
+    headers["Content-Type"] = "application/json";
+  }
 
   const res = await fetch(url, {
     method: options.method || "GET",
-    ...(options.body
+
+    ...(options.body !== undefined &&
+    options.body !== null
       ? {
           body: isJsonBody
             ? JSON.stringify(options.body)
             : options.body,
         }
       : {}),
+
     ...(options.noStore
-      ? { cache: "no-store" as const }
-      : { next: { revalidate: 60 } }),
-    headers: {
-      Accept: "application/json",
-      ...(isJsonBody ? { "Content-Type": "application/json" } : {}),
-      ...options.headers,
-    },
+      ? {
+          cache: "no-store" as const,
+        }
+      : {
+          next: {
+            revalidate: 60,
+          },
+        }),
+
+    headers,
   });
 
-  const contentType = res.headers.get("content-type") || "";
+  const contentType =
+    res.headers.get("content-type") || "";
 
   let responseData: any = null;
 
   if (contentType.includes("application/json")) {
     responseData = await res.json();
+  } else {
+    const text = await res.text();
+
+    if (text) {
+      try {
+        responseData = JSON.parse(text);
+      } catch {
+        responseData = null;
+      }
+    }
   }
 
   if (!res.ok) {
@@ -198,6 +288,7 @@ async function pubFetch<T>(
       `Request gagal dengan status ${res.status}`;
 
     const error = new Error(message) as ApiError;
+
     error.status = res.status;
 
     console.error("[PUBLIK API] Request gagal:", {
@@ -218,118 +309,167 @@ async function pubFetch<T>(
   return unwrapResponse(responseData) as T;
 }
 
+function tenantPath(
+  subdomain: string,
+  endpoint: string
+): string {
+  const tenant = validateSubdomain(subdomain);
+
+  return `/${encodeURIComponent(tenant)}${endpoint}`;
+}
+
 export const publikService = {
   getProfil: (subdomain: string) =>
     pubFetch<PublicProfil>(
-      `/${encodeURIComponent(subdomain)}/profil`
+      tenantPath(subdomain, "/profil")
     ),
 
   getTema: (subdomain: string) =>
     pubFetch<PublicTemaResponse>(
-      `/${encodeURIComponent(subdomain)}/tema`
+      tenantPath(subdomain, "/tema")
     ),
 
-  getArtikel: async (subdomain: string): Promise<PublicArtikel[]> => {
+  getArtikel: async (
+    subdomain: string
+  ): Promise<PublicArtikel[]> => {
     const response = await pubFetch<any>(
-      `/${encodeURIComponent(subdomain)}/artikel`
+      tenantPath(subdomain, "/artikel")
     );
 
     const articles = normalizeArticles(response);
 
     console.log("[PUBLIK API] Daftar artikel:", {
-      subdomain,
+      subdomain: validateSubdomain(subdomain),
       jumlah: articles.length,
     });
 
     return articles;
   },
 
-  getHalamanBySlug: (subdomain: string, slug: string) =>
-    pubFetch<PublicHalaman>(
-      `/${encodeURIComponent(subdomain)}/halaman/${encodeURIComponent(slug)}`
-    ),
+  getHalamanBySlug: (
+    subdomain: string,
+    slug: string
+  ) => {
+    if (!slug || !slug.trim()) {
+      throw new Error(
+        "[PUBLIK API] Slug halaman wajib disertakan."
+      );
+    }
+
+    return pubFetch<PublicHalaman>(
+      tenantPath(
+        subdomain,
+        `/halaman/${encodeURIComponent(slug.trim())}`
+      )
+    );
+  },
 
   getDaftarHalaman: (subdomain: string) =>
     pubFetch<HalamanRingkas[]>(
-      `/${encodeURIComponent(subdomain)}/halaman`
+      tenantPath(subdomain, "/halaman")
     ),
 
-      getKonfigurasi: (subdomain: string) =>
-        pubFetch<Record<string, any>>(
-          `/${encodeURIComponent(subdomain)}/konfigurasi`
-        ),
+  getKonfigurasi: (subdomain: string) =>
+    pubFetch<Record<string, any>>(
+      tenantPath(subdomain, "/konfigurasi")
+    ),
 
-      getPpdbOptions: (subdomain: string) =>
-        pubFetch<any>(
-          `/${encodeURIComponent(subdomain)}/ppdb`,
-          { noStore: true }
-        ),
+  getPpdbOptions: (subdomain: string) =>
+    pubFetch<any>(
+      tenantPath(subdomain, "/ppdb"),
+      {
+        noStore: true,
+      }
+    ),
 
-      getPpdbPengumuman: async (
-        subdomain: string,
-        query: { page?: number; limit?: number } = {}
-      ) => {
-        const qs = new URLSearchParams();
-        if (query.page) qs.set("page", String(query.page));
-        if (query.limit) qs.set("limit", String(query.limit));
-        const qsStr = qs.toString();
+  getPpdbPengumuman: async (
+    subdomain: string,
+    query: {
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<PublicPpdbPengumuman> => {
+    const tenant = validateSubdomain(subdomain);
 
-        // pubFetch() menjalankan unwrapResponse yang membuang `success` dan
-        // `meta`, padahal endpoint ini mengembalikan { success, data, meta }
-        // dan konsumen membutuhkan ketiganya (paginasi). Ambil respons utuh.
-        const url = `${cleanBase}/api/publik/${encodeURIComponent(subdomain)}/ppdb/pengumuman${qsStr ? `?${qsStr}` : ""}`;
-        const res = await fetch(url, {
-          method: "GET",
-          cache: "no-store",
-          headers: { Accept: "application/json" },
-        });
+    const qs = new URLSearchParams();
 
-        const contentType = res.headers.get("content-type") || "";
-        const json: any = contentType.includes("application/json")
-          ? await res.json()
-          : null;
+    if (query.page) {
+      qs.set("page", String(query.page));
+    }
 
-        if (!res.ok) {
-          const error = new Error(
-            json?.message || `Request gagal dengan status ${res.status}`
-          ) as ApiError;
-          error.status = res.status;
-          throw error;
-        }
+    if (query.limit) {
+      qs.set("limit", String(query.limit));
+    }
 
-        if (json === null) {
-          throw new Error(`Respons API bukan JSON yang valid: ${url}`);
-        }
+    const qsStr = qs.toString();
 
-        return json as {
-          success: boolean;
-          data: Array<{
-            id: string;
-            judul: string;
-            konten: string;
-            dipublikasikanPada: string | null;
-          }>;
-          meta?: {
-            page: number;
-            limit: number;
-            total: number;
-            totalPages: number;
-          };
-        };
+    const url =
+      `${PUBLIC_API}/${encodeURIComponent(tenant)}` +
+      `/ppdb/pengumuman` +
+      (qsStr ? `?${qsStr}` : "");
+
+    const res = await fetch(url, {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        Accept: "application/json",
       },
+    });
 
-      cekPendaftaran: (
-        subdomain: string,
-        payload: { nomorPendaftaran: string; nik: string }
-      ) =>
-        pubFetch<any>(
-          `/${encodeURIComponent(subdomain)}/ppdb/cek-pendaftaran`,
-          {
-            method: "POST",
-            body: payload,
-            noStore: true,
-          }
-        ),
-      };
+    const contentType =
+      res.headers.get("content-type") || "";
 
+    const json: any = contentType.includes(
+      "application/json"
+    )
+      ? await res.json()
+      : null;
 
+    if (!res.ok) {
+      const error = new Error(
+        json?.message ||
+          `Request gagal dengan status ${res.status}`
+      ) as ApiError;
+
+      error.status = res.status;
+
+      console.error(
+        "[PUBLIK API] Gagal mengambil pengumuman PPDB:",
+        {
+          url,
+          status: res.status,
+          message: error.message,
+        }
+      );
+
+      throw error;
+    }
+
+    if (json === null) {
+      throw new Error(
+        `Respons API bukan JSON yang valid: ${url}`
+      );
+    }
+
+    return json as PublicPpdbPengumuman;
+  },
+
+  cekPendaftaran: (
+    subdomain: string,
+    payload: {
+      nomorPendaftaran: string;
+      nik: string;
+    }
+  ) =>
+    pubFetch<any>(
+      tenantPath(
+        subdomain,
+        "/ppdb/cek-pendaftaran"
+      ),
+      {
+        method: "POST",
+        body: payload,
+        noStore: true,
+      }
+    ),
+};

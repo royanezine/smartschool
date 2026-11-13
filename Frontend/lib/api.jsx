@@ -6,7 +6,18 @@ import {
   clearSession,
   registerAuthApiHandlers,
   requestNewAccessToken as authRequestNewAccessToken,
+  getBackendOrigin,
+  getCleanApiBase,
+  resolveApiOrigin,
+  resolveApiBaseUrl,
 } from "./auth";
+
+export {
+  getBackendOrigin,
+  getCleanApiBase,
+  resolveApiOrigin,
+  resolveApiBaseUrl,
+};
 
 function normalizeEndpoint(endpoint) {
   if (!endpoint) return "/";
@@ -27,11 +38,7 @@ function normalizeEndpoint(endpoint) {
 }
 
 function resolveFullUrl(endpoint) {
-  const base = (
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-  ).replace(/\/+$/, "");
-
-  const cleanBase = base.endsWith("/api") ? base.slice(0, -4) : base;
+  const cleanBase = getBackendOrigin();
   const cleanPath = normalizeEndpoint(endpoint);
 
   return `${cleanBase}${cleanPath}`;

@@ -1,8 +1,19 @@
 "use client";
 
-import { Mail, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Mail, ArrowRight, Info } from "lucide-react";
 
 export default function Newsletter() {
+  const [email, setEmail] = useState("");
+  const [notice, setNotice] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setNotice(
+      "Layanan langganan newsletter otomatis belum tersedia pada server saat ini. Silakan hubungi tim SmartSchool atau daftar langsung melalui halaman onboarding."
+    );
+  };
+
   return (
     <section className="bg-white py-28 sm:py-36">
       <div className="mx-auto max-w-6xl px-6 text-center">
@@ -21,7 +32,7 @@ export default function Newsletter() {
         </p>
 
         <form
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={handleSubmit}
           className="mx-auto mt-12 flex max-w-2xl flex-col gap-4 sm:flex-row"
         >
           <label htmlFor="newsletter-email" className="sr-only">
@@ -31,6 +42,11 @@ export default function Newsletter() {
             id="newsletter-email"
             type="email"
             required
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (notice) setNotice("");
+            }}
             placeholder="Masukkan email Anda"
             className="flex-1 rounded-2xl border border-slate-300 bg-white px-6 py-4 text-lg text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10"
           />
@@ -43,6 +59,13 @@ export default function Newsletter() {
             <ArrowRight size={20} />
           </button>
         </form>
+
+        {notice && (
+          <div className="mx-auto mt-4 flex max-w-2xl items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-xs text-amber-800">
+            <Info size={16} className="mt-0.5 shrink-0 text-amber-600" />
+            <span>{notice}</span>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -33,7 +33,7 @@ import { getUjianByKelasMapel } from "@/services/ujian.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -844,24 +844,24 @@ export default function DaftarUjianPage() {
         <section
           className={`relative overflow-hidden rounded-[24px] ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
-          <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-2xl" />
-          <div className="absolute -bottom-32 right-32 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] blur-3xl" />
-          <div className="absolute left-1/3 top-0 h-full w-px bg-[color-mix(in_srgb,var(--color-card)_5%,transparent)]" />
-          <div className="absolute right-1/4 top-0 h-full w-px bg-[color-mix(in_srgb,var(--color-card)_5%,transparent)]" />
+          <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
+          <div className="absolute -bottom-32 right-32 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute left-1/3 top-0 h-full w-px bg-white/5" />
+          <div className="absolute right-1/4 top-0 h-full w-px bg-white/5" />
 
           <div className="relative p-6 sm:p-8 lg:p-9">
             <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0 max-w-2xl">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--color-card)] backdrop-blur-sm">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
                   <GraduationCap size={14} />
                   <span>AKADEMIK SISWA</span>
                 </div>
 
-                <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl lg:text-[34px]">
+                <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-[34px]">
                   Daftar Ujian
                 </h1>
 
-                <p className="mt-2 max-w-xl text-sm leading-6 text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] sm:text-[15px]">
+                <p className="mt-2 max-w-xl text-sm leading-6 text-white/80 sm:text-[15px]">
                   Kelola dan ikuti seluruh ujian yang tersedia
                   untuk kelas kamu dalam satu tempat.
                 </p>
@@ -903,7 +903,7 @@ export default function DaftarUjianPage() {
                   {loading ? "—" : stats.belum}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
                 <Clock size={17} />
               </div>
             </div>
@@ -917,7 +917,7 @@ export default function DaftarUjianPage() {
                   {loading ? "—" : stats.sedang}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeWarningSurface} ${themeWarningText}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
                 <CircleDot size={17} />
               </div>
             </div>
@@ -931,7 +931,7 @@ export default function DaftarUjianPage() {
                   {loading ? "—" : stats.selesai}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSurface} ${themeSuccessText}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
                 <CircleCheck size={17} />
               </div>
             </div>
@@ -945,7 +945,7 @@ export default function DaftarUjianPage() {
                   {loading ? "—" : stats.mapel}
                 </p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeInfoSurface} ${themeInfoText}`}>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
                 <BookOpen size={17} />
               </div>
             </div>
@@ -1254,18 +1254,18 @@ export default function DaftarUjianPage() {
 
 function HeroStat({ value, label, highlight = false }) {
   return (
-    <div className="min-w-[92px] rounded-xl border border-[color-mix(in_srgb,var(--color-card)_14%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-4 py-3 backdrop-blur-md">
+    <div className="min-w-[92px] rounded-xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-md">
       <div
         className={`text-xl font-bold ${
           highlight
             ? "text-[var(--color-warning)]"
-            : "text-[var(--color-card)]"
+            : "text-white"
         }`}
       >
         {value}
       </div>
 
-      <div className="mt-0.5 text-[10px] font-medium text-[color-mix(in_srgb,var(--color-card)_75%,transparent)]">
+      <div className="mt-0.5 text-[10px] font-medium text-white/75">
         {label}
       </div>
     </div>
@@ -1389,7 +1389,7 @@ function ErrorState({ error, onRetry }) {
 
         <button
           onClick={onRetry}
-          className={`mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 active:scale-[0.98]`}
+          className={`mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white ${themePrimaryShadow} transition hover:brightness-95 active:scale-[0.98]`}
         >
           <RefreshCw size={15} />
           Coba Lagi

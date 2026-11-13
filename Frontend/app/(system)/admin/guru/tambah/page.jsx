@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { createUser, getUsers } from "@/services/user.service";
+import { getRoles } from "@/services/role.service";
 import { getKategoriJabatan } from "@/services/kategoriJabatan.service";
 import { getAllJabatan } from "@/services/jabatan.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
@@ -141,7 +142,7 @@ function FieldError({ name, touched, validation }) {
 function SectionTitle({ icon: Icon, title, description }) {
   return (
     <div className="mb-6 flex items-start gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] pb-4">
-      <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
         <Icon size={20} />
       </div>
 
@@ -191,17 +192,31 @@ export default function TambahGuruPage() {
         setLoadingRole(true);
         setError("");
 
-        const response = await getUsers({
-          page: 1,
-          limit: 1,
-          role: "guru",
-        });
+        let roleId = "";
 
-        if (!mounted) return;
+        try {
+          const roles = await getRoles();
+          if (!mounted) return;
+          const guruRole = extractArray(roles).find(
+            (r) => String(r?.nama || "").trim().toLowerCase() === "guru"
+          );
+          roleId = guruRole?.id || "";
+        } catch {
+          // fallback ke query user guru bila daftar role gagal dimuat
+        }
 
-        const guru = extractArray(response)[0] || null;
+        if (!roleId) {
+          const response = await getUsers({
+            page: 1,
+            limit: 1,
+            role: "guru",
+          });
 
-        const roleId = guru?.peran?.id || guru?.peranId || "";
+          if (!mounted) return;
+
+          const guru = extractArray(response)[0] || null;
+          roleId = guru?.peran?.id || guru?.peranId || "";
+        }
 
         if (roleId) {
           setGuruRoleId(roleId);
@@ -925,7 +940,7 @@ export default function TambahGuruPage() {
                             <button
                               type="button"
                               onClick={handleGeneratePassword}
-                              className="theme-info theme-border h-11 shrink-0 rounded-xl border px-3 text-xs font-semibold transition hover:opacity-90"
+                              className="border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] h-11 shrink-0 rounded-xl px-3 text-xs font-semibold transition"
                             >
                               Generate
                             </button>
@@ -1457,7 +1472,7 @@ export default function TambahGuruPage() {
                 <aside className="flex min-w-0 flex-col gap-6">
 
                   {/* STATUS ROLE */}
-                  <div className="theme-info theme-border rounded-2xl border p-4">
+                  <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4">
                     <div className="flex items-start gap-3">
                       <div className="theme-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                         {loadingRole ? (
@@ -1468,11 +1483,11 @@ export default function TambahGuruPage() {
                       </div>
 
                       <div>
-                        <p className="text-sm font-semibold text-[var(--color-info)]">
+                        <p className="text-sm font-semibold theme-primary-text">
                           Role pengguna
                         </p>
 
-                        <p className="mt-0.5 text-xs leading-5 text-[var(--color-info)]">
+                        <p className="mt-0.5 text-xs leading-5 theme-primary-text">
                           {loadingRole
                             ? "Sedang mengambil role Guru dari backend..."
                             : guruRoleId
@@ -1484,7 +1499,7 @@ export default function TambahGuruPage() {
                   </div>
 
                   {/* STATUS KATEGORI */}
-                  <div className="theme-info theme-border rounded-2xl border p-4">
+                  <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4">
                     <div className="flex items-start gap-3">
                       <div className="theme-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                         {loadingKategori ? (
@@ -1495,11 +1510,11 @@ export default function TambahGuruPage() {
                       </div>
 
                       <div>
-                        <p className="text-sm font-semibold text-[var(--color-info)]">
+                        <p className="text-sm font-semibold theme-primary-text">
                           Kategori Jabatan
                         </p>
 
-                        <p className="mt-0.5 text-xs leading-5 text-[var(--color-info)]">
+                        <p className="mt-0.5 text-xs leading-5 theme-primary-text">
                           {loadingKategori
                             ? "Sedang mengambil kategori jabatan..."
                             : daftarKategoriJabatan.length > 0
@@ -1511,7 +1526,7 @@ export default function TambahGuruPage() {
                   </div>
 
                   {/* STATUS SHIFT */}
-                  <div className="theme-info theme-border rounded-2xl border p-4">
+                  <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4">
                     <div className="flex items-start gap-3">
                       <div className="theme-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                         {loadingShift ? (
@@ -1522,11 +1537,11 @@ export default function TambahGuruPage() {
                       </div>
 
                       <div>
-                        <p className="text-sm font-semibold text-[var(--color-info)]">
+                        <p className="text-sm font-semibold theme-primary-text">
                           Master Shift Kerja
                         </p>
 
-                        <p className="mt-0.5 text-xs leading-5 text-[var(--color-info)]">
+                        <p className="mt-0.5 text-xs leading-5 theme-primary-text">
                           {loadingShift
                             ? "Sedang mengambil shift kerja..."
                             : daftarShiftKerja.length > 0
@@ -1540,7 +1555,7 @@ export default function TambahGuruPage() {
                   {/* PREVIEW */}
                   <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                      <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <Eye className="h-4 w-4" />
                       </div>
 
@@ -1637,7 +1652,7 @@ export default function TambahGuruPage() {
                   {/* PANDUAN */}
                   <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
-                      <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <Lightbulb size={17} />
                       </div>
 
@@ -1692,18 +1707,18 @@ export default function TambahGuruPage() {
                   </div>
 
                   {/* PENUGASAN MAPEL */}
-                  <div className="theme-warning theme-border rounded-2xl border p-5">
+                  <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-5">
                     <div className="flex items-start gap-3">
-                      <div className="theme-warning theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <BookOpen size={18} />
                       </div>
 
                       <div>
-                        <h3 className="text-sm font-bold text-[var(--color-warning)]">
+                        <h3 className="text-sm font-bold theme-primary-text">
                           Penugasan Mata Pelajaran
                         </h3>
 
-                        <p className="mt-1 text-[11px] leading-5 text-[var(--color-warning)]">
+                        <p className="mt-1 text-[11px] leading-5 theme-primary-text">
                           Penugasan guru ke mata pelajaran dilakukan melalui relasi <b>KelasMapel</b>, bukan langsung dari formulir ini.
                         </p>
                       </div>

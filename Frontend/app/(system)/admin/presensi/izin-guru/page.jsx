@@ -22,6 +22,7 @@ import {
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { getBackendOrigin } from "@/lib/auth";
 import {
   extractIzinFieldErrors,
   formatIzinErrorMessage,
@@ -364,13 +365,8 @@ function getUploadUrl(url) {
 
   if (/^https?:\/\//i.test(url)) return url;
 
-  const apiBase = (
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
-  ).replace(/\/+$/, "");
-
+  const serverBase = getBackendOrigin();
   const path = String(url).replace(/^\/+/, "");
-
-  const serverBase = apiBase.replace(/\/api$/i, "");
 
   return `${serverBase}/${path}`;
 }
@@ -459,7 +455,7 @@ function StatCard({ label, value, icon: Icon, color }) {
         </div>
 
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-xl ${color}`}
+          className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
         >
           <Icon className="h-5 w-5" />
         </div>

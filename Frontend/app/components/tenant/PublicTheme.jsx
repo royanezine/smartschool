@@ -2,10 +2,7 @@
 "use client";
 
 import { useEffect } from "react";
-
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/+$/, "");
+import { getCleanApiBase } from "@/lib/auth";
 
 const DEFAULT_THEME = {
   primary: "#2563EB",
@@ -18,9 +15,7 @@ const DEFAULT_THEME = {
 };
 
 function getPublicApiBase() {
-  return API_URL.endsWith("/api")
-    ? `${API_URL}/publik`
-    : `${API_URL}/api/publik`;
+  return `${getCleanApiBase()}/publik`;
 }
 
 function normalizeHex(value, fallback) {

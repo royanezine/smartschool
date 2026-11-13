@@ -26,7 +26,7 @@ import { getDetailPeminjaman } from "@/services/sarpras.service";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -390,7 +390,7 @@ export default function DetailRiwayatPage() {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className={`mt-5 inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} transition-all hover:-translate-y-0.5`}
+                  className={`mt-5 inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-white ${themePrimaryGradient} ${themePrimaryShadow} transition-all hover:-translate-y-0.5`}
                 >
                   Kembali ke Riwayat
                 </button>
@@ -419,7 +419,7 @@ export default function DetailRiwayatPage() {
                 <button
                   type="button"
                   onClick={handleBack}
-                  className={`mt-5 inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} transition-all hover:-translate-y-0.5`}
+                  className={`mt-5 inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white ${themePrimaryGradient} ${themePrimaryShadow} transition-all hover:-translate-y-0.5`}
                 >
                   Kembali ke Riwayat
                 </button>
@@ -437,15 +437,15 @@ export default function DetailRiwayatPage() {
                   <div className="flex items-stretch">
                     <div className="w-1 flex-shrink-0 bg-[var(--color-card)]/60" />
 
-                    <div className="flex-1 p-5 text-[var(--color-card)] sm:p-6">
+                    <div className="flex-1 p-5 text-white sm:p-6">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div className="flex min-w-0 items-start gap-4">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[var(--color-card)]/20 bg-[var(--color-card)]/10">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-[var(--color-card)]/10">
                             <FileText size={18} />
                           </div>
 
                           <div className="min-w-0">
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-card)]/75">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/75">
                               Riwayat Peminjaman
                             </p>
 
@@ -453,7 +453,7 @@ export default function DetailRiwayatPage() {
                               {detail.nomorPeminjaman || "-"}
                             </h1>
 
-                            <p className="mt-1.5 text-xs text-[var(--color-card)]/70">
+                            <p className="mt-1.5 text-xs text-white/70">
                               {formatTanggalLengkap(
                                 detail.tanggalPengajuan
                               )}
@@ -463,7 +463,7 @@ export default function DetailRiwayatPage() {
 
                         {cfg && StatusIcon && (
                           <span
-                            className="inline-flex flex-shrink-0 items-center gap-1.5 self-start rounded-md border border-[var(--color-card)]/20 bg-[var(--color-card)]/10 px-2.5 py-1 text-[11px] font-semibold"
+                            className="inline-flex flex-shrink-0 items-center gap-1.5 self-start rounded-md border border-white/20 bg-[var(--color-card)]/10 px-2.5 py-1 text-[11px] font-semibold"
                           >
                             <StatusIcon size={12} />
 

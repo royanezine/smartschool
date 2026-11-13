@@ -231,7 +231,7 @@ export default function AkunKasPage() {
               <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <div className="flex items-center gap-3">
-                    <div className="theme-info flex h-12 w-12 items-center justify-center rounded-xl border">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-12 w-12 items-center justify-center rounded-xl border">
                       <Wallet size={23} />
                     </div>
 
@@ -727,30 +727,10 @@ function SummaryCard({
   description,
   tone = "primary",
 }) {
-  const toneMap = {
-    primary: {
-      surface: "bg-[var(--color-primary-background)]",
-      text: "text-[var(--color-primary)]",
-    },
-    success: {
-      surface: "bg-[var(--color-success-background)]",
-      text: "text-[var(--color-success)]",
-    },
-    warning: {
-      surface: "bg-[var(--color-warning-background)]",
-      text: "text-[var(--color-warning)]",
-    },
-    danger: {
-      surface: "bg-[var(--color-danger-background)]",
-      text: "text-[var(--color-danger)]",
-    },
-    info: {
-      surface: "bg-[var(--color-info-background)]",
-      text: "text-[var(--color-info)]",
-    },
+  const current = {
+    surface: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    text: "theme-primary-text",
   };
-
-  const current = toneMap[tone] || toneMap.primary;
 
   // Ukuran font menyesuaikan panjang angka agar nominal besar
   // (ratusan juta / miliar) tetap muat dalam satu baris.

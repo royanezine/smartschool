@@ -601,7 +601,7 @@ export default function PrestasiPage() {
 
                 <div className="flex items-center gap-3">
 
-                  <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] p-2.5 theme-warning">
+                  <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2.5 theme-primary-text">
                     <Award size={19} />
                   </div>
 
@@ -621,7 +621,7 @@ export default function PrestasiPage() {
 
                 <div className="flex items-center gap-3">
 
-                  <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] p-2.5 theme-success">
+                  <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2.5 theme-primary-text">
                     <Trophy size={19} />
                   </div>
 
@@ -641,7 +641,7 @@ export default function PrestasiPage() {
 
                 <div className="flex items-center gap-3">
 
-                  <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)] p-2.5 theme-info">
+                  <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2.5 bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                     <Award size={19} />
                   </div>
 
@@ -994,7 +994,7 @@ export default function PrestasiPage() {
 
                               <Trophy
                                 size={14}
-                                className="shrink-0 text-[var(--color-warning)]"
+                                className="shrink-0 theme-primary-text"
                               />
 
                               {p.juara}
@@ -1023,7 +1023,7 @@ export default function PrestasiPage() {
                                   )
                                 }
                                 title="Lihat detail"
-                                className="rounded-lg p-2 text-blue-500 transition-colors hover:bg-blue-500/10"
+                                className="rounded-lg p-2 theme-text-muted transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                               >
                                 <Eye size={16} />
                               </button>
@@ -1036,7 +1036,7 @@ export default function PrestasiPage() {
                                   )
                                 }
                                 title="Edit prestasi"
-                                className="rounded-lg p-2 text-amber-500 transition-colors hover:bg-amber-500/10"
+                                className="rounded-lg p-2 theme-text-muted transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                               >
                                 <Pencil size={16} />
                               </button>

@@ -27,6 +27,7 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import {
   getDetailUjian,
+  getHasilUjian,
   deleteUjian,
   updateUjian,
 } from "@/services/ujian.service";
@@ -119,16 +120,31 @@ export default function DetailUjianAdminPage() {
 
   const [publishing, setPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(null);
+  const [hasilPeserta, setHasilPeserta] = useState([]);
+  const [hasilError, setHasilError] = useState(null);
 
   const fetchDetail = async (isManual = false) => {
     if (!id) return;
     if (isManual) setRefreshing(true);
     else setLoading(true);
     setError(null);
+    setHasilError(null);
 
     try {
-      const data = await getDetailUjian(id);
-      setUjian(data);
+      const [detailRes, hasilRes] = await Promise.allSettled([
+        getDetailUjian(id),
+        getHasilUjian(id, { page: 1, limit: 50 }),
+      ]);
+      if (detailRes.status !== "fulfilled") {
+        throw detailRes.reason;
+      }
+      setUjian(detailRes.value);
+      if (hasilRes.status === "fulfilled") {
+        setHasilPeserta(Array.isArray(hasilRes.value?.data) ? hasilRes.value.data : []);
+      } else {
+        setHasilPeserta([]);
+        setHasilError(hasilRes.reason?.message || null);
+      }
     } catch (err) {
       console.error("Gagal memuat detail ujian:", err);
       setError(
@@ -147,8 +163,23 @@ export default function DetailUjianAdminPage() {
       try {
         setLoading(true);
         setError(null);
-        const data = await getDetailUjian(id);
-        if (isMounted) setUjian(data);
+        setHasilError(null);
+        const [detailRes, hasilRes] = await Promise.allSettled([
+          getDetailUjian(id),
+          getHasilUjian(id, { page: 1, limit: 50 }),
+        ]);
+        if (detailRes.status !== "fulfilled") {
+          throw detailRes.reason;
+        }
+        if (isMounted) {
+          setUjian(detailRes.value);
+          if (hasilRes.status === "fulfilled") {
+            setHasilPeserta(Array.isArray(hasilRes.value?.data) ? hasilRes.value.data : []);
+          } else {
+            setHasilPeserta([]);
+            setHasilError(hasilRes.reason?.message || null);
+          }
+        }
       } catch (err) {
         console.error("Gagal memuat detail ujian:", err);
         if (isMounted) {
@@ -592,14 +623,59 @@ export default function DetailUjianAdminPage() {
                 )}
               </div>
 
-              <div className="p-5 border theme-border rounded-xl theme-card-soft text-xs space-y-1.5">
-                <div className="flex items-center gap-2 font-semibold theme-text">
-                  <Users size={16} className="text-[var(--color-info)]" />
-                  <span>Pemantauan Sesi Peserta</span>
+              <div className="p-5 border theme-border rounded-xl theme-card-soft text-xs space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 font-semibold theme-text">
+                    <Users size={16} className="theme-primary-text" />
+                    <span>Pemantauan Sesi Peserta ({hasilPeserta.length})</span>
+                  </div>
                 </div>
-                <p className="theme-text-muted leading-relaxed">
-                  Data percobaan siswa dihimpun dari rekaman ujian aktif. Penilaian otomatis diterapkan langsung pada hasil jawaban objektif siswa.
-                </p>
+                {hasilError ? (
+                  <p className="theme-text-muted leading-relaxed">
+                    {hasilError}
+                  </p>
+                ) : hasilPeserta.length === 0 ? (
+                  <p className="theme-text-muted leading-relaxed">
+                    Belum ada sesi pengerjaan siswa untuk ujian ini.
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto rounded-lg border theme-border theme-card">
+                    <table className="w-full text-left text-xs">
+                      <thead className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] text-[11px] uppercase theme-text-muted">
+                        <tr>
+                          <th className="px-3 py-2.5">Nama Siswa</th>
+                          <th className="px-3 py-2.5">NIS / NISN</th>
+                          <th className="px-3 py-2.5">Status</th>
+                          <th className="px-3 py-2.5">Benar / Salah</th>
+                          <th className="px-3 py-2.5">Nilai</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y theme-border">
+                        {hasilPeserta.map((row) => (
+                          <tr key={row.id}>
+                            <td className="px-3 py-2.5 font-medium theme-text">
+                              {row?.pengguna?.namaLengkap || "-"}
+                            </td>
+                            <td className="px-3 py-2.5 theme-text-secondary">
+                              {row?.pengguna?.nisn || row?.pengguna?.nis || "-"}
+                            </td>
+                            <td className="px-3 py-2.5 capitalize theme-text-secondary">
+                              {row?.status || "-"}
+                            </td>
+                            <td className="px-3 py-2.5 theme-text-secondary">
+                              {row?.hasilAsesmen
+                                ? `${row.hasilAsesmen.jumlahBenar ?? 0} / ${row.hasilAsesmen.jumlahSalah ?? 0}`
+                                : "-"}
+                            </td>
+                            <td className="px-3 py-2.5 font-bold text-[var(--color-primary)]">
+                              {row?.hasilAsesmen?.totalNilai ?? row?.nilai ?? "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           ) : null}

@@ -513,7 +513,8 @@ export default function KelolaUserPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+                {/* Kartu statistik: 2 kolom di mobile, 4 kolom penuh di layar besar */}
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
                   <StatCard label="Total User" value={totalItems} icon={Users} color="blue" />
                   <StatCard label="Aktif di Halaman" value={totalAktif} icon={CheckCircle} color="emerald" />
                   <StatCard label="Nonaktif di Halaman" value={totalNonaktif} icon={UserX} color="rose" />
@@ -522,7 +523,7 @@ export default function KelolaUserPage() {
 
                 <section className="theme-card rounded-2xl border p-4 shadow-sm sm:p-5">
                   <div className="mb-4 flex items-center gap-2 sm:gap-3">
-                    <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-9 sm:w-9">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-9 sm:w-9">
                       <Filter size={14} />
                     </div>
                     <div>
@@ -783,7 +784,7 @@ export default function KelolaUserPage() {
                                       <button
                                         onClick={() => router.push(`/admin/pengguna/kelola-user/${item.id}`)}
                                         disabled={isDeleting}
-                                        className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)] disabled:opacity-40"
+                                        className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] disabled:opacity-40"
                                         title="Detail"
                                       >
                                         <Eye size={15} />
@@ -794,7 +795,7 @@ export default function KelolaUserPage() {
                                           type="button"
                                           onClick={() => setUserToResetPassword(item)}
                                           disabled={isDeleting || isUpdatingStatus}
-                                          className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-amber-500/10 hover:text-amber-600 disabled:opacity-40"
+                                          className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] disabled:opacity-40"
                                           title="Reset Kata Sandi"
                                           aria-label={`Reset kata sandi ${item.namaLengkap || "pengguna"}`}
                                         >
@@ -895,7 +896,7 @@ export default function KelolaUserPage() {
 
                 <section className="theme-card rounded-2xl border p-5 shadow-sm sm:p-6">
                   <div className="mb-4 flex items-center gap-3">
-                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-xl">
                       <Shield size={16} />
                     </div>
                     <div>
@@ -910,7 +911,8 @@ export default function KelolaUserPage() {
                       <p className="theme-text-muted mt-2 text-xs">Belum ada data role</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6 2xl:grid-cols-8">
+                    /* auto-fit: kartu role otomatis melebar mengisi baris, tanpa sisa kosong di kanan */
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2">
                       {roleOptions.map((role) => {
                         const Icon = getRoleIcon(role.label);
                         const color = getRoleColor(role.label);
@@ -1002,18 +1004,11 @@ function SortableHeader({
   );
 }
 
-function StatCard({ label, value, icon: Icon, color }) {
-  const colorMap = {
-    blue: { bg: "bg-[var(--color-info-background)]", text: "text-[var(--color-primary)]" },
-    emerald: { bg: "bg-[var(--color-success-background)]", text: "text-[var(--color-success)]" },
-    rose: { bg: "bg-[var(--color-danger-background)]", text: "text-[var(--color-danger)]" },
-    indigo: { bg: "bg-[var(--color-sidebar-active)]", text: "text-[var(--color-sidebar-text-active)]" },
-  };
-
-  const styles = colorMap[color] || colorMap.blue;
+function StatCard({ label, value, icon: Icon }) {
+  const styles = { bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]", text: "theme-primary-text" };
 
   return (
-    <div className="theme-card group rounded-2xl border p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg sm:p-5">
+    <div className="theme-card group h-full rounded-2xl border p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">

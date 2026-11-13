@@ -172,7 +172,7 @@ export default function EditKategoriPage() {
                     className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-xl"
                   >
                     <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-4 sm:px-6 sm:py-5">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-lg">
                         <Tag size={16} />
                       </div>
 
@@ -294,7 +294,7 @@ export default function EditKategoriPage() {
 
                       <div className="relative">
                         <div className="mb-4 flex items-center gap-2">
-                          <div className="theme-info flex h-7 w-7 items-center justify-center rounded-lg">
+                          <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-7 w-7 items-center justify-center rounded-lg">
                             <Eye size={14} />
                           </div>
 

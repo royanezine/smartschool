@@ -516,7 +516,7 @@ export default function TambahRuanganPage() {
                 {/* Informasi Samping */}
                 <aside className="flex min-w-0 flex-col gap-5">
 
-                  <div className="theme-info flex items-start gap-3 rounded-2xl border p-4">
+                  <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-start gap-3 rounded-2xl border p-4">
                     <Info
                       size={17}
                       className="mt-0.5 shrink-0"
@@ -561,7 +561,7 @@ export default function TambahRuanganPage() {
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] p-2 text-[var(--color-info)]">
+                        <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] p-2 theme-primary-text">
                           <Layers3 size={17} />
                         </div>
 
@@ -585,7 +585,7 @@ export default function TambahRuanganPage() {
                     <div className="mb-3 flex items-center gap-2">
                       <Lightbulb
                         size={17}
-                        className="text-[var(--color-warning)]"
+                        className="theme-primary-text"
                       />
 
                       <h2 className="theme-text text-sm font-bold">

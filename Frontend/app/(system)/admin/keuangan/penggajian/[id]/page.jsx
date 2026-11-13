@@ -580,20 +580,19 @@ function SummaryCard({ icon: Icon, label, value, tone = "blue" }) {
   const toneClasses = {
     blue: {
       wrapper: "theme-card border theme-border",
-      icon: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
+      icon: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
     },
     indigo: {
       wrapper: "theme-card border theme-border",
-      icon: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300",
+      icon: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
     },
     emerald: {
       wrapper: "theme-card border theme-border",
-      icon: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
+      icon: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
     },
     highlight: {
-      wrapper:
-        "border-blue-200 bg-blue-50/70 dark:border-blue-900/60 dark:bg-blue-950/30",
-      icon: "bg-white text-blue-700 dark:bg-slate-900 dark:text-blue-300",
+      wrapper: "border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]",
+      icon: "bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] theme-primary-text",
     },
   };
 
@@ -612,7 +611,7 @@ function SummaryCard({ icon: Icon, label, value, tone = "blue" }) {
       <p
         className={`mt-4 whitespace-nowrap text-xl font-bold tracking-tight tabular-nums sm:text-2xl ${
           tone === "highlight"
-            ? "text-blue-900 dark:text-blue-100"
+            ? "theme-primary-text"
             : "theme-text"
         }`}
       >

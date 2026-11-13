@@ -14,7 +14,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -625,7 +625,7 @@ function RingkasanTab({
               }
               className={
                 active
-                  ? `${themePrimaryGradient} rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--color-card)]`
+                  ? `${themePrimaryGradient} rounded-lg px-3 py-1.5 text-xs font-medium text-white`
                   : `rounded-lg px-3 py-1.5 text-xs font-medium theme-text-secondary ${themeNeutralHover}`
               }
             >
@@ -824,7 +824,7 @@ function RingkasanTab({
                       className="pointer-events-none opacity-0 transition-opacity group-hover:opacity-100"
                     >
                       <div
-                        className={`${themePrimaryGradient} rounded px-2 py-1 text-center text-[10px] text-[var(--color-card)]`}
+                        className={`${themePrimaryGradient} rounded px-2 py-1 text-center text-[10px] text-white`}
                       >
                         {val}
                       </div>
@@ -1351,7 +1351,7 @@ function SekolahTab({
                 className={`h-8 w-8 rounded-lg text-sm transition-colors ${
                   currentPage ===
                   i + 1
-                    ? `${themePrimaryGradient} text-[var(--color-card)]`
+                    ? `${themePrimaryGradient} text-white`
                     : `theme-text-secondary ${themeNeutralHover}`
                 }`}
               >

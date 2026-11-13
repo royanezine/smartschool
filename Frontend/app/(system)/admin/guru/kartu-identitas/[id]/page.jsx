@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { getUserById } from "@/services/user.service";
+import { getBackendOrigin } from "@/lib/auth";
 import {
   ArrowLeft,
   CreditCard,
@@ -84,9 +85,7 @@ function getAvatarUrl(avatar) {
   if (!avatar || typeof avatar !== "string") return null;
   if (/^(https?:|data:)/i.test(avatar)) return avatar;
 
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-  ).replace(/\/+$/, "");
+  const baseUrl = getBackendOrigin();
 
   return `${baseUrl}/${avatar.replace(/^\/+/, "")}`;
 }
@@ -279,7 +278,7 @@ export default function DetailPegawaiPage() {
                 <button
                   type="button"
                   onClick={handleEdit}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl theme-warning theme-sidebar-hover transition-colors text-sm font-medium"
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text transition-colors text-sm font-medium hover:opacity-80"
                 >
                   <Pencil size={15} />
                   Edit

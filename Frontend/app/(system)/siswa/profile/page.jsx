@@ -26,8 +26,18 @@ import {
   MapPin,
 } from "lucide-react";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+function getBackendOrigin() {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "").replace(/\/api(?:\/v1)?$/i, "");
+  }
+  if (typeof window !== "undefined") {
+    return ["localhost", "127.0.0.1"].includes(window.location.hostname)
+      ? "http://localhost:5000"
+      : window.location.origin;
+  }
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
+}
 
 /* ---------- helpers ---------- */
 
@@ -41,11 +51,9 @@ function getAvatarUrl(avatar) {
     return value;
   }
 
-  if (value.startsWith("/")) {
-    return `${API_URL}${value}`;
-  }
-
-  return `${API_URL}/${value}`;
+  const origin = getBackendOrigin();
+  const normalizedPath = value.startsWith("/") ? value : `/${value}`;
+  return `${origin}${normalizedPath}`;
 }
 
 function getInitials(name) {
@@ -283,10 +291,10 @@ function StudentCard({ profile, avatarUrl, initials }) {
 
         <div className="relative z-10 flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-100">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
               Student Card
             </p>
-            <p className="mt-1 text-xs text-blue-100/80">
+            <p className="mt-1 text-xs text-white/80">
               SmartSchool
             </p>
           </div>
@@ -309,7 +317,7 @@ function StudentCard({ profile, avatarUrl, initials }) {
               }}
             />
           ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-2xl border-4 border-[var(--color-card)] bg-[var(--color-info-background)] text-2xl font-bold text-[var(--color-primary)] shadow-md">
+            <div className="flex h-24 w-24 items-center justify-center rounded-2xl border-4 border-[var(--color-card)] bg-[color-mix(in_srgb,var(--color-primary)_12%,var(--color-card))] text-2xl font-bold text-[var(--color-primary)] shadow-md">
               {initials}
             </div>
           )}

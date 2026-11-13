@@ -323,7 +323,7 @@ export default function TambahMasterShiftPage() {
               <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_350px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
                 <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
                   <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-4 md:px-6">
-                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg border">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 items-center justify-center rounded-lg border">
                       <Clock3 size={17} />
                     </div>
 

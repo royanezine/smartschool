@@ -17,6 +17,34 @@ import {
   Quote,
 } from "lucide-react";
 
+function ToolbarButton({
+  onClick,
+  active = false,
+  title,
+  children,
+  onSaveSelection,
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={title}
+      onMouseDown={(event) => {
+        event.preventDefault();
+        onSaveSelection?.();
+      }}
+      onClick={onClick}
+      className={`inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-sm font-semibold transition ${
+        active
+          ? "border-blue-200 bg-blue-50 text-blue-700"
+          : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function RichTextEditor({
   value = "",
   onChange,
@@ -192,32 +220,7 @@ export default function RichTextEditor({
     }
   };
 
-  const ToolbarButton = ({
-    onClick,
-    active = false,
-    title,
-    children,
-  }) => {
-    return (
-      <button
-        type="button"
-        title={title}
-        aria-label={title}
-        onMouseDown={(event) => {
-          event.preventDefault();
-          saveSelection();
-        }}
-        onClick={onClick}
-        className={`inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-sm font-semibold transition ${
-          active
-            ? "border-blue-200 bg-blue-50 text-blue-700"
-            : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-        }`}
-      >
-        {children}
-      </button>
-    );
-  };
+
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-50">
@@ -227,6 +230,7 @@ export default function RichTextEditor({
         <div className="flex flex-wrap items-center gap-1.5">
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={handleBold}
             active={activeFormats.bold}
             title="Bold"
@@ -235,6 +239,7 @@ export default function RichTextEditor({
           </ToolbarButton>
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={handleItalic}
             active={activeFormats.italic}
             title="Italic"
@@ -243,6 +248,7 @@ export default function RichTextEditor({
           </ToolbarButton>
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={() => handleHeading("h2")}
             title="Heading 2"
           >
@@ -250,6 +256,7 @@ export default function RichTextEditor({
           </ToolbarButton>
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={() => handleHeading("h3")}
             title="Heading 3"
           >
@@ -259,6 +266,7 @@ export default function RichTextEditor({
           <div className="mx-1 hidden h-6 w-px bg-slate-200 sm:block" />
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={handleBulletList}
             active={activeFormats.unorderedList}
             title="Bullet List"
@@ -267,6 +275,7 @@ export default function RichTextEditor({
           </ToolbarButton>
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={handleNumberList}
             active={activeFormats.orderedList}
             title="Numbered List"
@@ -275,6 +284,7 @@ export default function RichTextEditor({
           </ToolbarButton>
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={handleQuote}
             title="Quote"
           >
@@ -284,6 +294,7 @@ export default function RichTextEditor({
           <div className="mx-1 hidden h-6 w-px bg-slate-200 sm:block" />
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={handleLinkOpen}
             title="Tambah Link"
           >
@@ -291,6 +302,7 @@ export default function RichTextEditor({
           </ToolbarButton>
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={handleImage}
             title="Tambah Gambar"
           >
@@ -300,6 +312,7 @@ export default function RichTextEditor({
           <div className="mx-1 hidden h-6 w-px bg-slate-200 sm:block" />
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={handleUndo}
             title="Undo"
           >
@@ -307,6 +320,7 @@ export default function RichTextEditor({
           </ToolbarButton>
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={handleRedo}
             title="Redo"
           >
@@ -314,6 +328,7 @@ export default function RichTextEditor({
           </ToolbarButton>
 
           <ToolbarButton
+            onSaveSelection={saveSelection}
             onClick={handleRemoveFormat}
             title="Hapus Format"
           >

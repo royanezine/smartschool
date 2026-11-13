@@ -241,7 +241,7 @@ export default function InvoicePage() {
                     value={formatRupiah(totalLunas)}
                     description={`${lunas.length} invoice lunas`}
                     icon={CheckCircle2}
-                    iconClass="text-[var(--color-success)]"
+                    iconClass="theme-primary-text"
                   />
 
                   <StatCard
@@ -249,7 +249,7 @@ export default function InvoicePage() {
                     value={formatRupiah(totalBelum)}
                     description={`${belumDibayar.length} invoice`}
                     icon={Clock3}
-                    iconClass="text-[var(--color-warning)]"
+                    iconClass="theme-primary-text"
                   />
 
                   <StatCard
@@ -257,7 +257,7 @@ export default function InvoicePage() {
                     value={gagal.length}
                     description="Transaksi gagal"
                     icon={AlertCircle}
-                    iconClass="text-[var(--color-danger)]"
+                    iconClass="theme-primary-text"
                   />
                 </div>
 

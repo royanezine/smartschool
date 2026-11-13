@@ -432,7 +432,15 @@ export default function TugasSiswaPage() {
                     Masih dalam tenggat waktu
                   </p>
                 </div>
-                <div className="w-11 h-11 rounded-xl theme-success flex items-center justify-center">
+                <div
+                  className={`
+                    w-11 h-11
+                    rounded-xl
+                    ${themePrimarySoft}
+                    flex items-center justify-center
+                    text-[var(--color-primary)]
+                  `}
+                >
                   <CheckCircle2 size={21} />
                 </div>
               </div>
@@ -458,7 +466,15 @@ export default function TugasSiswaPage() {
                     Tenggat waktu terlampaui
                   </p>
                 </div>
-                <div className="w-11 h-11 rounded-xl theme-danger flex items-center justify-center">
+                <div
+                  className={`
+                    w-11 h-11
+                    rounded-xl
+                    ${themePrimarySoft}
+                    flex items-center justify-center
+                    text-[var(--color-primary)]
+                  `}
+                >
                   <Clock3 size={21} />
                 </div>
               </div>
@@ -484,7 +500,15 @@ export default function TugasSiswaPage() {
                     Berkas jawaban siswa diterima
                   </p>
                 </div>
-                <div className="w-11 h-11 rounded-xl theme-info flex items-center justify-center">
+                <div
+                  className={`
+                    w-11 h-11
+                    rounded-xl
+                    ${themePrimarySoft}
+                    flex items-center justify-center
+                    text-[var(--color-primary)]
+                  `}
+                >
                   <FileText size={21} />
                 </div>
               </div>
@@ -720,7 +744,7 @@ export default function TugasSiswaPage() {
                             </div>
 
                             <div className="flex items-center gap-1.5 ml-auto">
-                              <CheckCircle2 size={14} className="text-blue-500" />
+                              <CheckCircle2 size={14} className="theme-primary-text" />
                               <span>
                                 Pengumpulan:{" "}
                                 <strong className="theme-text">

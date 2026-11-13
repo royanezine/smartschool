@@ -38,6 +38,19 @@ export interface PengaturanGlobalSemua {
   pemeliharaan: PengaturanGlobalPemeliharaan;
 }
 
+export interface PengaturanGlobalPublik {
+  identitas: PengaturanGlobalIdentitas;
+  pemeliharaan: PengaturanGlobalPemeliharaan;
+}
+
+export async function getPengaturanGlobalPublik(): Promise<{
+  success: boolean;
+  message: string;
+  data: PengaturanGlobalPublik;
+}> {
+  return apiFetch("/api/pengaturan/global/publik");
+}
+
 export async function getPengaturanGlobalSemua(): Promise<{
   success: boolean;
   message: string;
@@ -74,14 +87,27 @@ export async function upsertPengaturan(payload: {
   });
 }
 
-export async function getKkm(): Promise<any> {
+export interface KkmConfig {
+  kkmDefault: number;
+  kkmPerMapel?: Record<string, number>;
+}
+
+export async function getKkm(): Promise<{
+  success: boolean;
+  message: string;
+  data: KkmConfig;
+}> {
   return apiFetch("/api/pengaturan/kkm");
 }
 
-export async function setKkm(nilai: number): Promise<any> {
+export async function setKkm(payload: KkmConfig): Promise<{
+  success: boolean;
+  message: string;
+  data: KkmConfig;
+}> {
   return apiFetch("/api/pengaturan/kkm", {
     method: "POST",
-    body: JSON.stringify({ nilai }),
+    body: JSON.stringify(payload),
   });
 }
 

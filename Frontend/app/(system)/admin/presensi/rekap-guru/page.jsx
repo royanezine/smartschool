@@ -20,13 +20,9 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { getToken, hasMenuAccess } from "@/lib/auth";
+import { getToken, hasMenuAccess, getBackendOrigin } from "@/lib/auth";
 
-const API_BASE = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-)
-  .replace(/\/+$/, "")
-  .replace(/\/api$/i, "");
+const API_BASE = getBackendOrigin();
 
 const PAGE_SIZE = 10;
 
@@ -303,7 +299,7 @@ function StatCard({ icon: Icon, label, value, detail }) {
           </p>
         </div>
 
-        <div className="rounded-lg bg-blue-50 p-3 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+        <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-3 theme-primary-text">
           <Icon size={21} />
         </div>
       </div>
@@ -651,7 +647,7 @@ export default function RekapGuruPage() {
                 <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                   <span>Manajemen Guru</span>
                   <span>/</span>
-                  <span className="text-blue-700 dark:text-blue-400">
+                  <span className="theme-primary-text">
                     Rekap Guru
                   </span>
                 </div>
@@ -681,9 +677,9 @@ export default function RekapGuruPage() {
               </button>
             </div>
 
-            <div className="flex flex-col gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-blue-900/60 dark:bg-blue-950/30">
+            <div className="flex flex-col gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 rounded-lg bg-white p-2 text-blue-700 dark:bg-slate-900 dark:text-blue-300">
+                <div className="mt-0.5 rounded-lg p-2 bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                   <CalendarDays size={19} />
                 </div>
 
@@ -748,10 +744,10 @@ export default function RekapGuruPage() {
               />
             </div>
 
-            <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 dark:border-blue-900/60 dark:bg-blue-950/30">
+            <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4">
               <CalendarDays
                 size={20}
-                className="mt-0.5 shrink-0 text-blue-700 dark:text-blue-300"
+                className="mt-0.5 shrink-0 theme-primary-text"
               />
 
               <div>
@@ -859,7 +855,7 @@ export default function RekapGuruPage() {
                 <div className="flex min-h-64 flex-col items-center justify-center gap-3">
                   <LoaderCircle
                     size={28}
-                    className="animate-spin text-blue-600"
+                    className="animate-spin theme-primary-text"
                   />
 
                   <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -911,7 +907,7 @@ export default function RekapGuruPage() {
                           >
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-sm font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-sm font-bold theme-primary-text">
                                   {teacher.nama
                                     .split(" ")
                                     .filter(Boolean)
@@ -943,7 +939,7 @@ export default function RekapGuruPage() {
                                   {teacher.shifts.map((shift) => (
                                     <span
                                       key={shift.id}
-                                      className="inline-flex items-center gap-1.5 rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300"
+                                      className="inline-flex items-center gap-1.5 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2.5 py-1.5 text-xs font-medium theme-primary-text"
                                     >
                                       <BriefcaseBusiness size={13} />
                                       {shift.nama}
@@ -1088,7 +1084,7 @@ export default function RekapGuruPage() {
           >
             <div className="flex items-start justify-between gap-4 border-b border-slate-200 p-5 dark:border-slate-800">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+                <p className="text-xs font-semibold uppercase tracking-wider theme-primary-text">
                   Detail guru
                 </p>
 
@@ -1150,7 +1146,7 @@ export default function RekapGuruPage() {
                         className="rounded-lg border border-slate-200 p-4 dark:border-slate-800"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="rounded-lg bg-blue-50 p-2 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                          <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2 theme-primary-text">
                             <Clock3 size={18} />
                           </div>
 
@@ -1226,7 +1222,7 @@ export default function RekapGuruPage() {
               <button
                 type="button"
                 onClick={() => setSelectedTeacher(null)}
-                className="h-10 rounded-lg bg-blue-700 px-5 text-sm font-semibold text-white transition hover:bg-blue-800"
+                className="h-10 rounded-lg theme-primary px-5 text-sm font-semibold text-white transition hover:opacity-90"
               >
                 Tutup
               </button>

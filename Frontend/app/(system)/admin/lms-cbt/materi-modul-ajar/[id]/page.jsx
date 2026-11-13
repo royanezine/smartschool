@@ -265,7 +265,7 @@ export default function DetailMateriPage() {
                         {data.tipe === "link" && data.urlLink ? (
                           <div className="flex flex-col gap-4">
                             <div className="flex items-start gap-3 min-w-0">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--color-info-background)] text-[var(--color-info)]">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                                 <Link2 className="h-5 w-5" />
                               </div>
                               <div className="min-w-0">
@@ -326,7 +326,7 @@ export default function DetailMateriPage() {
                     {/* Card Metadata */}
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3.5">
-                        <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                           <Layers className="h-4 w-4" />
                         </div>
                         <h2 className="theme-text text-sm font-bold">Metadata</h2>
@@ -350,8 +350,8 @@ export default function DetailMateriPage() {
                     </div>
 
                     {/* Card Info (Biru) */}
-                    <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
-                      <Info size={16} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text theme-border flex items-start gap-3 rounded-2xl border p-4">
+                      <Info size={16} className="mt-0.5 shrink-0 theme-primary-text" />
                       <p className="text-[11px] leading-5">
                         Materi ini dapat diakses oleh siswa di kelas yang terdaftar. Pastikan tautan atau berkas masih valid.
                       </p>
@@ -370,7 +370,7 @@ export default function DetailMateriPage() {
           <div className="theme-card theme-border w-full max-w-md rounded-2xl border p-6 shadow-2xl">
             <h3 className="theme-text text-lg font-bold">Hapus Materi?</h3>
             <p className="theme-text-secondary mt-2 text-sm leading-relaxed">
-              Materi <strong>"{data?.judul}"</strong> akan dihapus dari sistem. Tindakan ini tidak dapat dibatalkan.
+              Materi <strong>&quot;{data?.judul}&quot;</strong> akan dihapus dari sistem. Tindakan ini tidak dapat dibatalkan.
             </p>
 
             {deleteError && (

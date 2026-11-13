@@ -50,7 +50,7 @@ import { ajukanIzin, formatIzinErrorMessage } from "@/services/izin.service";
 import { apiFetch } from "../../../../lib/api";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -1042,22 +1042,22 @@ export default function SiswaAbsensiPage() {
           <div className="p-6 sm:p-7">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/75">
                   Portal Siswa
                 </p>
 
-                <h1 className="mt-2 text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl">
+                <h1 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
                   Absensi
                 </h1>
 
-                <p className="mt-1.5 text-sm text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
+                <p className="mt-1.5 text-sm text-white/80">
                   {formatDate(new Date())}
                   <span className="mx-2 opacity-60">•</span>
                   {formatTime(new Date())}
                 </p>
 
                 {todayTerlambat && (
-                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-card)_18%,transparent)] px-3 py-1 text-[11px] font-semibold text-[var(--color-card)] backdrop-blur-sm">
+                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
                     <AlarmClock size={12} />
                     Terlambat {formatDurasi(todayTerlambatMenit)} hari ini
                   </div>
@@ -1065,7 +1065,7 @@ export default function SiswaAbsensiPage() {
               </div>
 
               {kelas && (
-                <div className="inline-flex items-center gap-2 self-start rounded-lg bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] px-3 py-2 text-xs font-semibold text-[var(--color-card)] backdrop-blur-sm sm:self-auto">
+                <div className="inline-flex items-center gap-2 self-start rounded-lg bg-white/15 px-3 py-2 text-xs font-semibold text-white backdrop-blur-sm sm:self-auto">
                   <UserCheck size={14} />
                   {kelas.nama}
                 </div>
@@ -1073,30 +1073,30 @@ export default function SiswaAbsensiPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 border-t border-[color-mix(in_srgb,var(--color-card)_14%,transparent)]">
+          <div className="grid grid-cols-3 border-t border-white/15">
             <div className="px-6 py-4 text-center">
-              <p className="text-xl font-bold text-[var(--color-card)] sm:text-2xl">
+              <p className="text-xl font-bold text-white sm:text-2xl">
                 {statistikAbsensi.total}
               </p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
+              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/70">
                 Total
               </p>
             </div>
 
-            <div className="border-x border-[color-mix(in_srgb,var(--color-card)_14%,transparent)] px-6 py-4 text-center">
-              <p className="text-xl font-bold text-[var(--color-card)] sm:text-2xl">
+            <div className="border-x border-white/15 px-6 py-4 text-center">
+              <p className="text-xl font-bold text-white sm:text-2xl">
                 {statistikAbsensi.hadir}
               </p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
+              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/70">
                 Hadir
               </p>
             </div>
 
             <div className="px-6 py-4 text-center">
-              <p className="text-xl font-bold text-[var(--color-card)] sm:text-2xl">
+              <p className="text-xl font-bold text-white sm:text-2xl">
                 {statistikAbsensi.izinSakit + statistikAbsensi.alpha}
               </p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
+              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/70">
                 Izin/Alpha
               </p>
             </div>
@@ -1115,53 +1115,44 @@ export default function SiswaAbsensiPage() {
               label: "Hadir",
               value: statistikAbsensi.hadir,
               icon: CalendarCheck,
-              tone: "success",
+              tone: "primary",
             },
             {
               label: "Izin",
               value: statistikAbsensi.izin,
               icon: FileText,
-              tone: "info",
+              tone: "primary",
             },
             {
               label: "Sakit",
               value: statistikAbsensi.sakit,
               icon: HeartPulse,
-              tone: "warning",
+              tone: "primary",
             },
             {
               label: "Alpha",
               value: statistikAbsensi.alpha,
               icon: CalendarX,
-              tone: "neutral",
+              tone: "primary",
             },
             {
               label: "Terlambat",
               value: statistikAbsensi.totalTerlambat,
               subtitle: `${formatDurasi(statistikAbsensi.totalMenitTerlambat)}`,
               icon: AlarmClock,
-              tone: "warning",
+              tone: "primary",
             },
             {
               label: "Tepat Waktu",
               value: statistikAbsensi.totalTepatWaktu,
               subtitle: `${statistikAbsensi.persentaseTepatWaktu}%`,
               icon: Timer,
-              tone: "success",
+              tone: "primary",
             },
           ].map((card) => {
             const Icon = card.icon;
 
-            const toneClass =
-              card.tone === "primary"
-                ? `${themePrimarySoft} ${themePrimaryText}`
-                : card.tone === "success"
-                  ? `${themeSuccessSurface} ${themeSuccessText}`
-                  : card.tone === "info"
-                    ? `${themeInfoSurface} ${themeInfoText}`
-                    : card.tone === "warning"
-                      ? `${themeWarningSurface} ${themeWarningText}`
-                      : `${themeNeutralSurface} theme-text`;
+            const toneClass = `${themePrimarySoft} ${themePrimaryText}`;
 
             return (
               <div
@@ -1392,7 +1383,7 @@ export default function SiswaAbsensiPage() {
                     <button
                       type="button"
                       onClick={loadMetodeAktif}
-                      className={`mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient}`}
+                      className={`mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold text-white ${themePrimaryGradient}`}
                     >
                       <RefreshCw size={13} />
                       Cek Kembali
@@ -1431,7 +1422,7 @@ export default function SiswaAbsensiPage() {
                             <div
                               className={`flex h-10 w-10 items-center justify-center rounded-lg ${
                                 selected
-                                  ? `${themePrimaryGradient} text-[var(--color-card)]`
+                                  ? `${themePrimaryGradient} text-white`
                                   : `${themeNeutralSurface} theme-text-secondary`
                               }`}
                             >
@@ -1536,7 +1527,7 @@ export default function SiswaAbsensiPage() {
                               !kelas?.kelasId ||
                               !barcodeData.trim()
                             }
-                            className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
+                            className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-white transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
                           >
                             {loadingAbsen ? (
                               <>
@@ -1645,7 +1636,7 @@ export default function SiswaAbsensiPage() {
 
                               {cameraLoading && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_70%,transparent)]">
-                                  <div className="flex flex-col items-center gap-2 text-[var(--color-card)]">
+                                  <div className="flex flex-col items-center gap-2 text-white">
                                     <Loader2
                                       size={24}
                                       className="animate-spin"
@@ -1671,7 +1662,7 @@ export default function SiswaAbsensiPage() {
                                 type="button"
                                 onClick={takePhoto}
                                 disabled={cameraLoading || !cameraReady}
-                                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
                               >
                                 <Camera size={16} />
                                 Ambil Foto
@@ -1736,7 +1727,7 @@ export default function SiswaAbsensiPage() {
                                   !kelas?.kelasId ||
                                   sudahAbsen
                                 }
-                                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
                               >
                                 {loadingAbsen ? (
                                   <>
@@ -1792,7 +1783,7 @@ export default function SiswaAbsensiPage() {
                                 sudahAbsen ||
                                 cameras.length === 0
                               }
-                              className={`mt-5 inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
+                              className={`mt-5 inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
                             >
                               <Camera size={16} />
                               {sudahAbsen ? "Sudah Absen" : "Buka Kamera"}
@@ -1885,7 +1876,7 @@ export default function SiswaAbsensiPage() {
                             !kelas?.kelasId ||
                             sudahAbsen
                           }
-                          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-white transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
                         >
                           {loadingAbsen || locationLoading ? (
                             <>
@@ -2159,7 +2150,7 @@ export default function SiswaAbsensiPage() {
                           }
                           className={`flex aspect-square items-center justify-center rounded text-[11px] font-medium ${
                             isCurrentDay
-                              ? `${themePrimaryGradient} font-bold text-[var(--color-card)]`
+                              ? `${themePrimaryGradient} font-bold text-white`
                               : dayTerlambat
                                 ? `${themeWarningSurface} font-semibold text-[var(--color-warning)]`
                                 : hasAbsen
@@ -2226,7 +2217,7 @@ export default function SiswaAbsensiPage() {
                           onClick={() => setJenisIzin(jenis)}
                           className={`rounded-lg border px-2 py-2 text-[11px] font-semibold capitalize transition ${
                             jenisIzin === jenis
-                              ? `${themePrimaryGradient} border-transparent text-[var(--color-card)]`
+                              ? `${themePrimaryGradient} border-transparent text-white`
                               : `${themeNeutralBorder} theme-card theme-text-secondary ${themeNeutralHover}`
                           }`}
                         >
@@ -2357,7 +2348,7 @@ export default function SiswaAbsensiPage() {
                         disabled={
                           loadingAbsen || !kelas?.kelasId || sudahAbsen
                         }
-                        className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                        className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold text-white transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         {loadingAbsen ? "Kirim..." : "Kirim"}
                       </button>
@@ -2443,7 +2434,7 @@ export default function SiswaAbsensiPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab("absensi")}
-                    className={`mt-5 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} hover:brightness-95`}
+                    className={`mt-5 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white transition ${themePrimaryGradient} hover:brightness-95`}
                   >
                     <ScanFace size={13} />
                     Mulai Absensi

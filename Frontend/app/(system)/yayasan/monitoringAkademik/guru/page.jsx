@@ -12,7 +12,7 @@ import {
 import { getLaporanGuru } from "@/services/yayasan.service";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -126,7 +126,7 @@ export default function LaporanGuruPage() {
           <div className="min-w-0">
             <div className="flex items-center gap-2.5">
               <div
-                className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
               >
                 <GraduationCap size={18} />
               </div>
@@ -141,15 +141,13 @@ export default function LaporanGuruPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div
             className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
           >
             <div className="flex items-center gap-3">
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
-              >
-                <GraduationCap size={18} />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                <GraduationCap size={18} className="theme-primary-text" />
               </div>
               <div>
                 <p className="theme-text-secondary text-sm">Total Guru</p>
@@ -164,12 +162,15 @@ export default function LaporanGuruPage() {
             className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-[var(--color-success)]">
-                <GraduationCap size={18} />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                <GraduationCap size={18} className="theme-primary-text" />
               </div>
               <div>
-                <p className="theme-text-secondary text-sm">Guru Aktif</p>
-                <p className="mt-1 text-2xl font-semibold text-[var(--color-success)]">
+                <p className="flex items-center gap-1.5 text-sm theme-text-secondary">
+                  <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
+                  Guru Aktif
+                </p>
+                <p className="theme-text mt-1 text-2xl font-semibold">
                   {loading ? "..." : guruAktif}
                 </p>
               </div>
@@ -180,12 +181,15 @@ export default function LaporanGuruPage() {
             className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] text-[var(--color-warning)]">
-                <GraduationCap size={18} />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                <GraduationCap size={18} className="theme-primary-text" />
               </div>
               <div>
-                <p className="theme-text-secondary text-sm">Guru Nonaktif</p>
-                <p className="mt-1 text-2xl font-semibold text-[var(--color-warning)]">
+                <p className="flex items-center gap-1.5 text-sm theme-text-secondary">
+                  <span className="h-2 w-2 rounded-full bg-[var(--color-warning)]" />
+                  Guru Nonaktif
+                </p>
+                <p className="theme-text mt-1 text-2xl font-semibold">
                   {loading ? "..." : guruNonaktif}
                 </p>
               </div>
@@ -279,10 +283,8 @@ export default function LaporanGuruPage() {
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div
-                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${themePrimarySoft} text-[var(--color-primary)]`}
-                          >
-                            <GraduationCap className="h-4 w-4" />
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+                            <GraduationCap className="theme-primary-text h-4 w-4" />
                           </div>
                           <span className="theme-text font-medium">{g.nama}</span>
                         </div>

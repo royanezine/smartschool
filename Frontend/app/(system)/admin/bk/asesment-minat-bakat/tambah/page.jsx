@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
 import { createAsesmenMinatBakat } from "@/services/bk.service";
+import { getSemuaSiswa } from "@/services/siswa.service";
 
 
 const inputClass =
@@ -18,6 +19,8 @@ export default function CreateAsesmenPage() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [siswaOptions, setSiswaOptions] = useState([]);
+  const [loadingSiswa, setLoadingSiswa] = useState(true);
 
   const [form, setForm] = useState({
     siswaId: "",
@@ -31,6 +34,31 @@ export default function CreateAsesmenPage() {
     status: "selesai",
     catatan: "",
   });
+
+  useEffect(() => {
+    let active = true;
+    getSemuaSiswa({ limit: 1000 })
+      .then((res) => {
+        if (!active) return;
+        const rows = Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res)
+          ? res
+          : [];
+        setSiswaOptions(rows);
+      })
+      .catch(() => {
+        if (active) setSiswaOptions([]);
+      })
+      .finally(() => {
+        if (active) setLoadingSiswa(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
 
   async function handleSubmit(e) {
@@ -208,22 +236,31 @@ export default function CreateAsesmenPage() {
 
 
                   <Field
-                    label="Siswa ID"
+                    label="Siswa"
                     required
                   >
-                    <input
+                    <select
                       required
+                      disabled={loadingSiswa}
                       value={form.siswaId}
                       onChange={(e) =>
                         setForm({
                           ...form,
-                          siswaId:
-                            e.target.value,
+                          siswaId: e.target.value,
                         })
                       }
-                      placeholder="Contoh: SIS-001"
                       className={inputClass}
-                    />
+                    >
+                      <option value="">
+                        {loadingSiswa ? "Memuat daftar siswa..." : "-- Pilih Siswa --"}
+                      </option>
+                      {siswaOptions.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.namaLengkap || s.user?.namaLengkap || s.id}
+                          {s.nisn || s.nis ? ` (${s.nisn || s.nis})` : ""}
+                        </option>
+                      ))}
+                    </select>
                   </Field>
 
 

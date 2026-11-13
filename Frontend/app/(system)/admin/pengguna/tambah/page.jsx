@@ -22,9 +22,18 @@ import {
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
+function getBackendOrigin() {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "").replace(/\/api(?:\/v1)?$/i, "");
+  }
+  if (typeof window !== "undefined") {
+    return ["localhost", "127.0.0.1"].includes(window.location.hostname)
+      ? "http://localhost:5000"
+      : window.location.origin;
+  }
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
+}
 
 // ============================================================
 // NORMALISASI SHIFT
@@ -257,7 +266,7 @@ export default function TambahPenggunaPage() {
       }
 
       const response = await fetch(
-        `${API_URL}/api/kategori-jabatan?page=1&limit=100&status=aktif`,
+        `${getBackendOrigin()}/api/kategori-jabatan?page=1&limit=100&status=aktif`,
         {
           method: "GET",
           headers: {
@@ -742,7 +751,7 @@ export default function TambahPenggunaPage() {
       console.log("PAYLOAD CREATE USER:", payload);
 
       const response = await fetch(
-        `${API_URL}/api/users`,
+        `${getBackendOrigin()}/api/users`,
         {
           method: "POST",
           headers: {

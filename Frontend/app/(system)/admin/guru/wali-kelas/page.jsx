@@ -598,10 +598,10 @@ export default function WaliKelasPage() {
                                 px-2.5 py-1
                                 rounded-lg
                                 text-xs font-bold
-                                text-[var(--color-primary)]
-                                bg-[var(--color-info-background)]
+                                theme-primary-text
+                                bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
                                 border
-                                border-[var(--color-primary)]
+                                border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
                               "
                             >
                               {item.kelas}
@@ -666,9 +666,10 @@ export default function WaliKelasPage() {
                                   inline-flex items-center gap-1.5
                                   px-2.5 py-1.5
                                   rounded-md
-                                  text-[var(--color-primary)]
-                                  bg-[var(--color-info-background)]
-                                  hover:bg-[var(--color-card-soft)]
+                                  border theme-border
+                                  theme-text-muted
+                                  hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                                  hover:text-[var(--color-primary)]
                                   text-xs font-medium
                                   transition-colors
                                 "
@@ -688,8 +689,10 @@ export default function WaliKelasPage() {
                                       inline-flex items-center justify-center
                                       p-1.5
                                       rounded-md
-                                      text-[var(--color-primary)]
-                                      bg-[var(--color-info-background)]
+                                      border theme-border
+                                      theme-text-muted
+                                      hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                                      hover:text-[var(--color-primary)]
                                       text-xs font-medium
                                       transition-colors
                                     "
@@ -735,7 +738,10 @@ export default function WaliKelasPage() {
                                     inline-flex items-center justify-center
                                     p-1.5
                                     rounded-md
-                                    theme-success
+                                    border theme-border
+                                    theme-text-muted
+                                    hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                                    hover:text-[var(--color-primary)]
                                     text-xs font-medium
                                     transition-colors
                                   "

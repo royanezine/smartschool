@@ -84,7 +84,7 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 
 const themePrimaryButton =
-  "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-[var(--color-card)]";
+  "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-white";
 
 
 const statusColorMap = {
@@ -113,9 +113,9 @@ const statusColorMap = {
 
 const paketColorMap = {
   Enterprise: {
-    bg: themeInfoSurface,
-    text: themeInfoText,
-    border: themeInfoBorder,
+    bg: themePrimarySurface,
+    text: themePrimaryText,
+    border: themePrimaryBorder,
   },
 
   Professional: {
@@ -125,9 +125,9 @@ const paketColorMap = {
   },
 
   Starter: {
-    bg: themeNeutralSurface,
-    text: "theme-text-secondary",
-    border: themeNeutralBorder,
+    bg: themePrimarySurface,
+    text: themePrimaryText,
+    border: themePrimaryBorder,
   },
 };
 
@@ -1211,13 +1211,13 @@ export default function DataSekolahPage() {
                     className={`
                       rounded-lg
                       border
-                      ${themeInfoBorder}
-                      ${themeInfoSurface}
+                      ${themePrimaryBorder}
+                      ${themePrimarySurface}
                       px-2.5
                       py-1
                       text-[10px]
                       font-medium
-                      ${themeInfoText}
+                      ${themePrimaryText}
                     `}
                   >
                     Sort:{" "}
@@ -2496,27 +2496,27 @@ function StatCard({
     },
 
     success: {
-      bg: themeSuccessSurface,
-      text: themeSuccessText,
-      border: themeSuccessBorder,
+      bg: themePrimarySurface,
+      text: themePrimaryText,
+      border: themePrimaryBorder,
     },
 
     warning: {
-      bg: themeWarningSurface,
-      text: themeWarningText,
-      border: themeWarningBorder,
+      bg: themePrimarySurface,
+      text: themePrimaryText,
+      border: themePrimaryBorder,
     },
 
     neutral: {
-      bg: themeNeutralSurface,
-      text: "theme-text-secondary",
-      border: themeNeutralBorder,
+      bg: themePrimarySurface,
+      text: themePrimaryText,
+      border: themePrimaryBorder,
     },
 
     info: {
-      bg: themeInfoSurface,
-      text: themeInfoText,
-      border: themeInfoBorder,
+      bg: themePrimarySurface,
+      text: themePrimaryText,
+      border: themePrimaryBorder,
     },
   };
 

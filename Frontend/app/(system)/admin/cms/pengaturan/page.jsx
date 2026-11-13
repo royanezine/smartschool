@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import {
@@ -74,12 +75,12 @@ export default function PengaturanPage() {
             
             {/* BREADCRUMB */}
             <nav className="flex items-center gap-2 text-sm">
-              <a
+              <Link
                 href="/admin/cms"
                 className="theme-text-muted hover:text-[var(--color-primary)] transition"
               >
                 Dashboard
-              </a>
+              </Link>
               <ChevronRight className="w-4 h-4 theme-text-placeholder" />
               <span className="text-[var(--color-primary)] font-semibold">
                 Pengaturan
@@ -88,7 +89,7 @@ export default function PengaturanPage() {
 
             {/* HEADER PAGE */}
             <div className="flex items-start gap-4">
-              <div className="shrink-0 p-3 rounded-xl theme-info border">
+              <div className="shrink-0 p-3 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border">
                 <Settings className="w-6 h-6" />
               </div>
               <div>
@@ -128,7 +129,7 @@ export default function PengaturanPage() {
                       <div
                         className="
                           shrink-0 p-3 rounded-xl
-                          theme-info
+                          bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text
                           border
                           transition-colors
                         "

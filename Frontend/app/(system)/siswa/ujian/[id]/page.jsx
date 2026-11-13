@@ -33,7 +33,7 @@ import {
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -813,7 +813,7 @@ export default function UjianPage() {
           <button
             type="button"
             onClick={loadUjian}
-            className={`mt-5 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-95 ${themePrimaryShadow}`}
+            className={`mt-5 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 ${themePrimaryShadow}`}
           >
             Coba Lagi
           </button>
@@ -858,7 +858,7 @@ export default function UjianPage() {
                 <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex min-w-0 items-start gap-3">
                     <div
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-white ${themePrimaryShadow}`}
                     >
                       <BookOpen size={20} />
                     </div>
@@ -915,14 +915,14 @@ export default function UjianPage() {
 
                     <StatChip
                       icon={Clock}
-                      tone="info"
+                      tone="primary"
                       label="Durasi"
                       value={`${ujian?.durasi || 0} menit`}
                     />
 
                     <StatChip
                       icon={Info}
-                      tone="success"
+                      tone="primary"
                       label="Jenis"
                       value={jenisUjian}
                     />
@@ -935,10 +935,10 @@ export default function UjianPage() {
                   className={`theme-card ${themeCardShadow} overflow-hidden rounded-2xl border ${themeNeutralBorder}`}
                 >
                   <div
-                    className={`${themePrimaryGradient} p-6 text-[var(--color-card)] sm:p-8`}
+                    className={`${themePrimaryGradient} p-6 text-white sm:p-8`}
                   >
                     <div className="mx-auto max-w-2xl text-center">
-                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_20%,transparent)] backdrop-blur">
+                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20 backdrop-blur">
                         <LockKeyhole size={28} />
                       </div>
 
@@ -946,7 +946,7 @@ export default function UjianPage() {
                         Siap Mengerjakan Ujian?
                       </h2>
 
-                      <p className="mt-2 text-sm text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
+                      <p className="mt-2 text-sm text-white/80">
                         Pastikan kamu sudah siap sebelum
                         memulai. Setelah ujian dimulai,
                         waktu akan berjalan sesuai durasi
@@ -965,14 +965,14 @@ export default function UjianPage() {
 
                     <InfoTile
                       icon={FileText}
-                      tone="info"
+                      tone="primary"
                       label="Jumlah Soal"
                       value={`${soal.length} soal`}
                     />
 
                     <InfoTile
                       icon={Clock}
-                      tone="warning"
+                      tone="primary"
                       label="Jadwal"
                       value={formatDate(
                         ujian?.waktuMulai
@@ -987,7 +987,7 @@ export default function UjianPage() {
                       type="button"
                       onClick={handleOpenStart}
                       disabled={soal.length === 0}
-                      className={`mx-auto flex w-full max-w-md items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryShadow}`}
+                      className={`mx-auto flex w-full max-w-md items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryShadow}`}
                     >
                       <BookOpen size={18} />
                       Mulai Ujian
@@ -1042,7 +1042,7 @@ export default function UjianPage() {
                           type="button"
                           onClick={handleSubmit}
                           disabled={submitting}
-                          className={`flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:text-sm ${themePrimaryShadow}`}
+                          className={`flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:text-sm ${themePrimaryShadow}`}
                         >
                           {submitting ? (
                             <Loader2
@@ -1112,7 +1112,7 @@ export default function UjianPage() {
                           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
                               <div
-                                className={`flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-primary)] text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow}`}
+                                className={`flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-primary)] text-sm font-bold text-white ${themePrimaryShadow}`}
                               >
                                 {currentIndex + 1}
                               </div>
@@ -1247,7 +1247,7 @@ export default function UjianPage() {
                                           <span
                                             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                                               isSelected
-                                                ? `bg-[var(--color-primary)] text-[var(--color-card)]`
+                                                ? `bg-[var(--color-primary)] text-white`
                                                 : `${themeNeutralSurface} theme-text-secondary`
                                             }`}
                                           >
@@ -1413,7 +1413,7 @@ export default function UjianPage() {
                                 currentIndex ===
                                 soal.length - 1
                               }
-                              className="flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-medium text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:text-sm"
+                              className="flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-medium text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:text-sm"
                             >
                               <span>Selanjutnya</span>
                               <ChevronRight size={16} />
@@ -1476,7 +1476,7 @@ export default function UjianPage() {
                                   }
                                   className={`relative flex aspect-square items-center justify-center rounded-lg text-xs font-semibold transition ${
                                     isActive
-                                      ? `bg-[var(--color-primary)] text-[var(--color-card)] ${themePrimaryShadow} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]`
+                                      ? `bg-[var(--color-primary)] text-white ${themePrimaryShadow} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]`
                                       : isAnswered
                                         ? `${themeSuccessSurface} text-[var(--color-success)] ring-1 ${themeSuccessBorder} hover:brightness-95`
                                         : `border ${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary ${themeNeutralHover}`
@@ -1491,7 +1491,7 @@ export default function UjianPage() {
                                       >
                                         <CheckCircle2
                                           size={8}
-                                          className="text-[var(--color-card)]"
+                                          className="text-white"
                                         />
                                       </span>
                                     )}
@@ -1521,7 +1521,7 @@ export default function UjianPage() {
                           type="button"
                           onClick={handleSubmit}
                           disabled={submitting}
-                          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-3 py-2.5 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryShadow}`}
+                          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-3 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryShadow}`}
                         >
                           {submitting ? (
                             <Loader2
@@ -1671,7 +1671,7 @@ export default function UjianPage() {
                   starting ||
                   !token.trim()
                 }
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryShadow}`}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryShadow}`}
               >
                 {starting ? (
                   <>
@@ -1762,7 +1762,7 @@ export default function UjianPage() {
                 type="button"
                 onClick={confirmSubmit}
                 disabled={submitting}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:opacity-50 ${themePrimaryShadow}`}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-50 ${themePrimaryShadow}`}
               >
                 {submitting ? (
                   <>

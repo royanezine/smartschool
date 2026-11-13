@@ -42,10 +42,6 @@ export default function TambahArtikelPage() {
     useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
   async function loadCategories() {
     try {
       setLoadingCategories(true);
@@ -69,6 +65,10 @@ export default function TambahArtikelPage() {
       setLoadingCategories(false);
     }
   }
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
   function handleChange(e) {
     const { name, value } = e.target;

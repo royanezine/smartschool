@@ -425,9 +425,44 @@ export interface TenantStatusResponse {
   };
 }
 
+export interface TenantPaymentStatusResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    status: string;
+    jenisPendaftaran?: string;
+    transactionStatus?: string;
+  };
+}
+
+export async function cekStatusPembayaranTenant(
+  orderId: string
+): Promise<TenantPaymentStatusResponse> {
+  if (!orderId || !String(orderId).trim()) {
+    throw new TenantApiError(
+      "Order ID pembayaran wajib diisi.",
+      400,
+      "VALIDATION_ERROR"
+    );
+  }
+
+  const response = await requestTenant(
+    `/status-pembayaran/${encodeURIComponent(String(orderId).trim())}`,
+    {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    }
+  );
+
+  return await parseResponse<TenantPaymentStatusResponse>(response);
+}
+
 // REMOVED: getTenantStatus, getOnboardingRegistration, updateTenantFoundation
 // Backend HEAD tidak menyediakan endpoint-endpoint tersebut.
 // Flow onboarding Backend HEAD:
 // 1. POST /api/tenant/register - registrasi dengan SEMUA data sekaligus (sekolah + yayasan opsional)
 // 2. POST /api/tenant/verify - verifikasi OTP dan aktivasi/pembayaran
+// 3. GET /api/tenant/status-pembayaran/:orderId - cek status aktivasi/pembayaran tenant
 

@@ -600,7 +600,7 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
 
       simpanTokenPendaftaran(
         pendaftaranId,
-        effectiveToken || tokenPendaftaran
+        tokenPendaftaran
       );
 
       return true;

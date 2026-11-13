@@ -305,21 +305,21 @@ export default function GelombangSpmbPage() {
                 value={totalGelombang}
                 description="Semua gelombang PPDB"
                 icon={<CalendarDays size={18} />}
-                iconClassName="theme-info"
+                iconClassName="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
               />
               <StatCard
                 label="Gelombang Aktif"
                 value={activeGelombang}
                 description="Pendaftaran sedang dibuka"
                 icon={<Check size={18} />}
-                iconClassName="theme-success"
+                iconClassName="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
               />
               <StatCard
                 label="Nonaktif"
                 value={inactiveGelombang}
                 description="Pendaftaran ditutup/berakhir"
                 icon={<Clock3 size={18} />}
-                iconClassName="theme-card theme-text-muted"
+                iconClassName="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
               />
             </div>
 
@@ -480,7 +480,7 @@ export default function GelombangSpmbPage() {
                           </td>
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
+                              <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
                                 <CalendarDays size={16} />
                               </div>
                               <div className="min-w-0">

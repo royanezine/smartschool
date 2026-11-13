@@ -903,26 +903,10 @@ export default function UjianCbtPage() {
 
 
 function StatCard({ title, value, icon: Icon, description, variant = "primary" }) {
-  const variantConfig = {
-    primary: {
-      bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-      text: "text-[var(--color-primary)]",
-    },
-    success: {
-      bg: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-      text: "text-[var(--color-success)]",
-    },
-    warning: {
-      bg: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-      text: "text-[var(--color-warning)]",
-    },
-    info: {
-      bg: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-      text: "text-[var(--color-info)]",
-    },
+  const current = {
+    bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    text: "theme-primary-text",
   };
-
-  const current = variantConfig[variant] || variantConfig.primary;
 
   return (
     <div className="theme-card border theme-border rounded-xl p-5 shadow-sm">

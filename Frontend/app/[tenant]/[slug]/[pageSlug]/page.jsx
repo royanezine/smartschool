@@ -14,36 +14,99 @@ import {
   School,
 } from "lucide-react";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000";
-
+const ROOT_DOMAIN = "smartschool.citrasolusi.id";
+const RESERVED_SUBDOMAINS = new Set([
+  "www",
+  "api",
+  "admin",
+  "guru",
+  "siswa",
+  "yayasan",
+  "super-admin",
+  "login",
+  "register",
+  "forgot-password",
+  "onboarding",
+  "pin",
+  ".git",
+]);
 
 function getApiBaseUrl() {
-  return API_URL
-    .replace(/\/+$/, "")
-    .replace(/\/api\/v1$/, "")
-    .replace(/\/api$/, "");
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envUrl) {
+    return envUrl
+      .replace(/\/+$/, "")
+      .replace(/\/api\/v1$/, "")
+      .replace(/\/api$/, "");
+  }
+  if (typeof window !== "undefined") {
+    return ["localhost", "127.0.0.1"].includes(window.location.hostname)
+      ? "http://localhost:5000"
+      : window.location.origin;
+  }
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
+}
+
+function isValidTenantSlug(value) {
+  if (typeof value !== "string") return false;
+  const tenant = value.trim().toLowerCase();
+  if (!tenant || RESERVED_SUBDOMAINS.has(tenant)) return false;
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(tenant);
+}
+
+function detectSubdomainFromHostname(hostname) {
+  const cleanHost = String(hostname || "")
+    .trim()
+    .toLowerCase()
+    .split(":")[0]
+    .replace(/\.$/, "");
+
+  if (!cleanHost || cleanHost === "localhost" || cleanHost === "127.0.0.1") {
+    return "";
+  }
+
+  if (cleanHost.endsWith(".localhost")) {
+    const candidate = cleanHost.slice(0, -".localhost".length);
+    return isValidTenantSlug(candidate) ? candidate : "";
+  }
+
+  if (cleanHost === ROOT_DOMAIN) {
+    return "";
+  }
+
+  if (cleanHost.endsWith(`.${ROOT_DOMAIN}`)) {
+    const candidate = cleanHost.slice(0, -`.${ROOT_DOMAIN}`.length);
+    return isValidTenantSlug(candidate) ? candidate : "";
+  }
+
+  const parts = cleanHost.split(".");
+  if (parts.length >= 3 && isValidTenantSlug(parts[0])) {
+    return parts[0];
+  }
+
+  return "";
 }
 
 
 export default function PublicCmsPage() {
- const params = useParams();
-const pageSlug = params?.pageSlug;
+  const params = useParams();
+  const pageSlug = params?.pageSlug;
+  const routeTenant =
+    typeof params?.tenant === "string" && isValidTenantSlug(params.tenant)
+      ? params.tenant.trim().toLowerCase()
+      : "";
 
-const [subdomain, setSubdomain] = useState("");
+  const [hostSubdomain, setHostSubdomain] = useState("");
+  const subdomain = hostSubdomain || routeTenant;
 
-useEffect(() => {
-  const hostname = window.location.hostname;
-  const parts = hostname.split(".");
-
-  if (
-    hostname.endsWith(".localhost") &&
-    parts.length >= 2
-  ) {
-    setSubdomain(parts[0]);
-  }
-}, []);
+  useEffect(() => {
+    const detected = detectSubdomainFromHostname(window.location.hostname);
+    if (!detected) return;
+    const timer = setTimeout(() => {
+      setHostSubdomain(detected);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);

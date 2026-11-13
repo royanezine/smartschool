@@ -81,15 +81,15 @@ function StatCard({ icon: Icon, label, value, description, colorType = "primary"
   const colors = {
     primary: {
       bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-      text: "text-[var(--color-primary)]",
+      text: "theme-primary-text",
     },
     info: {
-      bg: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-      text: "text-[var(--color-info)]",
+      bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      text: "theme-primary-text",
     },
     warning: {
-      bg: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-      text: "text-[var(--color-warning)]",
+      bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      text: "theme-primary-text",
     },
   };
 
@@ -98,7 +98,7 @@ function StatCard({ icon: Icon, label, value, description, colorType = "primary"
   return (
     <div
       className={`
-        theme-card group relative overflow-hidden
+        theme-card group relative h-full overflow-hidden
         rounded-2xl border theme-border p-5
         ${themeCardShadow}
         transition-all duration-200 hover:-translate-y-0.5
@@ -478,7 +478,7 @@ export default function SarprasLantaiPage() {
                           {showExport && (
                             <div className="theme-card absolute right-0 top-13 z-50 w-52 overflow-hidden rounded-2xl border theme-border p-1.5 shadow-[0_15px_45px_color-mix(in_srgb,var(--color-text)_14%,transparent)]">
                               <button onClick={exportExcel} className={`theme-text-secondary flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${themeNeutralHover}`}>
-                                <FileSpreadsheet size={16} className="theme-success" />
+                                <FileSpreadsheet size={16} className="theme-primary-text" />
                                 Export Excel
                               </button>
                               <button onClick={exportCSV} className={`theme-text-secondary flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${themeNeutralHover}`}>
@@ -510,7 +510,8 @@ export default function SarprasLantaiPage() {
                   </div>
                 </section>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-6">
+                {/* FIX: grid hanya 3 kolom agar 3 card memenuhi lebar penuh */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <StatCard
                     icon={Layers3}
                     label="Total Lantai"

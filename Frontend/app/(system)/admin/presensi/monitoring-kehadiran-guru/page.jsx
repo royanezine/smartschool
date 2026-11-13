@@ -1039,14 +1039,14 @@ export default function MonitoringKehadiranGuruPage() {
 
                               <td className="px-5 py-4">
                                 <span className="inline-flex items-center gap-2 theme-text">
-                                  <LogIn size={15} className="text-emerald-600" />
+                                  <LogIn size={15} className="theme-primary-text" />
                                   {formatWaktu(absensi?.waktuMasuk)}
                                 </span>
                               </td>
 
                               <td className="px-5 py-4">
                                 <span className="inline-flex items-center gap-2 theme-text">
-                                  <LogOut size={15} className="text-blue-600" />
+                                  <LogOut size={15} className="theme-primary-text" />
                                   {formatWaktu(absensi?.waktuKeluar)}
                                 </span>
                               </td>
@@ -1230,13 +1230,10 @@ function SortableTh({
 
 function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const toneClasses = {
-    blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
-    emerald:
-      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
-    slate:
-      "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-muted",
-    amber:
-      "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+    blue: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    emerald: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    slate: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    amber: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   return (

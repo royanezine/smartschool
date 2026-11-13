@@ -51,19 +51,8 @@ const getInitials = (nama = "") => {
   return String(nama).substring(0, 2).toUpperCase();
 };
 
-const getAvatarColor = (nama = "") => {
-  const colors = [
-    "bg-blue-700",
-    "bg-slate-700",
-    "bg-indigo-700",
-    "bg-cyan-700",
-    "bg-teal-700",
-    "bg-violet-700",
-    "bg-sky-700",
-    "bg-blue-800",
-  ];
-
-  return colors[String(nama).length % colors.length];
+const getAvatarColor = () => {
+  return "bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
 };
 
 const formatDate = (value) => {
@@ -178,7 +167,7 @@ function StatCard({
   value,
   label,
   description,
-  iconClass = "text-[var(--color-primary)]",
+  iconClass = "theme-primary-text",
   valueClass = "theme-text",
 }) {
   return (
@@ -202,7 +191,7 @@ function StatCard({
           )}
         </div>
 
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border theme-card-soft">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
           <Icon size={19} className={iconClass} strokeWidth={1.8} />
         </div>
       </div>
@@ -604,7 +593,7 @@ export default function DetailGuruPage() {
 
           <main className="flex flex-1 items-center justify-center">
             <div className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full theme-info">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <UserRound size={22} />
               </div>
 
@@ -643,7 +632,7 @@ export default function DetailGuruPage() {
 
           <main className="flex flex-1 items-center justify-center overflow-y-auto px-6">
             <div className="w-full max-w-md rounded-xl border theme-card p-8 text-center shadow-sm">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full theme-danger">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <UserRound size={22} />
               </div>
 
@@ -835,7 +824,7 @@ export default function DetailGuruPage() {
                   <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
                       <div
-                        className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-xl ${getAvatarColor(nama)} text-2xl font-bold text-white shadow-sm sm:h-24 sm:w-24 sm:text-3xl`}
+                        className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-xl ${getAvatarColor(nama)} text-2xl font-bold shadow-sm sm:h-24 sm:w-24 sm:text-3xl`}
                       >
                         {getInitials(nama)}
                       </div>
@@ -941,10 +930,10 @@ export default function DetailGuruPage() {
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <BriefcaseBusiness
                             size={18}
-                            className="text-[var(--color-info)]"
+                            className="theme-primary-text"
                           />
                         </div>
 
@@ -1005,10 +994,10 @@ export default function DetailGuruPage() {
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-3">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                             <CalendarClock
                               size={18}
-                              className="text-[var(--color-info)]"
+                              className="theme-primary-text"
                             />
                           </div>
 
@@ -1048,7 +1037,7 @@ export default function DetailGuruPage() {
                         </div>
                       ) : shiftGuru ? (
                         <>
-                          <div className="mb-5 rounded-lg border theme-info p-4">
+                          <div className="mb-5 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4">
                             <div className="flex items-center gap-3">
                               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border theme-card">
                                 <Clock
@@ -1082,7 +1071,7 @@ export default function DetailGuruPage() {
                                   ? `${jamMasuk} WIB`
                                   : "-"
                               }
-                              iconClass="text-[var(--color-success)]"
+                              iconClass="theme-primary-text"
                             />
 
                             <InfoItem
@@ -1093,7 +1082,7 @@ export default function DetailGuruPage() {
                                   ? `${jamKeluar} WIB`
                                   : "-"
                               }
-                              iconClass="text-[var(--color-info)]"
+                              iconClass="theme-primary-text"
                             />
 
                             <InfoItem
@@ -1116,10 +1105,10 @@ export default function DetailGuruPage() {
                         </>
                       ) : (
                         <div className="rounded-lg border theme-card-soft p-5 text-center">
-                          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-lg theme-info">
+                          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                             <CalendarClock
                               size={21}
-                              className="text-[var(--color-info)]"
+                              className="theme-primary-text"
                             />
                           </div>
 
@@ -1141,10 +1130,10 @@ export default function DetailGuruPage() {
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <MapPin
                             size={18}
-                            className="text-[var(--color-info)]"
+                            className="theme-primary-text"
                           />
                         </div>
 
@@ -1178,10 +1167,10 @@ export default function DetailGuruPage() {
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <Users
                             size={18}
-                            className="text-[var(--color-info)]"
+                            className="theme-primary-text"
                           />
                         </div>
 
@@ -1246,10 +1235,10 @@ export default function DetailGuruPage() {
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                           <GraduationCap
                             size={18}
-                            className="text-[var(--color-info)]"
+                            className="theme-primary-text"
                           />
                         </div>
 
@@ -1278,7 +1267,7 @@ export default function DetailGuruPage() {
                         value={loadingStatistik ? "..." : totalSiswa}
                         label="Total Siswa"
                         description="Jumlah siswa unik di kelas yang diampu"
-                        iconClass="text-[var(--color-info)]"
+                        iconClass="theme-primary-text"
                       />
 
                       <StatCard
@@ -1286,8 +1275,8 @@ export default function DetailGuruPage() {
                         value={loadingStatistik ? "..." : rataKehadiran}
                         label="Rata-rata Kehadiran"
                         description="Persentase catatan absensi berstatus hadir"
-                        iconClass="text-[var(--color-success)]"
-                        valueClass="text-[var(--color-success)]"
+                        iconClass="theme-primary-text"
+                        valueClass="theme-text"
                       />
                     </div>
                   </section>
@@ -1444,12 +1433,12 @@ export default function DetailGuruPage() {
                         mapelGuru.map((namaMapel, index) => (
                           <div
                             key={`${namaMapel}-${index}`}
-                            className="flex min-w-0 items-center gap-3 rounded-lg border theme-info p-4"
+                            className="flex min-w-0 items-center gap-3 rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4"
                           >
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border theme-card">
                               <BookOpen
                                 size={18}
-                                className="text-[var(--color-info)]"
+                                className="theme-primary-text"
                               />
                             </div>
 

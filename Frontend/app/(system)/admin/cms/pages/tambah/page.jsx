@@ -249,7 +249,7 @@ export default function CreatePagePage() {
               <div className="theme-border border-b px-5 py-5 sm:px-6">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex min-w-0 items-center gap-4">
-                    <div className="theme-info flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
                       <FileText className="h-6 w-6" />
                     </div>
 
@@ -301,7 +301,7 @@ export default function CreatePagePage() {
                   <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-card-soft theme-border border-b px-5 py-4 sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                           <Type className="h-5 w-5" />
                         </div>
 
@@ -395,7 +395,7 @@ export default function CreatePagePage() {
                     <div className="theme-card-soft theme-border border-b px-5 py-4 sm:px-6">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex min-w-0 items-center gap-3">
-                          <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                          <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                             <FileText className="h-5 w-5" />
                           </div>
 
@@ -538,7 +538,7 @@ export default function CreatePagePage() {
                   <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-card-soft theme-border border-b px-5 py-4">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                           <Eye className="h-4 w-4" />
                         </div>
 
@@ -637,7 +637,7 @@ export default function CreatePagePage() {
                         </p>
                       </div>
 
-                      <div className="theme-info mt-3 flex items-start gap-2 rounded-xl border p-3">
+                      <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text mt-3 flex items-start gap-2 rounded-xl border p-3">
                         <Info className="mt-0.5 h-4 w-4 shrink-0" />
 
                         <p className="text-xs leading-5">

@@ -131,9 +131,9 @@ export default function DataMasterSekolahPage() {
 
               <div className="flex items-center gap-2.5">
                 <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)] ${themeSmallShadow}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} ${themeSmallShadow}`}
                 >
-                  <School size={18} />
+                  <School size={18} className="theme-primary-text" />
                 </div>
 
                 <h1 className="theme-text truncate text-xl font-semibold sm:text-2xl">
@@ -153,7 +153,7 @@ export default function DataMasterSekolahPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/yayasan/sekolah/tambah"
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-95"
+                className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-sm transition-all hover:opacity-95"
               >
                 <Plus size={16} />
                 Tambah Sekolah Cabang
@@ -206,26 +206,23 @@ export default function DataMasterSekolahPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <SummaryCard
               icon={School}
               label="Total Unit Sekolah"
               value={loading ? "-" : summary.totalUnit}
-              variant="primary"
             />
 
             <SummaryCard
               icon={BadgeCheck}
               label="Sekolah Aktif"
               value={loading ? "-" : summary.totalAktif}
-              variant="success"
             />
 
             <SummaryCard
               icon={Users}
               label="Sekolah Uji Coba"
               value={loading ? "-" : summary.totalUjiCoba}
-              variant="warning"
             />
           </div>
 
@@ -275,9 +272,9 @@ export default function DataMasterSekolahPage() {
                       >
                         <div className="flex min-w-0 items-start gap-3">
                           <div
-                            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)] transition-transform group-hover:scale-[1.03]`}
+                            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} transition-transform group-hover:scale-[1.03]`}
                           >
-                            <School size={19} />
+                            <School size={19} className="theme-primary-text" />
                           </div>
 
                           <div className="min-w-0">
@@ -344,35 +341,13 @@ export default function DataMasterSekolahPage() {
   );
 }
 
-function SummaryCard({ icon: Icon, label, value, variant = "primary" }) {
-  const variantMap = {
-    primary: {
-      bg: "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
-      border: "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]",
-      text: "text-[var(--color-primary)]",
-    },
-    success: {
-      bg: "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
-      border: "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]",
-      text: "text-[var(--color-success)]",
-    },
-    warning: {
-      bg: "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]",
-      border: "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]",
-      text: "text-[var(--color-warning)]",
-    },
-  };
-
-  const styles = variantMap[variant] || variantMap.primary;
-
+function SummaryCard({ icon: Icon, label, value }) {
   return (
     <div
       className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border ${themeCardShadow} p-3.5`}
     >
-      <div
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${styles.bg} ${styles.border} ${styles.text}`}
-      >
-        <Icon size={16} />
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+        <Icon size={16} className="theme-primary-text" />
       </div>
 
       <div className="min-w-0">

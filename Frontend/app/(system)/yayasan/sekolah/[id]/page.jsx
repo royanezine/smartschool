@@ -99,7 +99,7 @@ export default function DetailSekolahPage() {
 
   return (
     <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+      <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="w-full space-y-6">
 
 
@@ -226,12 +226,11 @@ export default function DetailSekolahPage() {
                   items-center
                   gap-2
                   rounded-lg
-                  bg-[var(--color-primary)]
+                  theme-primary
                   px-4
                   py-2.5
                   text-xs
                   font-semibold
-                  text-[var(--color-card)]
                   transition-all
                   hover:opacity-90
                   ${themeSmallShadow}
@@ -279,10 +278,9 @@ export default function DetailSekolahPage() {
                             border
                             ${themePrimarySoftBorder}
                             ${themePrimarySoft}
-                            text-[var(--color-primary)]
                           `}
                         >
-                          <School size={26} />
+                          <School size={26} className="theme-primary-text" />
                         </div>
 
                         <div className="min-w-0">
@@ -347,21 +345,18 @@ export default function DetailSekolahPage() {
                       icon={GraduationCap}
                       label="Total Guru"
                       value={statistik.totalGuru}
-                      variant="primary"
                     />
 
                     <StatCard
                       icon={Users}
                       label="Total Siswa"
                       value={statistik.totalSiswa}
-                      variant="success"
                     />
 
                     <StatCard
                       icon={Layers}
                       label="Total Kelas"
                       value={statistik.totalKelas}
-                      variant="warning"
                     />
                   </div>
 
@@ -401,10 +396,9 @@ export default function DetailSekolahPage() {
                             border
                             ${themePrimarySoftBorder}
                             ${themePrimarySoft}
-                            text-[var(--color-primary)]
                           `}
                         >
-                          <Sparkles size={16} />
+                          <Sparkles size={16} className="theme-primary-text" />
                         </div>
 
                         <h3 className="text-sm font-semibold theme-text">
@@ -458,12 +452,11 @@ export default function DetailSekolahPage() {
                             justify-center
                             rounded-lg
                             border
-                            ${themeSuccessBorder}
-                            ${themeSuccessSurface}
-                            text-[var(--color-success)]
+                            ${themePrimarySoftBorder}
+                            ${themePrimarySoft}
                           `}
                         >
-                          <BadgeCheck size={16} />
+                          <BadgeCheck size={16} className="theme-primary-text" />
                         </div>
 
                         <h3 className="text-sm font-semibold theme-text">
@@ -558,10 +551,9 @@ export default function DetailSekolahPage() {
                           border
                           ${themePrimarySoftBorder}
                           ${themePrimarySoft}
-                          text-[var(--color-primary)]
                         `}
                       >
-                        <Settings size={16} />
+                        <Settings size={16} className="theme-primary-text" />
                       </div>
 
                       <div>
@@ -585,7 +577,7 @@ export default function DetailSekolahPage() {
                       <div className="rounded-xl border theme-border p-3.5 bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
                         <p className="text-xs theme-text-muted">Subdomain Sistem</p>
                         <p className="mt-1 font-mono font-semibold text-sm text-[var(--color-primary)] truncate">
-                          {pengaturan?.subdomain ? `${pengaturan.subdomain}.smartschool.id` : profil.subdomain || "-"}
+                          {pengaturan?.subdomain ? `${pengaturan.subdomain}.smartschool.citrasolusi.id` : profil.subdomain || "-"}
                         </p>
                       </div>
 
@@ -632,33 +624,7 @@ function StatCard({
   icon: Icon,
   label,
   value,
-  variant = "primary",
 }) {
-  const variantMap = {
-    primary: {
-      bg: "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
-      border:
-        "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]",
-      text: "text-[var(--color-primary)]",
-    },
-
-    success: {
-      bg: "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
-      border:
-        "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]",
-      text: "text-[var(--color-success)]",
-    },
-
-    warning: {
-      bg: "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]",
-      border:
-        "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]",
-      text: "text-[var(--color-warning)]",
-    },
-  };
-
-  const styles = variantMap[variant] || variantMap.primary;
-
   return (
     <div
       className={`
@@ -675,7 +641,7 @@ function StatCard({
       `}
     >
       <div
-        className={`
+        className="
           flex
           h-11
           w-11
@@ -684,12 +650,11 @@ function StatCard({
           justify-center
           rounded-xl
           border
-          ${styles.bg}
-          ${styles.border}
-          ${styles.text}
-        `}
+          border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+          bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+        "
       >
-        <Icon size={19} />
+        <Icon size={19} className="theme-primary-text" />
       </div>
 
       <div className="min-w-0">

@@ -52,15 +52,14 @@ function formatDateTime(value) {
 }
 
 function DetailItem({ icon: Icon, label, value, color = "primary" }) {
+  const primaryColorClass =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
+
   const colorClasses = {
-    primary:
-      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]",
-    info:
-      "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]",
-    success:
-      "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]",
-    warning:
-      "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]",
+    primary: primaryColorClass,
+    info: primaryColorClass,
+    success: primaryColorClass,
+    warning: primaryColorClass,
   };
 
   return (
@@ -374,7 +373,7 @@ export default function DetailRuanganPage() {
 
                       <div className="border-b theme-border" />
 
-                      <DetailItem
+<DetailItem
                         icon={MapPin}
                         label="Lokasi"
                         value={ruangan.lokasi || "Belum ditentukan"}
@@ -393,7 +392,7 @@ export default function DetailRuanganPage() {
                         </>
                       )}
 
-                      {namaLantai && (
+{namaLantai && (
                         <>
                           <div className="border-b theme-border" />
                           <DetailItem
@@ -416,7 +415,7 @@ export default function DetailRuanganPage() {
                     </div>
                   </section>
 
-                  {/* RIWAYAT DATA */}
+{/* RIWAYAT DATA */}
                   <section className="theme-card rounded-2xl border theme-border p-6 shadow-sm">
                     <h3 className="theme-text mb-5 border-b theme-border pb-3 font-bold">
                       Riwayat Data
@@ -442,11 +441,11 @@ export default function DetailRuanganPage() {
                   </section>
 
                   {/* INFORMASI */}
-                  <section className="theme-info flex items-start gap-3 rounded-2xl border p-5">
+                  <section className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex items-start gap-3 rounded-2xl border p-5">
                     <Info size={18} className="mt-0.5 shrink-0" />
 
                     <div>
-                      <p className="text-sm font-semibold text-[var(--color-info)]">
+<p className="text-sm font-semibold theme-primary-text">
                         Informasi Ruangan
                       </p>
 

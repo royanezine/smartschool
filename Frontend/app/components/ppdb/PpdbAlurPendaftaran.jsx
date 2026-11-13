@@ -67,7 +67,7 @@ const langkahPendaftaran = [
       "Panitia memeriksa kelengkapan dan kesesuaian dokumen",
       "Hubungi panitia sekolah untuk mengetahui status verifikasi",
     ],
-    tip: "Backend belum menyediakan layanan cek status publik. Simpan nomor pendaftaran dan hubungi panitia sekolah.",
+    tip: "Simpan nomor pendaftaran dan NIK untuk memeriksa status verifikasi atau pengumuman melalui halaman Cek Pendaftaran resmi sekolah.",
   },
   {
     id: 5,

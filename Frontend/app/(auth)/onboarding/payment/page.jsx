@@ -54,10 +54,53 @@ function PaymentContent() {
     return () => clearTimeout(timer);
   }, [searchParams]);
 
-  const handlePayment = () => {
-    if (!paymentUrl) return;
+  const getAllowedMidtransHosts = () => {
+    const hosts = new Set();
+    const isProdFlag = process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION;
 
-    window.location.href = paymentUrl;
+    if (isProdFlag === "true") {
+      hosts.add("app.midtrans.com");
+    } else if (isProdFlag === "false") {
+      hosts.add("app.sandbox.midtrans.com");
+    } else {
+      hosts.add("app.midtrans.com");
+      hosts.add("app.sandbox.midtrans.com");
+    }
+
+    const customSnapUrl = process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL?.trim();
+    if (customSnapUrl) {
+      try {
+        hosts.add(new URL(customSnapUrl).hostname);
+      } catch {
+        // Abaikan URL kustom yang tidak valid
+      }
+    }
+
+    return hosts;
+  };
+
+  const handlePayment = () => {
+    if (!paymentUrl) {
+      setError("Tautan pembayaran tidak tersedia.");
+      return;
+    }
+
+    try {
+      const parsedUrl = new URL(paymentUrl);
+      const allowedHosts = getAllowedMidtransHosts();
+
+      if (
+        parsedUrl.protocol !== "https:" ||
+        !allowedHosts.has(parsedUrl.hostname)
+      ) {
+        setError("Tautan checkout Midtrans tidak valid.");
+        return;
+      }
+
+      window.location.assign(parsedUrl.toString());
+    } catch {
+      setError("Tautan pembayaran tidak valid.");
+    }
   };
 
   const handleCopyVA = async () => {

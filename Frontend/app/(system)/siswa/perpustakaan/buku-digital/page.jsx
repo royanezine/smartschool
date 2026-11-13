@@ -346,7 +346,7 @@ function DigitalBookCard({ book }) {
               href={book.urlEbook}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-3 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-110"
+              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-3 text-xs font-semibold text-white transition hover:brightness-110"
             >
               Baca
               <ExternalLink size={14} />
@@ -545,7 +545,7 @@ export default function BukuDigitalSiswaPage() {
             >
               <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] blur-3xl" />
 
-              <div className="absolute -bottom-36 left-[35%] h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] blur-3xl" />
+              <div className="absolute -bottom-36 left-[35%] h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] blur-3xl" />
 
               <div
                 className="absolute inset-0 opacity-[0.04]"

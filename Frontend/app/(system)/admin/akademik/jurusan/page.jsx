@@ -48,26 +48,25 @@ const ICONS = {
 
 function StatCard({ icon: Icon, label, value, subLabel }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border theme-border theme-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:p-5">
-      <div className="relative flex items-start justify-between gap-2">
+    <div className="theme-card theme-border rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-[10px] font-semibold uppercase tracking-widest theme-text-muted sm:text-[11px]">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
             {label}
           </p>
-          <p className="mt-1.5 text-2xl font-extrabold tracking-tight theme-text sm:text-3xl">
+          <p className="theme-text mt-1.5 text-2xl font-bold tracking-tight tabular-nums">
             {value}
           </p>
           {subLabel && (
-            <p className="mt-1 truncate text-[10px] font-medium theme-text-muted sm:text-[11px]">
+            <p className="theme-text-muted mt-1 truncate text-xs">
               {subLabel}
             </p>
           )}
         </div>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl theme-card-soft theme-text-secondary sm:h-12 sm:w-12">
-          <Icon size={20} strokeWidth={2} />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+          <Icon size={19} />
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 h-1 w-full bg-slate-400/20" />
     </div>
   );
 }
@@ -76,17 +75,13 @@ function StatusBadge({ status }) {
   const active = status === "Aktif" || status === "aktif";
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
         active
-          ? "border-slate-300/30 bg-slate-500/10 theme-text-secondary dark:border-slate-500/30"
-          : "border-slate-400/20 bg-transparent theme-text-muted"
+          ? "border-[color-mix(in_srgb,var(--color-success)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]"
+          : "theme-card-soft theme-text-muted border theme-border"
       }`}
     >
-      {active ? (
-        <CircleCheck size={12} strokeWidth={2.5} />
-      ) : (
-        <CircleSlash size={12} strokeWidth={2.5} />
-      )}
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {active ? "Aktif" : "Nonaktif"}
     </span>
   );
@@ -210,74 +205,82 @@ export default function ListJurusanPage() {
 
         <main className="min-h-0 flex-1 overflow-y-auto">
           <div className="w-full px-3 py-5 sm:px-5 lg:px-6 xl:px-8">
-            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex min-w-0 items-center gap-3.5">
-                <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border theme-border theme-card-soft theme-text shadow-sm sm:h-14 sm:w-14">
-                  <GraduationCap size={24} strokeWidth={2} />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="truncate text-xl font-extrabold tracking-tight theme-text sm:text-2xl xl:text-3xl">
+            <section className="theme-card theme-border mb-5 rounded-2xl border p-5 shadow-sm sm:p-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-md">
+                    <GraduationCap size={23} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <span className="theme-primary-soft theme-primary-text rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                        Akademik
+                      </span>
+                      <span className="theme-card-soft theme-text-muted rounded-md px-2 py-0.5 text-[10px] font-semibold">
+                        {data.length} Jurusan
+                      </span>
+                    </div>
+                    <h1 className="truncate text-xl font-bold tracking-tight theme-text sm:text-2xl">
                       Data Jurusan
                     </h1>
-                    <span className="hidden rounded-full border theme-border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider theme-text-muted sm:inline-block">
-                      Program Keahlian
-                    </span>
+                    <p className="mt-1 truncate text-sm theme-text-muted">
+                      Kelola program keahlian & data jurusan sekolah terintegrasi.
+                    </p>
                   </div>
-                  <p className="mt-0.5 truncate text-xs theme-text-muted sm:text-sm">
-                    Kelola program keahlian & data jurusan sekolah terintegrasi
-                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={loadJurusan}
+                    disabled={loading}
+                    className="theme-card theme-border theme-text-secondary theme-header-hover flex min-h-10 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <RefreshCw
+                      size={16}
+                      className={loading ? "animate-spin" : ""}
+                    />
+                    Refresh
+                  </button>
+                  <CanAccess menu="jurusan" action="create">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/admin/akademik/jurusan/tambah")}
+                      className="theme-primary flex min-h-10 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-md transition hover:opacity-90"
+                    >
+                      <Plus size={17} />
+                      Tambah Jurusan
+                    </button>
+                  </CanAccess>
                 </div>
               </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={loadJurusan}
-                  disabled={loading}
-                  className="theme-card theme-border theme-text-secondary flex h-10 items-center gap-2 rounded-xl border px-3.5 text-sm font-semibold shadow-sm transition hover:bg-slate-500/5 disabled:opacity-50"
-                >
-                  <RefreshCw
-                    size={16}
-                    className={loading ? "animate-spin" : ""}
-                  />
-                  <span className="hidden sm:inline">Refresh</span>
-                </button>
-                <CanAccess menu="jurusan" action="create">
-                  <button
-                    onClick={() => router.push("/admin/akademik/jurusan/tambah")}
-                    className="flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 active:scale-95 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-                  >
-                    <Plus size={17} />
-                    <span className="hidden xs:inline">Tambah Jurusan</span>
-                    <span className="xs:hidden">Tambah</span>
-                  </button>
-                </CanAccess>
-              </div>
-            </div>
+            </section>
 
             {errorMsg && (
-              <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-slate-500/30 bg-slate-500/10 p-3.5 text-sm theme-text">
+              <div className="theme-danger theme-border mb-4 flex items-center justify-between gap-3 rounded-2xl border p-4 text-sm">
                 <div className="flex items-center gap-2.5">
                   <AlertCircle size={18} className="shrink-0" />
                   <span>{errorMsg}</span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setErrorMsg("")}
-                  className="rounded p-1 hover:bg-slate-500/20"
+                  className="rounded-lg p-1 transition hover:opacity-80"
                 >
                   <X size={16} />
                 </button>
               </div>
             )}
             {successMsg && (
-              <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-slate-500/30 bg-slate-500/10 p-3.5 text-sm theme-text">
+              <div className="theme-success theme-border mb-4 flex items-center justify-between gap-3 rounded-2xl border p-4 text-sm">
                 <div className="flex items-center gap-2.5">
                   <CircleCheck size={18} className="shrink-0" />
                   <span>{successMsg}</span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setSuccessMsg("")}
-                  className="rounded p-1 hover:bg-slate-500/20"
+                  className="rounded-lg p-1 transition hover:opacity-80"
                 >
                   <X size={16} />
                 </button>
@@ -335,14 +338,14 @@ export default function ListJurusanPage() {
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="relative flex-1">
                   <Search
-                    size={18}
-                    className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
+                    size={17}
+                    className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-primary)]"
                   />
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Cari nama, kode, atau deskripsi jurusan..."
-                    className="theme-input h-11 w-full rounded-xl pl-10 pr-4 text-sm outline-none transition focus:ring-2 focus:ring-slate-500/20"
+                    className="theme-input h-11 w-full rounded-xl pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
                   />
                 </div>
 
@@ -351,7 +354,7 @@ export default function ListJurusanPage() {
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="theme-input h-11 w-full appearance-none rounded-xl px-3 pr-8 text-xs outline-none focus:ring-2 focus:ring-slate-500/20 sm:text-sm"
+                      className="theme-input h-11 w-full appearance-none rounded-xl px-3 pr-8 text-xs outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] sm:text-sm"
                     >
                       <option value="Semua">Semua Status</option>
                       <option value="Aktif">Aktif</option>
@@ -371,7 +374,7 @@ export default function ListJurusanPage() {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="theme-input h-11 w-full appearance-none rounded-xl pl-8 pr-8 text-xs outline-none focus:ring-2 focus:ring-slate-500/20 sm:text-sm"
+                      className="theme-input h-11 w-full appearance-none rounded-xl pl-8 pr-8 text-xs outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] sm:text-sm"
                     >
                       <option value="nama-asc">Nama A-Z</option>
                       <option value="nama-desc">Nama Z-A</option>
@@ -386,7 +389,7 @@ export default function ListJurusanPage() {
 
                   <button
                     onClick={resetFilter}
-                    className="theme-card theme-border theme-text-secondary col-span-2 h-11 rounded-xl border px-4 text-sm font-semibold transition hover:bg-slate-500/5 sm:col-span-1"
+                    className="theme-card theme-border theme-text-secondary col-span-2 h-11 rounded-xl border px-4 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] sm:col-span-1"
                   >
                     Reset
                   </button>
@@ -396,11 +399,11 @@ export default function ListJurusanPage() {
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t theme-border-soft pt-3">
                 <p className="text-xs theme-text-muted">
                   Menampilkan{" "}
-                  <span className="font-bold theme-text">
+                  <span className="font-semibold theme-text">
                     {filtered.length}
                   </span>{" "}
                   dari{" "}
-                  <span className="font-bold theme-text-secondary">
+                  <span className="font-semibold theme-text-secondary">
                     {data.length}
                   </span>{" "}
                   jurusan
@@ -415,7 +418,7 @@ export default function ListJurusanPage() {
               <div className="w-full overflow-x-auto">
                 <table className="w-full min-w-[820px] border-collapse text-left">
                   <thead>
-                    <tr className="border-b theme-border theme-card-soft text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                    <tr className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs font-semibold uppercase tracking-wider theme-text-muted">
                       <th className="w-12 px-3 py-3.5 text-center sm:w-14 sm:px-4">
                         No
                       </th>
@@ -433,7 +436,7 @@ export default function ListJurusanPage() {
                         <td colSpan={6} className="px-5 py-16 text-center">
                           <div className="flex flex-col items-center gap-3">
                             <Loader2
-                              className="animate-spin theme-text-muted"
+                              className="animate-spin theme-primary-text"
                               size={28}
                             />
                             <span className="text-sm theme-text-muted">
@@ -450,22 +453,22 @@ export default function ListJurusanPage() {
                         return (
                           <tr
                             key={j.id}
-                            className="border-b theme-border-soft transition hover:bg-slate-500/5 last:border-0"
+                            className="border-b theme-border-soft transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] last:border-0"
                           >
-                            <td className="px-3 py-3.5 text-center text-sm font-semibold theme-text-muted sm:px-4 sm:py-4">
+                            <td className="px-3 py-3.5 text-center text-sm font-medium theme-text-muted sm:px-4 sm:py-4">
                               {index + 1}
                             </td>
 
                             <td className="px-3 py-3.5 sm:px-4 sm:py-4">
                               <div className="flex items-center gap-2.5 sm:gap-3">
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border theme-border theme-card-soft theme-text-secondary sm:h-10 sm:w-10">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text sm:h-10 sm:w-10">
                                   <Icon size={16} strokeWidth={2} />
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="truncate text-sm font-bold theme-text">
+                                  <p className="truncate text-sm font-semibold theme-text">
                                     {j.nama}
                                   </p>
-                                  <p className="mt-0.5 inline-block rounded bg-slate-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold theme-text-muted">
+                                  <p className="mt-0.5 inline-block rounded-md border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2 py-0.5 font-mono text-[10px] font-semibold theme-primary-text">
                                     {j.kode}
                                   </p>
                                 </div>
@@ -479,7 +482,7 @@ export default function ListJurusanPage() {
                             </td>
 
                             <td className="px-3 py-3.5 text-center sm:px-4 sm:py-4">
-                              <span className="inline-flex min-w-[32px] items-center justify-center rounded-lg bg-slate-500/10 px-2 py-1 text-sm font-bold theme-text-secondary">
+                              <span className="inline-flex min-w-[32px] items-center justify-center rounded-lg border theme-border theme-card-soft px-2.5 py-1 text-xs font-semibold theme-text-secondary">
                                 {j._count?.kelas ?? j.kelas ?? 0}
                               </span>
                             </td>
@@ -497,7 +500,7 @@ export default function ListJurusanPage() {
                                     )
                                   }
                                   title="Lihat detail"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-secondary transition hover:bg-slate-500/10 hover:theme-text"
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                                 >
                                   <Eye size={15} />
                                 </button>
@@ -509,7 +512,7 @@ export default function ListJurusanPage() {
                                       )
                                     }
                                     title="Edit"
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-secondary transition hover:bg-slate-500/10 hover:theme-text"
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                                   >
                                     <Pencil size={15} />
                                   </button>
@@ -518,7 +521,7 @@ export default function ListJurusanPage() {
                                   <button
                                     onClick={() => setConfirmDeleteItem(j)}
                                     title="Hapus"
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-secondary transition hover:bg-slate-500/10 hover:theme-text"
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg theme-text-muted transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400"
                                   >
                                     <Trash2 size={15} />
                                   </button>
@@ -532,10 +535,10 @@ export default function ListJurusanPage() {
                     {!loading && filtered.length === 0 && (
                       <tr>
                         <td colSpan={6} className="px-5 py-20 text-center">
-                          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border theme-border theme-card-soft theme-text-muted">
+                          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                             <GraduationCap size={26} />
                           </div>
-                          <p className="mt-4 text-base font-bold theme-text-secondary">
+                          <p className="mt-4 text-base font-semibold theme-text">
                             {data.length === 0
                               ? "Belum ada data jurusan"
                               : "Jurusan tidak ditemukan"}
@@ -551,7 +554,7 @@ export default function ListJurusanPage() {
                                 onClick={() =>
                                   router.push("/admin/akademik/jurusan/tambah")
                                 }
-                                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+                                className="theme-primary mt-4 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-md transition hover:opacity-90"
                               >
                                 <Plus size={16} />
                                 Tambah Jurusan
@@ -575,7 +578,7 @@ export default function ListJurusanPage() {
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
           <div className="theme-card theme-border w-full max-w-md rounded-2xl border p-5 shadow-2xl sm:p-6">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-500/10 theme-text-secondary">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
                 <Trash2 size={22} />
               </div>
               <div className="min-w-0">
@@ -599,14 +602,14 @@ export default function ListJurusanPage() {
               <button
                 disabled={deleting}
                 onClick={() => setConfirmDeleteItem(null)}
-                className="theme-card theme-border theme-text-secondary h-10 rounded-xl border px-5 text-sm font-semibold transition hover:bg-slate-500/5 disabled:opacity-50"
+                className="theme-card theme-border theme-text-secondary h-10 rounded-xl border px-5 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] disabled:opacity-50"
               >
                 Batal
               </button>
               <button
                 disabled={deleting}
                 onClick={() => removeItem(confirmDeleteItem)}
-                className="flex h-10 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50 dark:bg-rose-600 dark:hover:bg-rose-700"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
               >
                 {deleting && <Loader2 className="animate-spin" size={16} />}
                 {deleting ? "Menghapus..." : "Ya, Hapus"}

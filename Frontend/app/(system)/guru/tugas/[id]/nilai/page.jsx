@@ -32,7 +32,7 @@ import {
 
 
 const primaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const primarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -453,7 +453,7 @@ export default function NilaiTugasPage() {
           <button
             type="button"
             onClick={() => router.push(`/guru/tugas/${tugasId}`)}
-            className={`mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${primaryGradient}`}
+            className={`mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${primaryGradient}`}
           >
             <ArrowLeft size={16} />
             Kembali
@@ -482,7 +482,7 @@ export default function NilaiTugasPage() {
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <div
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${primaryGradient} text-[var(--color-card)] ${primaryShadow}`}
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${primaryGradient} text-white ${primaryShadow}`}
             >
               <GraduationCap size={21} />
             </div>
@@ -869,7 +869,7 @@ export default function NilaiTugasPage() {
                             type="button"
                             disabled={saving}
                             onClick={() => handleSave(item)}
-                            className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-card)] sm:w-auto ${primaryGradient} ${primaryShadow} transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
+                            className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white sm:w-auto ${primaryGradient} ${primaryShadow} transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
                           >
                             {saving ? (
                               <Loader2
@@ -923,12 +923,12 @@ function SummaryCard({ icon, label, value, hint, tone = "primary" }) {
       value: "theme-text",
     },
     success: {
-      icon: `${successSurface} ${successBorder} text-[var(--color-success)]`,
-      value: "text-[var(--color-success)]",
+      icon: `${primarySoft} ${primarySoftBorder} ${primaryText}`,
+      value: "theme-text",
     },
     warning: {
-      icon: `${warningSurface} ${warningBorder} text-[var(--color-warning)]`,
-      value: "text-[var(--color-warning)]",
+      icon: `${primarySoft} ${primarySoftBorder} ${primaryText}`,
+      value: "theme-text",
     },
   };
 

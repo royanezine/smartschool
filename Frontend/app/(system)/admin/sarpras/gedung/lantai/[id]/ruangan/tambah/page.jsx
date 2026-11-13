@@ -16,6 +16,7 @@ import {
   Users,
   Hash,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -24,6 +25,7 @@ import {
   getGedung,
   getLantaiByGedung,
 } from "@/services/infrastruktur.service";
+import { createRuangan } from "@/services/sarpras.service";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -43,7 +45,8 @@ export default function TambahRuanganPage() {
 
   const [lantai, setLantai] = useState(null);
   const [gedung, setGedung] = useState(null);
-  const [loadingContext, setLoadingContext] = useState(true);
+  const [, setLoadingContext] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   // Form states
   const [nama, setNama] = useState("");
@@ -53,6 +56,7 @@ export default function TambahRuanganPage() {
   const [status, setStatus] = useState("aktif");
   const [errors, setErrors] = useState({});
   const [infoMessage, setInfoMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const loadContext = useCallback(async () => {
     try {
@@ -81,12 +85,14 @@ export default function TambahRuanganPage() {
   }, [id]);
 
   useEffect(() => {
-    if (id) {
+    if (!id) return;
+    const timer = setTimeout(() => {
       loadContext();
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [id, loadContext]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -101,14 +107,31 @@ export default function TambahRuanganPage() {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setInfoMessage("");
+      setSubmitError("");
       return;
     }
 
-    setErrors({});
-    // Inform user of frontend-ready status without fake API call
-    setInfoMessage(
-      "Struktur form valid! Catatan: Data belum disimpan ke database karena endpoint backend `/api/infrastruktur/ruangan` belum tersedia (Backend Gap). Form ini siap digunakan segera setelah model dan API backend dimigrasikan."
-    );
+    try {
+      setErrors({});
+      setSubmitError("");
+      setSubmitting(true);
+
+      await createRuangan({
+        nama: nama.trim(),
+        gedungId: gedung?.id || lantai?.gedungId || null,
+        lantaiId: id || null,
+        lokasi: kode.trim() || null,
+        kapasitas: kapasitas ? Number(kapasitas) : null,
+        keterangan: status ? `Status: ${status}` : null,
+      });
+
+      setInfoMessage("Ruangan baru berhasil disimpan.");
+      router.push(`/admin/sarpras/gedung/lantai/${id}/ruangan`);
+    } catch (err) {
+      setSubmitError(err?.message || "Gagal menyimpan data ruangan.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const selectedKelasObj = lantai?.kelas?.find((k) => String(k.id) === String(kelasId));
@@ -192,12 +215,23 @@ export default function TambahRuanganPage() {
               </div>
             </div>
 
+            {/* Error Banner */}
+            {submitError && (
+              <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)] p-4 text-sm theme-danger">
+                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-sm">Gagal Menyimpan Ruangan</p>
+                  <p className="text-xs leading-relaxed mt-0.5">{submitError}</p>
+                </div>
+              </div>
+            )}
+
             {/* Informative Status Notification */}
             {infoMessage && (
-              <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)] p-4 sm:p-5 text-sm theme-info">
-                <CheckCircle2 size={20} className="shrink-0 mt-0.5 text-[var(--color-info)]" />
+              <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_6%,transparent)] p-4 sm:p-5 text-sm theme-success">
+                <CheckCircle2 size={20} className="shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="font-semibold text-sm">Simulasi Validasi Berhasil</p>
+                  <p className="font-semibold text-sm">Berhasil Disimpan</p>
                   <p className="text-xs leading-relaxed opacity-95">{infoMessage}</p>
                   <div className="pt-2 flex items-center gap-2">
                     <button
@@ -422,10 +456,11 @@ export default function TambahRuanganPage() {
                     </button>
                     <button
                       type="submit"
-                      className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition-all`}
+                      disabled={submitting}
+                      className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition-all disabled:opacity-60`}
                     >
-                      <Save size={16} />
-                      Simpan Ruangan
+                      {submitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                      {submitting ? "Menyimpan..." : "Simpan Ruangan"}
                     </button>
                   </div>
                 </form>

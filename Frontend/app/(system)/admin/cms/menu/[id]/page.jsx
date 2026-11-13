@@ -91,14 +91,33 @@ function getRuntimeBase() {
   };
 }
 
-function getBaseDomain(hostname) {
-  if (!hostname) return "";
-  if (hostname === "localhost") return hostname;
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return hostname;
+const ROOT_DOMAIN = "smartschool.citrasolusi.id";
 
-  const parts = hostname.split(".");
-  if (parts.length <= 2) return hostname;
-  return parts.slice(-2).join(".");
+function getBaseDomain(hostname, sekolahSlug = "") {
+  const cleanHost = String(hostname || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\.$/, "");
+
+  if (!cleanHost) return "";
+  if (cleanHost === "localhost" || cleanHost.endsWith(".localhost")) {
+    return "localhost";
+  }
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(cleanHost)) return cleanHost;
+
+  if (cleanHost === ROOT_DOMAIN || cleanHost.endsWith(`.${ROOT_DOMAIN}`)) {
+    return ROOT_DOMAIN;
+  }
+
+  if (sekolahSlug && cleanHost.startsWith(`${sekolahSlug.toLowerCase()}.`)) {
+    return cleanHost.slice(sekolahSlug.length + 1);
+  }
+
+  if (cleanHost.startsWith("www.")) {
+    return cleanHost.slice(4);
+  }
+
+  return cleanHost;
 }
 
 function getSekolahSlug(item) {
@@ -134,7 +153,7 @@ function resolveCtaLink(link, item) {
   if (!hostname) return normalizedPath;
 
   const sekolahSlug = getSekolahSlug(item);
-  const baseDomain = getBaseDomain(hostname);
+  const baseDomain = getBaseDomain(hostname, sekolahSlug);
   const portPart = port ? `:${port}` : "";
 
   console.group("[resolveCtaLink]");
@@ -281,7 +300,7 @@ export default function DetailMenuKonfigurasiPage() {
                   <ArrowLeft className="h-4 w-4" />
                   Kembali
                 </button>
-                <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border">
+                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border">
                   <Menu className="h-5 w-5" />
                 </div>
                 <div>
@@ -381,7 +400,7 @@ export default function DetailMenuKonfigurasiPage() {
                     <div className="space-y-5 p-5 sm:p-6">
                       <div>
                         <div className="mb-2 flex flex-wrap items-center gap-2">
-                          <span className="theme-info inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold">
+                          <span className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold">
                             <Layers className="h-3.5 w-3.5" />
                             {formatLabel(item.section)}
                           </span>
@@ -557,7 +576,7 @@ export default function DetailMenuKonfigurasiPage() {
               <p className="theme-text-secondary mt-2 text-sm leading-6">
                 Konfigurasi{" "}
                 <strong className="theme-text">
-                  "{item.judul || "Tanpa Judul"}"
+                  &quot;{item.judul || "Tanpa Judul"}&quot;
                 </strong>{" "}
                 akan dinonaktifkan melalui endpoint backend.
               </p>

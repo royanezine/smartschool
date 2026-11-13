@@ -27,13 +27,22 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000";
+function getBackendOrigin() {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "").replace(/\/api(?:\/v1)?$/i, "");
+  }
+  if (typeof window !== "undefined") {
+    return ["localhost", "127.0.0.1"].includes(window.location.hostname)
+      ? "http://localhost:5000"
+      : window.location.origin;
+  }
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
+}
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -534,7 +543,7 @@ export default function PresensiGuruPage() {
           jadwalResponse,
         ] = await Promise.all([
           fetch(
-            `${API_URL}/api/absensi/saya`,
+            `${getBackendOrigin()}/api/absensi/saya`,
             {
               method: "GET",
               headers,
@@ -543,7 +552,7 @@ export default function PresensiGuruPage() {
           ),
 
           fetch(
-            `${API_URL}/api/jadwal-mengajar`,
+            `${getBackendOrigin()}/api/jadwal-mengajar`,
             {
               method: "GET",
               headers,
@@ -1092,7 +1101,7 @@ export default function PresensiGuruPage() {
 
         const response =
           await fetch(
-            `${API_URL}/api/absensi/`,
+            `${getBackendOrigin()}/api/absensi/`,
             {
               method: "POST",
 
@@ -1356,9 +1365,9 @@ export default function PresensiGuruPage() {
                   value={jumlahHadir}
                   description="Total kehadiran"
                   icon={UserCheck}
-                  iconClass="text-[var(--color-success)]"
-                  iconSurface={themeSuccessSurface}
-                  iconBorder={themeSuccessBorder}
+                  iconClass={themePrimaryText}
+                  iconSurface={themePrimarySoft}
+                  iconBorder={themePrimarySoftBorder}
                 />
 
                 <StatCard
@@ -1366,9 +1375,9 @@ export default function PresensiGuruPage() {
                   value={jumlahTerlambat}
                   description="Total keterlambatan"
                   icon={Clock}
-                  iconClass="text-[var(--color-warning)]"
-                  iconSurface={themeWarningSurface}
-                  iconBorder={themeWarningBorder}
+                  iconClass={themePrimaryText}
+                  iconSurface={themePrimarySoft}
+                  iconBorder={themePrimarySoftBorder}
                 />
 
                 <StatCard
@@ -1376,9 +1385,9 @@ export default function PresensiGuruPage() {
                   value={jumlahIzin}
                   description="Total izin"
                   icon={Calendar}
-                  iconClass="text-[var(--color-info)]"
-                  iconSurface={themeInfoSurface}
-                  iconBorder={themeInfoBorder}
+                  iconClass={themePrimaryText}
+                  iconSurface={themePrimarySoft}
+                  iconBorder={themePrimarySoftBorder}
                 />
 
                 <StatCard
@@ -1594,7 +1603,7 @@ export default function PresensiGuruPage() {
                         ${themePrimaryGradient}
                         px-5 py-4
                         text-sm font-bold
-                        text-[var(--color-card)]
+                        text-white
                         ${themePrimaryShadow}
                         transition
                         hover:brightness-95
@@ -1664,12 +1673,12 @@ export default function PresensiGuruPage() {
                         jumlahHadir
                       }
                       surface={
-                        themeSuccessSurface
+                        themePrimarySoft
                       }
                       border={
-                        themeSuccessBorder
+                        themePrimarySoftBorder
                       }
-                      text="text-[var(--color-success)]"
+                      text={themePrimaryText}
                     />
 
                     <SummaryBox
@@ -1678,12 +1687,12 @@ export default function PresensiGuruPage() {
                         jumlahTerlambat
                       }
                       surface={
-                        themeWarningSurface
+                        themePrimarySoft
                       }
                       border={
-                        themeWarningBorder
+                        themePrimarySoftBorder
                       }
-                      text="text-[var(--color-warning)]"
+                      text={themePrimaryText}
                     />
 
                     <SummaryBox
@@ -1692,12 +1701,12 @@ export default function PresensiGuruPage() {
                         jumlahIzin
                       }
                       surface={
-                        themeInfoSurface
+                        themePrimarySoft
                       }
                       border={
-                        themeInfoBorder
+                        themePrimarySoftBorder
                       }
-                      text="text-[var(--color-info)]"
+                      text={themePrimaryText}
                     />
                   </div>
 
@@ -1907,7 +1916,7 @@ export default function PresensiGuruPage() {
                         <tr
                           className={`
                             ${themePrimaryGradient}
-                            text-[var(--color-card)]
+                            text-white
                           `}
                         >
                           <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide">
@@ -2125,11 +2134,11 @@ export default function PresensiGuruPage() {
                         text-center
                       "
                     >
-                      <p className="text-sm font-semibold text-[var(--color-card)]">
+                      <p className="text-sm font-semibold text-white">
                         Posisikan wajah di dalam oval
                       </p>
 
-                      <p className="mt-1 text-xs text-[color-mix(in_srgb,var(--color-card)_75%,transparent)]">
+                      <p className="mt-1 text-xs text-white/80">
                         Pastikan pencahayaan cukup dan wajah terlihat jelas
                       </p>
                     </div>
@@ -2190,7 +2199,7 @@ export default function PresensiGuruPage() {
                 </div>
               )}
 
-              <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+              <div className="mt-4 flex items-center justify-center gap-2 text-xs text-white/80">
                 <MapPin size={14} />
 
                 {location
@@ -2251,7 +2260,7 @@ export default function PresensiGuruPage() {
                       w-full rounded-xl
                       px-6 py-3
                       text-sm font-bold
-                      text-[var(--color-card)]
+                      text-white
                       ${themePrimaryShadow}
                       transition sm:w-auto
                       hover:brightness-95
@@ -2305,7 +2314,7 @@ export default function PresensiGuruPage() {
                       ${themePrimaryGradient}
                       px-6 py-3
                       text-sm font-bold
-                      text-[var(--color-card)]
+                      text-white
                       ${themePrimaryShadow}
                       transition sm:w-auto
                       hover:brightness-95
@@ -2355,7 +2364,7 @@ function StatCard({
       className={`
         theme-card
         rounded-2xl
-        border ${themeNeutralBorder}
+        border ${themePrimarySoftBorder}
         p-4 sm:p-5
         ${themeCardShadow}
         transition-all duration-200

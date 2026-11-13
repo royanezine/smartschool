@@ -33,7 +33,12 @@ import {
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-import { getPengaturanSpmb, getRankingJalur } from "@/services/ppdb.service";
+import {
+  getPengaturanSpmb,
+  getRankingJalur,
+  getHasilSeleksiPpdb,
+  simpanHasilSeleksiPpdb,
+} from "@/services/ppdb.service";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
 import { formatAngka, formatNilai } from "@/lib/spmb";
 
@@ -74,6 +79,111 @@ function SeleksiSpmbContent() {
 
   const [loadingJalur, setLoadingJalur] = useState(true);
   const [loadingRanking, setLoadingRanking] = useState(false);
+
+  const [hasilModalOpen, setHasilModalOpen] = useState(false);
+  const [selectedPeserta, setSelectedPeserta] = useState(null);
+  const [hasilForm, setHasilForm] = useState({
+    nilaiTes: "",
+    peringkat: "",
+    statusKelulusan: "",
+    catatan: "",
+  });
+  const [loadingHasilModal, setLoadingHasilModal] = useState(false);
+  const [savingHasilModal, setSavingHasilModal] = useState(false);
+  const [hasilModalError, setHasilModalError] = useState("");
+  const [hasilModalSuccess, setHasilModalSuccess] = useState("");
+
+  const openHasilModal = async (peserta) => {
+    if (!peserta?.id) return;
+    setSelectedPeserta(peserta);
+    setHasilModalError("");
+    setHasilModalSuccess("");
+    setHasilForm({
+      nilaiTes: "",
+      peringkat:
+        peserta?.peringkat !== null && peserta?.peringkat !== undefined
+          ? String(peserta.peringkat)
+          : "",
+      statusKelulusan: "",
+      catatan: "",
+    });
+    setHasilModalOpen(true);
+
+    try {
+      setLoadingHasilModal(true);
+      const res = await getHasilSeleksiPpdb(peserta.id);
+      const hs = res?.data;
+      if (hs) {
+        setHasilForm({
+          nilaiTes:
+            hs.nilaiTes !== null && hs.nilaiTes !== undefined
+              ? String(hs.nilaiTes)
+              : "",
+          peringkat:
+            hs.peringkat !== null && hs.peringkat !== undefined
+              ? String(hs.peringkat)
+              : peserta?.peringkat
+              ? String(peserta.peringkat)
+              : "",
+          statusKelulusan: hs.statusKelulusan || "",
+          catatan: hs.catatan || "",
+        });
+      }
+    } catch {
+      // Tetap izinkan input baru meski hasil seleksi belum pernah disimpan
+    } finally {
+      setLoadingHasilModal(false);
+    }
+  };
+
+  const handleSaveHasilModal = async (e) => {
+    e.preventDefault();
+    if (!selectedPeserta?.id) return;
+
+    const nilaiParsed =
+      hasilForm.nilaiTes.trim() === "" ? null : Number(hasilForm.nilaiTes);
+    if (
+      nilaiParsed !== null &&
+      (Number.isNaN(nilaiParsed) || nilaiParsed < 0 || nilaiParsed > 100)
+    ) {
+      setHasilModalError("Nilai tes harus antara 0 sampai 100.");
+      return;
+    }
+
+    const peringkatParsed =
+      hasilForm.peringkat.trim() === "" ? null : Number(hasilForm.peringkat);
+    if (
+      peringkatParsed !== null &&
+      (!Number.isInteger(peringkatParsed) || peringkatParsed < 1)
+    ) {
+      setHasilModalError("Peringkat harus bilangan bulat minimal 1.");
+      return;
+    }
+
+    try {
+      setSavingHasilModal(true);
+      setHasilModalError("");
+
+      await simpanHasilSeleksiPpdb(selectedPeserta.id, {
+        nilaiTes: nilaiParsed,
+        peringkat: peringkatParsed,
+        statusKelulusan: hasilForm.statusKelulusan || null,
+        catatan: hasilForm.catatan.trim() || null,
+      });
+
+      setHasilModalSuccess("Hasil seleksi pendaftar berhasil diperbarui.");
+      setHasilModalOpen(false);
+      await loadRanking(selectedJalurId, true);
+    } catch (err) {
+      setHasilModalError(
+        err instanceof Error
+          ? err.message
+          : "Gagal menyimpan hasil seleksi."
+      );
+    } finally {
+      setSavingHasilModal(false);
+    }
+  };
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [is404, setIs404] = useState(false);
@@ -356,7 +466,7 @@ function SeleksiSpmbContent() {
                         onClick={() => handlePilihJalur(j.id)}
                         className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-semibold transition ${
                           isSelected
-                            ? `${themePrimaryGradient} border-transparent text-[var(--color-card)] shadow-sm`
+                            ? "theme-primary border-transparent text-white shadow-sm"
                             : `theme-card theme-border theme-text ${themeNeutralHover}`
                         }`}
                       >
@@ -375,6 +485,19 @@ function SeleksiSpmbContent() {
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {hasilModalSuccess && (
+              <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] p-4 text-xs text-[var(--color-success)]">
+                <span className="font-semibold">{hasilModalSuccess}</span>
+                <button
+                  type="button"
+                  onClick={() => setHasilModalSuccess("")}
+                  className="rounded-md px-2 py-0.5 text-[11px] font-semibold hover:opacity-80"
+                >
+                  Tutup
+                </button>
               </div>
             )}
 
@@ -502,6 +625,7 @@ function SeleksiSpmbContent() {
                             <Th>Kelengkapan Berkas</Th>
                             <Th>Kriteria Seleksi</Th>
                             <Th>Status Penerimaan</Th>
+                            <Th>Hasil Seleksi</Th>
                           </tr>
                         </thead>
 
@@ -636,6 +760,16 @@ function SeleksiSpmbContent() {
                                     </span>
                                   )}
                                 </td>
+
+                                <td className="px-4 py-3 text-xs">
+                                  <button
+                                    type="button"
+                                    onClick={() => openHasilModal(item)}
+                                    className="theme-border inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold text-[var(--color-primary)] transition hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                                  >
+                                    Atur Hasil
+                                  </button>
+                                </td>
                               </tr>
                             );
                           })}
@@ -701,6 +835,143 @@ function SeleksiSpmbContent() {
           </div>
         </main>
       </div>
+
+      {hasilModalOpen && selectedPeserta && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="theme-card theme-border w-full max-w-md rounded-2xl border p-5 shadow-xl">
+            <div className="mb-3 flex items-start justify-between gap-2">
+              <div>
+                <h2 className="theme-text text-sm font-bold">
+                  Penetapan Hasil Seleksi
+                </h2>
+                <p className="theme-text-muted mt-0.5 text-xs">
+                  {selectedPeserta.namaLengkap} ({selectedPeserta.nomorPendaftaran})
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHasilModalOpen(false)}
+                className="theme-text-muted rounded-lg px-2 py-1 text-xs hover:opacity-80"
+              >
+                Tutup
+              </button>
+            </div>
+
+            {loadingHasilModal ? (
+              <div className="flex items-center justify-center gap-2 py-8 text-xs theme-text-muted">
+                <Loader2 size={16} className="animate-spin" />
+                Memuat hasil seleksi peserta...
+              </div>
+            ) : (
+              <form onSubmit={handleSaveHasilModal} className="space-y-3 text-xs">
+                {hasilModalError && (
+                  <div className="rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-3 py-2 text-[var(--color-danger)]">
+                    {hasilModalError}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="theme-text mb-1 block font-semibold">
+                      Nilai Tes (0-100)
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      step="0.01"
+                      value={hasilForm.nilaiTes}
+                      onChange={(e) =>
+                        setHasilForm((prev) => ({
+                          ...prev,
+                          nilaiTes: e.target.value,
+                        }))
+                      }
+                      className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="theme-text mb-1 block font-semibold">
+                      Peringkat
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      step="1"
+                      value={hasilForm.peringkat}
+                      onChange={(e) =>
+                        setHasilForm((prev) => ({
+                          ...prev,
+                          peringkat: e.target.value,
+                        }))
+                      }
+                      className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="theme-text mb-1 block font-semibold">
+                    Status Kelulusan
+                  </label>
+                  <select
+                    value={hasilForm.statusKelulusan}
+                    onChange={(e) =>
+                      setHasilForm((prev) => ({
+                        ...prev,
+                        statusKelulusan: e.target.value,
+                      }))
+                    }
+                    className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                  >
+                    <option value="">-- Belum Ditetapkan --</option>
+                    <option value="lulus">Lulus</option>
+                    <option value="cadangan">Cadangan</option>
+                    <option value="tidak_lulus">Tidak Lulus</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="theme-text mb-1 block font-semibold">
+                    Catatan Seleksi
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={hasilForm.catatan}
+                    onChange={(e) =>
+                      setHasilForm((prev) => ({
+                        ...prev,
+                        catatan: e.target.value,
+                      }))
+                    }
+                    className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setHasilModalOpen(false)}
+                    className="theme-border theme-text rounded-lg border px-3.5 py-2 font-semibold"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingHasilModal}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-4 py-2 font-semibold text-white disabled:opacity-60"
+                  >
+                    {savingHasilModal && (
+                      <Loader2 size={13} className="animate-spin" />
+                    )}
+                    Simpan Hasil
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

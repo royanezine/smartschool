@@ -526,7 +526,10 @@ function KartuIdentitasPageContent() {
                                 px-2.5
                                 py-1.5
                                 rounded-md
-                                theme-info
+                                border theme-border
+                                theme-text-muted
+                                hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                                hover:text-[var(--color-primary)]
                                 text-xs
                                 font-medium
                                 transition-colors

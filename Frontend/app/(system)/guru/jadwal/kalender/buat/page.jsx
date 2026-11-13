@@ -31,7 +31,7 @@ import { X } from "lucide-react";
 
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -1232,7 +1232,7 @@ export default function BuatJadwalGuruPage() {
                       loadingData ||
                       kelasMapel.length === 0
                     }
-                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-3 text-sm font-semibold text-white ${themePrimaryShadow} transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                   >
                     {saving ? (
                       <>
@@ -1288,7 +1288,7 @@ export default function BuatJadwalGuruPage() {
                   >
 
                     <div
-                      className={`${themePrimaryGradient} px-5 py-4 text-[var(--color-card)]`}
+                      className={`${themePrimaryGradient} px-5 py-4 text-white`}
                     >
                       <p className="text-xs font-medium uppercase tracking-wider opacity-80">
                         Hari

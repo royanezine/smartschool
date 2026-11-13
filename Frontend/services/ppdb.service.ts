@@ -1,5 +1,5 @@
 import { apiFetch } from "../lib/api";
-import { clearSession, getToken } from "../lib/auth";
+import { clearSession, getToken, getBackendOrigin } from "../lib/auth";
 
 const ENDPOINT = "/api/ppdb";
 
@@ -99,6 +99,7 @@ export interface BerkasPpdb {
 export interface HasilSeleksiPpdb {
   id?: string;
   pendaftaranPpdbId?: string;
+  pendaftaranId?: string;
   nilaiTes?: number | string | null;
   peringkat?: number | null;
   statusKelulusan?: string | null;
@@ -779,14 +780,7 @@ export async function uploadBerkasPpdb(
     );
   }
 
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:5000";
-
-  const baseUrl = API_URL.replace(/\/+$/, "").replace(
-    /\/api(?:\/v\d+)?$/,
-    ""
-  );
+  const baseUrl = getBackendOrigin();
 
   const formData = new FormData();
 
@@ -1004,10 +998,7 @@ export async function getDetailSaya(
   };
   message?: string;
 }> {
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:5000";
-  const baseUrl = API_URL.replace(/\/+$/, "").replace(/\/api(?:\/v\d+)?$/, "");
+  const baseUrl = getBackendOrigin();
   const headers = new Headers();
   headers.set("Accept", "application/json");
 
@@ -1071,10 +1062,7 @@ export async function getRankingSaya(
   tokenPendaftar?: string,
   limit: number = 100
 ): Promise<RankingSayaResponse> {
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:5000";
-  const baseUrl = API_URL.replace(/\/+$/, "").replace(/\/api(?:\/v\d+)?$/, "");
+  const baseUrl = getBackendOrigin();
   const headers = new Headers();
   headers.set("Accept", "application/json");
 
@@ -1223,6 +1211,52 @@ export function isPengumumanEndpointMissing(
   return false;
 }
 
+export interface SimpanHasilSeleksiPayload {
+  nilaiTes?: number | null;
+  peringkat?: number | null;
+  statusKelulusan?: "lulus" | "tidak_lulus" | "cadangan" | null;
+  catatan?: string | null;
+}
+
+export async function getHasilSeleksiPpdb(pendaftarId: string): Promise<{
+  success: boolean;
+  message?: string;
+  data: HasilSeleksiPpdb | null;
+}> {
+  if (!pendaftarId) {
+    throw new Error("ID pendaftar wajib diisi.");
+  }
+
+  return apiFetch(
+    `${ENDPOINT}/pendaftar/${encodeURIComponent(pendaftarId)}/hasil-seleksi`,
+    { method: "GET" }
+  );
+}
+
+export async function simpanHasilSeleksiPpdb(
+  pendaftarId: string,
+  payload: SimpanHasilSeleksiPayload
+): Promise<{
+  success: boolean;
+  message?: string;
+  data: HasilSeleksiPpdb;
+}> {
+  if (!pendaftarId) {
+    throw new Error("ID pendaftar wajib diisi.");
+  }
+
+  return apiFetch(
+    `${ENDPOINT}/pendaftar/${encodeURIComponent(pendaftarId)}/hasil-seleksi`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
 const ppdbService = {
   daftarPpdb,
   loginPendaftarPpdb,
@@ -1245,6 +1279,8 @@ const ppdbService = {
   createPengumumanPpdb,
   updatePengumumanPpdb,
   deletePengumumanPpdb,
+  getHasilSeleksiPpdb,
+  simpanHasilSeleksiPpdb,
 };
 
 export default ppdbService;

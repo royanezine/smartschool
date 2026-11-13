@@ -1,10 +1,8 @@
 
-import { getToken, getRefreshToken, clearSession } from "../lib/auth";
+import { getToken, getRefreshToken, clearSession, getBackendOrigin } from "../lib/auth";
 import { apiFetch } from "../lib/api";
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/+$/, "");
+const API_URL = getBackendOrigin();
 
 
 

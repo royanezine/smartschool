@@ -126,11 +126,13 @@ function StatCard({ icon: Icon, title, value }) {
 }
 
 export default function JadwalPelajaranPage() {
+  const router = useRouter();
   const [isCollapsed, setIsCollapsed] =
     useState(false);
 
   const [kelasList, setKelasList] = useState([]);
   const [rawJadwal, setRawJadwal] = useState([]);
+  const [jadwalData, setJadwalData] = useState({});
   const [loading, setLoading] = useState(true);
   const [kelasAktif, setKelasAktif] = useState("");
 
@@ -185,6 +187,9 @@ export default function JadwalPelajaranPage() {
   }, []);
 
   const jadwalKelasAktif = useMemo(() => {
+    if (kelasAktif && jadwalData[kelasAktif]) {
+      return jadwalData[kelasAktif];
+    }
     const jadwal = {};
     const normalizedKelas = (kelasAktif || "").trim().toLowerCase();
 
@@ -808,7 +813,7 @@ export default function JadwalPelajaranPage() {
               <div className="flex items-center gap-3">
 
                 <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl theme-primary text-[var(--color-card)] ${themePrimaryShadow}`}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl theme-primary text-white ${themePrimaryShadow}`}
                 >
                   <CalendarDays size={20} />
                 </div>
@@ -857,7 +862,7 @@ export default function JadwalPelajaranPage() {
                   onClick={
                     handleExportExcel
                   }
-                  className="theme-primary inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition-all hover:brightness-110"
+                  className="theme-primary inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-white transition-all hover:brightness-110"
                 >
                   <Download size={15} />
                   Export Excel
@@ -946,7 +951,7 @@ export default function JadwalPelajaranPage() {
                     }
                     className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                       kelasAktif === kelas
-                        ? "theme-primary text-[var(--color-card)] shadow-sm"
+                        ? "theme-primary text-white shadow-sm"
                         : `theme-card ${themeNeutralBorder} theme-text-secondary hover:${themePrimarySoft} hover:text-[var(--color-primary)]`
                     }`}
                   >
@@ -992,7 +997,7 @@ export default function JadwalPelajaranPage() {
 
                   <thead>
 
-                    <tr className="theme-primary text-[var(--color-card)]">
+                    <tr className="theme-primary text-white">
 
                       <th className="w-28 whitespace-nowrap px-3 py-3 text-left font-semibold">
                         Jam

@@ -25,7 +25,6 @@ import {
   clearSession,
   subscribeAuth,
   hasMenuAccess,
-  getUserAksesMenu,
 } from "../../lib/auth";
 
 const configByRole = {
@@ -113,8 +112,17 @@ function canViewMenu(item, permissions, modules, currentRole) {
   }
 
   // Untuk role non-admin (guru, siswa, yayasan), gunakan logika legacy berbasis permission/modul
-  const permissionAllowed = !item.permission || permissions.includes(item.permission);
-  const moduleAllowed = !item.module || modules.includes(item.module);
+  const permissionList = Array.isArray(permissions) ? permissions : [];
+  const moduleList = Array.isArray(modules) ? modules : [];
+
+  const permissionAllowed = !item.permission
+    ? true
+    : Array.isArray(item.permission)
+    ? item.permission.length === 0 ||
+      item.permission.some((perm) => permissionList.includes(perm))
+    : permissionList.includes(item.permission);
+
+  const moduleAllowed = !item.module || moduleList.includes(item.module);
 
   return permissionAllowed && moduleAllowed;
 }
@@ -175,46 +183,6 @@ function toStableKeySlug(value) {
     .replace(/^\/+|\/+$/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-}
-
-function scopeDelegatedMenuItems(items, prefix = "jabatan") {
-  if (!Array.isArray(items)) return [];
-
-  return items.map((item) => {
-    if (!item || typeof item !== "object") return item;
-
-    if (item.type === "header") {
-      const baseHeaderKey =
-        String(item.key || "").trim() ||
-        `header-${toStableKeySlug(item.label) || "section"}`;
-      return {
-        ...item,
-        key: baseHeaderKey.startsWith(`${prefix}-`)
-          ? baseHeaderKey
-          : `${prefix}-${baseHeaderKey}`,
-      };
-    }
-
-    const baseKey =
-      String(item.key || "").trim() ||
-      toStableKeySlug(item.path) ||
-      toStableKeySlug(item.label) ||
-      "item";
-
-    const scopedKey = baseKey.startsWith(`${prefix}-`)
-      ? baseKey
-      : `${prefix}-${baseKey}`;
-
-    const scopedChildren = Array.isArray(item.children)
-      ? scopeDelegatedMenuItems(item.children, scopedKey)
-      : item.children;
-
-    return {
-      ...item,
-      key: scopedKey,
-      ...(Array.isArray(scopedChildren) ? { children: scopedChildren } : {}),
-    };
-  });
 }
 
 function deduplicateMenuItems(items, parentKey = "") {
@@ -500,51 +468,12 @@ export default function Sidebar({
   const menuSections = useMemo(() => {
     if (!config || !Array.isArray(config.menuSections)) return [];
 
-    let baseSections = filterMenuItems(
+    const baseSections = filterMenuItems(
       config.menuSections,
       permissions,
       modules,
       role
     );
-
-    const authRole = normalizeRole(getAuthRole());
-    const userAksesMenu = getUserAksesMenu();
-
-    // Jika Guru memiliki Jabatan dengan aksesMenu, tampilkan juga menu Jabatan yang diizinkan
-    if (
-      role === "guru" &&
-      authRole === "guru" &&
-      Array.isArray(userAksesMenu) &&
-      userAksesMenu.length > 0 &&
-      Array.isArray(adminSidebarConfig?.menuSections)
-    ) {
-      const delegatedAdminItems = filterMenuItems(
-        adminSidebarConfig.menuSections.filter(
-          (item) => item.type !== "header" && item.key !== "dashboard"
-        ),
-        permissions,
-        modules,
-        "admin"
-      );
-
-      if (delegatedAdminItems.length > 0) {
-        const scopedDelegatedItems = scopeDelegatedMenuItems(
-          delegatedAdminItems,
-          "jabatan"
-        );
-
-        baseSections = [
-          ...baseSections,
-          {
-            type: "header",
-            key: "menu-jabatan-header",
-            label: "Menu Jabatan",
-            __header: true,
-          },
-          ...scopedDelegatedItems,
-        ];
-      }
-    }
 
     return removeEmptyHeaders(deduplicateMenuItems(baseSections));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -977,8 +906,7 @@ export default function Sidebar({
     : `relative shrink-0 h-screen ${desktopWidth} z-40 overflow-visible sticky top-0 ${transitionClass}`;
 
   const asideBase = `
-    bg-[#f4f8ff]
-    dark:bg-[#0b1220]
+    sidebar-bg
     flex
     flex-col
     border-r
@@ -1051,7 +979,7 @@ export default function Sidebar({
           <div
             className="
               relative z-10 flex flex-col h-full min-h-0 overflow-hidden
-              bg-[#f4f8ff] dark:bg-[#0b1220]
+              sidebar-bg
             "
           >
             <div className="sidebar-header relative h-[112px] shrink-0 overflow-visible">
@@ -1098,7 +1026,7 @@ export default function Sidebar({
                     <span
                       className="
                         mt-0.5 text-[9px] font-medium tracking-[0.1em] uppercase
-                        text-white/85 dark:text-blue-200/80 truncate
+                        text-white/85 dark:text-white/80 truncate
                       "
                     >
                       {config?.brandName || "ADMIN SEKOLAH"}
@@ -1118,8 +1046,8 @@ export default function Sidebar({
                   className="
                     absolute right-3 top-4 z-20
                     rounded-lg p-1.5
-                    text-white/80 dark:text-blue-100/80
-                    hover:bg-white/15 dark:hover:bg-blue-900/40
+                    text-white/80 dark:text-white/80
+                    hover:bg-white/15 dark:hover:bg-white/15
                     hover:text-white dark:hover:text-white
                     transition
                   "
@@ -1378,9 +1306,9 @@ export default function Sidebar({
               aria-expanded={!collapsed}
               className="
                 sidebar-toggle absolute z-[100] top-8 -right-3 w-7 h-7
-                rounded-full bg-white dark:bg-slate-900
+                rounded-full bg-white dark:bg-[var(--color-card)]
                 /* Force solid background on click */
-                active:!bg-white dark:active:!bg-slate-900
+                active:!bg-white dark:active:!bg-[var(--color-card)]
                 border flex items-center justify-center
                 shadow-md shadow-black/10 dark:shadow-black/40
                 hover:scale-110 active:scale-95
@@ -1414,16 +1342,16 @@ export default function Sidebar({
               }}
               className="
                 min-w-[230px] max-w-[320px] p-2
-                bg-white dark:bg-[#111827] rounded-xl
+                bg-white dark:bg-[var(--color-card)] rounded-xl
                 shadow-xl dark:shadow-black/50
-                border border-blue-100 dark:border-slate-700
+                border border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] dark:border-[var(--color-border)]
               "
             >
               <div
                 className="
                   absolute -left-1.5 top-5 w-3 h-3
-                  bg-white dark:bg-[#111827]
-                  border-l border-b border-blue-100 dark:border-slate-700
+                  bg-white dark:bg-[var(--color-card)]
+                  border-l border-b border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] dark:border-[var(--color-border)]
                   rotate-45
                 "
               />

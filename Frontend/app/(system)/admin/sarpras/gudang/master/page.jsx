@@ -126,9 +126,7 @@ function StatCard({
           )}
         </div>
 
-        <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${iconBg} ${iconColor}`}
-        >
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
           <Icon size={22} />
         </div>
       </div>
@@ -463,8 +461,8 @@ export default function MasterGudangPage() {
                   title="Gudang dengan Lokasi"
                   value={gudangDenganLokasi}
                   icon={MapPinned}
-                  iconBg={themeSuccessSurface}
-                  iconColor="text-[var(--color-success)]"
+                  iconBg={themePrimarySoft}
+                  iconColor="theme-primary-text"
                   description="Gudang yang memiliki informasi lokasi"
                 />
 
@@ -472,8 +470,8 @@ export default function MasterGudangPage() {
                   title="Lokasi Belum Diisi"
                   value={gudangTanpaLokasi}
                   icon={MapPin}
-                  iconBg={themeNeutralSurface}
-                  iconColor="theme-text-muted"
+                  iconBg={themePrimarySoft}
+                  iconColor="theme-primary-text"
                   description="Gudang tanpa informasi lokasi"
                 />
 

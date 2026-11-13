@@ -166,8 +166,8 @@ export default function TambahSekolahCabangPage() {
 
           {/* Heading */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-              <Building2 size={22} />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
+              <Building2 size={22} className="theme-primary-text" />
             </div>
             <div className="min-w-0">
               <h1 className="theme-text text-xl font-semibold sm:text-2xl">
@@ -254,7 +254,7 @@ export default function TambahSekolahCabangPage() {
                 <button
                   type="button"
                   onClick={() => router.push("/yayasan/sekolah")}
-                  className="rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90"
+                  className="theme-primary rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition-all hover:opacity-90"
                 >
                   Kembali ke Daftar Sekolah
                 </button>
@@ -379,7 +379,7 @@ export default function TambahSekolahCabangPage() {
                         className="theme-text w-full bg-transparent outline-none"
                       />
                       <span className="theme-text-muted ml-1 shrink-0 font-mono text-xs">
-                        .smartschool.id
+                        .smartschool.citrasolusi.id
                       </span>
                     </div>
                   </div>
@@ -485,7 +485,7 @@ export default function TambahSekolahCabangPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 disabled:opacity-50 sm:w-auto"
+                  className="theme-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold shadow-sm transition-all hover:opacity-90 disabled:opacity-50 sm:w-auto"
                 >
                   {submitting ? (
                     <>

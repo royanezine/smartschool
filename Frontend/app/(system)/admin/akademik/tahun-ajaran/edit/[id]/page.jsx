@@ -271,7 +271,7 @@ export default function EditTahunAjaranPage() {
 
           <main className="theme-page flex min-h-0 flex-1 items-center justify-center">
             <div className="flex flex-col items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full theme-info">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <Loader2
                   size={22}
                   className="animate-spin theme-sidebar-text-active"
@@ -546,7 +546,7 @@ export default function EditTahunAjaranPage() {
 
                     <div className="theme-table-header flex items-center justify-between gap-4 border-b px-4 py-4">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                        <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                           <Layers3 size={18} />
                         </div>
 

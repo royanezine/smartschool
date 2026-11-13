@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-import { getJurusan, updateJurusan } from "@/services/jurusan.service";
+import { getJurusanById, updateJurusan } from "@/services/jurusan.service";
 import {
   GraduationCap,
   FlaskConical,
@@ -58,9 +58,8 @@ export default function EditJurusanPage({ params }) {
     (async () => {
       try {
         setLoading(true);
-        const res = await getJurusan({ limit: 100 });
-        const list = res?.data && Array.isArray(res.data) ? res.data : res || [];
-        const found = list.find((j) => String(j.id) === String(id));
+        const res = await getJurusanById(id);
+        const found = res?.data && !Array.isArray(res.data) ? res.data : res;
         if (!found) {
           setError("Jurusan tidak ditemukan.");
           return;
@@ -116,11 +115,9 @@ export default function EditJurusanPage({ params }) {
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      <div className="fixed inset-y-0 left-0 z-50">
-        <Sidebar />
-      </div>
+      <Sidebar />
 
-      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden lg:ml-[260px]">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0">
           <Header />
         </div>
@@ -137,11 +134,11 @@ export default function EditJurusanPage({ params }) {
                   <ArrowLeft size={20} />
                 </button>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/25">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]">
                     <Pencil size={24} />
                   </div>
                   <div>
-                    <h1 className="theme-text text-2xl font-extrabold tracking-tight">
+                    <h1 className="theme-text text-xl font-bold tracking-tight sm:text-2xl">
                       Edit Jurusan
                     </h1>
                     <p className="theme-text-muted text-sm">
@@ -155,7 +152,7 @@ export default function EditJurusanPage({ params }) {
             {loading ? (
               <div className="theme-card theme-border flex min-h-[400px] items-center justify-center rounded-2xl border">
                 <div className="flex flex-col items-center gap-3">
-                  <Loader2 className="animate-spin text-blue-500" size={32} />
+                  <Loader2 className="animate-spin theme-primary-text" size={32} />
                   <p className="theme-text-muted text-sm font-medium">
                     Memuat data jurusan...
                   </p>
@@ -177,11 +174,11 @@ export default function EditJurusanPage({ params }) {
 
                   <div className="theme-card theme-border rounded-2xl border p-6 shadow-sm sm:p-8">
                     <div className="mb-6 flex items-center gap-3 border-b border-[var(--color-border-soft)] pb-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <FileText size={20} />
                       </div>
                       <div>
-                        <h2 className="theme-text text-lg font-bold">
+                        <h2 className="theme-text text-base font-semibold">
                           Informasi Utama
                         </h2>
                         <p className="theme-text-muted text-xs">
@@ -193,7 +190,7 @@ export default function EditJurusanPage({ params }) {
                     <div className="space-y-6">
                       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
-                          <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
+                          <label className="theme-text-secondary mb-2 block text-xs font-semibold uppercase tracking-wider">
                             Kode Jurusan <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -202,19 +199,19 @@ export default function EditJurusanPage({ params }) {
                             value={form.kode}
                             onChange={update("kode")}
                             placeholder="Contoh: RPL"
-                            className="theme-input h-11 w-full rounded-xl px-4 text-sm font-medium uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                            className="theme-input h-11 w-full rounded-xl px-4 text-sm font-medium uppercase outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]"
                           />
                         </div>
                         
                         <div>
-                          <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
+                          <label className="theme-text-secondary mb-2 block text-xs font-semibold uppercase tracking-wider">
                             Status Publikasi
                           </label>
                           <div className="relative">
                             <select
                               value={form.status}
                               onChange={update("status")}
-                              className="theme-input h-11 w-full cursor-pointer appearance-none rounded-xl px-4 pr-10 text-sm font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                              className="theme-input h-11 w-full cursor-pointer appearance-none rounded-xl px-4 pr-10 text-sm font-medium outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]"
                             >
                               <option value="Aktif">Aktif</option>
                               <option value="Nonaktif">Nonaktif</option>
@@ -228,7 +225,7 @@ export default function EditJurusanPage({ params }) {
                       </div>
 
                       <div>
-                        <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
+                        <label className="theme-text-secondary mb-2 block text-xs font-semibold uppercase tracking-wider">
                           Nama Jurusan <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -237,7 +234,7 @@ export default function EditJurusanPage({ params }) {
                           value={form.nama}
                           onChange={update("nama")}
                           placeholder="Contoh: Rekayasa Perangkat Lunak"
-                          className="theme-input h-11 w-full rounded-xl px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                          className="theme-input h-11 w-full rounded-xl px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]"
                         />
                       </div>
 
@@ -253,7 +250,7 @@ export default function EditJurusanPage({ params }) {
                           value={form.deskripsi}
                           onChange={update("deskripsi")}
                           placeholder="Jelaskan secara singkat mengenai jurusan ini..."
-                          className="theme-input w-full resize-y rounded-xl p-4 text-sm leading-relaxed outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                          className="theme-input w-full resize-y rounded-xl p-4 text-sm leading-relaxed outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]"
                         />
                       </div>
                     </div>
@@ -264,11 +261,11 @@ export default function EditJurusanPage({ params }) {
                 <div className="space-y-6">
                   <div className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
                     <div className="mb-5 flex items-center gap-3 border-b border-[var(--color-border-soft)] pb-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <Layers3 size={20} />
                       </div>
                       <div>
-                        <h2 className="theme-text text-base font-bold">
+                        <h2 className="theme-text text-sm font-semibold">
                           Ikon Jurusan
                         </h2>
                         <p className="theme-text-muted text-xs">
@@ -288,8 +285,8 @@ export default function EditJurusanPage({ params }) {
                             title={name}
                             className={`flex aspect-square items-center justify-center rounded-xl border-2 transition-all ${
                               selected
-                                ? "border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-600/30"
-                                : "theme-border theme-card theme-text-muted hover:border-blue-400/50 hover:text-blue-500"
+                                ? "theme-primary shadow-lg"
+                                : "theme-border theme-card theme-text-muted hover:border-[var(--color-primary)] hover:theme-primary-text"
                             }`}
                           >
                             <Icon size={22} />
@@ -301,20 +298,20 @@ export default function EditJurusanPage({ params }) {
 
                   <div className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
                     <div className="mb-4 flex items-center gap-2">
-                      <Info size={18} className="text-blue-500" />
+                      <Info size={18} className="theme-primary-text" />
                       <h3 className="theme-text text-sm font-bold">Panduan</h3>
                     </div>
                     <ul className="theme-text-muted space-y-3 text-xs leading-relaxed">
                       <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
                         <span>Pastikan <strong>Kode Jurusan</strong> unik dan belum digunakan oleh jurusan lain.</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
                         <span>Status <strong>Aktif</strong> akan membuat jurusan ini muncul di daftar pendaftaran siswa.</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
                         <span>Deskripsi yang baik akan membantu calon siswa memahami jurusan ini.</span>
                       </li>
                     </ul>
@@ -339,7 +336,7 @@ export default function EditJurusanPage({ params }) {
                       <button
                         type="submit"
                         disabled={saving}
-                        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-700 hover:shadow-xl disabled:opacity-50"
+                        className="theme-primary flex h-10 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold shadow-md transition hover:opacity-90 disabled:opacity-50"
                       >
                         {saving ? (
                           <Loader2 className="animate-spin" size={18} />

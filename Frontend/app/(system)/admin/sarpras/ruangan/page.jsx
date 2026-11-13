@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -139,6 +138,38 @@ function InfoKosong({ children = "Belum terhubung" }) {
     <span className="theme-text-muted text-xs italic">
       {children}
     </span>
+  );
+}
+
+function Stat({ label, value, subtitle, icon: Icon }) {
+  const toneClass =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text";
+
+  return (
+    <div className="theme-card h-full rounded-2xl border theme-border p-5 shadow-xl transition hover:shadow-lg">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider theme-text-muted">
+            {label}
+          </p>
+          <p className="mt-2 text-3xl font-bold tracking-tight theme-text">
+            {value}
+          </p>
+        </div>
+
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ${toneClass}`}
+        >
+          <Icon size={20} />
+        </div>
+      </div>
+
+      {subtitle && (
+        <p className="mt-3 text-xs font-medium theme-text-muted">
+          {subtitle}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -336,57 +367,34 @@ export default function RuanganPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {[
-                {
-                  label: "Total Ruangan",
-                  value: ruanganList.length,
-                  note: "Ruangan terdaftar",
-                  icon: DoorOpen,
-                  color: "primary",
-                },
-                {
-                  label: "Total Kapasitas",
-                  value: totalKapasitas,
-                  note: "Total daya tampung",
-                  icon: Users,
-                  color: "success",
-                },
-                {
-                  label: "Terhubung Gedung",
-                  value: totalGedung,
-                  note: "Memiliki data gedung",
-                  icon: Building2,
-                  color: "info",
-                },
-                {
-                  label: "Terhubung Lantai",
-                  value: totalLantai,
-                  note: "Memiliki data lantai",
-                  icon: Layers3,
-                  color: "warning",
-                },
-              ].map((stat) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={stat.label} className="theme-card rounded-2xl border theme-border p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="theme-text-muted text-xs font-semibold uppercase tracking-wider">
-                          {stat.label}
-                        </p>
-                        <h2 className="theme-text mt-2 text-3xl font-bold">
-                          {formatNumber(stat.value)}
-                        </h2>
-                        <p className="theme-text-muted mt-1 text-xs">{stat.note}</p>
-                      </div>
-                      <div className={`rounded-xl bg-[color-mix(in_srgb,var(--color-${stat.color})_10%,transparent)] p-3 text-[var(--color-${stat.color})]`}>
-                        <Icon size={23} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Stat
+                label="Total Ruangan"
+                value={formatNumber(ruanganList.length)}
+                subtitle="Ruangan terdaftar"
+                icon={DoorOpen}
+              />
+
+              <Stat
+                label="Total Kapasitas"
+                value={formatNumber(totalKapasitas)}
+                subtitle="Total daya tampung"
+                icon={Users}
+              />
+
+              <Stat
+                label="Terhubung Gedung"
+                value={formatNumber(totalGedung)}
+                subtitle="Memiliki data gedung"
+                icon={Building2}
+              />
+
+              <Stat
+                label="Terhubung Lantai"
+                value={formatNumber(totalLantai)}
+                subtitle="Memiliki data lantai"
+                icon={Layers3}
+              />
             </div>
 
             <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
@@ -543,7 +551,7 @@ export default function RuanganPage() {
                                 type="button"
                                 title="Lihat Detail"
                                 onClick={() => router.push(`/admin/sarpras/ruangan/${item.id}`)}
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-info)] hover:bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                               >
                                 <Eye size={17} />
                               </button>
@@ -551,7 +559,7 @@ export default function RuanganPage() {
                                 type="button"
                                 title="Edit Ruangan"
                                 onClick={() => router.push(`/admin/sarpras/ruangan/${item.id}/edit`)}
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-warning)] hover:bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]"
                               >
                                 <Pencil size={17} />
                               </button>
@@ -603,7 +611,7 @@ export default function RuanganPage() {
             <h3 className="theme-text text-center text-lg font-bold">Hapus Ruangan?</h3>
             <p className="theme-text-secondary mt-2 text-center text-sm">
               Apakah Anda yakin ingin menghapus ruangan{" "}
-              <strong className="theme-text">"{deleteTarget.nama}"</strong>?
+              <strong className="theme-text">&quot;{deleteTarget.nama}&quot;</strong>?
               Tindakan ini tidak dapat dibatalkan.
             </p>
             <div className="mt-6 flex gap-3">

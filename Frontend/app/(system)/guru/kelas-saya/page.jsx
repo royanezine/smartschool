@@ -699,6 +699,7 @@ export default function GuruKelasSayaPage() {
                 <p className="mt-1 max-w-xl text-xs leading-5 text-white/90 sm:text-sm">
                   Halo, {teacher.name}. Kelola kelas yang kamu ajar dan temukan informasi mata pelajaran serta siswa dalam satu tempat.
                 </p>
+
               </div>
 
               <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -764,6 +765,7 @@ export default function GuruKelasSayaPage() {
                   </div>
                 );
               })}
+
             </div>
           </div>
         </section>
@@ -1293,7 +1295,7 @@ export default function GuruKelasSayaPage() {
 
           <button
             type="button"
-            onClick={() => router.push("/guru/mataPelajaran")}
+            onClick={() => router.push("/guru/materi")}
             className={`
               inline-flex
               shrink-0

@@ -155,9 +155,9 @@ export default function TambahUjianAdminPage() {
           </div>
 
           <div className="w-full mb-6 p-4 rounded-xl border border-[color-mix(in_srgb,var(--color-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] flex items-start gap-3 text-xs theme-text">
-            <Info size={18} className="text-[var(--color-info)] shrink-0 mt-0.5" />
+            <Info size={18} className="theme-primary-text shrink-0 mt-0.5" />
             <div className="leading-relaxed">
-              <p className="font-semibold text-[var(--color-info)]">
+              <p className="font-semibold theme-primary-text">
                 Informasi Aturan Backend
               </p>
               <p className="mt-0.5 text-xs opacity-90">

@@ -232,7 +232,7 @@ export default function RiwayatPembayaranPage() {
                     value={successPayments.length}
                     description="Pembayaran selesai"
                     icon={CheckCircle2}
-                    iconClass="text-[var(--color-success)]"
+                    iconClass="theme-primary-text"
                   />
 
                   <StatCard
@@ -240,7 +240,7 @@ export default function RiwayatPembayaranPage() {
                     value={pendingPayments.length}
                     description="Menunggu pembayaran"
                     icon={Clock3}
-                    iconClass="text-[var(--color-warning)]"
+                    iconClass="theme-primary-text"
                   />
 
                   <StatCard

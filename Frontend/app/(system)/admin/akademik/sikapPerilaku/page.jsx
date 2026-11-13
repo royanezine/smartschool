@@ -1,795 +1,813 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Header from "@/app/components/Header";
-import Sidebar from "@/app/components/Sidebar";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Search,
+  Award,
+  AlertCircle,
+  Calendar,
+  Edit3,
   Filter,
-  ClipboardList,
+  Loader2,
+  MessageSquare,
   Plus,
+  RefreshCw,
+  Search,
+  Sparkles,
+  ThumbsDown,
+  ThumbsUp,
+  Trash2,
+  User,
   X,
 } from "lucide-react";
 
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import {
+  createSikapPerilaku,
+  deleteSikapPerilaku,
+  getSikapPerilaku,
+  updateSikapPerilaku,
+} from "@/services/sikapPerilaku.service";
+import { getUsers } from "@/services/user.service";
+import { getKelas } from "@/services/kelas.service";
 
-const JENIS_OPTIONS = ["Positif", "Negatif"];
-
-const MOCK_CATATAN = [
-  {
-    id: 1,
-    nama: "Alya Ramadhani",
-    kelas: "X RPL 1",
-    jenis: "Positif",
-    catatan: "Membantu teman sekelas memahami materi pemrograman dasar",
-    poin: 5,
-    tanggal: "2026-08-12",
-  },
-  {
-    id: 2,
-    nama: "Cahyo Nugroho",
-    kelas: "X RPL 1",
-    jenis: "Negatif",
-    catatan: "Terlambat masuk kelas tanpa keterangan",
-    poin: -2,
-    tanggal: "2026-08-14",
-  },
-  {
-    id: 3,
-    nama: "Dimas Prasetyo",
-    kelas: "X RPL 2",
-    jenis: "Positif",
-    catatan: "Aktif bertanya dan berdiskusi selama pembelajaran",
-    poin: 3,
-    tanggal: "2026-08-15",
-  },
-  {
-    id: 4,
-    nama: "Eka Wulandari",
-    kelas: "X TKJ 1",
-    jenis: "Negatif",
-    catatan: "Tidak mengumpulkan tugas praktikum tepat waktu",
-    poin: -3,
-    tanggal: "2026-08-18",
-  },
-  {
-    id: 5,
-    nama: "Gilang Ramadhan",
-    kelas: "X TKJ 2",
-    jenis: "Positif",
-    catatan: "Menjadi ketua kelompok dan memimpin presentasi dengan baik",
-    poin: 5,
-    tanggal: "2026-08-19",
-  },
-  {
-    id: 6,
-    nama: "Hana Permatasari",
-    kelas: "X TKJ 2",
-    jenis: "Negatif",
-    catatan: "Menggunakan ponsel saat jam pelajaran berlangsung",
-    poin: -2,
-    tanggal: "2026-08-20",
-  },
-  {
-    id: 7,
-    nama: "Indra Kusuma",
-    kelas: "XII RPL 1",
-    jenis: "Positif",
-    catatan: "Mewakili sekolah dalam kegiatan LKS tingkat nasional",
-    poin: 10,
-    tanggal: "2026-08-21",
-  },
-  {
-    id: 8,
-    nama: "Krisna Aditya",
-    kelas: "XII RPL 2",
-    jenis: "Negatif",
-    catatan: "Tidak memakai seragam sesuai ketentuan sekolah",
-    poin: -1,
-    tanggal: "2026-08-22",
-  },
-  {
-    id: 9,
-    nama: "Muhammad Fadli",
-    kelas: "XII TKJ 1",
-    jenis: "Positif",
-    catatan: "Membantu petugas piket merapikan lab komputer",
-    poin: 3,
-    tanggal: "2026-08-24",
-  },
-  {
-    id: 10,
-    nama: "Oka Wijaya",
-    kelas: "XI RPL 1",
-    jenis: "Negatif",
-    catatan: "Berbicara kasar kepada teman sekelas",
-    poin: -4,
-    tanggal: "2026-08-25",
-  },
-  {
-    id: 11,
-    nama: "Putri Ayuningtyas",
-    kelas: "XI RPL 1",
-    jenis: "Positif",
-    catatan: "Meraih nilai tertinggi pada ujian tengah semester",
-    poin: 5,
-    tanggal: "2026-08-26",
-  },
-  {
-    id: 12,
-    nama: "Salsabila Putri",
-    kelas: "XI TKJ 2",
-    jenis: "Negatif",
-    catatan: "Membuat gaduh saat kegiatan belajar mengajar",
-    poin: -2,
-    tanggal: "2026-08-27",
-  },
-];
-
-const KELAS_OPTIONS = [
-  "Semua Kelas",
-  ...Array.from(
-    new Set(MOCK_CATATAN.map((c) => c.kelas))
-  ).sort(),
-];
-
-const emptyForm = {
+const EMPTY_FORM = {
+  siswaId: "",
+  kelasId: "",
   nama: "",
   kelas: "",
   jenis: "Positif",
   catatan: "",
-  poin: 0,
+  poin: "10",
   tanggal: new Date().toISOString().slice(0, 10),
 };
 
-function formatTanggal(iso) {
-  const d = new Date(iso);
+function getErrorMessage(err, fallback) {
+  return (
+    err?.response?.data?.message ||
+    err?.data?.message ||
+    err?.message ||
+    fallback
+  );
+}
 
+function extractArray(res) {
+  const payload = res?.data ?? res;
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
+  return [];
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
   return d.toLocaleDateString("id-ID", {
     day: "2-digit",
-    month: "long",
+    month: "short",
     year: "numeric",
   });
 }
 
+function toInputDate(value) {
+  if (!value) return new Date().toISOString().slice(0, 10);
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value).slice(0, 10);
+  return d.toISOString().slice(0, 10);
+}
+
 export default function SikapPerilakuPage() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [data, setData] = useState(MOCK_CATATAN);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [records, setRecords] = useState([]);
+  const [siswaList, setSiswaList] = useState([]);
+  const [kelasList, setKelasList] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   const [search, setSearch] = useState("");
-  const [kelasFilter, setKelasFilter] = useState("Semua Kelas");
-  const [jenisFilter, setJenisFilter] = useState("Semua Jenis");
+  const [filterJenis, setFilterJenis] = useState("Semua");
+  const [filterKelasId, setFilterKelasId] = useState("Semua");
 
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(emptyForm);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const filteredData = useMemo(() => {
-    return data
-      .filter((c) => {
-        const matchSearch =
-          c.nama
-            .toLowerCase()
-            .includes(search.toLowerCase()) ||
-          c.catatan
-            .toLowerCase()
-            .includes(search.toLowerCase());
+  const loadMasterData = useCallback(async () => {
+    try {
+      const [siswaRes, kelasRes] = await Promise.allSettled([
+        getUsers({ page: 1, limit: 200, role: "siswa" }),
+        getKelas({ page: 1, limit: 100, sortBy: "nama", sortOrder: "asc" }),
+      ]);
 
-        const matchKelas =
-          kelasFilter === "Semua Kelas" ||
-          c.kelas === kelasFilter;
+      if (siswaRes.status === "fulfilled") {
+        setSiswaList(extractArray(siswaRes.value));
+      }
+      if (kelasRes.status === "fulfilled") {
+        setKelasList(extractArray(kelasRes.value));
+      }
+    } catch {
+      // Non-blocking: catatan tetap bisa dimuat meski dropdown master sebagian gagal
+    }
+  }, []);
 
-        const matchJenis =
-          jenisFilter === "Semua Jenis" ||
-          c.jenis === jenisFilter;
+  const loadRecords = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-        return matchSearch && matchKelas && matchJenis;
-      })
-      .sort(
-        (a, b) =>
-          new Date(b.tanggal) - new Date(a.tanggal)
-      );
-  }, [data, search, kelasFilter, jenisFilter]);
+      const data = await getSikapPerilaku({
+        jenis: filterJenis,
+        kelasId: filterKelasId,
+        search,
+      });
 
-  const handleSimpan = () => {
-    if (!form.nama || !form.catatan) return;
+      setRecords(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(getErrorMessage(err, "Gagal memuat data sikap & perilaku."));
+      setRecords([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [filterJenis, filterKelasId, search]);
 
-    setData((prev) => [
-      {
-        id: Date.now(),
-        ...form,
-        poin: Number(form.poin),
-      },
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      loadMasterData();
+    });
+  }, [loadMasterData]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadRecords();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [loadRecords]);
+
+  const stats = useMemo(() => {
+    let positif = 0;
+    let negatif = 0;
+    let netral = 0;
+    let totalPoin = 0;
+
+    for (const item of records) {
+      const jenis = String(item?.jenis || "").toLowerCase();
+      const poin = Number(item?.poin) || 0;
+      totalPoin += poin;
+      if (jenis === "positif") positif += 1;
+      else if (jenis === "negatif") negatif += 1;
+      else netral += 1;
+    }
+
+    return {
+      total: records.length,
+      positif,
+      negatif,
+      netral,
+      totalPoin,
+    };
+  }, [records]);
+
+  const openCreateModal = () => {
+    setEditingItem(null);
+    setForm(EMPTY_FORM);
+    setFormError("");
+    setModalOpen(true);
+  };
+
+  const openEditModal = (item) => {
+    setEditingItem(item);
+    setForm({
+      siswaId: item?.siswaId || item?.siswa?.id || "",
+      kelasId: item?.kelasId || item?.kelasRel?.id || "",
+      nama: item?.siswa?.namaLengkap || item?.nama || "",
+      kelas: item?.kelasRel?.nama || item?.kelas || "",
+      jenis: item?.jenis || "Positif",
+      catatan: item?.catatan || "",
+      poin: String(item?.poin ?? 0),
+      tanggal: toInputDate(item?.tanggal),
+    });
+    setFormError("");
+    setModalOpen(true);
+  };
+
+  const handleSelectSiswa = (siswaId) => {
+    const found = siswaList.find((s) => String(s.id) === String(siswaId));
+    const kelasFromSiswa =
+      found?.anggotaKelas?.[0]?.kelas || found?.kelas || null;
+
+    setForm((prev) => ({
       ...prev,
-    ]);
+      siswaId,
+      nama: found?.namaLengkap || found?.name || prev.nama,
+      kelasId: kelasFromSiswa?.id ? String(kelasFromSiswa.id) : prev.kelasId,
+      kelas: kelasFromSiswa?.nama || prev.kelas,
+    }));
+  };
 
-    setForm(emptyForm);
-    setShowForm(false);
+  const handleSelectKelas = (kelasId) => {
+    const found = kelasList.find((k) => String(k.id) === String(kelasId));
+    setForm((prev) => ({
+      ...prev,
+      kelasId,
+      kelas: found?.nama || found?.namaKelas || "",
+    }));
+  };
+
+  const handleJenisChange = (jenis) => {
+    setForm((prev) => {
+      let nextPoin = prev.poin;
+      if (!editingItem) {
+        if (jenis === "Positif") nextPoin = "10";
+        else if (jenis === "Negatif") nextPoin = "-10";
+        else nextPoin = "0";
+      }
+      return { ...prev, jenis, poin: nextPoin };
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setFormError("");
+
+    const cleanNama = form.nama.trim();
+    const cleanCatatan = form.catatan.trim();
+
+    if (!form.siswaId && !cleanNama) {
+      setFormError("Pilih siswa atau isi nama siswa terlebih dahulu.");
+      return;
+    }
+
+    if (!cleanCatatan) {
+      setFormError("Catatan sikap & perilaku wajib diisi.");
+      return;
+    }
+
+    const parsedPoin = Number(form.poin);
+    if (Number.isNaN(parsedPoin) || parsedPoin < -1000 || parsedPoin > 1000) {
+      setFormError("Poin harus berupa angka antara -1000 hingga 1000.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const payload = {
+        siswaId: form.siswaId || null,
+        kelasId: form.kelasId || null,
+        nama: cleanNama || undefined,
+        kelas: form.kelas.trim() || null,
+        jenis: form.jenis,
+        catatan: cleanCatatan,
+        poin: parsedPoin,
+        tanggal: form.tanggal || new Date().toISOString().slice(0, 10),
+      };
+
+      if (editingItem?.id) {
+        await updateSikapPerilaku(editingItem.id, payload);
+        setNotice("Catatan sikap & perilaku berhasil diperbarui.");
+      } else {
+        await createSikapPerilaku(payload);
+        setNotice("Catatan sikap & perilaku berhasil ditambahkan.");
+      }
+
+      setModalOpen(false);
+      setEditingItem(null);
+      await loadRecords();
+    } catch (err) {
+      setFormError(
+        getErrorMessage(err, "Gagal menyimpan catatan sikap & perilaku.")
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget?.id) return;
+    try {
+      setDeleting(true);
+      await deleteSikapPerilaku(deleteTarget.id);
+      setDeleteTarget(null);
+      setNotice("Catatan sikap & perilaku berhasil dihapus.");
+      await loadRecords();
+    } catch (err) {
+      setError(getErrorMessage(err, "Gagal menghapus catatan sikap & perilaku."));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const getJenisBadgeClass = (jenis) => {
+    const val = String(jenis || "").toLowerCase();
+    if (val === "positif") {
+      return "border-[color-mix(in_srgb,var(--color-success)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]";
+    }
+    if (val === "negatif") {
+      return "border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-[var(--color-danger)]";
+    }
+    return "border-[color-mix(in_srgb,var(--color-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]";
   };
 
   return (
-    <div className="flex h-screen w-full theme-page overflow-hidden">
+    <div className="theme-page theme-text flex h-screen overflow-hidden">
       <Sidebar
-        active="akademikSikapPerilaku"
-        setActive={() => {}}
-        collapsed={isCollapsed}
-        setCollapsed={setIsCollapsed}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
         role="admin"
       />
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <div className="shrink-0 border-b theme-border">
-          <Header
-            toggleSidebar={toggleSidebar}
-            notifications={[]}
-            user={{
-              name: "Admin Sekolah",
-              email: "admin@smartschool.com",
-              avatar: "AD",
-            }}
-          />
-        </div>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <Header
+          onMenuClick={() => setSidebarOpen(true)}
+          title="Sikap & Perilaku Siswa"
+        />
 
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="w-full px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="theme-text flex items-center gap-2 text-xl font-bold sm:text-2xl">
+                <Sparkles className="text-[var(--color-primary)]" size={22} />
+                Catatan Sikap & Perilaku
+              </h1>
+              <p className="theme-text-muted mt-1 text-sm">
+                Kelola catatan pembinaan, apresiasi poin positif, dan pelanggaran siswa secara real-time.
+              </p>
+            </div>
 
-
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl theme-primary shadow-lg">
-                  <ClipboardList size={20} />
-                </div>
-
-                <div>
-                  <h1 className="text-2xl font-bold theme-text">
-                    Sikap & Perilaku
-                  </h1>
-
-                  <p className="text-sm theme-text-secondary">
-                    Catatan sikap dan perilaku siswa sehari-hari.
-                  </p>
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={loadRecords}
+                disabled={loading}
+                className="theme-card theme-border theme-text inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition hover:opacity-85 disabled:opacity-50"
+              >
+                <RefreshCw
+                  size={14}
+                  className={loading ? "animate-spin" : ""}
+                />
+                Muat Ulang
+              </button>
 
               <button
-                onClick={() => setShowForm(true)}
-                className="
-                  flex items-center justify-center gap-2
-                  px-4 py-2.5 rounded-xl
-                  theme-primary
-                  text-sm font-semibold
-                  shadow-sm
-                  transition-colors
-                  self-start sm:self-auto
-                "
+                type="button"
+                onClick={openCreateModal}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
               >
-                <Plus size={16} />
+                <Plus size={15} />
                 Tambah Catatan
               </button>
             </div>
+          </div>
 
+          {notice && (
+            <div className="mb-4 flex items-center justify-between rounded-xl border border-[color-mix(in_srgb,var(--color-success)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] px-4 py-3 text-xs text-[var(--color-success)]">
+              <span>{notice}</span>
+              <button
+                type="button"
+                onClick={() => setNotice("")}
+                aria-label="Tutup notifikasi"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
 
-            <div
-              className="
-                theme-card rounded-xl
-                border theme-border
-                p-4 shadow-sm
-                flex flex-col lg:flex-row gap-3
-              "
-            >
+          {error && (
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-4 py-3 text-xs text-[var(--color-danger)]">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="font-semibold">Gagal Memuat Data</p>
+                <p className="mt-0.5">{error}</p>
+              </div>
+              <button
+                type="button"
+                onClick={loadRecords}
+                className="rounded-lg border border-current px-2.5 py-1 text-[11px] font-semibold"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          )}
+
+          <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div className="theme-card theme-border rounded-xl border p-4">
+              <p className="theme-text-muted text-xs">Total Catatan</p>
+              <p className="theme-text mt-1 text-2xl font-bold">{stats.total}</p>
+            </div>
+            <div className="theme-card theme-border rounded-xl border p-4">
+              <p className="theme-text-muted flex items-center gap-1 text-xs">
+                <ThumbsUp size={13} className="text-[var(--color-success)]" />
+                Positif
+              </p>
+              <p className="mt-1 text-2xl font-bold text-[var(--color-success)]">
+                {stats.positif}
+              </p>
+            </div>
+            <div className="theme-card theme-border rounded-xl border p-4">
+              <p className="theme-text-muted flex items-center gap-1 text-xs">
+                <ThumbsDown size={13} className="text-[var(--color-danger)]" />
+                Negatif
+              </p>
+              <p className="mt-1 text-2xl font-bold text-[var(--color-danger)]">
+                {stats.negatif}
+              </p>
+            </div>
+            <div className="theme-card theme-border rounded-xl border p-4">
+              <p className="theme-text-muted flex items-center gap-1 text-xs">
+                <Award size={13} className="text-[var(--color-primary)]" />
+                Akumulasi Poin
+              </p>
+              <p className="theme-text mt-1 text-2xl font-bold">
+                {stats.totalPoin > 0 ? `+${stats.totalPoin}` : stats.totalPoin}
+              </p>
+            </div>
+          </div>
+
+          <div className="theme-card theme-border overflow-hidden rounded-xl border">
+            <div className="theme-divider flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center">
               <div className="relative flex-1">
                 <Search
-                  size={16}
-                  className="
-                    absolute left-3 top-1/2
-                    -translate-y-1/2
-                    theme-text-muted
-                  "
+                  size={15}
+                  className="theme-text-muted absolute left-3 top-1/2 -translate-y-1/2"
                 />
-
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Cari nama siswa atau catatan..."
-                  className="
-                    w-full pl-9 pr-3 py-2
-                    text-sm rounded-lg
-                    border theme-border
-                    theme-input
-                    focus:outline-none
-                  "
+                  placeholder="Cari nama siswa atau catatan perilaku..."
+                  className="theme-input theme-text w-full rounded-lg border py-2 pl-9 pr-3 text-xs focus:border-[var(--color-primary)] focus:outline-none"
                 />
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <Filter
-                  size={15}
-                  className="
-                    theme-text-muted
-                    hidden lg:block
-                  "
-                />
+                <div className="flex items-center gap-1.5 text-xs">
+                  <Filter size={14} className="theme-text-muted" />
+                  <select
+                    value={filterJenis}
+                    onChange={(e) => setFilterJenis(e.target.value)}
+                    className="theme-input theme-text rounded-lg border px-2.5 py-2 text-xs"
+                  >
+                    <option value="Semua">Semua Jenis</option>
+                    <option value="Positif">Positif</option>
+                    <option value="Negatif">Negatif</option>
+                    <option value="Netral">Netral</option>
+                  </select>
+                </div>
 
                 <select
-                  value={kelasFilter}
-                  onChange={(e) =>
-                    setKelasFilter(e.target.value)
-                  }
-                  className="
-                    text-sm rounded-lg
-                    border theme-border
-                    theme-input
-                    px-3 py-2
-                    focus:outline-none
-                    font-medium
-                  "
+                  value={filterKelasId}
+                  onChange={(e) => setFilterKelasId(e.target.value)}
+                  className="theme-input theme-text rounded-lg border px-2.5 py-2 text-xs"
                 >
-                  {KELAS_OPTIONS.map((k) => (
-                    <option key={k} value={k}>
-                      {k}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={jenisFilter}
-                  onChange={(e) =>
-                    setJenisFilter(e.target.value)
-                  }
-                  className="
-                    text-sm rounded-lg
-                    border theme-border
-                    theme-input
-                    px-3 py-2
-                    focus:outline-none
-                    font-medium
-                  "
-                >
-                  {[
-                    "Semua Jenis",
-                    ...JENIS_OPTIONS,
-                  ].map((j) => (
-                    <option key={j} value={j}>
-                      {j}
+                  <option value="Semua">Semua Kelas</option>
+                  {kelasList.map((kelas) => (
+                    <option key={kelas.id} value={kelas.id}>
+                      {kelas.nama || kelas.namaKelas}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
 
-
-            <div
-              className="
-                theme-card rounded-xl
-                border theme-border
-                shadow-sm overflow-hidden
-              "
-            >
+            {loading ? (
+              <div className="flex min-h-[240px] flex-col items-center justify-center p-8">
+                <Loader2
+                  size={28}
+                  className="animate-spin text-[var(--color-primary)]"
+                />
+                <p className="theme-text-muted mt-2 text-xs">
+                  Memuat catatan sikap & perilaku...
+                </p>
+              </div>
+            ) : records.length === 0 ? (
+              <div className="flex min-h-[240px] flex-col items-center justify-center p-8 text-center">
+                <MessageSquare size={28} className="theme-text-muted mb-2" />
+                <p className="theme-text text-sm font-semibold">
+                  Belum Ada Catatan Sikap & Perilaku
+                </p>
+                <p className="theme-text-muted mt-1 max-w-sm text-xs">
+                  Belum ada data untuk filter saat ini. Klik Tambah Catatan untuk mencatat sikap atau perilaku siswa.
+                </p>
+              </div>
+            ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] text-sm">
-                  <thead>
-                    <tr
-                      className="
-                        bg-gradient-to-r
-                        from-blue-600 to-indigo-600
-                        text-white
-                      "
-                    >
-                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
-                        No.
-                      </th>
-
-                      <th className="text-left font-semibold px-4 py-3 min-w-[180px]">
-                        Nama Siswa
-                      </th>
-
-                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
-                        Kelas
-                      </th>
-
-                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
-                        Jenis
-                      </th>
-
-                      <th className="text-left font-semibold px-4 py-3 min-w-[260px]">
-                        Catatan
-                      </th>
-
-                      <th className="text-center font-semibold px-4 py-3 whitespace-nowrap">
-                        Poin
-                      </th>
-
-                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
-                        Tanggal
+                <table className="w-full text-left text-xs">
+                  <thead className="theme-divider border-b bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                    <tr>
+                      <th className="px-4 py-3 font-semibold">Siswa</th>
+                      <th className="px-4 py-3 font-semibold">Kelas</th>
+                      <th className="px-4 py-3 font-semibold">Jenis</th>
+                      <th className="px-4 py-3 font-semibold">Poin</th>
+                      <th className="px-4 py-3 font-semibold">Tanggal</th>
+                      <th className="px-4 py-3 font-semibold">Catatan</th>
+                      <th className="px-4 py-3 text-right font-semibold">
+                        Aksi
                       </th>
                     </tr>
                   </thead>
+                  <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+                    {records.map((item) => {
+                      const namaSiswa =
+                        item?.siswa?.namaLengkap || item?.nama || "-";
+                      const namaKelas =
+                        item?.kelasRel?.nama || item?.kelas || "-";
+                      const poinNum = Number(item?.poin) || 0;
 
-                  <tbody>
-                    {filteredData.map((c, idx) => (
-                      <tr
-                        key={c.id}
-                        className="
-                          border-b theme-border-soft
-                          last:border-0
-                          theme-table-hover
-                          transition-colors
-                        "
-                      >
-                        <td
-                          className="
-                            px-4 py-2.5
-                            theme-text-secondary
-                            font-medium
-                          "
+                      return (
+                        <tr
+                          key={item.id}
+                          className="transition hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
                         >
-                          {idx + 1}
-                        </td>
-
-                        <td className="px-4 py-2.5">
-                          <p className="font-semibold theme-text">
-                            {c.nama}
-                          </p>
-                        </td>
-
-                        <td
-                          className="
-                            px-4 py-2.5
-                            theme-text-secondary
-                            whitespace-nowrap
-                          "
-                        >
-                          {c.kelas}
-                        </td>
-
-                        <td
-                          className="
-                            px-4 py-2.5
-                            theme-text
-                            font-medium
-                            whitespace-nowrap
-                          "
-                        >
-                          {c.jenis}
-                        </td>
-
-                        <td className="px-4 py-2.5 theme-text-secondary">
-                          {c.catatan}
-                        </td>
-
-                        <td
-                          className="
-                            px-4 py-2.5
-                            text-center
-                            theme-text
-                            font-semibold
-                          "
-                        >
-                          {c.poin > 0
-                            ? `+${c.poin}`
-                            : c.poin}
-                        </td>
-
-                        <td
-                          className="
-                            px-4 py-2.5
-                            theme-text-secondary
-                            whitespace-nowrap
-                          "
-                        >
-                          {formatTanggal(c.tanggal)}
-                        </td>
-                      </tr>
-                    ))}
-
-                    {filteredData.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={7}
-                          className="
-                            px-4 py-10
-                            text-center
-                            text-sm
-                            theme-text-muted
-                          "
-                        >
-                          Tidak ada catatan yang cocok
-                          dengan filter ini.
-                        </td>
-                      </tr>
-                    )}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
+                                <User size={13} />
+                              </span>
+                              <div>
+                                <p className="theme-text font-semibold">
+                                  {namaSiswa}
+                                </p>
+                                {(item?.siswa?.nisn || item?.siswa?.nipd) && (
+                                  <p className="theme-text-muted text-[11px]">
+                                    {item?.siswa?.nisn || item?.siswa?.nipd}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="theme-text-secondary px-4 py-3">
+                            {namaKelas}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${getJenisBadgeClass(
+                                item.jenis
+                              )}`}
+                            >
+                              {item.jenis}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 font-bold">
+                            <span
+                              className={
+                                poinNum > 0
+                                  ? "text-[var(--color-success)]"
+                                  : poinNum < 0
+                                  ? "text-[var(--color-danger)]"
+                                  : "theme-text-muted"
+                              }
+                            >
+                              {poinNum > 0 ? `+${poinNum}` : poinNum}
+                            </span>
+                          </td>
+                          <td className="theme-text-secondary whitespace-nowrap px-4 py-3">
+                            <span className="inline-flex items-center gap-1">
+                              <Calendar size={12} />
+                              {formatDate(item.tanggal)}
+                            </span>
+                          </td>
+                          <td className="theme-text-secondary max-w-xs px-4 py-3">
+                            <p className="line-clamp-2">{item.catatan}</p>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="inline-flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => openEditModal(item)}
+                                className="theme-border rounded-lg border p-1.5 text-[var(--color-primary)] transition hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                                title="Edit catatan"
+                              >
+                                <Edit3 size={13} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeleteTarget(item)}
+                                className="theme-border rounded-lg border p-1.5 text-[var(--color-danger)] transition hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]"
+                                title="Hapus catatan"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
-            </div>
+            )}
           </div>
         </main>
       </div>
 
-
-      {showForm && (
-        <>
-          <div
-            onClick={() => setShowForm(false)}
-            className="
-              fixed inset-0 z-40
-              bg-slate-900/40
-              backdrop-blur-sm
-            "
-          />
-
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div
-              className="
-                theme-card
-                rounded-2xl
-                shadow-2xl
-                w-full max-w-lg
-                max-h-[90vh]
-                overflow-y-auto
-              "
-            >
-              <div
-                className="
-                  flex items-center justify-between
-                  px-5 h-16
-                  border-b theme-border-soft
-                  sticky top-0
-                  theme-card
-                  z-10
-                "
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="theme-card theme-border w-full max-w-lg rounded-2xl border p-5 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="theme-text text-base font-bold">
+                {editingItem
+                  ? "Edit Catatan Sikap & Perilaku"
+                  : "Tambah Catatan Sikap & Perilaku"}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="theme-text-muted rounded-lg p-1 hover:opacity-80"
               >
-                <h2 className="text-sm font-semibold theme-text">
-                  Tambah Catatan Sikap & Perilaku
-                </h2>
+                <X size={18} />
+              </button>
+            </div>
 
-                <button
-                  onClick={() => setShowForm(false)}
-                  className="
-                    p-1.5 rounded-lg
-                    theme-text-muted
-                    theme-header-hover
-                    transition-colors
-                  "
+            {formError && (
+              <div className="mb-3 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] px-3 py-2 text-xs text-[var(--color-danger)]">
+                {formError}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
+              <div>
+                <label className="theme-text mb-1 block font-semibold">
+                  Pilih Siswa Terdaftar
+                </label>
+                <select
+                  value={form.siswaId}
+                  onChange={(e) => handleSelectSiswa(e.target.value)}
+                  className="theme-input theme-text w-full rounded-lg border px-3 py-2"
                 >
-                  <X size={18} />
-                </button>
+                  <option value="">-- Pilih dari data siswa (atau isi nama manual) --</option>
+                  {siswaList.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.namaLengkap || s.name}
+                      {s.nisn ? ` (${s.nisn})` : ""}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              <div className="p-5 space-y-4">
+              <div>
+                <label className="theme-text mb-1 block font-semibold">
+                  Nama Siswa *
+                </label>
+                <input
+                  type="text"
+                  value={form.nama}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, nama: e.target.value }))
+                  }
+                  placeholder="Nama lengkap siswa"
+                  required
+                  className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                />
+              </div>
 
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label
-                    className="
-                      text-xs font-semibold
-                      theme-text-secondary
-                      mb-1.5 block
-                    "
-                  >
-                    Nama Siswa
-                  </label>
-
-                  <input
-                    type="text"
-                    value={form.nama}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        nama: e.target.value,
-                      })
-                    }
-                    placeholder="Contoh: Alya Ramadhani"
-                    className="
-                      w-full px-3 py-2
-                      text-sm rounded-lg
-                      border theme-border
-                      theme-input
-                      focus:outline-none
-                    "
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="
-                      text-xs font-semibold
-                      theme-text-secondary
-                      mb-1.5 block
-                    "
-                  >
+                  <label className="theme-text mb-1 block font-semibold">
                     Kelas
                   </label>
-
-                  <input
-                    type="text"
-                    value={form.kelas}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        kelas: e.target.value,
-                      })
-                    }
-                    placeholder="Contoh: X RPL 1 / XI TKJ 2"
-                    className="
-                      w-full px-3 py-2
-                      text-sm rounded-lg
-                      border theme-border
-                      theme-input
-                      focus:outline-none
-                    "
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label
-                      className="
-                        text-xs font-semibold
-                        theme-text-secondary
-                        mb-1.5 block
-                      "
-                    >
-                      Jenis
-                    </label>
-
-                    <select
-                      value={form.jenis}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          jenis: e.target.value,
-                        })
-                      }
-                      className="
-                        w-full px-3 py-2
-                        text-sm rounded-lg
-                        border theme-border
-                        theme-input
-                        focus:outline-none
-                      "
-                    >
-                      {JENIS_OPTIONS.map((j) => (
-                        <option key={j} value={j}>
-                          {j}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className="
-                        text-xs font-semibold
-                        theme-text-secondary
-                        mb-1.5 block
-                      "
-                    >
-                      Poin
-                    </label>
-
-                    <input
-                      type="number"
-                      value={form.poin}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          poin: e.target.value,
-                        })
-                      }
-                      placeholder="Contoh: 5 atau -3"
-                      className="
-                        w-full px-3 py-2
-                        text-sm rounded-lg
-                        border theme-border
-                        theme-input
-                        focus:outline-none
-                      "
-                    />
-                  </div>
+                  <select
+                    value={form.kelasId}
+                    onChange={(e) => handleSelectKelas(e.target.value)}
+                    className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                  >
+                    <option value="">-- Pilih Kelas --</option>
+                    {kelasList.map((k) => (
+                      <option key={k.id} value={k.id}>
+                        {k.nama || k.namaKelas}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
-                  <label
-                    className="
-                      text-xs font-semibold
-                      theme-text-secondary
-                      mb-1.5 block
-                    "
-                  >
-                    Catatan
+                  <label className="theme-text mb-1 block font-semibold">
+                    Tanggal *
                   </label>
-
-                  <textarea
-                    value={form.catatan}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        catatan: e.target.value,
-                      })
-                    }
-                    placeholder="Contoh: Aktif membantu teman sekelas"
-                    rows={3}
-                    className="
-                      w-full px-3 py-2
-                      text-sm rounded-lg
-                      border theme-border
-                      theme-input
-                      focus:outline-none
-                      resize-none
-                    "
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="
-                      text-xs font-semibold
-                      theme-text-secondary
-                      mb-1.5 block
-                    "
-                  >
-                    Tanggal
-                  </label>
-
                   <input
                     type="date"
                     value={form.tanggal}
                     onChange={(e) =>
-                      setForm({
-                        ...form,
-                        tanggal: e.target.value,
-                      })
+                      setForm((prev) => ({ ...prev, tanggal: e.target.value }))
                     }
-                    className="
-                      w-full px-3 py-2
-                      text-sm rounded-lg
-                      border theme-border
-                      theme-input
-                      focus:outline-none
-                    "
+                    required
+                    className="theme-input theme-text w-full rounded-lg border px-3 py-2"
                   />
                 </div>
               </div>
 
-              <div
-                className="
-                  flex items-center justify-end gap-2
-                  px-5 py-4
-                  border-t theme-border-soft
-                "
-              >
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="theme-text mb-1 block font-semibold">
+                    Jenis Perilaku *
+                  </label>
+                  <select
+                    value={form.jenis}
+                    onChange={(e) => handleJenisChange(e.target.value)}
+                    className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                  >
+                    <option value="Positif">Positif</option>
+                    <option value="Negatif">Negatif</option>
+                    <option value="Netral">Netral</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="theme-text mb-1 block font-semibold">
+                    Poin (-1000 s/d 1000)
+                  </label>
+                  <input
+                    type="number"
+                    min={-1000}
+                    max={1000}
+                    value={form.poin}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, poin: e.target.value }))
+                    }
+                    className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="theme-text mb-1 block font-semibold">
+                  Catatan *
+                </label>
+                <textarea
+                  rows={3}
+                  value={form.catatan}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, catatan: e.target.value }))
+                  }
+                  placeholder="Tuliskan kronologi atau catatan perilaku siswa..."
+                  required
+                  className="theme-input theme-text w-full rounded-lg border px-3 py-2"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
                 <button
-                  onClick={() => setShowForm(false)}
-                  className="
-                    px-4 py-2
-                    text-sm font-semibold
-                    theme-text-secondary
-                    theme-header-hover
-                    rounded-lg
-                    transition-colors
-                  "
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  className="theme-border theme-text rounded-lg border px-4 py-2 font-semibold"
                 >
                   Batal
                 </button>
-
                 <button
-                  onClick={handleSimpan}
-                  className="
-                    px-4 py-2
-                    text-sm font-semibold
-                    theme-primary
-                    rounded-lg
-                    transition-colors
-                    shadow-sm
-                  "
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-4 py-2 font-semibold text-white disabled:opacity-60"
                 >
-                  Simpan
+                  {saving && <Loader2 size={14} className="animate-spin" />}
+                  {editingItem ? "Simpan Perubahan" : "Simpan Catatan"}
                 </button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="theme-card theme-border w-full max-w-sm rounded-2xl border p-5 shadow-xl">
+            <h3 className="theme-text text-sm font-bold">
+              Hapus Catatan Sikap & Perilaku?
+            </h3>
+            <p className="theme-text-muted mt-2 text-xs leading-relaxed">
+              Catatan milik{" "}
+              <span className="theme-text font-semibold">
+                {deleteTarget?.siswa?.namaLengkap || deleteTarget?.nama || "siswa ini"}
+              </span>{" "}
+              akan dihapus dari sistem.
+            </p>
+            <div className="mt-4 flex justify-end gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="theme-border theme-text rounded-lg border px-3.5 py-2 font-semibold"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-danger)] px-3.5 py-2 font-semibold text-white disabled:opacity-60"
+              >
+                {deleting && <Loader2 size={13} className="animate-spin" />}
+                Hapus
+              </button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

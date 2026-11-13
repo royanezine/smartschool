@@ -30,7 +30,7 @@ import {
 } from "@/services/sarpras.service";
 
 const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_80%,#000))]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -85,29 +85,23 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
+const primaryThemeColor = {
+  badge: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
+  iconBg: themePrimaryGradient,
+};
+
 const colorClasses = {
-  primary: {
-    badge: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
-    iconBg: themePrimaryGradient,
-  },
-  warning: {
-    badge: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
-    iconBg:
-      "bg-[linear-gradient(135deg,var(--color-warning),color-mix(in_srgb,var(--color-warning)_72%,var(--color-primary)))]",
-  },
-  success: {
-    badge: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
-    iconBg:
-      "bg-[linear-gradient(135deg,var(--color-success),color-mix(in_srgb,var(--color-success)_72%,var(--color-primary)))]",
-  },
+  primary: primaryThemeColor,
+  warning: primaryThemeColor,
+  success: primaryThemeColor,
 };
 
 const statusClasses = {
-  dipinjam: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
-  sedang_dipinjam: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+  dipinjam: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
+  sedang_dipinjam: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
   menunggu: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
   menunggu_persetujuan: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
-  disetujui: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+  disetujui: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
   terlambat: `${themeDangerSurface} text-[var(--color-danger)] ${themeDangerBorder}`,
   ditolak: `${themeDangerSurface} text-[var(--color-danger)] ${themeDangerBorder}`,
   selesai: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
@@ -115,7 +109,7 @@ const statusClasses = {
 
 const statusLaporanClasses = {
   menunggu: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
-  diproses: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+  diproses: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
   selesai: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
   ditolak: `${themeDangerSurface} text-[var(--color-danger)] ${themeDangerBorder}`,
 };
@@ -334,7 +328,7 @@ export default function GuruSarprasIndexPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2.5">
                   <div
-                    className={`flex flex-shrink-0 items-center justify-center rounded-lg p-2 text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow}`}
+                    className={`flex flex-shrink-0 items-center justify-center rounded-lg p-2 text-white ${themePrimaryGradient} ${themePrimaryShadow}`}
                   >
                     <Package size={18} />
                   </div>
@@ -396,7 +390,7 @@ export default function GuruSarprasIndexPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div
-                        className={`flex flex-shrink-0 items-center justify-center rounded-lg p-2.5 text-[var(--color-card)] ${theme.iconBg} ${themeSmallShadow}`}
+                        className={`flex flex-shrink-0 items-center justify-center rounded-lg p-2.5 text-white ${theme.iconBg} ${themeSmallShadow}`}
                       >
                         <s.icon size={18} />
                       </div>
@@ -434,11 +428,11 @@ export default function GuruSarprasIndexPage() {
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl border ${themeWarningSurface} ${themeWarningBorder}`}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text"
                   >
                     <Wrench
                       size={19}
-                      className="text-[var(--color-warning)]"
+                      className="theme-primary-text shrink-0"
                     />
                   </div>
 
@@ -493,7 +487,7 @@ export default function GuruSarprasIndexPage() {
                   <div className="mt-2 flex items-center gap-2">
                     <Wrench
                       size={17}
-                      className="text-[var(--color-info)]"
+                      className="theme-primary-text shrink-0"
                     />
                     <span className="theme-text text-xl font-semibold">
                       {loading ? "-" : stats.diproses}

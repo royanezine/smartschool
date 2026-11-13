@@ -13,6 +13,7 @@ import {
   Loader2,
   AlertCircle,
   Save,
+  X,
 } from "lucide-react";
 
 const API_URL = "/api/cms/menu-konfigurasi";
@@ -264,7 +265,7 @@ export default function EditMenuKonfigurasiPage() {
                   <ArrowLeft className="h-4 w-4" />
                   Kembali
                 </button>
-                <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border">
+                <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border">
                   <Menu className="h-5 w-5" />
                 </div>
                 <div>

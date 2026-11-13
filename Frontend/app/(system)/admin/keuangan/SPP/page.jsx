@@ -29,6 +29,7 @@ import Sidebar from "@/app/components/Sidebar";
 import {
   getTagihan,
   getRingkasanTagihan,
+  getPembayaran,
 } from "@/services/tagihan.service";
 
 const ENTRIES_PER_PAGE = 10;
@@ -120,6 +121,7 @@ export default function SPPPage() {
   const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("tagihan");
 
   const [tagihanList, setTagihanList] = useState([]);
   const [meta, setMeta] = useState({
@@ -136,6 +138,23 @@ export default function SPPPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [pembayaranList, setPembayaranList] = useState([]);
+  const [pembayaranMeta, setPembayaranMeta] = useState({
+    page: 1,
+    limit: ENTRIES_PER_PAGE,
+    total: 0,
+    totalPages: 1,
+  });
+  const [pembayaranRingkasan, setPembayaranRingkasan] = useState({
+    totalDiterima: 0,
+  });
+  const [pembayaranSearch, setPembayaranSearch] = useState("");
+  const [filterMetodePembayaran, setFilterMetodePembayaran] = useState("");
+  const [filterStatusPembayaran, setFilterStatusPembayaran] = useState("");
+  const [pembayaranPage, setPembayaranPage] = useState(1);
+  const [pembayaranLoading, setPembayaranLoading] = useState(false);
+  const [pembayaranError, setPembayaranError] = useState("");
 
   const loadTagihan = useCallback(async () => {
     try {
@@ -182,15 +201,67 @@ export default function SPPPage() {
     }
   }, [currentPage, search, filterStatus]);
 
+  const loadPembayaran = useCallback(async () => {
+    try {
+      setPembayaranLoading(true);
+      setPembayaranError("");
+
+      const res = await getPembayaran({
+        page: pembayaranPage,
+        limit: ENTRIES_PER_PAGE,
+        q: pembayaranSearch.trim() || undefined,
+        metode: filterMetodePembayaran || undefined,
+        status: filterStatusPembayaran || undefined,
+      });
+
+      setPembayaranList(unwrapList(res));
+      setPembayaranMeta(
+        res?.meta || {
+          page: pembayaranPage,
+          limit: ENTRIES_PER_PAGE,
+          total: 0,
+          totalPages: 1,
+        }
+      );
+      setPembayaranRingkasan({
+        totalDiterima: Number(res?.ringkasan?.totalDiterima ?? 0),
+      });
+    } catch (err) {
+      console.error("Gagal memuat riwayat pembayaran:", err);
+      setPembayaranList([]);
+      setPembayaranError(
+        err?.message || "Gagal memuat riwayat pembayaran dari server."
+      );
+    } finally {
+      setPembayaranLoading(false);
+    }
+  }, [
+    pembayaranPage,
+    pembayaranSearch,
+    filterMetodePembayaran,
+    filterStatusPembayaran,
+  ]);
+
   useEffect(() => {
+    if (activeTab !== "tagihan") return undefined;
     const timer = setTimeout(() => {
       loadTagihan();
     }, 0);
     return () => clearTimeout(timer);
-  }, [loadTagihan]);
+  }, [activeTab, loadTagihan]);
+
+  useEffect(() => {
+    if (activeTab !== "pembayaran") return undefined;
+    const timer = setTimeout(() => {
+      loadPembayaran();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [activeTab, loadPembayaran]);
 
   const totalPages = meta?.totalPages || 1;
   const indexOfFirst = (currentPage - 1) * ENTRIES_PER_PAGE;
+  const pembayaranTotalPages = pembayaranMeta?.totalPages || 1;
+  const pembayaranIndexOfFirst = (pembayaranPage - 1) * ENTRIES_PER_PAGE;
 
   const getStatusBadge = (status, item) => {
     if (isTunggakan(item)) {
@@ -286,13 +357,27 @@ export default function SPPPage() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
-                      onClick={loadTagihan}
-                      disabled={loading}
+                      onClick={
+                        activeTab === "pembayaran"
+                          ? loadPembayaran
+                          : loadTagihan
+                      }
+                      disabled={
+                        activeTab === "pembayaran" ? pembayaranLoading : loading
+                      }
                       className="theme-card-soft theme-text-secondary inline-flex items-center gap-2 rounded-lg border theme-border px-4 py-2.5 text-sm font-medium transition hover:brightness-95 disabled:opacity-60"
                     >
                       <RefreshCw
                         size={16}
-                        className={loading ? "animate-spin" : ""}
+                        className={
+                          (
+                            activeTab === "pembayaran"
+                              ? pembayaranLoading
+                              : loading
+                          )
+                            ? "animate-spin"
+                            : ""
+                        }
                       />
                       Muat Ulang
                     </button>
@@ -321,7 +406,7 @@ export default function SPPPage() {
                 </div>
               </section>
 
-              {error && (
+              {activeTab === "tagihan" && error && (
                 <div className="theme-danger flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
                   <AlertCircle
                     size={18}
@@ -341,6 +426,53 @@ export default function SPPPage() {
                   </button>
                 </div>
               )}
+
+              {activeTab === "pembayaran" && pembayaranError && (
+                <div className="theme-danger flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
+                  <AlertCircle
+                    size={18}
+                    className="mt-0.5 shrink-0"
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold">Terjadi masalah</p>
+                    <p className="mt-0.5 text-xs opacity-80">
+                      {pembayaranError}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPembayaranError("")}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+
+              {/* TABS */}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("tagihan")}
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                    activeTab === "tagihan"
+                      ? "theme-primary text-white"
+                      : "theme-card border theme-border theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                  }`}
+                >
+                  Daftar Tagihan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("pembayaran")}
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                    activeTab === "pembayaran"
+                      ? "theme-primary text-white"
+                      : "theme-card border theme-border theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                  }`}
+                >
+                  Riwayat Pembayaran
+                </button>
+              </div>
 
               {/* STAT CARDS */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
@@ -419,280 +551,582 @@ export default function SPPPage() {
                 />
               </div>
 
-              {/* FILTER */}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="relative flex-1">
-                  <Search
-                    size={18}
-                    className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                  />
+              {activeTab === "tagihan" ? (
+                <>
+                  {/* FILTER */}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div className="relative flex-1">
+                      <Search
+                        size={18}
+                        className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
+                      />
 
-                  <input
-                    value={search}
-                    onChange={(event) => {
-                      setSearch(event.target.value);
-                      setCurrentPage(1);
-                    }}
-                    placeholder="Cari nomor tagihan, nama siswa, atau NIS..."
-                    className="theme-input w-full rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
-                  />
-                </div>
+                      <input
+                        value={search}
+                        onChange={(event) => {
+                          setSearch(event.target.value);
+                          setCurrentPage(1);
+                        }}
+                        placeholder="Cari nomor tagihan, nama siswa, atau NIS..."
+                        className="theme-input w-full rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
+                      />
+                    </div>
 
-                <select
-                  value={filterStatus}
-                  onChange={(event) => {
-                    setFilterStatus(event.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="theme-input rounded-xl px-4 py-2.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
-                >
-                  <option value="">Semua Status</option>
-                  {STATUS_OPTIONS.map((option) => (
-                    <option
-                      key={option.value}
-                      value={option.value}
+                    <select
+                      value={filterStatus}
+                      onChange={(event) => {
+                        setFilterStatus(event.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="theme-input rounded-xl px-4 py-2.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
                     >
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                      <option value="">Semua Status</option>
+                      {STATUS_OPTIONS.map((option) => (
+                        <option
+                          key={option.value}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              {/* TABEL */}
-              <div className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
-                <div className="w-full overflow-x-auto">
-                  <table className="w-full min-w-[1000px] text-sm">
-                    <thead>
-                      <tr className="theme-card-soft border-b theme-border">
-                        {[
-                          "No",
-                          "Siswa",
-                          "Kategori",
-                          "Periode",
-                          "Total",
-                          "Dibayar",
-                          "Sisa",
-                          "Status",
-                          "Jatuh Tempo",
-                          "Aksi",
-                        ].map((heading, index) => (
-                          <th
-                            key={heading}
-                            className={`theme-text-muted px-4 py-3.5 text-xs font-semibold uppercase tracking-wider ${
-                              index >= 4 && index <= 6
-                                ? "text-right"
-                                : index === 9
-                                ? "text-center"
-                                : "text-left"
-                            }`}
-                          >
-                            {heading}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
+                  {/* TABEL */}
+                  <div className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                    <div className="w-full overflow-x-auto">
+                      <table className="w-full min-w-[1000px] text-sm">
+                        <thead>
+                          <tr className="theme-card-soft border-b theme-border">
+                            {[
+                              "No",
+                              "Siswa",
+                              "Kategori",
+                              "Periode",
+                              "Total",
+                              "Dibayar",
+                              "Sisa",
+                              "Status",
+                              "Jatuh Tempo",
+                              "Aksi",
+                            ].map((heading, index) => (
+                              <th
+                                key={heading}
+                                className={`theme-text-muted px-4 py-3.5 text-xs font-semibold uppercase tracking-wider ${
+                                  index >= 4 && index <= 6
+                                    ? "text-right"
+                                    : index === 9
+                                    ? "text-center"
+                                    : "text-left"
+                                }`}
+                              >
+                                {heading}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
 
-                    <tbody className="divide-y divide-[var(--color-border-soft)]">
-                      {loading ? (
-                        <tr>
-                          <td
-                            colSpan={10}
-                            className="theme-text-muted px-4 py-12 text-center"
-                          >
-                            <div className="flex items-center justify-center gap-2">
-                              <Loader2
-                                size={18}
-                                className="animate-spin text-[var(--color-primary)]"
-                              />
-                              <span className="text-sm">
-                                Memuat data tagihan...
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : tagihanList.length === 0 ? (
-                        <tr>
-                          <td
-                            colSpan={10}
-                            className="theme-text-muted px-4 py-12 text-center"
-                          >
-                            <div className="flex flex-col items-center gap-2">
-                              <FileText
-                                size={32}
-                                className="opacity-50"
-                              />
-                              <p className="theme-text-secondary text-sm font-medium">
-                                Tidak ada data tagihan
-                              </p>
-                              <p className="text-xs">
-                                Ubah filter atau generate tagihan
-                                baru
-                              </p>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : (
-                        tagihanList.map((item, index) => (
-                          <tr
-                            key={item.id}
-                            className="theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-card))]"
-                          >
-                            <td className="theme-text-muted px-4 py-3.5 text-sm">
-                              {indexOfFirst + index + 1}
-                            </td>
+                        <tbody className="divide-y divide-[var(--color-border-soft)]">
+                          {loading ? (
+                            <tr>
+                              <td
+                                colSpan={10}
+                                className="theme-text-muted px-4 py-12 text-center"
+                              >
+                                <div className="flex items-center justify-center gap-2">
+                                  <Loader2
+                                    size={18}
+                                    className="animate-spin text-[var(--color-primary)]"
+                                  />
+                                  <span className="text-sm">
+                                    Memuat data tagihan...
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : tagihanList.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan={10}
+                                className="theme-text-muted px-4 py-12 text-center"
+                              >
+                                <div className="flex flex-col items-center gap-2">
+                                  <FileText
+                                    size={32}
+                                    className="opacity-50"
+                                  />
+                                  <p className="theme-text-secondary text-sm font-medium">
+                                    Tidak ada data tagihan
+                                  </p>
+                                  <p className="text-xs">
+                                    Ubah filter atau generate tagihan
+                                    baru
+                                  </p>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : (
+                            tagihanList.map((item, index) => (
+                              <tr
+                                key={item.id}
+                                className="theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-card))]"
+                              >
+                                <td className="theme-text-muted px-4 py-3.5 text-sm">
+                                  {indexOfFirst + index + 1}
+                                </td>
 
-                            <td className="px-4 py-3.5">
-                              <p className="theme-text font-medium">
-                                {item.siswa?.namaLengkap || "-"}
-                              </p>
-                              <p className="theme-text-muted text-xs">
-                                {item.siswa?.nis
-                                  ? `NIS ${item.siswa.nis}`
-                                  : item.nomorTagihan}
-                              </p>
-                            </td>
+                                <td className="px-4 py-3.5">
+                                  <p className="theme-text font-medium">
+                                    {item.siswa?.namaLengkap || "-"}
+                                  </p>
+                                  <p className="theme-text-muted text-xs">
+                                    {item.siswa?.nis
+                                      ? `NIS ${item.siswa.nis}`
+                                      : item.nomorTagihan}
+                                  </p>
+                                </td>
 
-                            <td className="px-4 py-3.5">
-                              {item.kategoriTagihan?.nama || "-"}
-                            </td>
+                                <td className="px-4 py-3.5">
+                                  {item.kategoriTagihan?.nama || "-"}
+                                </td>
 
-                            <td className="px-4 py-3.5">
-                              {periodeLabel(item)}
-                            </td>
+                                <td className="px-4 py-3.5">
+                                  {periodeLabel(item)}
+                                </td>
 
-                            <td className="theme-text px-4 py-3.5 text-right font-semibold">
-                              {formatRupiah(item.totalTagihan)}
-                            </td>
+                                <td className="theme-text px-4 py-3.5 text-right font-semibold">
+                                  {formatRupiah(item.totalTagihan)}
+                                </td>
 
-                            <td className="px-4 py-3.5 text-right">
-                              {formatRupiah(item.totalDibayar)}
-                            </td>
+                                <td className="px-4 py-3.5 text-right">
+                                  {formatRupiah(item.totalDibayar)}
+                                </td>
 
-                            <td className="theme-text px-4 py-3.5 text-right font-bold">
-                              {formatRupiah(item.sisa)}
-                            </td>
+                                <td className="theme-text px-4 py-3.5 text-right font-bold">
+                                  {formatRupiah(item.sisa)}
+                                </td>
 
-                            <td className="px-4 py-3.5">
-                              {getStatusBadge(
-                                item.status,
-                                item
-                              )}
-                            </td>
+                                <td className="px-4 py-3.5">
+                                  {getStatusBadge(
+                                    item.status,
+                                    item
+                                  )}
+                                </td>
 
-                            <td className="px-4 py-3.5">
-                              {formatDate(item.jatuhTempo)}
-                            </td>
+                                <td className="px-4 py-3.5">
+                                  {formatDate(item.jatuhTempo)}
+                                </td>
 
-                            <td className="px-4 py-3.5">
-                              <div className="flex items-center justify-center gap-1">
-                                <ActionButton
-                                  title="Lihat detail"
-                                  icon={<Eye size={16} />}
-                                  onClick={() =>
-                                    router.push(
-                                      `/admin/keuangan/SPP/${item.id}`
-                                    )
-                                  }
-                                  type="primary"
-                                />
-
-                                {canBayar(item) && (
-                                  <CanAccess menu="keuangan dan kas" action="create">
+                                <td className="px-4 py-3.5">
+                                  <div className="flex items-center justify-center gap-1">
                                     <ActionButton
-                                      title="Catat pembayaran"
-                                      icon={
-                                        <CreditCard size={16} />
-                                      }
+                                      title="Lihat detail"
+                                      icon={<Eye size={16} />}
                                       onClick={() =>
                                         router.push(
-                                          `/admin/keuangan/SPP/${item.id}/bayar`
+                                          `/admin/keuangan/SPP/${item.id}`
                                         )
                                       }
                                       type="primary"
                                     />
-                                  </CanAccess>
-                                )}
 
-                                {canBatal(item) && (
-                                  <CanAccess menu="keuangan dan kas" action="update">
-                                    <ActionButton
-                                      title="Batalkan tagihan"
-                                      icon={<XCircle size={16} />}
-                                      onClick={() =>
-                                        router.push(
-                                          `/admin/keuangan/SPP/${item.id}/batal`
-                                        )
-                                      }
-                                      type="danger"
-                                    />
-                                  </CanAccess>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                                    {canBayar(item) && (
+                                      <CanAccess menu="keuangan dan kas" action="create">
+                                        <ActionButton
+                                          title="Catat pembayaran"
+                                          icon={
+                                            <CreditCard size={16} />
+                                          }
+                                          onClick={() =>
+                                            router.push(
+                                              `/admin/keuangan/SPP/${item.id}/bayar`
+                                            )
+                                          }
+                                          type="primary"
+                                        />
+                                      </CanAccess>
+                                    )}
 
-                {!loading && tagihanList.length > 0 && (
-                  <div className="theme-card-soft flex flex-col items-start justify-between gap-3 border-t theme-border px-4 py-3 sm:flex-row sm:items-center">
-                    <p className="theme-text-muted text-sm">
-                      Menampilkan {indexOfFirst + 1}-
-                      {Math.min(
-                        indexOfFirst + ENTRIES_PER_PAGE,
-                        meta?.total || 0
-                      )}{" "}
-                      dari {meta?.total || 0} data
-                    </p>
+                                    {canBatal(item) && (
+                                      <CanAccess menu="keuangan dan kas" action="update">
+                                        <ActionButton
+                                          title="Batalkan tagihan"
+                                          icon={<XCircle size={16} />}
+                                          onClick={() =>
+                                            router.push(
+                                              `/admin/keuangan/SPP/${item.id}/batal`
+                                            )
+                                          }
+                                          type="danger"
+                                        />
+                                      </CanAccess>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
 
-                    <div className="flex items-center gap-1">
-                      <PaginationButton
-                        disabled={currentPage === 1}
-                        onClick={() =>
-                          setCurrentPage((page) =>
-                            Math.max(1, page - 1)
-                          )
-                        }
-                      >
-                        <ChevronLeft size={16} />
-                      </PaginationButton>
+                    {!loading && tagihanList.length > 0 && (
+                      <div className="theme-card-soft flex flex-col items-start justify-between gap-3 border-t theme-border px-4 py-3 sm:flex-row sm:items-center">
+                        <p className="theme-text-muted text-sm">
+                          Menampilkan {indexOfFirst + 1}-
+                          {Math.min(
+                            indexOfFirst + ENTRIES_PER_PAGE,
+                            meta?.total || 0
+                          )}{" "}
+                          dari {meta?.total || 0} data
+                        </p>
 
-                      {Array.from(
-                        { length: totalPages },
-                        (_, i) => (
-                          <button
-                            key={i}
-                            type="button"
+                        <div className="flex items-center gap-1">
+                          <PaginationButton
+                            disabled={currentPage === 1}
                             onClick={() =>
-                              setCurrentPage(i + 1)
-                            }
-                            className={
-                              currentPage === i + 1
-                                ? "theme-primary rounded-lg px-3.5 py-1.5 text-sm font-medium text-white"
-                                : "theme-text-secondary rounded-lg px-3.5 py-1.5 text-sm font-medium transition hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                              setCurrentPage((page) =>
+                                Math.max(1, page - 1)
+                              )
                             }
                           >
-                            {i + 1}
-                          </button>
-                        )
-                      )}
+                            <ChevronLeft size={16} />
+                          </PaginationButton>
 
-                      <PaginationButton
-                        disabled={currentPage >= totalPages}
-                        onClick={() =>
-                          setCurrentPage((page) =>
-                            Math.min(totalPages, page + 1)
-                          )
-                        }
-                      >
-                        <ChevronRight size={16} />
-                      </PaginationButton>
-                    </div>
+                          {Array.from(
+                            { length: totalPages },
+                            (_, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() =>
+                                  setCurrentPage(i + 1)
+                                }
+                                className={
+                                  currentPage === i + 1
+                                    ? "theme-primary rounded-lg px-3.5 py-1.5 text-sm font-medium text-white"
+                                    : "theme-text-secondary rounded-lg px-3.5 py-1.5 text-sm font-medium transition hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                                }
+                              >
+                                {i + 1}
+                              </button>
+                            )
+                          )}
+
+                          <PaginationButton
+                            disabled={currentPage >= totalPages}
+                            onClick={() =>
+                              setCurrentPage((page) =>
+                                Math.min(totalPages, page + 1)
+                              )
+                            }
+                          >
+                            <ChevronRight size={16} />
+                          </PaginationButton>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </>
+              ) : (
+                <>
+                  {/* RINGKASAN & FILTER PEMBAYARAN */}
+                  <div className="theme-card flex flex-col justify-between gap-3 rounded-2xl border theme-border p-4 shadow-sm sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                        <CreditCard size={20} />
+                      </div>
+                      <div>
+                        <p className="theme-text-muted text-xs font-medium">
+                          Total Pembayaran Berhasil (Filter Saat Ini)
+                        </p>
+                        <p className="theme-text text-lg font-bold">
+                          {formatRupiah(pembayaranRingkasan?.totalDiterima || 0)}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="theme-text-muted text-xs">
+                      Menampilkan {pembayaranMeta?.total || 0} transaksi pembayaran siswa
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div className="relative flex-1">
+                      <Search
+                        size={18}
+                        className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
+                      />
+
+                      <input
+                        value={pembayaranSearch}
+                        onChange={(event) => {
+                          setPembayaranSearch(event.target.value);
+                          setPembayaranPage(1);
+                        }}
+                        placeholder="Cari nomor pembayaran, nomor tagihan, nama siswa, atau referensi..."
+                        className="theme-input w-full rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
+                      />
+                    </div>
+
+                    <select
+                      value={filterMetodePembayaran}
+                      onChange={(event) => {
+                        setFilterMetodePembayaran(event.target.value);
+                        setPembayaranPage(1);
+                      }}
+                      className="theme-input rounded-xl px-4 py-2.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
+                    >
+                      <option value="">Semua Metode</option>
+                      <option value="tunai">Tunai</option>
+                      <option value="transfer">Transfer</option>
+                      <option value="qris">QRIS</option>
+                      <option value="lainnya">Lainnya</option>
+                    </select>
+
+                    <select
+                      value={filterStatusPembayaran}
+                      onChange={(event) => {
+                        setFilterStatusPembayaran(event.target.value);
+                        setPembayaranPage(1);
+                      }}
+                      className="theme-input rounded-xl px-4 py-2.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
+                    >
+                      <option value="">Semua Status</option>
+                      <option value="berhasil">Berhasil</option>
+                      <option value="dibatalkan">Dibatalkan</option>
+                    </select>
+                  </div>
+
+                  {/* TABEL PEMBAYARAN */}
+                  <div className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                    <div className="w-full overflow-x-auto">
+                      <table className="w-full min-w-[1000px] text-sm">
+                        <thead>
+                          <tr className="theme-card-soft border-b theme-border">
+                            {[
+                              "No",
+                              "No. Pembayaran",
+                              "Siswa",
+                              "Tagihan",
+                              "Akun Kas",
+                              "Metode",
+                              "Jumlah",
+                              "Tanggal Bayar",
+                              "Status",
+                              "Aksi",
+                            ].map((heading, index) => (
+                              <th
+                                key={heading}
+                                className={`theme-text-muted px-4 py-3.5 text-xs font-semibold uppercase tracking-wider ${
+                                  index === 6
+                                    ? "text-right"
+                                    : index === 9
+                                    ? "text-center"
+                                    : "text-left"
+                                }`}
+                              >
+                                {heading}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+
+                        <tbody className="divide-y divide-[var(--color-border-soft)]">
+                          {pembayaranLoading ? (
+                            <tr>
+                              <td
+                                colSpan={10}
+                                className="theme-text-muted px-4 py-12 text-center"
+                              >
+                                <div className="flex items-center justify-center gap-2">
+                                  <Loader2
+                                    size={18}
+                                    className="animate-spin text-[var(--color-primary)]"
+                                  />
+                                  <span className="text-sm">
+                                    Memuat riwayat pembayaran...
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : pembayaranList.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan={10}
+                                className="theme-text-muted px-4 py-12 text-center"
+                              >
+                                <div className="flex flex-col items-center gap-2">
+                                  <CreditCard
+                                    size={32}
+                                    className="opacity-50"
+                                  />
+                                  <p className="theme-text-secondary text-sm font-medium">
+                                    Tidak ada riwayat pembayaran
+                                  </p>
+                                  <p className="text-xs">
+                                    Ubah kata kunci pencarian atau filter status/metode
+                                  </p>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : (
+                            pembayaranList.map((item, index) => (
+                              <tr
+                                key={item.id}
+                                className="theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-card))]"
+                              >
+                                <td className="theme-text-muted px-4 py-3.5 text-sm">
+                                  {pembayaranIndexOfFirst + index + 1}
+                                </td>
+
+                                <td className="px-4 py-3.5">
+                                  <p className="theme-text font-medium">
+                                    {item.nomorPembayaran || "-"}
+                                  </p>
+                                  {item.referensi && (
+                                    <p className="theme-text-muted text-xs">
+                                      Ref: {item.referensi}
+                                    </p>
+                                  )}
+                                </td>
+
+                                <td className="px-4 py-3.5">
+                                  <p className="theme-text font-medium">
+                                    {item.siswa?.namaLengkap || "-"}
+                                  </p>
+                                  <p className="theme-text-muted text-xs">
+                                    {item.siswa?.nis
+                                      ? `NIS ${item.siswa.nis}`
+                                      : "-"}
+                                  </p>
+                                </td>
+
+                                <td className="px-4 py-3.5">
+                                  <p className="theme-text font-medium">
+                                    {item.tagihan?.kategoriTagihan?.nama || "-"}
+                                  </p>
+                                  <p className="theme-text-muted text-xs">
+                                    {item.tagihan?.nomorTagihan || "-"}
+                                  </p>
+                                </td>
+
+                                <td className="px-4 py-3.5">
+                                  {item.akunKas?.nama || "-"}
+                                </td>
+
+                                <td className="px-4 py-3.5 uppercase text-xs font-semibold">
+                                  {item.metode || "-"}
+                                </td>
+
+                                <td className="theme-text px-4 py-3.5 text-right font-semibold">
+                                  {formatRupiah(item.jumlah)}
+                                </td>
+
+                                <td className="px-4 py-3.5">
+                                  {formatDate(item.tanggalBayar)}
+                                </td>
+
+                                <td className="px-4 py-3.5">
+                                  <span
+                                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                      item.status === "dibatalkan"
+                                        ? "theme-danger"
+                                        : "theme-success"
+                                    }`}
+                                  >
+                                    {item.status === "dibatalkan" ? (
+                                      <XCircle size={12} />
+                                    ) : (
+                                      <CheckCircle2 size={12} />
+                                    )}
+                                    {item.status === "dibatalkan"
+                                      ? "Dibatalkan"
+                                      : "Berhasil"}
+                                  </span>
+                                </td>
+
+                                <td className="px-4 py-3.5">
+                                  <div className="flex items-center justify-center">
+                                    {item.tagihanId && (
+                                      <ActionButton
+                                        title="Lihat detail tagihan"
+                                        icon={<Eye size={16} />}
+                                        onClick={() =>
+                                          router.push(
+                                            `/admin/keuangan/SPP/${item.tagihanId}`
+                                          )
+                                        }
+                                        type="primary"
+                                      />
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {!pembayaranLoading && pembayaranList.length > 0 && (
+                      <div className="theme-card-soft flex flex-col items-start justify-between gap-3 border-t theme-border px-4 py-3 sm:flex-row sm:items-center">
+                        <p className="theme-text-muted text-sm">
+                          Menampilkan {pembayaranIndexOfFirst + 1}-
+                          {Math.min(
+                            pembayaranIndexOfFirst + ENTRIES_PER_PAGE,
+                            pembayaranMeta?.total || 0
+                          )}{" "}
+                          dari {pembayaranMeta?.total || 0} data
+                        </p>
+
+                        <div className="flex items-center gap-1">
+                          <PaginationButton
+                            disabled={pembayaranPage === 1}
+                            onClick={() =>
+                              setPembayaranPage((page) =>
+                                Math.max(1, page - 1)
+                              )
+                            }
+                          >
+                            <ChevronLeft size={16} />
+                          </PaginationButton>
+
+                          {Array.from(
+                            { length: pembayaranTotalPages },
+                            (_, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() =>
+                                  setPembayaranPage(i + 1)
+                                }
+                                className={
+                                  pembayaranPage === i + 1
+                                    ? "theme-primary rounded-lg px-3.5 py-1.5 text-sm font-medium text-white"
+                                    : "theme-text-secondary rounded-lg px-3.5 py-1.5 text-sm font-medium transition hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                                }
+                              >
+                                {i + 1}
+                              </button>
+                            )
+                          )}
+
+                          <PaginationButton
+                            disabled={pembayaranPage >= pembayaranTotalPages}
+                            onClick={() =>
+                              setPembayaranPage((page) =>
+                                Math.min(pembayaranTotalPages, page + 1)
+                              )
+                            }
+                          >
+                            <ChevronRight size={16} />
+                          </PaginationButton>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
 
               <footer className="theme-text-muted border-t theme-border-soft pt-6 text-center text-xs">
                 © 2026 SmartSchool • SPP & Tagihan
@@ -709,11 +1143,10 @@ export default function SPPPage() {
 
 function StatCard({ icon, label, value, color, subtext }) {
   const colors = {
-    primary:
-      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]",
-    success: "theme-success",
-    warning: "theme-warning",
-    danger: "theme-danger",
+    primary: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    success: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    warning: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
+    danger: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text",
   };
 
   return (

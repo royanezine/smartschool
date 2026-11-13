@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  AlertCircle,
   ArrowLeft,
   School,
   MapPin,
@@ -32,8 +33,16 @@ const themeSmallShadow =
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 
+const themePrimarySurface =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
 const themePrimarySoftBorder =
   "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText = "text-[var(--color-primary)]";
 
 const themeInfoSurface =
   "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
@@ -66,7 +75,7 @@ const themeNeutralHover =
   "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:border-[color-mix(in_srgb,var(--color-text)_16%,transparent)]";
 
 const themePrimaryButton =
-  "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-[var(--color-card)]";
+  "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-white";
 
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -153,6 +162,7 @@ export default function TambahSekolahPage() {
   const [kotaList, setKotaList] = useState([]);
   const [loadingKota, setLoadingKota] = useState(false);
   const [selectedKota, setSelectedKota] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -304,7 +314,7 @@ export default function TambahSekolahPage() {
             className={`hidden shrink-0 items-center gap-2.5 rounded-xl border theme-border theme-card px-3 py-2.5 ${themeCardShadow} md:flex`}
           >
             <div
-              className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)]`}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themePrimaryBorder} ${themePrimarySurface} ${themePrimaryText}`}
             >
               <School size={17} />
             </div>
@@ -320,10 +330,41 @@ export default function TambahSekolahPage() {
           </div>
         </div>
 
+        <div
+          className={`mb-6 flex items-start gap-3 rounded-2xl border ${themeWarningBorder} ${themeWarningSurface} p-4 text-xs`}
+        >
+          <AlertCircle
+            size={18}
+            className="mt-0.5 shrink-0 text-[var(--color-warning)]"
+          />
+          <div className="space-y-1">
+            <p className="font-semibold theme-text">
+              Pembuatan Sekolah Langsung oleh Super Admin Belum Tersedia di Backend
+            </p>
+            <p className="leading-5 theme-text-secondary">
+              Data referensi Yayasan, Paket Langganan, Provinsi, dan Kota/Kabupaten di bawah ini dimuat langsung dari API Backend. Namun endpoint pembuatan sekolah langsung oleh Super Admin (
+              <code>POST /api/platform/sekolah</code>
+              ) belum tersedia pada Backend — pendaftaran sekolah dilakukan melalui alur registrasi tenant (
+              <code>/daftar-sekolah</code>
+              ) atau Admin Yayasan.
+            </p>
+          </div>
+        </div>
+
+        {submitError && (
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] p-4 text-xs text-[var(--color-danger)]">
+            <AlertCircle size={18} className="mt-0.5 shrink-0" />
+            <span>{submitError}</span>
+          </div>
+        )}
+
         <form
           className="space-y-6"
           onSubmit={(event) => {
             event.preventDefault();
+            setSubmitError(
+              "Pembuatan sekolah baru langsung oleh Super Admin belum didukung oleh API Backend (endpoint POST /api/platform/sekolah belum tersedia). Gunakan alur registrasi tenant atau Admin Yayasan."
+            );
           }}
         >
           <section
@@ -443,7 +484,7 @@ export default function TambahSekolahPage() {
             <div className={`border-b ${themeDivider} px-4 py-4 sm:px-6`}>
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themePrimaryBorder} ${themePrimarySurface} ${themePrimaryText}`}
                 >
                   <MapPin size={19} />
                 </div>
@@ -569,7 +610,7 @@ export default function TambahSekolahPage() {
             <div className={`border-b ${themeDivider} px-4 py-4 sm:px-6`}>
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)]`}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themePrimaryBorder} ${themePrimarySurface} ${themePrimaryText}`}
                 >
                   <Building2 size={19} />
                 </div>

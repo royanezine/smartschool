@@ -725,7 +725,7 @@ export default function TambahJurnalKasPage() {
                       </p>
                     </section>
 
-                    <div className="theme-info flex gap-3 rounded-2xl border p-4">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text flex gap-3 rounded-2xl border p-4">
                       <Info size={17} className="mt-0.5 shrink-0" />
                       <div>
                         <p className="text-xs font-bold">Informasi</p>
@@ -783,30 +783,10 @@ function SummaryCard({
   description,
   tone = "primary",
 }) {
-  const toneMap = {
-    primary: {
-      surface: "bg-[var(--color-primary-background)]",
-      text: "text-[var(--color-primary)]",
-    },
-    success: {
-      surface: "bg-[var(--color-success-background)]",
-      text: "text-[var(--color-success)]",
-    },
-    warning: {
-      surface: "bg-[var(--color-warning-background)]",
-      text: "text-[var(--color-warning)]",
-    },
-    danger: {
-      surface: "bg-[var(--color-danger-background)]",
-      text: "text-[var(--color-danger)]",
-    },
-    info: {
-      surface: "bg-[var(--color-info-background)]",
-      text: "text-[var(--color-info)]",
-    },
+  const current = {
+    surface: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+    text: "theme-primary-text",
   };
-
-  const current = toneMap[tone] || toneMap.primary;
 
   return (
     <div className="theme-card rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">

@@ -492,7 +492,7 @@ export default function EditYayasanPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themeSmallShadow} transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98] disabled:opacity-60 sm:w-auto`}
+                  className={`flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-sm font-semibold text-white ${themeSmallShadow} transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98] disabled:opacity-60 sm:w-auto`}
                 >
                   {submitting ? (
                     <>
