@@ -18,11 +18,6 @@ import {
   createPelanggaranSiswa,
   updatePelanggaranSiswa,
   deletePelanggaranSiswa,
-  getAsesmenMinatBakat,
-  getAsesmenMinatBakatById,
-  createAsesmenMinatBakat,
-  updateAsesmenMinatBakat,
-  deleteAsesmenMinatBakat,
 } from "../controllers/bk.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
@@ -66,11 +61,5 @@ router.get("/pelanggaran/export/pdf", exportPelanggaranPdf);
 router.post("/pelanggaran", authorizeRoles("admin_sekolah", "guru"), createPelanggaranSiswa);
 router.put("/pelanggaran/:id", authorizeRoles("admin_sekolah", "guru"), updatePelanggaranSiswa);
 router.delete("/pelanggaran/:id", authorizeRoles("admin_sekolah", "guru"), deletePelanggaranSiswa);
-
-router.get("/asesmen-minat-bakat", getAsesmenMinatBakat);
-router.get("/asesmen-minat-bakat/:id", getAsesmenMinatBakatById);
-router.post("/asesmen-minat-bakat", authorizeRoles("admin_sekolah", "guru"), createAsesmenMinatBakat);
-router.put("/asesmen-minat-bakat/:id", authorizeRoles("admin_sekolah", "guru"), updateAsesmenMinatBakat);
-router.delete("/asesmen-minat-bakat/:id", authorizeRoles("admin_sekolah", "guru"), deleteAsesmenMinatBakat);
 
 export default router;
