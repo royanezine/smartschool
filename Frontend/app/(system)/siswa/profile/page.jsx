@@ -39,7 +39,6 @@ function getBackendOrigin() {
   return process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
 }
 
-/* ---------- helpers ---------- */
 
 function getAvatarUrl(avatar) {
   if (!avatar) return "";
@@ -121,7 +120,6 @@ function formatHari(value) {
   return HARI_LABEL[key] || value;
 }
 
-/* ---------- page ---------- */
 
 export default function ProfilSiswaPage() {
   const [profile, setProfile] = useState(null);
@@ -166,82 +164,82 @@ export default function ProfilSiswaPage() {
   const initials = getInitials(nama);
 
   return (
-    <main className="theme-page h-full min-h-0 flex-1 overflow-y-auto">
-      <div className="mx-auto w-full max-w-[1380px] px-4 pb-10 pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pt-8">
-        {/* Header sticky — biar tidak tenggelam saat scroll */}
-        <div className="sticky top-0 z-20 -mx-4 mb-6 border-b theme-border-soft bg-[var(--color-page)]/95 px-4 pb-4 pt-2 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-[28px]">
-            Profil Saya
-          </h1>
+    <main className="theme-page flex h-screen flex-col overflow-hidden">
+      <div className="shrink-0 border-b theme-border-soft bg-[var(--color-page)]/95 px-4 pb-4 pt-2 backdrop-blur sm:px-6 lg:px-8">
+        <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-[28px]">
+          Profil Saya
+        </h1>
 
-          <p className="mt-1 text-sm theme-text-muted">
-            Kelola data pribadi, keamanan, dan lihat
-            informasi akademik kamu.
-          </p>
+        <p className="mt-1 text-sm theme-text-muted">
+          Kelola data pribadi, keamanan, dan lihat
+          informasi akademik kamu.
+        </p>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="w-full px-4 pb-10 pt-4 sm:px-6 lg:px-8">
+          {error && (
+            <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl px-4 py-3 text-sm">
+              <AlertCircle size={18} className="mt-0.5 shrink-0" />
+
+              <div className="min-w-0">
+                <p className="font-semibold">
+                  Terjadi kesalahan
+                </p>
+                <p className="mt-0.5">{error}</p>
+              </div>
+            </div>
+          )}
+
+          {success && (
+            <div className="theme-success mb-6 flex items-center gap-3 rounded-xl px-4 py-3 text-sm">
+              <Check size={18} />
+              <span>{success}</span>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="theme-card flex min-h-[400px] items-center justify-center rounded-2xl border">
+              <div className="flex flex-col items-center gap-3 theme-text-muted">
+                <Loader2
+                  size={28}
+                  className="animate-spin text-[var(--color-primary)]"
+                />
+                <p className="text-sm">
+                  Memuat data profile...
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-6">
+                <DataPribadiSection
+                  profile={profile}
+                  onProfileUpdated={setProfile}
+                  onSuccess={setSuccess}
+                  onError={setError}
+                />
+
+                <DataAkademikSection profile={profile} />
+
+                <MataPelajaranSection profile={profile} />
+              </div>
+
+              <aside className="xl:sticky xl:top-6">
+                <StudentCard
+                  profile={profile}
+                  avatarUrl={avatarUrl}
+                  initials={initials}
+                />
+              </aside>
+            </div>
+          )}
         </div>
-
-        {error && (
-          <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl px-4 py-3 text-sm">
-            <AlertCircle size={18} className="mt-0.5 shrink-0" />
-
-            <div className="min-w-0">
-              <p className="font-semibold">
-                Terjadi kesalahan
-              </p>
-              <p className="mt-0.5">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {success && (
-          <div className="theme-success mb-6 flex items-center gap-3 rounded-xl px-4 py-3 text-sm">
-            <Check size={18} />
-            <span>{success}</span>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="theme-card flex min-h-[400px] items-center justify-center rounded-2xl border">
-            <div className="flex flex-col items-center gap-3 theme-text-muted">
-              <Loader2
-                size={28}
-                className="animate-spin text-[var(--color-primary)]"
-              />
-              <p className="text-sm">
-                Memuat data profile...
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-            <div className="min-w-0 space-y-6">
-              <DataPribadiSection
-                profile={profile}
-                onProfileUpdated={setProfile}
-                onSuccess={setSuccess}
-                onError={setError}
-              />
-
-              <DataAkademikSection profile={profile} />
-
-              <MataPelajaranSection profile={profile} />
-            </div>
-
-            <aside className="xl:sticky xl:top-6">
-              <StudentCard
-                profile={profile}
-                avatarUrl={avatarUrl}
-                initials={initials}
-              />
-            </aside>
-          </div>
-        )}
       </div>
     </main>
   );
 }
 
-/* ---------- reusable card ---------- */
 
 function SettingsCard({ icon: Icon, title, desc, children }) {
   return (
@@ -269,7 +267,6 @@ function SettingsCard({ icon: Icon, title, desc, children }) {
   );
 }
 
-/* ---------- kartu siswa ---------- */
 
 function StudentCard({ profile, avatarUrl, initials }) {
   const nama = profile?.namaLengkap || "Siswa";
@@ -434,7 +431,6 @@ function StudentInfo({ icon: Icon, label, value }) {
   );
 }
 
-
 function DataPribadiSection({ profile }) {
   const [namaLengkap, setNamaLengkap] = useState(
     profile?.namaLengkap || ""
@@ -579,7 +575,6 @@ function DataPribadiSection({ profile }) {
   );
 }
 
-
 function DataAkademikSection({ profile }) {
   const kelas = profile?.kelas;
   const waliKelas = profile?.waliKelas;
@@ -647,7 +642,6 @@ function DataAkademikSection({ profile }) {
     </SettingsCard>
   );
 }
-
 
 function MataPelajaranSection({ profile }) {
   const mapel = profile?.mataPelajaran || [];
@@ -740,7 +734,6 @@ function MataPelajaranSection({ profile }) {
     </SettingsCard>
   );
 }
-
 
 function InfoTile({ icon: Icon, label, value, hint }) {
   return (

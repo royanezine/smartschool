@@ -61,8 +61,6 @@ const STATUS_REVIEW = {
   },
 };
 
-
-
 function formatDate(value, withTime = false) {
   if (!value) return "Belum tersedia";
   const date = new Date(value);
@@ -114,8 +112,6 @@ function getErrorMessage(error) {
   return error?.message || "Terjadi kesalahan. Silakan coba lagi.";
 }
 
-
-
 function InfoRow({ icon: Icon, label, value, isFullWidth = false }) {
   return (
     <div className={`flex min-w-0 flex-col gap-1 ${isFullWidth ? "sm:col-span-2" : ""}`}>
@@ -150,8 +146,6 @@ function ProfileLoading() {
     </div>
   );
 }
-
-
 
 function ReviewSection() {
   const [review, setReview] = useState(null);
@@ -230,9 +224,9 @@ function ReviewSection() {
 
   return (
     <section className="theme-card theme-border rounded-xl border p-5 shadow-sm sm:p-6">
-      <SectionHeader 
-        icon={MessageSquare} 
-        title="Review SmartSchool" 
+      <SectionHeader
+        icon={MessageSquare}
+        title="Review SmartSchool"
         action={
           <button type="button" onClick={loadReview} disabled={loadingReview || savingReview} className="theme-text-secondary flex items-center gap-1.5 text-xs hover:text-[var(--color-primary)] disabled:opacity-50">
             <RefreshCw size={14} className={loadingReview ? "animate-spin" : ""} /> Muat Ulang
@@ -338,8 +332,6 @@ function ReviewSection() {
   );
 }
 
-
-
 export default function AdminProfilePage() {
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -388,19 +380,20 @@ export default function AdminProfilePage() {
   const avatarUrl = typeof profile?.avatar === "string" && /^https?:\/\//i.test(profile.avatar) ? profile.avatar : "";
 
   return (
-    <div className="theme-page flex h-screen w-full overflow-hidden">
+    <div className="theme-page flex h-dvh w-full overflow-hidden">
       <Sidebar active="profile" setActive={() => {}} collapsed={isCollapsed} setCollapsed={setIsCollapsed} />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() => setIsCollapsed((v) => !v)}
-          notifications={[]}
-          user={{ name: nama, email: profile?.email || "", avatar: avatarUrl || getInitials(nama) }}
-        />
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={() => setIsCollapsed((v) => !v)}
+            notifications={[]}
+            user={{ name: nama, email: profile?.email || "", avatar: avatarUrl || getInitials(nama) }}
+          />
+        </div>
 
         <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8">
-            
+          <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
             <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">Profil Pengguna</h1>
@@ -429,9 +422,7 @@ export default function AdminProfilePage() {
 
             {profile && (
               <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-                
-               
-                <div className="space-y-6 lg:col-span-1 sticky top-0">
+                <div className="space-y-6 lg:col-span-1 self-start lg:sticky lg:top-4">
                   <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
                     <div className="h-28 w-full" style={{ background: "linear-gradient(110deg, var(--color-primary), #3b82f6)" }} />
                     <div className="relative px-6 pb-6">
@@ -479,27 +470,23 @@ export default function AdminProfilePage() {
                   </section>
 
                   <section className="theme-card theme-border rounded-xl border p-4 shadow-sm">
-                     <SectionHeader icon={Settings} title="Menu Cepat" />
-                     <div className="space-y-1">
-                        <button onClick={() => router.push("/admin/settings")} className="flex w-full items-center justify-between rounded-lg p-2 text-sm theme-text hover:bg-black/5">
-                          <span className="flex items-center gap-2"><Settings size={16}/> Pengaturan Akun</span>
-                          <ChevronRight size={16} className="theme-text-muted"/>
-                        </button>
-                        <button onClick={handleLogout} className="flex w-full items-center justify-between rounded-lg p-2 text-sm text-red-600 hover:bg-red-50">
-                          <span className="flex items-center gap-2"><LogOut size={16}/> Logout</span>
-                          <ChevronRight size={16} className="opacity-50"/>
-                        </button>
-                     </div>
+                    <SectionHeader icon={Settings} title="Menu Cepat" />
+                    <div className="space-y-1">
+                      <button onClick={() => router.push("/admin/settings")} className="flex w-full items-center justify-between rounded-lg p-2 text-sm theme-text hover:bg-black/5">
+                        <span className="flex items-center gap-2"><Settings size={16} /> Pengaturan Akun</span>
+                        <ChevronRight size={16} className="theme-text-muted" />
+                      </button>
+                      <button onClick={handleLogout} className="flex w-full items-center justify-between rounded-lg p-2 text-sm text-red-600 hover:bg-red-50">
+                        <span className="flex items-center gap-2"><LogOut size={16} /> Logout</span>
+                        <ChevronRight size={16} className="opacity-50" />
+                      </button>
+                    </div>
                   </section>
                 </div>
 
-             
                 <div className="space-y-6 lg:col-span-2">
-                  
-                  
                   <ReviewSection />
 
-                 
                   <section className="theme-card theme-border rounded-xl border p-5 shadow-sm sm:p-6">
                     <SectionHeader icon={User} title="Informasi Pribadi" />
                     <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
@@ -518,7 +505,6 @@ export default function AdminProfilePage() {
                     </div>
                   </section>
 
-                 
                   <section className="theme-card theme-border rounded-xl border p-5 shadow-sm sm:p-6">
                     <SectionHeader icon={Building2} title="Informasi Sekolah" />
                     {sekolah ? (
@@ -544,7 +530,6 @@ export default function AdminProfilePage() {
                       <InfoRow icon={Activity} label="Deskripsi" value={peran?.deskripsi} isFullWidth />
                     </div>
                   </section>
-
                 </div>
               </div>
             )}

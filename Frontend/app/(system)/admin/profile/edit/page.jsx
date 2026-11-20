@@ -17,7 +17,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-
 export default function EditProfilePage() {
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -120,7 +119,7 @@ export default function EditProfilePage() {
   const nama = initialData?.namaLengkap || initialData?.namaPengguna || "Admin";
 
   return (
-    <div className="theme-page flex h-screen w-full overflow-hidden">
+    <div className="theme-page flex h-dvh w-full overflow-hidden">
       <Sidebar
         active="profile"
         setActive={() => {}}
@@ -129,18 +128,20 @@ export default function EditProfilePage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() => setIsCollapsed((v) => !v)}
-          notifications={[]}
-          user={{
-            name: nama,
-            email: initialData?.email || "",
-            avatar: initialData?.avatar || nama.slice(0, 2).toUpperCase(),
-          }}
-        />
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={() => setIsCollapsed((v) => !v)}
+            notifications={[]}
+            user={{
+              name: nama,
+              email: initialData?.email || "",
+              avatar: initialData?.avatar || nama.slice(0, 2).toUpperCase(),
+            }}
+          />
+        </div>
 
         <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1000px] space-y-5 p-4 sm:p-6 lg:p-8">
+          <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
             <div className="flex items-center justify-between gap-4">
               <button
                 type="button"

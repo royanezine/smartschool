@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -25,7 +24,6 @@ import {
   ExternalLink,
   Info,
 } from "lucide-react";
-
 
 const cardClass =
   "rounded-2xl border border-[var(--color-text)]/10 theme-card shadow-sm";
@@ -134,10 +132,7 @@ function InfoCard({ icon: Icon, label, value, description }) {
 function DetailRow({ icon: Icon, label, value }) {
   return (
     <div className="flex min-w-0 items-start gap-3 border-b border-[var(--color-text)]/8 py-3 last:border-b-0">
-      <Icon
-        size={17}
-        className="mt-0.5 shrink-0 theme-text-muted"
-      />
+      <Icon size={17} className="mt-0.5 shrink-0 theme-text-muted" />
 
       <div className="min-w-0 flex-1">
         <p className={labelClass}>{label}</p>
@@ -155,9 +150,7 @@ function SectionHeader({ icon: Icon, title, description }) {
       </div>
 
       <div className="min-w-0">
-        <h2 className="text-sm font-bold theme-text sm:text-base">
-          {title}
-        </h2>
+        <h2 className="text-sm font-bold theme-text sm:text-base">{title}</h2>
         <p className="mt-1 text-xs leading-relaxed theme-text-secondary sm:text-sm">
           {description}
         </p>
@@ -203,26 +196,19 @@ export default function AdminPengaturanPage() {
       const response = await getProfile();
 
       if (response?.success === false) {
-        throw new Error(
-          response.message || "Data profil gagal diambil."
-        );
+        throw new Error(response.message || "Data profil gagal diambil.");
       }
 
       const data = response?.data;
 
       if (!data || typeof data !== "object") {
-        throw new Error(
-          "Respons backend tidak berisi data profil yang valid."
-        );
+        throw new Error("Respons backend tidak berisi data profil yang valid.");
       }
 
       setProfile(data);
     } catch (err) {
       console.error("Gagal mengambil profil pengaturan:", err);
-      setError(
-        err?.message ||
-          "Tidak dapat mengambil data dari server."
-      );
+      setError(err?.message || "Tidak dapat mengambil data dari server.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -246,12 +232,10 @@ export default function AdminPengaturanPage() {
 
   const schoolName = school?.nama || "Data sekolah belum tersedia";
   const userName =
-    profile?.namaLengkap ||
-    profile?.namaPengguna ||
-    "Pengguna";
+    profile?.namaLengkap || profile?.namaPengguna || "Pengguna";
 
   return (
-    <div className="theme-page flex h-screen w-full min-w-0 overflow-hidden">
+    <div className="theme-page flex h-dvh w-full min-w-0 overflow-hidden">
       <Sidebar
         active="pengaturan"
         setActive={() => {}}
@@ -261,18 +245,20 @@ export default function AdminPengaturanPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={toggleSidebar}
-          notifications={[]}
-          user={{
-            name: userName,
-            email: profile?.email || "",
-            avatar: profile?.avatar || userName.slice(0, 2).toUpperCase(),
-          }}
-        />
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={toggleSidebar}
+            notifications={[]}
+            user={{
+              name: userName,
+              email: profile?.email || "",
+              avatar: profile?.avatar || userName.slice(0, 2).toUpperCase(),
+            }}
+          />
+        </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto w-full max-w-[1600px] space-y-6 p-3 sm:p-5 lg:p-7">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full space-y-6 p-3 sm:p-5 lg:p-7">
             <section className={`${cardClass} relative overflow-hidden`}>
               <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] blur-3xl" />
 
@@ -294,8 +280,8 @@ export default function AdminPengaturanPage() {
                     </h1>
 
                     <p className="mt-1 max-w-2xl text-xs leading-relaxed theme-text-secondary sm:text-sm">
-                      Informasi sekolah dan akun yang sedang login,
-                      diambil langsung dari backend SmartSchool.
+                      Informasi sekolah dan akun yang sedang login, diambil
+                      langsung dari backend SmartSchool.
                     </p>
                   </div>
                 </div>
@@ -308,9 +294,7 @@ export default function AdminPengaturanPage() {
                 >
                   <RefreshCw
                     size={16}
-                    className={
-                      refreshing ? "animate-spin" : ""
-                    }
+                    className={refreshing ? "animate-spin" : ""}
                   />
                   {refreshing ? "Memuat..." : "Muat Ulang Data"}
                 </button>
@@ -350,9 +334,8 @@ export default function AdminPengaturanPage() {
                       {error}
                     </p>
                     <p className="mt-2 text-xs leading-relaxed theme-text-muted">
-                      Pastikan backend berjalan, token login masih
-                      valid, dan NEXT_PUBLIC_API_URL mengarah ke server
-                      yang benar.
+                      Pastikan backend berjalan, token login masih valid, dan
+                      NEXT_PUBLIC_API_URL mengarah ke server yang benar.
                     </p>
 
                     <button
@@ -370,7 +353,7 @@ export default function AdminPengaturanPage() {
 
             {!loading && !error && profile && (
               <>
-                <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
                   <InfoCard
                     icon={Building2}
                     label="Nama Sekolah"
@@ -417,13 +400,9 @@ export default function AdminPengaturanPage() {
                       {school ? (
                         <>
                           <div className="mb-5 flex items-center gap-3">
-                            {school.logoBesarUrl ||
-                            school.logoKecilUrl ? (
+                            {school.logoBesarUrl || school.logoKecilUrl ? (
                               <img
-                                src={
-                                  school.logoBesarUrl ||
-                                  school.logoKecilUrl
-                                }
+                                src={school.logoBesarUrl || school.logoKecilUrl}
                                 alt={`Logo ${school.nama || "sekolah"}`}
                                 className="h-14 w-14 shrink-0 rounded-xl border border-[var(--color-text)]/10 bg-white object-contain p-1"
                               />
@@ -510,11 +489,7 @@ export default function AdminPengaturanPage() {
                         </div>
                       </div>
 
-                      <DetailRow
-                        icon={Mail}
-                        label="Email"
-                        value={profile.email}
-                      />
+                      <DetailRow icon={Mail} label="Email" value={profile.email} />
 
                       <DetailRow
                         icon={Phone}
@@ -528,17 +503,9 @@ export default function AdminPengaturanPage() {
                         value={profile.jabatan}
                       />
 
-                      <DetailRow
-                        icon={Hash}
-                        label="NIP"
-                        value={profile.nip}
-                      />
+                      <DetailRow icon={Hash} label="NIP" value={profile.nip} />
 
-                      <DetailRow
-                        icon={Hash}
-                        label="NIPD"
-                        value={profile.nipd}
-                      />
+                      <DetailRow icon={Hash} label="NIPD" value={profile.nipd} />
 
                       <DetailRow
                         icon={Clock3}
@@ -561,13 +528,9 @@ export default function AdminPengaturanPage() {
                           <div className="rounded-xl border border-[var(--color-text)]/10 bg-[var(--color-text)]/[0.03] p-4">
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
-                                <p className={labelClass}>
-                                  Nama Peran
-                                </p>
+                                <p className={labelClass}>Nama Peran</p>
                                 <h3 className="mt-1 break-words text-base font-bold theme-text">
-                                  {formatValue(
-                                    role.namaTampilan || role.nama
-                                  )}
+                                  {formatValue(role.namaTampilan || role.nama)}
                                 </h3>
                               </div>
 
@@ -580,11 +543,7 @@ export default function AdminPengaturanPage() {
                           </div>
 
                           <div className="mt-4">
-                            <DetailRow
-                              icon={Hash}
-                              label="ID Peran"
-                              value={role.id}
-                            />
+                            <DetailRow icon={Hash} label="ID Peran" value={role.id} />
 
                             <DetailRow
                               icon={ShieldCheck}
@@ -599,10 +558,9 @@ export default function AdminPengaturanPage() {
                               className="mt-0.5 shrink-0 theme-text-muted"
                             />
                             <p className="text-xs leading-relaxed theme-text-secondary">
-                              Informasi ini menunjukkan peran akun
-                              yang sedang login. Daftar seluruh role
-                              dan perubahan hak akses memerlukan
-                              endpoint manajemen role tersendiri.
+                              Informasi ini menunjukkan peran akun yang sedang
+                              login. Daftar seluruh role dan perubahan hak akses
+                              memerlukan endpoint manajemen role tersendiri.
                             </p>
                           </div>
                         </>
@@ -631,11 +589,10 @@ export default function AdminPengaturanPage() {
                               Data tahun ajaran belum dimuat
                             </h3>
                             <p className="mt-1 text-xs leading-relaxed theme-text-secondary">
-                              Endpoint profil pengguna tidak
-                              mengembalikan tahun ajaran aktif.
-                              Bagian ini perlu dihubungkan dengan
-                              endpoint tahun ajaran yang digunakan
-                              backend proyekmu.
+                              Endpoint profil pengguna tidak mengembalikan tahun
+                              ajaran aktif. Bagian ini perlu dihubungkan dengan
+                              endpoint tahun ajaran yang digunakan backend
+                              proyekmu.
                             </p>
                           </div>
                         </div>
@@ -703,7 +660,9 @@ export default function AdminPengaturanPage() {
                             )}
 
                             <p className="mt-2.5 text-xs leading-relaxed theme-text-secondary">
-                              Hari aktif menentukan kapan presensi siswa dan guru dapat dicatat oleh sistem backend (GET /api/pengaturan/hari-aktif).
+                              Hari aktif menentukan kapan presensi siswa dan guru
+                              dapat dicatat oleh sistem backend (GET
+                              /api/pengaturan/hari-aktif).
                             </p>
                           </div>
                         </div>
@@ -731,10 +690,10 @@ export default function AdminPengaturanPage() {
                         Data berhasil dimuat dari backend
                       </h2>
                       <p className="mt-1 text-xs leading-relaxed theme-text-secondary">
-                        Data yang tampil pada bagian profil, sekolah,
-                        dan peran berasal dari respons API. Halaman ini
-                        belum mengubah konfigurasi sekolah, tahun
-                        ajaran, notifikasi, ataupun hak akses.
+                        Data yang tampil pada bagian profil, sekolah, dan peran
+                        berasal dari respons API. Halaman ini belum mengubah
+                        konfigurasi sekolah, tahun ajaran, notifikasi, ataupun
+                        hak akses.
                       </p>
                     </div>
                   </div>
@@ -757,13 +716,8 @@ export default function AdminPengaturanPage() {
 function EmptyState({ message }) {
   return (
     <div className="rounded-xl border border-dashed border-[var(--color-text)]/15 p-5 text-center">
-      <Info
-        size={22}
-        className="mx-auto theme-text-muted"
-      />
-      <p className="mt-2 text-sm theme-text-secondary">
-        {message}
-      </p>
+      <Info size={22} className="mx-auto theme-text-muted" />
+      <p className="mt-2 text-sm theme-text-secondary">{message}</p>
     </div>
   );
 }
