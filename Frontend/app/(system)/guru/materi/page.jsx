@@ -831,38 +831,50 @@ export default function GuruMateriPage() {
 
             {/* === BANNER HERO (KONSISTEN DENGAN HALAMAN LAIN) === */}
             <section
-              className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 ${themePrimaryGradient} shadow-lg`}
+              className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 ${themePrimaryGradient} shadow-lg dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
             >
-              <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
+              <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] dark:blur-2xl" />
+              <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl dark:hidden" />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                  backgroundSize: "32px 32px",
+                }}
+              />
 
               <div className="relative z-10">
                 <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0">
                     <div className="mb-4 flex flex-wrap items-center gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))] dark:text-[var(--color-primary)]">
                         <BookOpen size={25} />
                       </div>
-                      <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
+                      <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:bg-[var(--color-card)] dark:text-[var(--color-primary)]">
                         Guru
                       </span>
                     </div>
 
-                    <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                      Materi Pembelajaran
+                    <h1 className="text-2xl font-bold tracking-tight text-white dark:text-[var(--color-text)] sm:text-3xl">
+                      Materi{" "}
+                      <span className="dark:text-[var(--color-primary)]">
+                        Pembelajaran
+                      </span>
                     </h1>
 
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90 sm:text-base">
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90 dark:text-[var(--color-text-secondary)] sm:text-base">
                       Kelola bahan ajar untuk siswa berdasarkan kelas dan mata pelajaran.
                     </p>
 
                     <div className="mt-5 flex flex-wrap gap-2">
-                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
-                        <Layers size={14} />
+                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))] dark:text-[var(--color-text)]">
+                        <Layers size={14} className="dark:text-[var(--color-primary)]" />
                         {loading ? "—" : summary.total} materi
                       </div>
-                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
-                        <CalendarDays size={14} />
+                      <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))] dark:text-[var(--color-text)]">
+                        <CalendarDays size={14} className="dark:text-[var(--color-primary)]" />
                         {loading ? "—" : summary.bulanIni} bulan ini
                       </div>
                     </div>
@@ -873,11 +885,11 @@ export default function GuruMateriPage() {
                       type="button"
                       onClick={() => loadMateri(true)}
                       disabled={refreshing}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border dark:border-[var(--color-border)] dark:bg-[var(--color-card)] dark:text-[var(--color-text)] dark:hover:border-[color-mix(in_srgb,var(--color-primary)_35%,var(--color-border))]"
                     >
                       <RefreshCw
                         size={16}
-                        className={refreshing ? "animate-spin" : ""}
+                        className={refreshing ? "animate-spin dark:text-[var(--color-primary)]" : "dark:text-[var(--color-primary)]"}
                       />
                       <span className="hidden sm:inline">Refresh</span>
                     </button>
@@ -885,7 +897,7 @@ export default function GuruMateriPage() {
                     <button
                       type="button"
                       onClick={() => router.push("/guru/materi/tambah")}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 active:scale-[0.98]"
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 active:scale-[0.98] dark:!bg-[var(--color-primary)] dark:!text-white dark:shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:hover:opacity-90"
                     >
                       <Plus size={17} />
                       Tambah Materi
@@ -895,42 +907,42 @@ export default function GuruMateriPage() {
 
                 {/* 4 Kartu Statistik (Tanpa Border Kaku) */}
                 <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
-                    <div className="flex items-center gap-2 text-white/70">
-                      <Layers size={15} />
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                    <div className="flex items-center gap-2 text-white/70 dark:text-[var(--color-text-muted)]">
+                      <Layers size={15} className="dark:text-[var(--color-primary)]" />
                       <span className="text-xs font-medium">Total Materi</span>
                     </div>
-                    <p className="mt-2 text-2xl font-bold text-white">
+                    <p className="mt-2 text-2xl font-bold text-white dark:text-[var(--color-text)]">
                       {loading ? "—" : summary.total}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
-                    <div className="flex items-center gap-2 text-white/70">
-                      <CalendarDays size={15} />
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                    <div className="flex items-center gap-2 text-white/70 dark:text-[var(--color-text-muted)]">
+                      <CalendarDays size={15} className="dark:text-[var(--color-primary)]" />
                       <span className="text-xs font-medium">Bulan Ini</span>
                     </div>
-                    <p className="mt-2 text-2xl font-bold text-white">
+                    <p className="mt-2 text-2xl font-bold text-white dark:text-[var(--color-text)]">
                       {loading ? "—" : summary.bulanIni}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
-                    <div className="flex items-center gap-2 text-white/70">
-                      <GraduationCap size={15} />
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                    <div className="flex items-center gap-2 text-white/70 dark:text-[var(--color-text-muted)]">
+                      <GraduationCap size={15} className="dark:text-[var(--color-primary)]" />
                       <span className="text-xs font-medium">Kelas</span>
                     </div>
-                    <p className="mt-2 text-2xl font-bold text-white">
+                    <p className="mt-2 text-2xl font-bold text-white dark:text-[var(--color-text)]">
                       {loading ? "—" : summary.kelasTercakup}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
-                    <div className="flex items-center gap-2 text-white/70">
-                      <HardDrive size={15} />
+                  <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                    <div className="flex items-center gap-2 text-white/70 dark:text-[var(--color-text-muted)]">
+                      <HardDrive size={15} className="dark:text-[var(--color-primary)]" />
                       <span className="text-xs font-medium">Sumber</span>
                     </div>
-                    <p className="mt-2 text-sm font-bold text-white truncate">
+                    <p className="mt-2 text-sm font-bold text-white dark:text-[var(--color-text)] truncate">
                       {loading ? "Memuat..." : `${summary.totalFile} file · ${summary.totalLink} link`}
                     </p>
                   </div>

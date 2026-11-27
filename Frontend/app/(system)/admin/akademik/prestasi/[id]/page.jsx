@@ -219,33 +219,42 @@ export default function DetailPrestasiPage() {
               <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_400px] 2xl:grid-cols-[minmax(0,1fr)_440px]">
                 <div className="min-w-0 space-y-6">
                   <div
-                    className={`relative overflow-hidden rounded-3xl p-6 ${themePrimaryGradient} text-[var(--color-card)] sm:p-8`}
+                    className={`relative overflow-hidden rounded-3xl p-6 ${themePrimaryGradient} text-[var(--color-card)] dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:text-[var(--color-text)] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)] sm:p-8`}
                   >
-                    <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] blur-3xl" />
-                    <div className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--color-info)_20%,transparent)] blur-3xl" />
+                    <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] blur-3xl dark:bg-[var(--color-primary)]/14" />
+                    <div className="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--color-info)_20%,transparent)] blur-3xl dark:bg-[var(--color-primary)]/10" />
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                        backgroundSize: "32px 32px",
+                      }}
+                    />
 
                     <div className="relative">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_18%,transparent)]">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_18%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)] dark:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
                           <Trophy size={26} />
                         </div>
-                        <span className="rounded-full bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] px-3 py-1.5 text-[10px] font-bold tracking-wide ring-1 ring-[color-mix(in_srgb,var(--color-card)_18%,transparent)]">
+                        <span className="rounded-full bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] px-3 py-1.5 text-[10px] font-bold tracking-wide ring-1 ring-[color-mix(in_srgb,var(--color-card)_18%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)] dark:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
                           {prestasi.juara || "-"}
                         </span>
                       </div>
 
-                      <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_78%,var(--color-primary))]">
+                      <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_78%,var(--color-primary))] dark:text-[var(--color-primary)]">
                         Prestasi
                       </p>
-                      <h2 className="mt-2 text-2xl font-bold leading-tight">
+                      <h2 className="mt-2 text-2xl font-bold leading-tight dark:text-[var(--color-text)]">
                         {prestasi.namaLomba || "-"}
                       </h2>
-                      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[color-mix(in_srgb,var(--color-card)_72%,transparent)] dark:text-[var(--color-text-secondary)]">
                         <span className="flex items-center gap-1.5">
-                          <Award size={13} /> {prestasi.tingkat || "-"}
+                          <Award size={13} className="dark:text-[var(--color-primary)]" /> {prestasi.tingkat || "-"}
                         </span>
                         <span className="flex items-center gap-1.5">
-                          <CalendarDays size={13} /> {prestasi.bulan || "-"}{" "}
+                          <CalendarDays size={13} className="dark:text-[var(--color-primary)]" /> {prestasi.bulan || "-"}{" "}
                           {prestasi.tahun || ""}
                         </span>
                       </div>

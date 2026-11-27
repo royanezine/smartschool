@@ -301,16 +301,25 @@ export default function TambahJurusanPage() {
 
                 <div className="space-y-4">
                   <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
-                    <div className="relative flex h-28 items-center justify-center theme-primary shadow-md">
-                      <div className="absolute inset-0 opacity-20">
+                    <div className="relative flex h-28 items-center justify-center overflow-hidden theme-primary shadow-md dark:border-b dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:hover:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:!text-[var(--color-text)] dark:shadow-none">
+                      <div className="pointer-events-none absolute inset-0 opacity-20 dark:hidden">
                         <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white blur-2xl" />
                         <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white blur-2xl" />
                       </div>
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                          backgroundSize: "32px 32px",
+                        }}
+                      />
                       <div className="relative flex flex-col items-center gap-2">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)]">
                           <SelectedIcon size={26} strokeWidth={2} />
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-widest">
+                        <span className="text-[10px] font-bold uppercase tracking-widest dark:text-[var(--color-text-secondary)]">
                           Preview Ikon
                         </span>
                       </div>

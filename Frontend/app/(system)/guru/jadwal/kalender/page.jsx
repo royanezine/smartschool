@@ -504,34 +504,46 @@ export default function KalenderGuruPage() {
               
               {/* === BANNER HERO (KONSISTEN DENGAN HALAMAN LAIN) === */}
               <section
-                className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 ${themePrimaryGradient} shadow-lg`}
+                className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 ${themePrimaryGradient} shadow-lg dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
               >
-                <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
+                <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] dark:blur-2xl" />
+                <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl dark:hidden" />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                    backgroundSize: "32px 32px",
+                  }}
+                />
 
                 <div className="relative z-10">
                   <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                     <div className="min-w-0">
                       <div className="mb-4 flex flex-wrap items-center gap-3">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))] dark:text-[var(--color-primary)]">
                           <GreetingIcon size={25} />
                         </div>
-                        <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
+                        <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:bg-[var(--color-card)] dark:text-[var(--color-primary)]">
                           Jadwal Mengajar
                         </span>
                       </div>
 
-                      <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                        {greeting.text}, {currentUser?.name || "Bapak/Ibu Guru"}
+                      <h1 className="text-2xl font-bold tracking-tight text-white dark:text-[var(--color-text)] sm:text-3xl">
+                        {greeting.text},{" "}
+                        <span className="dark:text-[var(--color-primary)]">
+                          {currentUser?.name || "Bapak/Ibu Guru"}
+                        </span>
                       </h1>
 
-                      <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90 sm:text-base">
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-white/90 dark:text-[var(--color-text-secondary)] sm:text-base">
                         Kelola jadwal mengajar Anda dengan mudah dan profesional.
                       </p>
 
                       <div className="mt-5 flex flex-wrap gap-2">
-                        <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
-                          <CalendarDays size={14} />
+                        <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))] dark:text-[var(--color-text)]">
+                          <CalendarDays size={14} className="dark:text-[var(--color-primary)]" />
                           {selectedDate.toLocaleDateString("id-ID", {
                             weekday: "long",
                             day: "numeric",
@@ -539,8 +551,8 @@ export default function KalenderGuruPage() {
                             year: "numeric",
                           })}
                         </div>
-                        <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
-                          <Clock size={14} />
+                        <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))] dark:text-[var(--color-text)]">
+                          <Clock size={14} className="dark:text-[var(--color-primary)]" />
                           {totalSessions} Sesi
                         </div>
                       </div>
@@ -551,11 +563,11 @@ export default function KalenderGuruPage() {
                         type="button"
                         onClick={loadSchedules}
                         disabled={loading}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-white/10 px-4 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border dark:border-[var(--color-border)] dark:bg-[var(--color-card)] dark:text-[var(--color-text)] dark:hover:border-[color-mix(in_srgb,var(--color-primary)_35%,var(--color-border))]"
                       >
                         <RefreshCw
                           size={16}
-                          className={loading ? "animate-spin" : ""}
+                          className={loading ? "animate-spin dark:text-[var(--color-primary)]" : "dark:text-[var(--color-primary)]"}
                         />
                         <span className="hidden sm:inline">Muat ulang</span>
                       </button>
@@ -564,42 +576,42 @@ export default function KalenderGuruPage() {
 
                   {/* 4 Kartu Statistik (Tanpa Border Kaku) */}
                   <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                    <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
-                      <div className="flex items-center gap-2 text-white/70">
-                        <Clock size={15} />
+                    <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                      <div className="flex items-center gap-2 text-white/70 dark:text-[var(--color-text-muted)]">
+                        <Clock size={15} className="dark:text-[var(--color-primary)]" />
                         <span className="text-xs font-medium">Total Sesi</span>
                       </div>
-                      <p className="mt-2 text-2xl font-bold text-white">
+                      <p className="mt-2 text-2xl font-bold text-white dark:text-[var(--color-text)]">
                         {totalSessions}
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
-                      <div className="flex items-center gap-2 text-white/70">
-                        <Timer size={15} />
+                    <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                      <div className="flex items-center gap-2 text-white/70 dark:text-[var(--color-text-muted)]">
+                        <Timer size={15} className="dark:text-[var(--color-primary)]" />
                         <span className="text-xs font-medium">Total Jam</span>
                       </div>
-                      <p className="mt-2 text-2xl font-bold text-white">
+                      <p className="mt-2 text-2xl font-bold text-white dark:text-[var(--color-text)]">
                         {formatDuration(totalMinutes)}
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
-                      <div className="flex items-center gap-2 text-white/70">
-                        <Users size={15} />
+                    <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                      <div className="flex items-center gap-2 text-white/70 dark:text-[var(--color-text-muted)]">
+                        <Users size={15} className="dark:text-[var(--color-primary)]" />
                         <span className="text-xs font-medium">Kelas</span>
                       </div>
-                      <p className="mt-2 text-2xl font-bold text-white truncate">
+                      <p className="mt-2 text-2xl font-bold text-white dark:text-[var(--color-text)] truncate">
                         {uniqueClasses.length || "-"}
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15">
-                      <div className="flex items-center gap-2 text-white/70">
-                        <BookOpen size={15} />
+                    <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm transition-colors hover:bg-white/15 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                      <div className="flex items-center gap-2 text-white/70 dark:text-[var(--color-text-muted)]">
+                        <BookOpen size={15} className="dark:text-[var(--color-primary)]" />
                         <span className="text-xs font-medium">Mapel</span>
                       </div>
-                      <p className="mt-2 text-2xl font-bold text-white truncate">
+                      <p className="mt-2 text-2xl font-bold text-white dark:text-[var(--color-text)] truncate">
                         {uniqueSubjects.length || "-"}
                       </p>
                     </div>

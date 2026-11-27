@@ -201,22 +201,34 @@ export default function LanggananPage() {
 
             {!loading && !error && (
               <>
-                <section className="relative mb-6 overflow-hidden rounded-[28px] bg-[var(--color-primary)] shadow-[0_20px_55px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]">
-                  <div className="absolute -right-20 -top-28 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
-                  <div className="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
+                <section className="relative mb-6 overflow-hidden rounded-[28px] bg-[var(--color-primary)] shadow-[0_20px_55px_color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]">
+                  <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full bg-white/10 blur-3xl dark:bg-[var(--color-primary)]/15" />
+                  <div className="pointer-events-none absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-white/5 blur-3xl dark:bg-[var(--color-primary)]/10" />
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                      backgroundSize: "32px 32px",
+                    }}
+                  />
 
                   <div className="relative grid gap-8 px-6 py-7 sm:px-8 sm:py-8 lg:grid-cols-[1fr_400px] lg:px-10 lg:py-9 2xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.5fr)]">
                     <div className="flex flex-col justify-center">
-                      <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
+                      <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md dark:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:bg-[var(--color-card)] dark:text-[var(--color-primary)]">
                         <Crown size={13} />
                         SmartSchool Subscription
                       </div>
 
-                      <h1 className="max-w-2xl text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-[38px] lg:leading-tight">
-                        Langganan SmartSchool
+                      <h1 className="max-w-2xl text-2xl font-bold tracking-tight text-white dark:text-[var(--color-text)] sm:text-3xl lg:text-[38px] lg:leading-tight">
+                        Langganan{" "}
+                        <span className="dark:text-[var(--color-primary)]">
+                          SmartSchool
+                        </span>
                       </h1>
 
-                      <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75 sm:text-[15px]">
+                      <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75 dark:text-[var(--color-text-secondary)] sm:text-[15px]">
                         Kelola paket sekolah, masa berlangganan, pembayaran,
                         dan invoice dalam satu tempat.
                       </p>
@@ -224,7 +236,7 @@ export default function LanggananPage() {
                       <div className="mt-6 flex flex-wrap gap-3">
                         <Link
                           href="/admin/langganan/paket"
-                          className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-white/90"
+                          className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-white/90 dark:!bg-[var(--color-primary)] dark:!text-white dark:shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:hover:!bg-[var(--color-primary)] dark:hover:opacity-90"
                         >
                           <Package size={17} />
                           Lihat Paket
@@ -232,30 +244,30 @@ export default function LanggananPage() {
 
                         <Link
                           href="/admin/langganan/riwayat-pembayaran"
-                          className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/15"
+                          className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/15 dark:border-[var(--color-border)] dark:bg-[var(--color-card)] dark:text-[var(--color-text)] dark:hover:border-[color-mix(in_srgb,var(--color-primary)_35%,var(--color-border))] dark:hover:bg-[color-mix(in_srgb,var(--color-text)_4%,var(--color-card))]"
                         >
-                          <History size={17} />
+                          <History size={17} className="dark:text-[var(--color-primary)]" />
                           Riwayat Pembayaran
                         </Link>
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-5 backdrop-blur-md">
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-5 backdrop-blur-md dark:border-[color-mix(in_srgb,var(--color-primary)_22%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-xs font-medium text-white/55">
+                          <p className="text-xs font-medium text-white/55 dark:text-[var(--color-text-muted)]">
                             Paket {aktif ? "aktif" : "belum dipilih"}
                           </p>
 
                           <div className="mt-1 flex items-center gap-2">
-                            <h2 className="text-xl font-bold text-white">
+                            <h2 className="text-xl font-bold text-white dark:text-[var(--color-text)]">
                               {detailAktif?.nama ??
                                 aktif?.paket?.nama ??
                                 "Belum Berlangganan"}
                             </h2>
 
                             {aktif && (
-                              <span className="rounded-full bg-white/10 px-2 py-1 text-[9px] font-bold text-white">
+                              <span className="rounded-full bg-white/10 px-2 py-1 text-[9px] font-bold text-white dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)]">
                                 {statusLanggananInfo(
                                   aktif.statusLangganan
                                 ).label.toUpperCase()}
@@ -264,13 +276,13 @@ export default function LanggananPage() {
                           </div>
                         </div>
 
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)]">
                           <Crown size={20} />
                         </div>
                       </div>
 
                       <div className="mt-5">
-                        <p className="text-2xl font-bold text-white">
+                        <p className="text-2xl font-bold text-white dark:text-[var(--color-text)]">
                           {aktif
                             ? formatRupiah(
                                 aktif.hargaSaatBerlangganan ??
@@ -278,7 +290,7 @@ export default function LanggananPage() {
                               )
                             : "-"}
                           {aktif && (
-                            <span className="ml-1 text-xs font-medium text-white/45">
+                            <span className="ml-1 text-xs font-medium text-white/45 dark:text-[var(--color-text-muted)]">
                               /{" "}
                               {aktif.siklusPenagihan === "annual"
                                 ? "tahun"
@@ -289,22 +301,22 @@ export default function LanggananPage() {
                       </div>
 
                       <div className="mt-5 grid grid-cols-2 gap-3">
-                        <div className="rounded-xl bg-white/[0.06] p-3">
-                          <p className="text-[10px] text-white/45">
+                        <div className="rounded-xl bg-white/[0.06] p-3 dark:border dark:border-[var(--color-border)] dark:bg-[color-mix(in_srgb,var(--color-primary)_6%,var(--color-card))]">
+                          <p className="text-[10px] text-white/45 dark:text-[var(--color-text-muted)]">
                             Berlaku sampai
                           </p>
-                          <p className="mt-1 text-xs font-semibold text-white">
+                          <p className="mt-1 text-xs font-semibold text-white dark:text-[var(--color-text)]">
                             {aktif
                               ? formatTanggal(aktif.tanggalBerakhir)
                               : "-"}
                           </p>
                         </div>
 
-                        <div className="rounded-xl bg-white/[0.06] p-3">
-                          <p className="text-[10px] text-white/45">
+                        <div className="rounded-xl bg-white/[0.06] p-3 dark:border dark:border-[var(--color-border)] dark:bg-[color-mix(in_srgb,var(--color-primary)_6%,var(--color-card))]">
+                          <p className="text-[10px] text-white/45 dark:text-[var(--color-text-muted)]">
                             Sisa masa aktif
                           </p>
-                          <p className="mt-1 text-xs font-semibold text-white">
+                          <p className="mt-1 text-xs font-semibold text-white dark:text-[var(--color-text)]">
                             {hariTersisa !== null ? `${hariTersisa} hari` : "-"}
                           </p>
                         </div>
@@ -313,7 +325,7 @@ export default function LanggananPage() {
                   </div>
                 </section>
 
-                <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+                <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <Link
                     href="/admin/langganan/paket"
                     className={`group theme-card theme-border rounded-2xl border p-5 ${themeCardShadow} transition ${themeCardHoverShadow} hover:-translate-y-0.5`}
@@ -421,7 +433,7 @@ export default function LanggananPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6 2xl:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6">
                       <div className="theme-card-soft rounded-xl p-4">
                         <div className="flex items-center gap-2">
                           <CalendarDays
@@ -522,22 +534,33 @@ export default function LanggananPage() {
                 </section>
 
                 <section className="mb-7 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] 2xl:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
-                  <div className="relative overflow-hidden rounded-2xl bg-[var(--color-primary)] p-6 text-white shadow-[0_16px_45px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]">
-                    <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+                  <div className="relative overflow-hidden rounded-2xl bg-[var(--color-primary)] p-6 text-white shadow-[0_16px_45px_color-mix(in_srgb,var(--color-primary)_18%,transparent)] dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:text-[var(--color-text)] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]">
+                    <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/10 blur-2xl dark:bg-[var(--color-primary)]/15" />
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                        backgroundSize: "32px 32px",
+                      }}
+                    />
 
                     <div className="relative">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)]">
                         <Sparkles size={19} />
                       </div>
 
                       <h2 className="mt-5 text-xl font-bold">
                         Fitur{" "}
-                        {detailAktif?.nama ??
-                          aktif?.paket?.nama ??
-                          "Langganan"}
+                        <span className="dark:text-[var(--color-primary)]">
+                          {detailAktif?.nama ??
+                            aktif?.paket?.nama ??
+                            "Langganan"}
+                        </span>
                       </h2>
 
-                      <p className="mt-2 text-xs leading-5 text-white/75">
+                      <p className="mt-2 text-xs leading-5 text-white/75 dark:text-[var(--color-text-secondary)]">
                         Modul yang tersedia sesuai paket langganan sekolah.
                       </p>
 
@@ -545,18 +568,18 @@ export default function LanggananPage() {
                         <span className="text-3xl font-bold">
                           {fitur.length}
                         </span>
-                        <span className="pb-1 text-xs text-white/60">
+                        <span className="pb-1 text-xs text-white/60 dark:text-[var(--color-text-muted)]">
                           modul aktif
                         </span>
                       </div>
 
-                      <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.08] p-4">
+                      <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.08] p-4 dark:border-[color-mix(in_srgb,var(--color-primary)_22%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
                         <div className="flex items-start gap-3">
                           <ShieldCheck
                             size={17}
-                            className="mt-0.5 shrink-0 text-white/80"
+                            className="mt-0.5 shrink-0 text-white/80 dark:text-[var(--color-primary)]"
                           />
-                          <p className="text-[11px] leading-5 text-white/75">
+                          <p className="text-[11px] leading-5 text-white/75 dark:text-[var(--color-text-secondary)]">
                             Paket aktif memberikan akses ke modul akademik dan
                             operasional sekolah.
                           </p>

@@ -651,6 +651,10 @@ export default function ManajemenAksesPage() {
             ${themePrimaryGradient}
             ${themePrimaryShadow}
             mb-6
+            dark:border
+            dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+            dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))]
+            dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]
           `}
         >
 
@@ -665,6 +669,8 @@ export default function ManajemenAksesPage() {
               bg-white/10
               blur-3xl
               pointer-events-none
+              dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]
+              dark:blur-2xl
             "
           />
 
@@ -679,6 +685,7 @@ export default function ManajemenAksesPage() {
               bg-white/8
               blur-3xl
               pointer-events-none
+              dark:hidden
             "
           />
 
@@ -689,12 +696,22 @@ export default function ManajemenAksesPage() {
               inset-0
               opacity-[0.045]
               pointer-events-none
+              dark:hidden
             "
             style={{
               backgroundImage:
                 "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
               backgroundSize:
                 "36px 36px",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
             }}
           />
 
@@ -721,6 +738,9 @@ export default function ManajemenAksesPage() {
                       uppercase
                       tracking-[0.14em]
                       text-white
+                      dark:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]
+                      dark:bg-[var(--color-card)]
+                      dark:text-[var(--color-primary)]
                     "
                   >
                     <ShieldCheck size={13} />
@@ -742,9 +762,12 @@ export default function ManajemenAksesPage() {
                       text-[10px]
                       font-medium
                       text-white/80
+                      dark:border-[var(--color-border)]
+                      dark:bg-[var(--color-card)]
+                      dark:text-[var(--color-text-secondary)]
                     "
                   >
-                    <Activity size={12} />
+                    <Activity size={12} className="dark:text-[var(--color-primary)]" />
                     SmartSchool
                   </span>
 
@@ -766,6 +789,9 @@ export default function ManajemenAksesPage() {
                       items-center
                       justify-center
                       text-white
+                      dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]
+                      dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))]
+                      dark:text-[var(--color-primary)]
                     "
                   >
                     <Shield
@@ -784,9 +810,13 @@ export default function ManajemenAksesPage() {
                         font-semibold
                         tracking-tight
                         text-white
+                        dark:text-[var(--color-text)]
                       "
                     >
-                      Manajemen Akses
+                      Manajemen{" "}
+                      <span className="dark:text-[var(--color-primary)]">
+                        Akses
+                      </span>
                     </h1>
 
                     <p
@@ -796,6 +826,7 @@ export default function ManajemenAksesPage() {
                         text-sm
                         leading-6
                         text-white/80
+                        dark:text-[var(--color-text-secondary)]
                       "
                     >
                       Kelola role, pengguna, dan
@@ -813,6 +844,7 @@ export default function ManajemenAksesPage() {
                           gap-2
                           text-xs
                           text-white/80
+                          dark:text-[var(--color-text-secondary)]
                         "
                       >
                         <div
@@ -824,6 +856,8 @@ export default function ManajemenAksesPage() {
                             flex
                             items-center
                             justify-center
+                            dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))]
+                            dark:text-[var(--color-primary)]
                           "
                         >
                           <Database size={12} />
@@ -838,6 +872,7 @@ export default function ManajemenAksesPage() {
                           h-1
                           rounded-full
                           bg-white/30
+                          dark:bg-[var(--color-border)]
                         "
                       />
 
@@ -848,6 +883,7 @@ export default function ManajemenAksesPage() {
                           gap-2
                           text-xs
                           text-white/80
+                          dark:text-[var(--color-text-secondary)]
                         "
                       >
                         <div
@@ -859,6 +895,8 @@ export default function ManajemenAksesPage() {
                             flex
                             items-center
                             justify-center
+                            dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))]
+                            dark:text-[var(--color-primary)]
                           "
                         >
                           <Lock size={12} />
@@ -902,9 +940,14 @@ export default function ManajemenAksesPage() {
                     transition-all
                     disabled:opacity-40
                     disabled:cursor-not-allowed
+                    dark:border-[var(--color-border)]
+                    dark:bg-[var(--color-card)]
+                    dark:text-[var(--color-text)]
+                    dark:hover:border-[color-mix(in_srgb,var(--color-primary)_35%,var(--color-border))]
+                    dark:hover:bg-[color-mix(in_srgb,var(--color-text)_4%,var(--color-card))]
                   "
                 >
-                  <FileSpreadsheet size={16} />
+                  <FileSpreadsheet size={16} className="dark:text-[var(--color-primary)]" />
                   Export Data
                 </button>
 
@@ -931,6 +974,11 @@ export default function ManajemenAksesPage() {
                     hover:-translate-y-0.5
                     hover:bg-white/90
                     transition-all
+                    dark:!bg-[var(--color-primary)]
+                    dark:!text-white
+                    dark:shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)]
+                    dark:hover:!bg-[var(--color-primary)]
+                    dark:hover:opacity-90
                   "
                 >
                   <ShieldPlus size={17} />

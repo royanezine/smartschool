@@ -864,44 +864,57 @@ function MateriPageInner() {
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
             <section
-              className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-5 sm:p-6 lg:p-7 ${themePrimaryShadow} mb-6`}
+              className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-5 sm:p-6 lg:p-7 ${themePrimaryShadow} mb-6 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
             >
-              <div className="absolute -right-16 -top-20 w-56 h-56 rounded-full bg-white/10" />
+              <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/10 dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] dark:blur-2xl" />
 
-              <div className="absolute right-20 -bottom-24 w-44 h-44 rounded-full bg-white/5" />
+              <div className="pointer-events-none absolute right-20 -bottom-24 h-44 w-44 rounded-full bg-white/5 dark:hidden" />
 
-              <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[linear-gradient(to_left,rgba(255,255,255,0.06),transparent)] pointer-events-none" />
+              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-1/3 bg-[linear-gradient(to_left,rgba(255,255,255,0.06),transparent)] dark:hidden" />
+
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                  backgroundSize: "32px 32px",
+                }}
+              />
 
               <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div className="max-w-2xl">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3 py-1.5 text-xs font-medium text-white mb-4">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3 py-1.5 text-xs font-medium text-white mb-4 dark:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:bg-[var(--color-card)] dark:text-[var(--color-primary)]">
                     <BookMarked size={13} />
                     Ruang belajar siswa
                   </div>
 
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                    Materi Pembelajaran
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white dark:text-[var(--color-text)]">
+                    Materi{" "}
+                    <span className="dark:text-[var(--color-primary)]">
+                      Pembelajaran
+                    </span>
                   </h1>
 
-                  <p className="text-sm sm:text-[15px] leading-6 text-white/80 mt-2 max-w-xl">
+                  <p className="text-sm sm:text-[15px] leading-6 text-white/80 dark:text-[var(--color-text-secondary)] mt-2 max-w-xl">
                     Akses materi yang dibagikan guru untuk membantu kamu
                     belajar dengan lebih terarah.
                   </p>
 
                   {selectedMapel && SelectedMapelIcon && (
                     <div className="flex items-center gap-2 mt-5">
-                      <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))]">
                         <SelectedMapelIcon
                           size={16}
-                          className="text-white"
+                          className="text-white dark:text-[var(--color-primary)]"
                         />
                       </div>
 
                       <div>
-                        <p className="text-[11px] text-white/75">
+                        <p className="text-[11px] text-white/75 dark:text-[var(--color-text-muted)]">
                           Mata pelajaran aktif
                         </p>
-                        <p className="text-sm font-semibold text-white">
+                        <p className="text-sm font-semibold text-white dark:text-[var(--color-text)]">
                           {selectedMapel.nama}
                         </p>
                       </div>
@@ -910,31 +923,31 @@ function MateriPageInner() {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5 min-w-0 lg:min-w-[280px]">
-                  <div className="rounded-xl bg-white/10 border border-white/15 px-4 py-3.5">
-                    <p className="text-[11px] text-white/75">
+                  <div className="rounded-xl bg-white/10 border border-white/15 px-4 py-3.5 dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                    <p className="text-[11px] text-white/75 dark:text-[var(--color-text-muted)]">
                       Total materi
                     </p>
-                    <p className="text-2xl font-bold text-white mt-1">
+                    <p className="text-2xl font-bold text-white dark:text-[var(--color-text)] mt-1">
                       {loading ? "—" : totalMateri}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-white/10 border border-white/15 px-4 py-3.5">
-                    <p className="text-[11px] text-white/75">
+                  <div className="rounded-xl bg-white/10 border border-white/15 px-4 py-3.5 dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                    <p className="text-[11px] text-white/75 dark:text-[var(--color-text-muted)]">
                       File tersedia
                     </p>
-                    <p className="text-2xl font-bold text-white mt-1">
+                    <p className="text-2xl font-bold text-white dark:text-[var(--color-text)] mt-1">
                       {loading ? "—" : totalFile}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-white/10 border border-white/15 px-4 py-3.5 col-span-2 sm:col-span-1 lg:col-span-2">
-                    <p className="text-[11px] text-white/75">
+                  <div className="rounded-xl bg-white/10 border border-white/15 px-4 py-3.5 col-span-2 sm:col-span-1 lg:col-span-2 dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]">
+                    <p className="text-[11px] text-white/75 dark:text-[var(--color-text-muted)]">
                       Sumber belajar
                     </p>
                     <div className="flex items-center gap-3 mt-1">
                       <div>
-                        <p className="text-sm font-semibold text-white">
+                        <p className="text-sm font-semibold text-white dark:text-[var(--color-text)]">
                           {loading
                             ? "Memuat..."
                             : `${totalMapel} mata pelajaran`}
@@ -943,7 +956,7 @@ function MateriPageInner() {
                       <div className="ml-auto">
                         <Sparkles
                           size={17}
-                          className="text-white/75"
+                          className="text-white/75 dark:text-[var(--color-primary)]"
                         />
                       </div>
                     </div>

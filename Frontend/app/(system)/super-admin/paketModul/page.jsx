@@ -881,43 +881,56 @@ export default function PaketModulPage() {
 
 
         <section
-          className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-6 md:p-7 ${themePrimaryShadow}`}
+          className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-6 md:p-7 ${themePrimaryShadow} dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
         >
           <div
-            className={`absolute -right-10 -top-16 w-56 h-56 rounded-full ${themeHeroSoft} blur-2xl`}
+            className={`pointer-events-none absolute -right-10 -top-16 w-56 h-56 rounded-full ${themeHeroSoft} blur-2xl dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]`}
           />
 
           <div
-            className={`absolute right-24 bottom-[-80px] w-48 h-48 rounded-full ${themeHeroSoft} blur-2xl`}
+            className={`pointer-events-none absolute right-24 bottom-[-80px] w-48 h-48 rounded-full ${themeHeroSoft} blur-2xl dark:hidden`}
+          />
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
           />
 
           <div className="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
             <div>
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-11 h-11 rounded-xl ${themeHeroSoft} border ${themeHeroSoftBorder} backdrop-blur-sm flex items-center justify-center`}
+                  className={`w-11 h-11 rounded-xl ${themeHeroSoft} border ${themeHeroSoftBorder} backdrop-blur-sm flex items-center justify-center dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))]`}
                 >
                   <Package
                     size={21}
-                    className="text-white"
+                    className="text-white dark:text-[var(--color-primary)]"
                   />
                 </div>
 
                 <div>
                   <p
-                    className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${themeHeroSecondary}`}
+                    className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${themeHeroSecondary} dark:text-[var(--color-primary)]`}
                   >
                     Product Management
                   </p>
 
-                  <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                    Paket Langganan
+                  <h1 className="text-2xl md:text-3xl font-bold text-white dark:text-[var(--color-text)] tracking-tight">
+                    Paket{" "}
+                    <span className="dark:text-[var(--color-primary)]">
+                      Langganan
+                    </span>
                   </h1>
                 </div>
               </div>
 
               <p
-                className={`text-sm ${themeHeroSecondary} mt-3 max-w-xl`}
+                className={`text-sm ${themeHeroSecondary} dark:text-[var(--color-text-secondary)] mt-3 max-w-xl`}
               >
                 Kelola paket langganan
                 dan fitur yang tersedia
@@ -931,14 +944,14 @@ export default function PaketModulPage() {
                   loadData(false)
                 }
                 disabled={refreshing}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl ${themeHeroSoft} hover:bg-white/20 border ${themeHeroSoftBorder} text-white text-sm font-medium backdrop-blur-sm transition disabled:opacity-50`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl ${themeHeroSoft} hover:bg-white/20 border ${themeHeroSoftBorder} text-white text-sm font-medium backdrop-blur-sm transition disabled:opacity-50 dark:border-[var(--color-border)] dark:bg-[var(--color-card)] dark:text-[var(--color-text)] dark:hover:border-[color-mix(in_srgb,var(--color-primary)_35%,var(--color-border))] dark:hover:bg-[color-mix(in_srgb,var(--color-text)_4%,var(--color-card))]`}
               >
                 <RefreshCw
                   size={15}
                   className={
                     refreshing
-                      ? "animate-spin"
-                      : ""
+                      ? "animate-spin dark:text-[var(--color-primary)]"
+                      : "dark:text-[var(--color-primary)]"
                   }
                 />
 
@@ -949,7 +962,7 @@ export default function PaketModulPage() {
                 onClick={
                   navigateToTambah
                 }
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-white/90 ${themePrimaryText} text-sm font-semibold ${themeCardShadow} transition`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-white/90 ${themePrimaryText} text-sm font-semibold ${themeCardShadow} transition dark:!bg-[var(--color-primary)] dark:!text-white dark:shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:hover:!bg-[var(--color-primary)] dark:hover:opacity-90`}
               >
                 <Plus size={16} />
 
@@ -1243,22 +1256,32 @@ function PaketCard({
       }`}
     >
 
-      <div className={`relative h-24 ${theme.card} rounded-t-2xl`}>
+      <div className={`relative h-24 ${theme.card} rounded-t-2xl dark:border-b dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))]`}>
         <div className="absolute inset-0 overflow-hidden rounded-t-2xl pointer-events-none">
           <div
-            className={`absolute -right-8 -top-12 w-32 h-32 rounded-full ${themeHeroSoft}`}
+            className={`absolute -right-8 -top-12 w-32 h-32 rounded-full ${themeHeroSoft} dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] dark:blur-xl`}
           />
 
-          <div className="absolute right-8 bottom-[-35px] w-24 h-24 rounded-full bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]" />
+          <div className="absolute right-8 bottom-[-35px] w-24 h-24 rounded-full bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)] dark:hidden" />
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
         </div>
 
         <div className="relative flex items-center justify-between p-5">
           <div
-            className={`w-11 h-11 rounded-xl ${themeHeroSoft} border ${themeHeroSoftBorder} backdrop-blur-sm flex items-center justify-center`}
+            className={`w-11 h-11 rounded-xl ${themeHeroSoft} border ${themeHeroSoftBorder} backdrop-blur-sm flex items-center justify-center dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))]`}
           >
             <Icon
               size={21}
-              className="text-white"
+              className="text-white dark:text-[var(--color-primary)]"
             />
           </div>
 
@@ -1272,7 +1295,7 @@ function PaketCard({
                 )
               }
               aria-label="Menu Opsi Paket"
-              className={`w-9 h-9 rounded-lg flex items-center justify-center ${themeHeroSecondary} hover:text-white hover:bg-white/10 transition`}
+              className={`w-9 h-9 rounded-lg flex items-center justify-center ${themeHeroSecondary} hover:text-white hover:bg-white/10 transition dark:text-[var(--color-text-secondary)] dark:hover:text-[var(--color-text)] dark:hover:bg-white/5`}
             >
               <MoreVertical size={18} />
             </button>

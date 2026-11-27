@@ -82,7 +82,7 @@ export const adminSidebarConfig = {
       key: "manajemenShift",
       icon: Clock3,
       label: "Manajemen Shift",
-      path: "/admin/presensi/master-shift",
+      path: "/admin/manajemen-shift",
       menuKey: "shift",
 
       children: [

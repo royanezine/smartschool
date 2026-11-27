@@ -10,7 +10,7 @@ import {
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
-import { ChevronRight, ChevronDown, ChevronUp, Menu, X } from "lucide-react";
+import { ChevronRight, ChevronDown, ChevronUp, Menu, Search, X } from "lucide-react";
 
 import { guruSidebarConfig } from "../../configs/navigation/guru";
 import { superadminSidebarConfig } from "../../configs/navigation/superAdmin";
@@ -378,6 +378,9 @@ export default function Sidebar({
   const [flyoutState, setFlyoutState] = useState(null);
   const [logoTooltip, setLogoTooltip] = useState(null);
   const [itemTooltip, setItemTooltip] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef(null);
+  const pendingSearchFocusRef = useRef(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -478,6 +481,51 @@ export default function Sidebar({
     return removeEmptyHeaders(deduplicateMenuItems(baseSections));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, permissions, modules, role, authTick]);
+
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const isSearching = normalizedSearch.length > 0;
+
+  const filteredMenuSections = useMemo(() => {
+    if (!isSearching) return menuSections;
+
+    const matched = menuSections
+      .map((item) => {
+        if (!item) return null;
+        if (item.type === "header") return item;
+
+        const parentLabel = String(item.label || "").toLowerCase();
+        const parentMatches = parentLabel.includes(normalizedSearch);
+
+        if (Array.isArray(item.children) && item.children.length > 0) {
+          if (parentMatches) {
+            return item;
+          }
+          const matchingChildren = item.children.filter((child) =>
+            String(child?.label || "")
+              .toLowerCase()
+              .includes(normalizedSearch)
+          );
+          if (matchingChildren.length > 0) {
+            return { ...item, children: matchingChildren };
+          }
+          return null;
+        }
+
+        return parentMatches ? item : null;
+      })
+      .filter(Boolean);
+
+    return removeEmptyHeaders(matched);
+  }, [menuSections, isSearching, normalizedSearch]);
+
+  useEffect(() => {
+    if (!collapsed && pendingSearchFocusRef.current) {
+      pendingSearchFocusRef.current = false;
+      requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+      });
+    }
+  }, [collapsed]);
 
   const menuPaths = useMemo(() => {
     const paths = [];
@@ -850,11 +898,23 @@ export default function Sidebar({
     }
 
     setItemTooltip(null);
-
-    const alreadyOnThisPage = pathname === item.path;
     setActive?.(item.key);
 
-    if (Array.isArray(item.children) && alreadyOnThisPage) {
+    if (Array.isArray(item.children) && item.children.length > 0) {
+      if (item.path) {
+        setOpenMenus((prev) => ({
+          ...prev,
+          [item.key]: true,
+        }));
+
+        if (normalizeMenuPath(pathname) !== normalizeMenuPath(item.path)) {
+          router.push(item.path);
+        }
+
+        if (isMobile) setMobileOpen(false);
+        return;
+      }
+
       toggleSubmenu(item.key);
       return;
     }
@@ -1072,6 +1132,75 @@ export default function Sidebar({
               </svg>
             </div>
 
+            <div className="shrink-0 px-3 pt-1 pb-2">
+              {showLabels ? (
+                <div className="relative flex items-center">
+                  <Search
+                    size={14}
+                    className="pointer-events-none absolute left-3 text-slate-400 dark:text-slate-400"
+                  />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") {
+                        setSearchQuery("");
+                        event.currentTarget.blur();
+                      }
+                    }}
+                    placeholder="Cari menu..."
+                    aria-label="Cari menu sidebar"
+                    className="
+                      w-full rounded-xl border sidebar-border
+                      bg-slate-100/80 dark:bg-white/[0.05]
+                      py-2 pl-8 pr-7 text-xs font-medium
+                      text-slate-700 dark:text-slate-200
+                      placeholder:text-slate-400 dark:placeholder:text-slate-500
+                      outline-none transition-colors
+                      focus:border-[var(--color-primary)]
+                      focus:bg-white dark:focus:bg-white/[0.08]
+                    "
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        searchInputRef.current?.focus();
+                      }}
+                      aria-label="Hapus pencarian menu"
+                      className="absolute right-2 rounded-md p-0.5 text-slate-400 transition hover:text-slate-600 dark:hover:text-slate-200"
+                    >
+                      <X size={13} />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    pendingSearchFocusRef.current = true;
+                    setAllowTransition(true);
+                    setCollapsed(false);
+                  }}
+                  title="Cari menu"
+                  aria-label="Cari menu sidebar"
+                  className="
+                    mx-auto flex h-10 w-10 items-center justify-center
+                    rounded-xl border sidebar-border
+                    bg-slate-100/80 dark:bg-white/[0.05]
+                    text-slate-500 dark:text-slate-300
+                    transition hover:border-[var(--color-primary)]
+                    hover:text-[var(--color-primary)]
+                  "
+                >
+                  <Search size={16} />
+                </button>
+              )}
+            </div>
+
             <nav
               ref={sidebarNavRef}
               className="
@@ -1081,8 +1210,8 @@ export default function Sidebar({
                 px-3 py-2 space-y-1 pb-6
               "
             >
-              {menuSections.length > 0 ? (
-                menuSections.map((item) => {
+              {filteredMenuSections.length > 0 ? (
+                filteredMenuSections.map((item) => {
                   if (item.type === "header") {
                     if (!showLabels) {
                       return (
@@ -1116,8 +1245,17 @@ export default function Sidebar({
                     item.children.some((child) =>
                       isMenuPathActive(pathname, child.path, menuPaths)
                     );
-                  const isLeafActive = !hasChildren && isMenuPathActive(pathname, item.path, menuPaths);
-                  const isOpen = !!openMenus[item.key];
+                  const isSelfPathActive =
+                    Boolean(item.path) &&
+                    (isMenuPathActive(pathname, item.path, menuPaths) ||
+                      (item.key === "manajemenShift" &&
+                        normalizeMenuPath(pathname) ===
+                          "/admin/presensi/manajemen-shift"));
+                  const isParentOverviewActive =
+                    hasChildren && isSelfPathActive && !isChildActive;
+                  const isLeafActive =
+                    (!hasChildren && isSelfPathActive) || isParentOverviewActive;
+                  const isOpen = isSearching ? true : !!openMenus[item.key];
                   const collapsedIconMode = collapsed && !isMobile;
 
                   let stateClass = "text-slate-700 dark:text-slate-300 sidebar-hover";
@@ -1133,6 +1271,7 @@ export default function Sidebar({
                   return (
                     <div key={item.key} className="relative">
                       <div
+                        aria-current={isLeafActive ? "page" : undefined}
                         onClick={(event) =>
                           handleMenuClick(item, collapsedIconMode, event.currentTarget)
                         }
@@ -1208,12 +1347,15 @@ export default function Sidebar({
                               event.stopPropagation();
                               toggleSubmenu(item.key);
                             }}
-                            className="
+                            className={`
                               shrink-0 p-1 -m-1 rounded-md
-                              text-slate-500 dark:text-slate-400
-                              hover:bg-black/5 dark:hover:bg-white/10
+                              ${
+                                isLeafActive
+                                  ? "text-white/90 hover:bg-white/15"
+                                  : "text-slate-500 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/10"
+                              }
                               transition-colors duration-150
-                            "
+                            `}
                             title={isOpen ? "Tutup submenu" : "Buka submenu"}
                           >
                             {isOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -1240,6 +1382,7 @@ export default function Sidebar({
                                 <button
                                   key={child.key}
                                   type="button"
+                                  aria-current={isChildItemActive ? "page" : undefined}
                                   onClick={() => handleSubItemClick(item.key, child)}
                                   className={`
                                     flex items-center w-full gap-3 px-3 py-2 rounded-xl
@@ -1287,11 +1430,28 @@ export default function Sidebar({
               ) : (
                 <div
                   className={`
-                    mt-6 text-center text-xs text-slate-400 dark:text-slate-600
+                    mt-6 text-center text-xs text-slate-400 dark:text-slate-500
                     ${collapsed ? "px-1" : "px-4"}
                   `}
                 >
-                  {!collapsed && "Tidak ada menu yang tersedia"}
+                  {!collapsed &&
+                    (isSearching ? (
+                      <div className="space-y-2">
+                        <p>Menu &ldquo;{searchQuery.trim()}&rdquo; tidak ditemukan</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery("");
+                            searchInputRef.current?.focus();
+                          }}
+                          className="text-xs font-semibold text-[var(--color-primary)] hover:underline"
+                        >
+                          Reset pencarian
+                        </button>
+                      </div>
+                    ) : (
+                      "Tidak ada menu yang tersedia"
+                    ))}
                 </div>
               )}
             </nav>

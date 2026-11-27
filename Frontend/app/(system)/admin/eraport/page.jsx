@@ -493,40 +493,45 @@ export default function ERaportPage() {
               </div>
             )}
 
-            <section className="relative mb-6 overflow-hidden rounded-[28px] border theme-border theme-sidebar shadow-lg">
-              <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-[var(--color-primary)] opacity-[0.12] blur-3xl" />
-
-              <div className="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-[var(--color-info)] opacity-[0.08] blur-3xl" />
-
+            <section className="relative mb-6 overflow-hidden rounded-3xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]">
               <div
-                className="absolute inset-0 opacity-[0.05]"
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] blur-2xl"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.05]"
                 style={{
                   backgroundImage:
-                    "linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px)",
-                  backgroundSize: "34px 34px",
+                    "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                  backgroundSize: "32px 32px",
                 }}
               />
 
               <div className="relative grid gap-8 px-6 py-7 sm:px-8 sm:py-8 lg:grid-cols-[1fr_390px] lg:px-10 lg:py-9">
                 <div className="flex flex-col justify-center">
-                  <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border theme-border theme-card-soft px-3 py-1.5 text-xs font-semibold theme-text-secondary">
+                  <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[var(--color-card)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)]">
                     <Sparkles size={13} />
                     Akademik · E-Raport
                   </div>
 
-                  <h1 className="max-w-2xl text-2xl font-bold tracking-tight theme-text sm:text-3xl lg:text-[38px] lg:leading-tight">
-                    Kelola E-Raport Sekolah
+                  <h1 className="mt-4 max-w-2xl text-2xl font-bold tracking-tight theme-text sm:text-3xl lg:text-4xl">
+                    Kelola{" "}
+                    <span className="text-[var(--color-primary)]">
+                      E-Raport
+                    </span>{" "}
+                    Sekolah
                   </h1>
 
-                  <p className="mt-3 max-w-2xl text-sm leading-6 theme-text-secondary sm:text-[15px]">
+                  <p className="mt-2 max-w-xl text-sm leading-6 theme-text-secondary sm:text-base">
                     Pantau data akademik, pengelolaan nilai, kelengkapan raport,
                     dan pencetakan raport siswa dalam satu dashboard akademik.
                   </p>
 
-                  <div className="mt-6 flex flex-wrap gap-3">
+                  <div className="mt-5 flex flex-wrap items-center gap-3">
                     <Link
                       href="/admin/eraport/entry-nilai"
-                      className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md transition hover:-translate-y-0.5"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)] transition hover:opacity-90"
                     >
                       <PenLine size={17} />
                       Entry Nilai
@@ -534,32 +539,28 @@ export default function ERaportPage() {
 
                     <Link
                       href="/admin/eraport/cetak-raport"
-                      className="theme-card theme-sidebar-hover inline-flex items-center gap-2 rounded-xl border theme-border px-4 py-2.5 text-sm font-semibold theme-text-secondary transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                      className="theme-card theme-border theme-text inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:shadow-sm"
                     >
-                      <Printer size={17} />
+                      <Printer size={17} className="text-[var(--color-primary)]" />
                       Cetak Raport
                     </Link>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border theme-border theme-card-soft p-5">
+                <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_82%,transparent)] p-5 backdrop-blur-sm">
                   <div className="flex items-start justify-between">
                     <div>
-                     
-
-                     
-
                       <p className="mt-1 text-xs theme-text-muted">
                         {loading ? "..." : semesterAktif}
                       </p>
                     </div>
 
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))] text-[var(--color-primary)]">
                       <CalendarDays size={20} />
                     </div>
                   </div>
 
-                  <div className="theme-card mt-5 rounded-xl p-4">
+                  <div className="mt-5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-card))] p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-xs theme-text-muted">

@@ -17,6 +17,54 @@ import {
 } from "@/lib/auth";
 
 
+function SessionLoadingScreen() {
+  const [dotCount, setDotCount] = useState(1);
+
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setDotCount(3);
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setDotCount((prev) => (prev >= 3 ? 1 : prev + 1));
+    }, 400);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label="Memuat"
+      className="theme-page flex h-screen w-full items-center justify-center"
+    >
+      <span className="sr-only">Memuat</span>
+      <div className="flex flex-col items-center gap-3.5" aria-hidden="true">
+        <div
+          className="h-10 w-10 animate-spin rounded-full border-[3px]"
+          style={{
+            borderColor:
+              "color-mix(in srgb, var(--color-primary) 22%, transparent)",
+            borderTopColor: "var(--color-primary)",
+          }}
+        />
+
+        <p className="inline-flex items-baseline text-sm font-medium tracking-wide theme-text">
+          <span>Memuat</span>
+          <span className="inline-block w-[1.5em] text-left">
+            {".".repeat(dotCount)}
+          </span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function AuthGuard({ allowedRoles = [], children }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -264,27 +312,7 @@ export default function AuthGuard({ allowedRoles = [], children }) {
   }
 
   if (!checked) {
-    return (
-      <div className="theme-page flex h-screen w-full items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div
-            className="
-              h-8
-              w-8
-              animate-spin
-              rounded-full
-              border-2
-              border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]
-              border-t-[var(--color-primary)]
-            "
-          />
-
-          <p className="text-sm theme-text-secondary">
-            Memeriksa sesi login...
-          </p>
-        </div>
-      </div>
-    );
+    return <SessionLoadingScreen />;
   }
 
   return children;

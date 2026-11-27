@@ -368,22 +368,31 @@ export default function EditTahunAjaranPage() {
 
               <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
-                <div className="theme-primary px-6 py-6 sm:px-8 sm:py-7">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white">
+                <div className="relative overflow-hidden theme-primary px-6 py-6 sm:px-8 sm:py-7 dark:border-b dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:hover:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:!text-[var(--color-text)]">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                      backgroundSize: "32px 32px",
+                    }}
+                  />
+                  <div className="relative flex items-center gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)]">
                       <CalendarDays size={28} />
                     </div>
 
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-white/75">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-white/75 dark:text-[var(--color-primary)]">
                         Data Master
                       </p>
 
-                      <h1 className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                      <h1 className="mt-1 text-2xl font-bold tracking-tight text-white dark:text-[var(--color-text)] sm:text-3xl">
                         Edit Tahun Ajaran
                       </h1>
 
-                      <p className="mt-1 text-sm text-white/75">
+                      <p className="mt-1 text-sm text-white/75 dark:text-[var(--color-text-secondary)]">
                         Perbarui informasi tahun ajaran yang
                         terdaftar.
                       </p>

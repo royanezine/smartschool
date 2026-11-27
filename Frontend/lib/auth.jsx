@@ -1297,6 +1297,8 @@ export function getMenuKeyForAdminPath(pathname = "") {
   }
 
   if (
+    path.startsWith("/admin/manajemen-shift") ||
+    path.startsWith("/admin/presensi/manajemen-shift") ||
     path.startsWith("/admin/presensi/master-shift") ||
     path.startsWith("/admin/presensi/penugasan-shift")
   ) {
@@ -1424,7 +1426,7 @@ export function getDefaultAdminPath(user = null) {
     { menu: "langganan", path: "/admin/langganan" },
     { menu: "manajemen pengguna", path: "/admin/pengguna" },
     { menu: "monitoring absensi", path: "/admin/presensi" },
-    { menu: "shift", path: "/admin/presensi/master-shift" },
+    { menu: "shift", path: "/admin/manajemen-shift" },
     { menu: "jurusan", path: "/admin/akademik/jurusan" },
     { menu: "prakerin", path: "/admin/prakerin" },
   ];

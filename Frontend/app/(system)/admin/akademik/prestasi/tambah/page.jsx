@@ -712,30 +712,39 @@ export default function TambahPrestasiPage() {
 
                   <div className="p-5">
                     <div
-                      className={`relative overflow-hidden rounded-2xl p-5 ${themePrimaryGradient}`}
+                      className={`relative overflow-hidden rounded-2xl p-5 ${themePrimaryGradient} dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))]`}
                     >
-                      <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-3xl" />
-                      <div className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)] blur-3xl" />
+                      <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-3xl dark:bg-[var(--color-primary)]/14" />
+                      <div className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)] blur-3xl dark:bg-[var(--color-primary)]/10" />
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                          backgroundSize: "32px 32px",
+                        }}
+                      />
 
                       <div className="relative">
                         <div className="flex items-start justify-between gap-3">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_14%,transparent)]">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_14%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)] dark:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
                             <Trophy size={20} />
                           </div>
-                          <span className="rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-2.5 py-1 text-[10px] font-bold tracking-wide text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_14%,transparent)]">
+                          <span className="rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-2.5 py-1 text-[10px] font-bold tracking-wide text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_14%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)] dark:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
                             {form.juara}
                           </span>
                         </div>
 
                         <div className="mt-6">
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_78%,var(--color-primary))]">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_78%,var(--color-primary))] dark:text-[var(--color-primary)]">
                             Prestasi Siswa
                           </p>
-                          <h3 className="mt-2 min-h-[56px] break-words text-lg font-bold leading-6 text-[var(--color-card)]">
+                          <h3 className="mt-2 min-h-[56px] break-words text-lg font-bold leading-6 text-[var(--color-card)] dark:text-[var(--color-text)]">
                             {form.namaLomba.trim() || "Nama Lomba"}
                           </h3>
-                          <div className="mt-3 flex items-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_68%,transparent)]">
-                            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-card)]" />
+                          <div className="mt-3 flex items-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_68%,transparent)] dark:text-[var(--color-text-secondary)]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-card)] dark:bg-[var(--color-primary)]" />
                             <span>{form.tingkat}</span>
                           </div>
                         </div>

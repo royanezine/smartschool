@@ -1757,23 +1757,32 @@ export default function EditAsetPage() {
 
 
                       <div
-                        className={`relative overflow-hidden rounded-2xl p-5 ${themePrimaryGradient}`}
+                        className={`relative overflow-hidden rounded-2xl p-5 ${themePrimaryGradient} dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))]`}
                       >
                         <div
-                          className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full ${themeInfoSurface} blur-2xl`}
+                          className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full ${themeInfoSurface} blur-2xl dark:bg-[var(--color-primary)]/14`}
                         />
 
                         <div
-                          className={`pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full ${themePrimarySoft} blur-2xl`}
+                          className={`pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full ${themePrimarySoft} blur-2xl dark:bg-[var(--color-primary)]/10`}
+                        />
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                          style={{
+                            backgroundImage:
+                              "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                            backgroundSize: "32px 32px",
+                          }}
                         />
 
                         <div className="relative">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_15%,transparent)]">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_15%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)] dark:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
                               <Package size={21} />
                             </div>
 
-                            <span className="rounded-full bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] px-2.5 py-1 text-[10px] font-semibold text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_15%,transparent)]">
+                            <span className="rounded-full bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] px-2.5 py-1 text-[10px] font-semibold text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_15%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)] dark:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
                               {form.status ===
                               "aktif"
                                 ? "AKTIF"
@@ -1782,11 +1791,11 @@ export default function EditAsetPage() {
                           </div>
 
                           <div className="mt-7">
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)] dark:text-[var(--color-primary)]">
                               Nama Aset
                             </p>
 
-                            <h3 className="mt-1 break-words text-lg font-bold leading-6 text-[var(--color-card)]">
+                            <h3 className="mt-1 break-words text-lg font-bold leading-6 text-[var(--color-card)] dark:text-[var(--color-text)]">
                               {form.nama ||
                                 "Nama Aset"}
                             </h3>

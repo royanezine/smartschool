@@ -244,21 +244,32 @@ export default function RaporDetailPage() {
             </div>
 
             <div className="theme-card rounded-xl border theme-border shadow-sm print:shadow-none print:border-0 overflow-hidden">
-              <div className="theme-primary text-white px-6 py-5 print:bg-white print:text-slate-900 print:border-b print:border-slate-300">
-                <p className="text-xs font-medium tracking-wide text-white/80 uppercase">
-                  Laporan Hasil Belajar Peserta Didik
-                </p>
+              <div className="relative overflow-hidden theme-primary text-white px-6 py-5 dark:border-b dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:hover:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:!text-[var(--color-text)] print:!bg-white print:!text-slate-900 print:border-b print:border-slate-300">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block print:!hidden"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                    backgroundSize: "32px 32px",
+                  }}
+                />
+                <div className="relative">
+                  <p className="text-xs font-medium tracking-wide text-white/80 uppercase dark:text-[var(--color-primary)] print:text-slate-600">
+                    Laporan Hasil Belajar Peserta Didik
+                  </p>
 
-                <h2 className="text-xl font-bold mt-0.5">
-                  Buku Rapor Siswa
-                </h2>
+                  <h2 className="text-xl font-bold mt-0.5 dark:text-[var(--color-text)] print:text-slate-900">
+                    Buku Rapor Siswa
+                  </h2>
 
-                <p className="text-xs text-white/80 mt-1">
-                  Tahun Ajaran:{" "}
-                  {tahunAjaranInfo?.tahunAjaran || "Belum tersedia"} &bull;
-                  Semester:{" "}
-                  {tahunAjaranInfo?.semester || "Belum tersedia"}
-                </p>
+                  <p className="text-xs text-white/80 mt-1 dark:text-[var(--color-text-secondary)] print:text-slate-600">
+                    Tahun Ajaran:{" "}
+                    {tahunAjaranInfo?.tahunAjaran || "Belum tersedia"} &bull;
+                    Semester:{" "}
+                    {tahunAjaranInfo?.semester || "Belum tersedia"}
+                  </p>
+                </div>
               </div>
 
               <div className="p-6 grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6 text-sm">

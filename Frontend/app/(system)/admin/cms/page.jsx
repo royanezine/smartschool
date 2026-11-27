@@ -368,7 +368,7 @@ export default function CmsDashboardPage() {
               </div>
             )}
 
-            <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-6">
+            <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
               {statCards.map((stat) => {
                 const Icon = stat.icon;
                 const color = colorClasses[stat.color];

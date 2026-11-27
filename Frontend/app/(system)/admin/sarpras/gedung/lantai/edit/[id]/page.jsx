@@ -741,38 +741,47 @@ export default function EditLantaiPage() {
 
 
                       <div
-                        className={`relative overflow-hidden rounded-2xl p-5 text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow}`}
+                        className={`relative overflow-hidden rounded-2xl p-5 text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:text-[var(--color-text)] dark:shadow-none`}
                       >
                         <div
-                          className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]"
+                          className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] dark:bg-[var(--color-primary)]/14 dark:blur-2xl"
                         />
 
                         <div
-                          className="pointer-events-none absolute -bottom-12 -left-8 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-info)_20%,transparent)] blur-2xl"
+                          className="pointer-events-none absolute -bottom-12 -left-8 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-info)_20%,transparent)] blur-2xl dark:bg-[var(--color-primary)]/10"
+                        />
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                          style={{
+                            backgroundImage:
+                              "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                            backgroundSize: "32px 32px",
+                          }}
                         />
 
                         <div className="relative">
                           <div className="mb-8 flex items-start justify-between">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-card)_15%,transparent)]">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-card)_15%,transparent)] dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)]">
                               <Layers3 size={22} />
                             </div>
 
-                            <span className="rounded-full border border-[color-mix(in_srgb,var(--color-card)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-[color-mix(in_srgb,var(--color-card)_90%,transparent)]">
+                            <span className="rounded-full border border-[color-mix(in_srgb,var(--color-card)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-[color-mix(in_srgb,var(--color-card)_90%,transparent)] dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)]">
                               Lantai
                             </span>
                           </div>
 
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] dark:text-[var(--color-primary)]">
                             Nama Lantai
                           </p>
 
-                          <h3 className="mt-1.5 truncate text-xl font-bold tracking-tight">
+                          <h3 className="mt-1.5 truncate text-xl font-bold tracking-tight dark:text-[var(--color-text)]">
                             {form.nama.trim() ||
                               "Nama Lantai"}
                           </h3>
 
-                          <div className="mt-3 flex items-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
-                            <Building2 size={14} />
+                          <div className="mt-3 flex items-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] dark:text-[var(--color-text-secondary)]">
+                            <Building2 size={14} className="dark:text-[var(--color-primary)]" />
 
                             <span className="truncate">
                               {selectedGedung?.nama ||

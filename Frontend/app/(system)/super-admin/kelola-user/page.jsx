@@ -320,18 +320,27 @@ export default function KelolaUserPage() {
       {/* Full width: tidak ada max-width / mx-auto, sehingga selalu menempel ke sidebar saat zoom out */}
       <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <section
-          className={`relative mb-6 w-full overflow-hidden rounded-3xl ${themePrimaryGradient} ${themePrimaryShadow}`}
+          className={`relative mb-6 w-full overflow-hidden rounded-3xl ${themePrimaryGradient} ${themePrimaryShadow} dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
         >
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -right-20 -top-28 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute -right-20 -top-28 h-72 w-72 rounded-full bg-white/10 blur-2xl dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]" />
 
-            <div className="absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/8 blur-3xl" />
+            <div className="absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/8 blur-3xl dark:hidden" />
 
             <div
-              className="absolute inset-0 opacity-[0.08]"
+              className="absolute inset-0 opacity-[0.08] dark:hidden"
               style={{
                 backgroundImage:
                   "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
+                backgroundSize: "32px 32px",
+              }}
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 hidden opacity-[0.05] dark:block"
+              style={{
+                backgroundImage:
+                  "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
                 backgroundSize: "32px 32px",
               }}
             />
@@ -340,30 +349,33 @@ export default function KelolaUserPage() {
           <div className="relative p-6 md:p-8">
             <div className="flex flex-col gap-7 xl:flex-row xl:items-end xl:justify-between">
               <div className="max-w-3xl">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm dark:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:bg-[var(--color-card)] dark:text-[var(--color-primary)]">
                   <ShieldCheck className="h-3.5 w-3.5" />
                   MANAJEMEN AKSES
                 </div>
 
-                <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
-                  Kelola User
+                <h1 className="text-3xl font-bold tracking-tight text-white dark:text-[var(--color-text)] md:text-4xl">
+                  Kelola{" "}
+                  <span className="dark:text-[var(--color-primary)]">
+                    User
+                  </span>
                 </h1>
 
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-white/80 md:text-base">
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-white/80 dark:text-[var(--color-text-secondary)] md:text-base">
                   Kelola akun, role, akses, dan status pengguna SmartSchool
                   dalam satu dashboard terpusat.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
-                  <span className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm">
+                  <span className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))] dark:text-[var(--color-text)]">
                     {statistics.total} Pengguna
                   </span>
 
-                  <span className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm">
+                  <span className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))] dark:text-[var(--color-text)]">
                     {statistics.active} Aktif
                   </span>
 
-                  <span className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm">
+                  <span className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white backdrop-blur-sm dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))] dark:text-[var(--color-text)]">
                     {statistics.admin} Administrator
                   </span>
                 </div>
@@ -371,7 +383,7 @@ export default function KelolaUserPage() {
 
               <Link
                 href="/super-admin/kelola-user/tambah"
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20 xl:w-auto"
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20 dark:border-transparent dark:!bg-[var(--color-primary)] dark:!text-white dark:shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:hover:opacity-90 xl:w-auto"
               >
                 <UserPlus size={18} />
                 Tambah User

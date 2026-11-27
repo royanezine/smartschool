@@ -477,22 +477,31 @@ export default function EditGudangPage() {
                     </div>
 
                     <div className="p-5">
-                      <div className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-5`}>
-                        <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] blur-2xl" />
-                        <div className="pointer-events-none absolute -bottom-10 -left-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-info)_16%,transparent)] blur-2xl" />
+                      <div className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-5 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))]`}>
+                        <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] blur-2xl dark:bg-[var(--color-primary)]/14" />
+                        <div className="pointer-events-none absolute -bottom-10 -left-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-info)_16%,transparent)] blur-2xl dark:bg-[var(--color-primary)]/10" />
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                          style={{
+                            backgroundImage:
+                              "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                            backgroundSize: "32px 32px",
+                          }}
+                        />
 
                         <div className="relative">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_15%,transparent)]">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_15%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:text-[var(--color-primary)] dark:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
                             <Boxes size={24} strokeWidth={1.8} />
                           </div>
-                          <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                          <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)] dark:text-[var(--color-primary)]">
                             Gudang
                           </p>
-                          <h3 className="mt-1 break-words text-lg font-bold leading-6 text-[var(--color-card)]">
+                          <h3 className="mt-1 break-words text-lg font-bold leading-6 text-[var(--color-card)] dark:text-[var(--color-text)]">
                             {form.nama.trim() || "Nama Gudang"}
                           </h3>
-                          <div className="mt-3 flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,var(--color-card)_75%,transparent)]">
-                            <MapPin size={13} />
+                          <div className="mt-3 flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,var(--color-card)_75%,transparent)] dark:text-[var(--color-text-secondary)]">
+                            <MapPin size={13} className="dark:text-[var(--color-primary)]" />
                             <span className="truncate">{form.lokasi.trim() || "Lokasi belum diisi"}</span>
                           </div>
                         </div>

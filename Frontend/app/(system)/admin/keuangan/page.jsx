@@ -208,6 +208,8 @@ export default function KeuanganPage() {
 
   const [akunKas, setAkunKas] = useState([]);
   const [akunTotalSaldo, setAkunTotalSaldo] = useState(null);
+  const [hasLoadedAkun, setHasLoadedAkun] = useState(false);
+  const [akunError, setAkunError] = useState("");
 
   const [jurnal, setJurnal] = useState([]);
   const [jurnalRingkasan, setJurnalRingkasan] = useState(null);
@@ -248,11 +250,13 @@ export default function KeuanganPage() {
             ? null
             : Number(akunRes.value.ringkasan.totalSaldo),
         );
+        setAkunError("");
       } else {
-        setAkunKas([]);
-        setAkunTotalSaldo(null);
-        messages.push(getErrorMessage(akunRes.reason, "akun kas"));
+        const akunErrMsg = getErrorMessage(akunRes.reason, "akun kas");
+        setAkunError(akunErrMsg);
+        messages.push(akunErrMsg);
       }
+      setHasLoadedAkun(true);
 
       if (jurnalRes.status === "fulfilled") {
         setJurnal(jurnalRes.value.data || []);
@@ -533,42 +537,51 @@ export default function KeuanganPage() {
             {/* TOP GRID: SALDO UTAMA & KARTU RINGKASAN */}
             <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
               {/* Kartu Saldo Utama */}
-              <div
-                className={`relative flex flex-col overflow-hidden rounded-2xl ${themePrimaryGradient} p-6 text-white shadow-lg lg:col-span-4`}
-              >
-                <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/10" />
-                <div className="pointer-events-none absolute -bottom-24 -left-10 h-48 w-48 rounded-full bg-white/5" />
+              <div className="relative flex flex-col overflow-hidden rounded-3xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] p-6 shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)] lg:col-span-4">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] blur-2xl"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 opacity-[0.05]"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                    backgroundSize: "32px 32px",
+                  }}
+                />
 
                 <div className="relative flex items-center justify-between">
-                  <p className="text-sm font-medium text-white/90">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[var(--color-card)] px-3 py-1 text-xs font-semibold text-[var(--color-primary)]">
                     Total Saldo Kas
-                  </p>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
-                    <Wallet size={18} className="text-white" />
+                  </span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[var(--color-card)] text-[var(--color-primary)]">
+                    <Wallet size={18} />
                   </div>
                 </div>
 
-                <h2 className="relative mt-5 break-words text-3xl font-bold tracking-tight">
+                <h2 className="relative mt-5 break-words text-3xl font-bold tracking-tight theme-text">
                   {loading ? "..." : formatRupiahOrUnavailable(saldoAkhir)}
                 </h2>
 
-                <p className="relative mt-1.5 flex items-center gap-1.5 text-xs text-white/80">
-                  <TrendingUp size={13} /> Saldo gabungan semua akun
+                <p className="relative mt-1.5 flex items-center gap-1.5 text-xs theme-text-secondary">
+                  <TrendingUp size={13} className="text-[var(--color-primary)]" /> Saldo gabungan semua akun
                 </p>
 
                 <div className="relative mt-auto grid grid-cols-2 gap-3 pt-8">
                   <button
                     type="button"
                     onClick={() => openForm("pemasukan")}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/20 py-2.5 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-white/30"
+                    className="theme-card theme-border theme-text inline-flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-xs font-semibold transition hover:shadow-sm"
                   >
-                    <ArrowDownLeft size={14} />
+                    <ArrowDownLeft size={14} className="text-[var(--color-primary)]" />
                     Catat Masuk
                   </button>
                   <button
                     type="button"
                     onClick={() => openForm("pengeluaran")}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-xs font-semibold text-[var(--color-primary)] transition hover:bg-white/90"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-primary)] py-2.5 text-xs font-semibold text-white shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)] transition hover:opacity-90"
                   >
                     <ArrowUpRight size={14} />
                     Catat Keluar
@@ -655,76 +668,152 @@ export default function KeuanganPage() {
                 <SectionTitle
                   title="Akun Kas & Bank"
                   action={
-                    <Link
-                      href="/admin/keuangan/akunKas/tambah"
-                      aria-label="Tambah akun kas"
-                      className={`flex h-7 w-7 items-center justify-center rounded-full ${themePrimarySurface} ${themePrimaryText} transition hover:opacity-80`}
-                    >
-                      <Plus size={16} />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      {loading && hasLoadedAkun && (
+                        <span
+                          aria-live="polite"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[var(--color-card)] px-2.5 py-1 text-[11px] font-medium theme-text-secondary"
+                        >
+                          <RefreshCw
+                            size={11}
+                            className="animate-spin text-[var(--color-primary)]"
+                          />
+                          Memuat...
+                        </span>
+                      )}
+                      <Link
+                        href="/admin/keuangan/akunKas/tambah"
+                        aria-label="Tambah akun kas"
+                        className={`flex h-7 w-7 items-center justify-center rounded-full ${themePrimarySurface} ${themePrimaryText} transition hover:opacity-80`}
+                      >
+                        <Plus size={16} />
+                      </Link>
+                    </div>
                   }
                 />
 
                 <div className="flex flex-1 flex-col gap-3">
-                  {akunKas.map((akun) => {
-                    const isBank = akun.tipe === "bank";
-
-                    return (
+                  {loading && !hasLoadedAkun ? (
+                    Array.from({ length: 2 }).map((_, idx) => (
                       <div
-                        key={akun.id}
-                        className={`relative overflow-hidden rounded-xl p-4 text-white shadow-sm ${
-                          isBank ? themePrimaryGradient : themeDarkGradient
-                        }`}
+                        key={`akun-skeleton-${idx}`}
+                        aria-hidden="true"
+                        className="relative overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_14%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] p-4 shadow-sm"
                       >
-                        <div className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-white/10" />
-
-                        <div className="relative flex items-center justify-between gap-2">
+                        <div className="flex items-center justify-between gap-2 animate-pulse">
                           <div className="flex min-w-0 items-center gap-2">
-                            {isBank ? (
-                              <Building2 size={16} className="shrink-0 text-white/80" />
-                            ) : (
-                              <Wallet size={16} className="shrink-0 text-white/80" />
-                            )}
-                            <p className="truncate text-sm font-medium">
-                              {akun.nama}
+                            <div className="h-4 w-4 shrink-0 rounded bg-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]" />
+                            <div className="h-4 w-28 rounded bg-[color-mix(in_srgb,var(--color-text)_14%,transparent)]" />
+                          </div>
+                          <div className="h-5 w-12 shrink-0 rounded bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]" />
+                        </div>
+
+                        <div className="mt-4 space-y-2 animate-pulse">
+                          <div className="h-6 w-32 rounded bg-[color-mix(in_srgb,var(--color-text)_16%,transparent)]" />
+                          <div className="h-3 w-16 rounded bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)]" />
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      {akunError && (
+                        <div className="flex items-start justify-between gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] p-3.5 text-xs">
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            <AlertCircle
+                              size={16}
+                              className="mt-0.5 shrink-0 text-[var(--color-danger)]"
+                            />
+                            <p className="break-words theme-text-secondary">
+                              {akunError}
                             </p>
                           </div>
-                          <span className="shrink-0 rounded bg-white/20 px-2 py-0.5 text-[10px] font-semibold backdrop-blur-sm">
-                            {isBank ? "Bank" : "Tunai"}
-                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setRefreshKey((value) => value + 1)}
+                            disabled={loading}
+                            className="shrink-0 rounded-lg border theme-border theme-card px-2.5 py-1 text-[11px] font-semibold theme-text transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:opacity-50"
+                          >
+                            Coba lagi
+                          </button>
                         </div>
+                      )}
 
-                        <div className="relative mt-4">
-                          <p className="text-lg font-bold">
-                            {formatRupiah(akun.saldo)}
+                      {akunKas.map((akun) => {
+                        const isBank = akun.tipe === "bank";
+
+                        return (
+                          <div
+                            key={akun.id}
+                            className={`relative overflow-hidden rounded-xl p-4 text-white shadow-sm ${
+                              isBank ? themePrimaryGradient : themeDarkGradient
+                            } dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:text-[var(--color-text)] dark:shadow-[0_10px_24px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
+                          >
+                            <div className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-white/10 dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] dark:blur-xl" />
+                            <div
+                              aria-hidden="true"
+                              className="pointer-events-none absolute inset-0 hidden opacity-[0.04] dark:block"
+                              style={{
+                                backgroundImage:
+                                  "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                                backgroundSize: "32px 32px",
+                              }}
+                            />
+
+                            <div className="relative flex items-center justify-between gap-2">
+                              <div className="flex min-w-0 items-center gap-2">
+                                {isBank ? (
+                                  <Building2
+                                    size={16}
+                                    className="shrink-0 text-white/80 dark:text-[var(--color-primary)]"
+                                  />
+                                ) : (
+                                  <Wallet
+                                    size={16}
+                                    className="shrink-0 text-white/80 dark:text-[var(--color-primary)]"
+                                  />
+                                )}
+                                <p className="truncate text-sm font-semibold text-white dark:text-[var(--color-text)]">
+                                  {akun.nama}
+                                </p>
+                              </div>
+                              <span className="shrink-0 rounded bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))] dark:text-[var(--color-primary)]">
+                                {isBank ? "Bank" : "Tunai"}
+                              </span>
+                            </div>
+
+                            <div className="relative mt-4">
+                              <p className="text-lg font-bold tabular-nums text-white dark:text-[var(--color-text)]">
+                                {formatRupiah(akun.saldo)}
+                              </p>
+                              <p className="mt-0.5 text-[10px] font-medium tracking-wide text-white/75 dark:text-[var(--color-text-muted)]">
+                                {akun.kode || (isBank ? "REKENING" : "KAS")}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {!loading && !akunError && akunKas.length === 0 && (
+                        <div
+                          className={`flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-dashed ${themeNeutralBorder} ${themeNeutralSurface} p-6 text-center`}
+                        >
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-full ${themePrimarySurface} ${themePrimaryText}`}
+                          >
+                            <Wallet size={18} />
+                          </div>
+                          <p className="text-xs font-medium theme-text-secondary">
+                            Belum ada akun kas atau bank
                           </p>
-                          <p className="mt-0.5 text-[10px] text-white/75">
-                            {akun.kode || (isBank ? "REKENING" : "KAS")}
-                          </p>
+                          <Link
+                            href="/admin/keuangan/akunKas/tambah"
+                            className={`text-xs font-semibold ${themePrimaryText} hover:underline`}
+                          >
+                            Tambah akun kas
+                          </Link>
                         </div>
-                      </div>
-                    );
-                  })}
-
-                  {!loading && akunKas.length === 0 && (
-                    <div
-                      className={`flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-dashed ${themeNeutralBorder} ${themeNeutralSurface} p-6 text-center`}
-                    >
-                      <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-full ${themePrimarySurface} ${themePrimaryText}`}
-                      >
-                        <Wallet size={18} />
-                      </div>
-                      <p className="text-xs font-medium theme-text-secondary">
-                        Belum ada akun kas
-                      </p>
-                      <Link
-                        href="/admin/keuangan/akunKas/tambah"
-                        className={`text-xs font-semibold ${themePrimaryText} hover:underline`}
-                      >
-                        Tambah akun kas
-                      </Link>
-                    </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

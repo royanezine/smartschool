@@ -705,44 +705,45 @@ export default function PerpustakaanPage() {
 
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
-            <section
-              className={`relative mb-6 overflow-hidden rounded-[28px] border ${themePrimaryBorder} ${themePrimaryShadow} bg-[color-mix(in_srgb,var(--color-primary)_12%,var(--color-card))]`}
-            >
-              <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] blur-3xl" />
-              <div className="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)] blur-3xl" />
-
+            <section className="relative mb-6 overflow-hidden rounded-3xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]">
               <div
-                className="absolute inset-0 opacity-[0.05]"
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] blur-2xl"
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.05]"
                 style={{
                   backgroundImage:
-                    "linear-gradient(color-mix(in srgb, var(--color-text) 35%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-text) 35%, transparent) 1px, transparent 1px)",
-                  backgroundSize: "34px 34px",
+                    "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                  backgroundSize: "32px 32px",
                 }}
               />
 
               <div className="relative grid gap-8 px-6 py-7 sm:px-8 sm:py-8 lg:grid-cols-[1fr_390px] lg:px-10 lg:py-9">
                 <div className="flex flex-col justify-center">
-                  <div
-                    className={`mb-4 inline-flex w-fit items-center gap-2 rounded-full border ${themePrimaryBorder} ${themePrimarySoft} px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)] backdrop-blur-md`}
-                  >
+                  <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[var(--color-card)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)]">
                     <Sparkles size={13} />
                     Literasi · Perpustakaan Digital
                   </div>
 
-                  <h1 className="theme-text max-w-2xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-[38px] lg:leading-tight">
-                    Perpustakaan Sekolah
+                  <h1 className="mt-4 max-w-2xl text-2xl font-bold tracking-tight theme-text sm:text-3xl lg:text-4xl">
+                    <span className="text-[var(--color-primary)]">
+                      Perpustakaan
+                    </span>{" "}
+                    Sekolah
                   </h1>
 
-                  <p className="theme-text-secondary mt-3 max-w-2xl text-sm leading-6 sm:text-[15px]">
+                  <p className="mt-2 max-w-xl text-sm leading-6 theme-text-secondary sm:text-base">
                     Kelola koleksi buku, perpustakaan digital, peminjaman,
                     pengembalian, dan aktivitas literasi siswa dalam satu
                     dashboard.
                   </p>
 
-                  <div className="mt-6 flex flex-wrap gap-3">
+                  <div className="mt-5 flex flex-wrap items-center gap-3">
                     <Link
                       href="/admin/perpustakaan/data-buku"
-                      className={`inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white ${themePrimaryShadow} transition hover:brightness-110`}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)] transition hover:opacity-90"
                     >
                       <Library size={17} />
                       Kelola Koleksi
@@ -750,17 +751,15 @@ export default function PerpustakaanPage() {
 
                     <Link
                       href="/admin/perpustakaan/peminjaman"
-                      className={`inline-flex items-center gap-2 rounded-xl border ${themePrimaryBorder} ${themePrimarySoft} px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] backdrop-blur-md transition ${themePrimarySoftHover}`}
+                      className="theme-card theme-border theme-text inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:shadow-sm"
                     >
-                      <BookOpenCheck size={17} />
+                      <BookOpenCheck size={17} className="text-[var(--color-primary)]" />
                       Peminjaman
                     </Link>
                   </div>
                 </div>
 
-                <div
-                  className={`rounded-2xl border ${themePrimaryBorder} ${themePrimarySoft} p-5 backdrop-blur-md`}
-                >
+                <div className="rounded-2xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_82%,transparent)] p-5 backdrop-blur-sm">
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="theme-text-muted text-xs font-medium">
@@ -794,7 +793,7 @@ export default function PerpustakaanPage() {
                     ].map(([label, value]) => (
                       <div
                         key={label}
-                        className={`rounded-xl border theme-border-soft ${themeNeutralSoft} p-3.5`}
+                        className="rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-card))] p-3.5"
                       >
                         <p className="theme-text-muted text-[11px]">{label}</p>
                         <p className="theme-text mt-1 text-xl font-bold">

@@ -407,13 +407,13 @@ export default function LokasiSekolahPage() {
             ) : (
               <>
                 <div
-                  className={`theme-card theme-border overflow-hidden rounded-xl border ${themeCardShadow}`}
+                  className={`theme-card theme-border overflow-hidden rounded-xl border ${themeCardShadow} dark:bg-[#0f172a]`}
                 >
                   {hasCoordinate ? (
                     <iframe
                       title={`Peta Lokasi ${selected.nama}`}
                       src={mapSrc}
-                      className="h-[300px] w-full sm:h-80 lg:h-[400px] xl:h-[480px]"
+                      className="h-[300px] w-full transition-[filter] duration-300 dark:[filter:invert(90%)_hue-rotate(180deg)_brightness(92%)_contrast(90%)_saturate(85%)] sm:h-80 lg:h-[400px] xl:h-[480px]"
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
                     />

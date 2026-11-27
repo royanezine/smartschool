@@ -671,40 +671,50 @@ export default function GuruKelasSayaPage() {
         
         {/* === BANNER HERO (KONSISTEN & TIDAK TERLALU BESAR) === */}
         <section
-          className={`relative overflow-hidden rounded-2xl p-5 sm:p-6 ${themePrimaryGradient} shadow-lg`}
+          className={`relative overflow-hidden rounded-2xl p-5 sm:p-6 ${themePrimaryGradient} shadow-lg dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
         >
-          <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] dark:blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-white/10 blur-3xl dark:hidden" />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
 
           <div className="relative z-10">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))] dark:text-[var(--color-primary)]">
                     <BookMarked size={20} />
                   </div>
-                  <span className="rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white backdrop-blur-sm">
+                  <span className="rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:bg-[var(--color-card)] dark:text-[var(--color-primary)]">
                     Area Guru
                   </span>
-                  <span className="h-1 w-1 rounded-full bg-white/50" />
-                  <span className="text-[10px] font-medium text-white/80">
+                  <span className="h-1 w-1 rounded-full bg-white/50 dark:bg-[var(--color-border)]" />
+                  <span className="text-[10px] font-medium text-white/80 dark:text-[var(--color-text-secondary)]">
                     Pembelajaran
                   </span>
                 </div>
 
-                <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
-                  Kelas Saya
+                <h1 className="text-xl font-bold tracking-tight text-white dark:text-[var(--color-text)] sm:text-2xl">
+                  Kelas{" "}
+                  <span className="dark:text-[var(--color-primary)]">Saya</span>
                 </h1>
 
-                <p className="mt-1 max-w-xl text-xs leading-5 text-white/90 sm:text-sm">
+                <p className="mt-1 max-w-xl text-xs leading-5 text-white/90 dark:text-[var(--color-text-secondary)] sm:text-sm">
                   Halo, {teacher.name}. Kelola kelas yang kamu ajar dan temukan informasi mata pelajaran serta siswa dalam satu tempat.
                 </p>
 
               </div>
 
               <div className="flex shrink-0 flex-wrap items-center gap-2">
-                <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm">
-                  <GraduationCap size={14} />
+                <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))] dark:text-[var(--color-text)]">
+                  <GraduationCap size={14} className="dark:text-[var(--color-primary)]" />
                   <span>
                     {loadingTahunAjaran
                       ? "Memuat tahun ajaran..."
@@ -726,11 +736,11 @@ export default function GuruKelasSayaPage() {
                   type="button"
                   onClick={loadKelasSaya}
                   disabled={loading}
-                  className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-white px-3.5 text-xs font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-white px-3.5 text-xs font-semibold text-blue-600 shadow-sm transition-all hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60 dark:!bg-[var(--color-card)] dark:!text-[var(--color-text)] dark:border dark:border-[var(--color-border)] dark:hover:border-[color-mix(in_srgb,var(--color-primary)_35%,var(--color-border))]"
                 >
                   <RefreshCw
                     size={14}
-                    className={loading ? "animate-spin" : ""}
+                    className={loading ? "animate-spin dark:text-[var(--color-primary)]" : "dark:text-[var(--color-primary)]"}
                   />
                   Muat ulang
                 </button>
@@ -744,17 +754,17 @@ export default function GuruKelasSayaPage() {
                 return (
                   <div
                     key={stat.title}
-                    className="rounded-xl bg-white/10 p-3.5 backdrop-blur-sm transition-colors hover:bg-white/15"
+                    className="rounded-xl bg-white/10 p-3.5 backdrop-blur-sm transition-colors hover:bg-white/15 dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-white/70">
+                        <p className="text-[10px] font-semibold uppercase tracking-wide text-white/70 dark:text-[var(--color-text-muted)]">
                           {stat.title}
                         </p>
-                        <p className="mt-1 text-xl font-bold text-white">
+                        <p className="mt-1 text-xl font-bold text-white dark:text-[var(--color-text)]">
                           {stat.value}
                         </p>
-                        <p className="mt-0.5 text-[10px] text-white/60 truncate">
+                        <p className="mt-0.5 text-[10px] text-white/60 dark:text-[var(--color-text-muted)] truncate">
                           {stat.description}
                         </p>
                       </div>

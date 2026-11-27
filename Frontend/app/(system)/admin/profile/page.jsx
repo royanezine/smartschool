@@ -424,7 +424,17 @@ export default function AdminProfilePage() {
               <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
                 <div className="space-y-6 lg:col-span-1 self-start lg:sticky lg:top-4">
                   <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
-                    <div className="h-28 w-full" style={{ background: "linear-gradient(110deg, var(--color-primary), #3b82f6)" }} />
+                    <div className="relative h-28 w-full overflow-hidden bg-[linear-gradient(110deg,var(--color-primary),#3b82f6)] dark:border-b dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))]">
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                          backgroundSize: "32px 32px",
+                        }}
+                      />
+                    </div>
                     <div className="relative px-6 pb-6">
                       <div className="flex justify-center">
                         <div className="relative -mt-14">

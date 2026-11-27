@@ -1037,27 +1037,41 @@ export default function SiswaAbsensiPage() {
       <div className="w-full space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
         <section
-          className={`overflow-hidden rounded-2xl ${themePrimaryGradient} ${themePrimaryShadow}`}
+          className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} ${themePrimaryShadow} dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
         >
-          <div className="p-6 sm:p-7">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -top-20 hidden h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] blur-2xl dark:block"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
+
+          <div className="relative p-6 sm:p-7">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/75">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-white/75 dark:text-[var(--color-primary)]">
                   Portal Siswa
                 </p>
 
-                <h1 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                <h1 className="mt-2 text-2xl font-bold tracking-tight text-white dark:text-[var(--color-text)] sm:text-3xl">
                   Absensi
                 </h1>
 
-                <p className="mt-1.5 text-sm text-white/80">
+                <p className="mt-1.5 text-sm text-white/80 dark:text-[var(--color-text-secondary)]">
                   {formatDate(new Date())}
                   <span className="mx-2 opacity-60">•</span>
                   {formatTime(new Date())}
                 </p>
 
                 {todayTerlambat && (
-                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-warning)_14%,var(--color-card))] dark:text-[var(--color-warning)]">
                     <AlarmClock size={12} />
                     Terlambat {formatDurasi(todayTerlambatMenit)} hari ini
                   </div>
@@ -1065,7 +1079,7 @@ export default function SiswaAbsensiPage() {
               </div>
 
               {kelas && (
-                <div className="inline-flex items-center gap-2 self-start rounded-lg bg-white/15 px-3 py-2 text-xs font-semibold text-white backdrop-blur-sm sm:self-auto">
+                <div className="inline-flex items-center gap-2 self-start rounded-lg bg-white/15 px-3 py-2 text-xs font-semibold text-white backdrop-blur-sm dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] dark:bg-[var(--color-card)] dark:text-[var(--color-primary)] sm:self-auto">
                   <UserCheck size={14} />
                   {kelas.nama}
                 </div>
@@ -1073,30 +1087,30 @@ export default function SiswaAbsensiPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 border-t border-white/15">
+          <div className="relative grid grid-cols-3 border-t border-white/15 dark:border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-border))] dark:bg-[color-mix(in_srgb,var(--color-primary)_6%,var(--color-card))]">
             <div className="px-6 py-4 text-center">
-              <p className="text-xl font-bold text-white sm:text-2xl">
+              <p className="text-xl font-bold text-white dark:text-[var(--color-text)] sm:text-2xl">
                 {statistikAbsensi.total}
               </p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/70">
+              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/70 dark:text-[var(--color-text-muted)]">
                 Total
               </p>
             </div>
 
-            <div className="border-x border-white/15 px-6 py-4 text-center">
-              <p className="text-xl font-bold text-white sm:text-2xl">
+            <div className="border-x border-white/15 px-6 py-4 text-center dark:border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-border))]">
+              <p className="text-xl font-bold text-white dark:text-[var(--color-primary)] sm:text-2xl">
                 {statistikAbsensi.hadir}
               </p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/70">
+              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/70 dark:text-[var(--color-text-muted)]">
                 Hadir
               </p>
             </div>
 
             <div className="px-6 py-4 text-center">
-              <p className="text-xl font-bold text-white sm:text-2xl">
+              <p className="text-xl font-bold text-white dark:text-[var(--color-text)] sm:text-2xl">
                 {statistikAbsensi.izinSakit + statistikAbsensi.alpha}
               </p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/70">
+              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/70 dark:text-[var(--color-text-muted)]">
                 Izin/Alpha
               </p>
             </div>

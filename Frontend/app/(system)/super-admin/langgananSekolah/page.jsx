@@ -334,35 +334,47 @@ export default function LanggananSekolahPage() {
         <div className="w-full min-w-0 space-y-6">
           {/* ================= BANNER HEADER ================= */}
           <section
-            className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} text-white ${themeBannerShadow}`}
+            className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} text-white ${themeBannerShadow} dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:text-[var(--color-text)] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
           >
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/10"
+              className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/10 dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] dark:blur-2xl"
             />
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute right-24 -bottom-20 h-44 w-44 rounded-full bg-white/[0.07]"
+              className="pointer-events-none absolute right-24 -bottom-20 h-44 w-44 rounded-full bg-white/[0.07] dark:hidden"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+              style={{
+                backgroundImage:
+                  "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                backgroundSize: "32px 32px",
+              }}
             />
 
             <div className="relative flex flex-col gap-5 p-6 sm:px-7 sm:py-6 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/15 backdrop-blur-sm">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/15 backdrop-blur-sm dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))] dark:text-[var(--color-primary)]">
                     <CreditCard size={22} />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/75">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/75 dark:text-[var(--color-primary)]">
                       Subscription Management
                     </p>
-                    <h1 className="mt-0.5 text-2xl font-bold tracking-tight sm:text-3xl">
-                      Langganan Sekolah
+                    <h1 className="mt-0.5 text-2xl font-bold tracking-tight dark:text-[var(--color-text)] sm:text-3xl">
+                      Langganan{" "}
+                      <span className="dark:text-[var(--color-primary)]">
+                        Sekolah
+                      </span>
                     </h1>
                   </div>
                 </div>
 
-                <p className="mt-4 max-w-2xl text-sm text-white/85">
+                <p className="mt-4 max-w-2xl text-sm text-white/85 dark:text-[var(--color-text-secondary)]">
                   Kelola dan pantau seluruh langganan sekolah beserta status
                   pembayarannya.
                 </p>
@@ -373,9 +385,9 @@ export default function LanggananSekolahPage() {
                   type="button"
                   onClick={fetchSubscriptions}
                   disabled={loading}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-[var(--color-border)] dark:bg-[var(--color-card)] dark:text-[var(--color-text)] dark:hover:border-[color-mix(in_srgb,var(--color-primary)_35%,var(--color-border))] dark:hover:bg-[color-mix(in_srgb,var(--color-text)_4%,var(--color-card))]"
                 >
-                  <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+                  <RefreshCw size={16} className={loading ? "animate-spin dark:text-[var(--color-primary)]" : "dark:text-[var(--color-primary)]"} />
                   Refresh
                 </button>
               </div>
@@ -523,7 +535,7 @@ export default function LanggananSekolahPage() {
               <table className="w-full min-w-[1100px] border-collapse">
                 <thead>
                   <tr
-                    className={`${themePrimaryGradient} text-left text-xs font-bold uppercase tracking-wider text-white`}
+                    className={`${themePrimaryGradient} text-left text-xs font-bold uppercase tracking-wider text-white dark:border-b dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))] dark:text-[var(--color-text-secondary)]`}
                   >
                     <th className="w-[60px] px-4 py-4 text-center">No.</th>
                     <th className="min-w-[220px] px-4 py-4">Sekolah</th>

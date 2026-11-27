@@ -467,86 +467,59 @@ export default function JadwalSiswaPage() {
       <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
         {/* Header */}
         <section
-          className={`relative mb-6 overflow-hidden rounded-2xl ${themePrimaryGradient} ${themePrimaryShadow}`}
+          className={`relative mb-6 overflow-hidden rounded-2xl ${themePrimaryGradient} ${themePrimaryShadow} dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
         >
-          <div
-            className="absolute -right-20 -top-24 h-64 w-64 rounded-full blur-2xl"
-            style={{
-              background:
-                "rgba(255, 255, 255, 0.10)",
-            }}
-          />
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-white/10 blur-2xl dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]" />
 
           <div
-            className="absolute -bottom-24 -left-16 h-56 w-56 rounded-full blur-2xl"
+            className="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full blur-2xl dark:hidden"
             style={{
               background:
                 "color-mix(in srgb, var(--color-primary) 18%, transparent)",
             }}
           />
 
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
+
           <div className="relative flex flex-col gap-5 px-5 py-6 sm:px-7 sm:py-7 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-4">
-              <div
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
-                style={{
-                  background:
-                    "rgba(255, 255, 255, 0.14)",
-                  boxShadow:
-                    "inset 0 0 0 1px rgba(255, 255, 255, 0.20)",
-                }}
-              >
-                <CalendarDays className="h-6 w-6 text-white" />
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20 dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))] dark:ring-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
+                <CalendarDays className="h-6 w-6 text-white dark:text-[var(--color-primary)]" />
               </div>
 
               <div>
-                <p
-                  className="mb-1 text-xs font-semibold uppercase tracking-[0.14em]"
-                  style={{
-                    color:
-                      "rgba(255, 255, 255, 0.76)",
-                  }}
-                >
+                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-white/75 dark:text-[var(--color-primary)]">
                   Akademik
                 </p>
 
-                <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                  Jadwal Pelajaran
+                <h1 className="text-2xl font-bold tracking-tight text-white dark:text-[var(--color-text)] sm:text-3xl">
+                  Jadwal{" "}
+                  <span className="dark:text-[var(--color-primary)]">
+                    Pelajaran
+                  </span>
                 </h1>
 
-                <p
-                  className="mt-1.5 max-w-2xl text-sm"
-                  style={{
-                    color:
-                      "rgba(255, 255, 255, 0.78)",
-                  }}
-                >
+                <p className="mt-1.5 max-w-2xl text-sm text-white/80 dark:text-[var(--color-text-secondary)]">
                   Lihat jadwal pelajaran, guru, dan ruangan setiap hari.
                 </p>
               </div>
             </div>
 
-            <div
-              className="flex items-center gap-3 rounded-xl px-4 py-3"
-              style={{
-                background:
-                  "rgba(255, 255, 255, 0.10)",
-                boxShadow:
-                  "inset 0 0 0 1px rgba(255, 255, 255, 0.16)",
-              }}
-            >
-              <BookOpen className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 ring-1 ring-white/15 dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))] dark:ring-[color-mix(in_srgb,var(--color-primary)_22%,var(--color-border))]">
+              <BookOpen className="h-5 w-5 text-white dark:text-[var(--color-primary)]" />
               <div>
-                <p
-                  className="text-[11px]"
-                  style={{
-                    color:
-                      "rgba(255, 255, 255, 0.68)",
-                  }}
-                >
+                <p className="text-[11px] text-white/70 dark:text-[var(--color-text-muted)]">
                   Mata Pelajaran
                 </p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-lg font-bold text-white dark:text-[var(--color-text)]">
                   {loading ? "—" : statistik.totalMapel}
                 </p>
               </div>

@@ -477,29 +477,48 @@ export default function LMSCBTDashboardPage() {
                 relative mb-6 overflow-hidden rounded-[28px]
                 bg-[var(--color-primary)]
                 shadow-[0_20px_55px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]
+                dark:bg-transparent
+                dark:bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))]
+                dark:shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]
               "
             >
               <div
+                aria-hidden="true"
                 className="
-                  absolute -right-24 -top-28 h-80 w-80
+                  pointer-events-none absolute -right-24 -top-28 h-80 w-80
                   translate-x-0 rounded-full
                   bg-white/10 blur-3xl
+                  dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] dark:blur-2xl
                 "
               />
 
               <div
+                aria-hidden="true"
                 className="
-                  absolute -bottom-40 left-1/3 h-96 w-96
+                  pointer-events-none absolute -bottom-40 left-1/3 h-96 w-96
                   rounded-full bg-white/5 blur-3xl
+                  dark:bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]
                 "
               />
 
               <div
-                className="absolute inset-0 opacity-[0.07]"
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.07] dark:hidden"
                 style={{
                   backgroundImage:
                     "linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)",
                   backgroundSize: "34px 34px",
+                }}
+              />
+
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+                  backgroundSize: "32px 32px",
                 }}
               />
 
@@ -512,17 +531,24 @@ export default function LMSCBTDashboardPage() {
                       bg-white/10 px-3 py-1.5
                       text-xs font-semibold text-white
                       backdrop-blur-md
+                      dark:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]
+                      dark:bg-[var(--color-card)]
+                      dark:text-[var(--color-primary)]
                     "
                   >
                     <Sparkles size={13} />
                     Pusat Pembelajaran Digital Terintegrasi
                   </div>
 
-                  <h1 className="max-w-2xl text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-[38px] lg:leading-tight">
-                    Dashboard LMS & CBT Sekolah
+                  <h1 className="max-w-2xl text-2xl font-bold tracking-tight text-white dark:text-[var(--color-text)] sm:text-3xl lg:text-[38px] lg:leading-tight">
+                    Dashboard{" "}
+                    <span className="dark:text-[var(--color-primary)]">
+                      LMS &amp; CBT
+                    </span>{" "}
+                    Sekolah
                   </h1>
 
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75 sm:text-[15px]">
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-white/75 dark:text-[var(--color-text-secondary)] sm:text-[15px]">
                     Pantau metrik riil pembelajaran digital, relasi kelas-mapel, modul ajar guru,
                     pengumpulan tugas siswa, dan pelaksanaan ujian CBT secara akurat.
                   </p>
@@ -532,13 +558,18 @@ export default function LMSCBTDashboardPage() {
                       href="/admin/lms-cbt/materi-modul-ajar"
                       className="
                         inline-flex items-center gap-2
-                        rounded-xl bg-white px-4 py-2.5
+                        rounded-xl bg-[#ffffff] px-4 py-2.5
                         text-sm font-semibold
                         text-[var(--color-primary)]
                         shadow-lg shadow-black/10
                         transition
                         hover:-translate-y-0.5
-                        hover:bg-white/90
+                        hover:bg-[#ffffff]/90
+                        dark:!bg-[var(--color-primary)]
+                        dark:!text-white
+                        dark:shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_22%,transparent)]
+                        dark:hover:!bg-[var(--color-primary)]
+                        dark:hover:opacity-90
                       "
                     >
                       <BookOpen size={17} />
@@ -554,9 +585,14 @@ export default function LMSCBTDashboardPage() {
                         text-sm font-semibold text-white
                         backdrop-blur-md transition
                         hover:bg-white/15
+                        dark:border-[var(--color-border)]
+                        dark:bg-[var(--color-card)]
+                        dark:text-[var(--color-text)]
+                        dark:hover:border-[color-mix(in_srgb,var(--color-primary)_35%,var(--color-border))]
+                        dark:hover:bg-[color-mix(in_srgb,var(--color-text)_4%,var(--color-card))]
                       "
                     >
-                      <MonitorPlay size={17} />
+                      <MonitorPlay size={17} className="dark:text-[var(--color-primary)]" />
                       Kelola CBT
                     </Link>
 
@@ -571,23 +607,47 @@ export default function LMSCBTDashboardPage() {
                         text-sm font-semibold text-white
                         backdrop-blur-md transition
                         hover:bg-white/15
-                        disabled:opacity-50
+                        disabled:cursor-not-allowed disabled:opacity-50
+                        dark:border-[var(--color-border)]
+                        dark:bg-[var(--color-card)]
+                        dark:text-[var(--color-text)]
+                        dark:hover:border-[color-mix(in_srgb,var(--color-primary)_35%,var(--color-border))]
+                        dark:hover:bg-[color-mix(in_srgb,var(--color-text)_4%,var(--color-card))]
+                        dark:disabled:opacity-60
                       "
                       title="Segarkan data dashboard"
                     >
-                      <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
-                      <span>{refreshing ? "Menyegarkan..." : "Refresh Data"}</span>
+                      {refreshing || loading ? (
+                        <Loader2 size={16} className="animate-spin dark:text-[var(--color-primary)]" />
+                      ) : (
+                        <RefreshCw size={16} className="dark:text-[var(--color-primary)]" />
+                      )}
+                      <span>
+                        {refreshing
+                          ? "Menyegarkan..."
+                          : loading
+                          ? "Memuat..."
+                          : "Refresh Data"}
+                      </span>
                     </button>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-5 backdrop-blur-md flex flex-col justify-between">
+                <div
+                  className="
+                    flex flex-col justify-between rounded-2xl
+                    border border-white/10 bg-white/[0.07] p-5 backdrop-blur-md
+                    dark:border-[color-mix(in_srgb,var(--color-primary)_22%,var(--color-border))]
+                    dark:bg-[color-mix(in_srgb,var(--color-text)_4%,var(--color-card))]
+                    dark:shadow-[0_8px_24px_rgba(0,0,0,0.22)]
+                  "
+                >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-white/60">
+                      <p className="text-xs font-medium text-white/60 dark:text-[var(--color-text-muted)]">
                         Status Integrasi Data
                       </p>
-                      <p className="mt-1 text-lg font-bold text-white">
+                      <p className="mt-1 text-lg font-bold text-white dark:text-[var(--color-text)]">
                         {loading
                           ? "Menghubungkan API..."
                           : Object.keys(errors).length > 0
@@ -596,25 +656,63 @@ export default function LMSCBTDashboardPage() {
                       </p>
                     </div>
 
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white">
+                    <div
+                      className="
+                        flex h-10 w-10 items-center justify-center rounded-xl
+                        bg-white/10 text-white
+                        dark:border dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]
+                        dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]
+                        dark:text-[var(--color-primary)]
+                      "
+                    >
                       <GraduationCap size={20} />
                     </div>
                   </div>
 
                   <div className="mt-5 space-y-2.5">
-                    <div className="flex items-center justify-between rounded-xl bg-white/[0.06] px-3.5 py-2.5 text-xs text-white">
+                    <div
+                      className="
+                        flex items-center justify-between rounded-xl
+                        bg-white/[0.06] px-3.5 py-2.5 text-xs text-white
+                        dark:border dark:border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]
+                        dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]
+                        dark:text-[var(--color-text-secondary)]
+                      "
+                    >
                       <span>Kelas-Mapel Terhubung</span>
-                      <strong className="font-bold">{loading ? "..." : totalKelasMapel}</strong>
+                      <strong className="font-bold tabular-nums dark:text-[var(--color-text)]">
+                        {loading ? "..." : totalKelasMapel}
+                      </strong>
                     </div>
 
-                    <div className="flex items-center justify-between rounded-xl bg-white/[0.06] px-3.5 py-2.5 text-xs text-white">
+                    <div
+                      className="
+                        flex items-center justify-between rounded-xl
+                        bg-white/[0.06] px-3.5 py-2.5 text-xs text-white
+                        dark:border dark:border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]
+                        dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]
+                        dark:text-[var(--color-text-secondary)]
+                      "
+                    >
                       <span>Total Berkas Terkumpul</span>
-                      <strong className="font-bold">{loading ? "..." : totalPengumpulanTugas}</strong>
+                      <strong className="font-bold tabular-nums dark:text-[var(--color-text)]">
+                        {loading ? "..." : totalPengumpulanTugas}
+                      </strong>
                     </div>
 
-                    <div className="flex items-center justify-between rounded-xl bg-white/[0.06] px-3.5 py-2.5 text-xs text-white">
+                    <div
+                      className="
+                        flex items-center justify-between rounded-xl
+                        bg-white/[0.06] px-3.5 py-2.5 text-xs text-white
+                        dark:border dark:border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]
+                        dark:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-card))]
+                        dark:text-[var(--color-text-secondary)]
+                      "
+                    >
                       <span>Total Percobaan Ujian</span>
-                      <strong className="font-bold">{loading ? "..." : totalPercobaanUjian}</strong>
+                      <strong className="font-bold tabular-nums dark:text-[var(--color-text)]">
+                        {loading ? "..." : totalPercobaanUjian}
+                      </strong>
                     </div>
                   </div>
                 </div>

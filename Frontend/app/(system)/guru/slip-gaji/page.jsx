@@ -554,7 +554,7 @@ export default function SlipGajiPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[650px] border-collapse text-sm">
                   <thead>
-                    <tr className={themePrimarySolid}>
+                    <tr className={`${themePrimarySolid} dark:border-b dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))] dark:text-[var(--color-text-secondary)]`}>
                       <th className="px-4 py-3 text-left text-xs font-semibold">
                         Periode
                       </th>

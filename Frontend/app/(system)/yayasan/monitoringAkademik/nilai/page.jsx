@@ -134,22 +134,34 @@ export default function MonitoringNilaiPage() {
 
         {/* Hero Header */}
         <section
-          className={`relative mb-6 overflow-hidden rounded-2xl border ${themePrimarySoftBorder} ${themePrimaryGradient} ${themePrimaryShadow}`}
+          className={`relative mb-6 overflow-hidden rounded-2xl border ${themePrimarySoftBorder} ${themePrimaryGradient} ${themePrimaryShadow} dark:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] dark:!bg-[linear-gradient(120deg,color-mix(in_srgb,var(--color-primary)_16%,var(--color-card)),color-mix(in_srgb,var(--color-primary)_4%,var(--color-card)))] dark:shadow-[0_14px_34px_color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
         >
-          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-white/10 blur-3xl dark:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] dark:blur-2xl" />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden opacity-[0.05] dark:block"
+            style={{
+              backgroundImage:
+                "linear-gradient(var(--color-text) 1px, transparent 1px), linear-gradient(90deg, var(--color-text) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
           <div className="relative p-5 sm:p-6 md:p-8">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--color-text)_12%,transparent)] backdrop-blur-md sm:h-14 sm:w-14">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--color-text)_12%,transparent)] backdrop-blur-md dark:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] dark:bg-[color-mix(in_srgb,var(--color-primary)_14%,var(--color-card))] dark:text-[var(--color-primary)] dark:shadow-none sm:h-14 sm:w-14">
                 <GraduationCap className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
               <div className="min-w-0">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 sm:text-xs">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 dark:text-[var(--color-primary)] sm:text-xs">
                   Monitoring Akademik
                 </p>
-                <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
-                  Monitoring Nilai &amp; Prestasi
+                <h1 className="text-2xl font-bold tracking-tight text-white dark:text-[var(--color-text)] sm:text-3xl lg:text-4xl">
+                  Monitoring{" "}
+                  <span className="dark:text-[var(--color-primary)]">
+                    Nilai &amp; Prestasi
+                  </span>
                 </h1>
-                <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-white/80 sm:text-sm">
+                <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-white/80 dark:text-[var(--color-text-secondary)] sm:text-sm">
                   Pantau rata-rata capaian nilai akademik dan ketuntasan belajar siswa di seluruh unit naungan yayasan.
                 </p>
               </div>
